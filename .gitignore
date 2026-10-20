@@ -33,3 +33,6 @@ iso_root/
 vars.fd
 # Cargo build outputs in any workspace
 **/target/
+
+# Apps maintained in The-EonOS-Project/eon-apps
+/eon-apps/
