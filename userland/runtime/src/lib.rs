@@ -149,6 +149,7 @@ const SYS_TCP_CONNECT: usize = 9041;
 const SYS_TCP_SEND: usize = 9042;
 const SYS_TCP_RECEIVE: usize = 9043;
 const SYS_TCP_CLOSE: usize = 9044;
+const SYS_SECURE_RANDOM: usize = 9046;
 const SYS_KILL: usize = 62;
 const SYS_SCHED_YIELD: usize = 24;
 const SYS_KEYBOARD_EVENT: usize = 9035;
@@ -584,6 +585,14 @@ pub fn tcp_receive(buffer: &mut [u8], timeout_ms: u64) -> Result<usize> {
 /// Close the active TCP stream.
 pub fn tcp_close() -> Result<()> {
     checked(unsafe { syscall3(SYS_TCP_CLOSE, 0, 0, 0) }).map(|_| ())
+}
+
+/// Fill bytes using the kernel's hardware-backed RDRAND source. Fails on
+/// CPUs without RDRAND or if the instruction cannot produce a value; no
+/// timing-based fallback is used.
+pub fn secure_random(buffer: &mut [u8]) -> Result<()> {
+    checked(unsafe { syscall3(SYS_SECURE_RANDOM, buffer.as_mut_ptr() as usize, buffer.len(), 0) })
+        .map(|_| ())
 }
 
 /// Resolve a DNS hostname to its first IPv4 A record.

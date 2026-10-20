@@ -85,9 +85,13 @@ snapshot of uptime, current process, memory, process listings, storage devices,
 mounts, and E1000 counters. Existing focused commands such as `ps`, `free`,
 `lsblk`, `net`, and `mouse` remain available.
 
-Use `./runb.sh` for a normal build, which suppresses `DEBUG` log lines and
-creates `build/iso_output/eonos.iso`. Use `./runb.sh --debug` to include
-`DEBUG` logs and create `build/iso_output/eonos_debugbuild.iso`.
+Use `./runb.sh` for an optimized release build, which suppresses `DEBUG` log
+lines and creates `build/iso_output/eonos.iso`. Use
+`EONOS_PROFILE=dev ./runb.sh` to run an unoptimized development build. Use
+`./runb.sh --debug` to include `DEBUG` logs and create
+`build/iso_output/eonos_debugbuild.iso` (development profile by default).
+`run.sh` uses the release profile by default and records the profile alongside
+each ISO so it rebuilds when the requested profile changes.
 `run.sh` prefers QEMU's standalone `virtio-gpu-pci` device, then tries
 `virtio-vga`, and falls back to standard VGA. It performs a host-only startup
 probe before selecting either VirtIO model. It requests a 1360×765 scanout for
@@ -144,6 +148,9 @@ mutations also issue a device flush before reporting success. The root
 initramfs remains read-only. After mounting the disk, `ls` shows `/disk` in the
 root listing; use `cat /disk/README.TXT` or `exec /disk/HELLO.ELF` to access
 the bundled files.
+Era requires a writable filesystem mounted exactly at `/disk`; the shell and
+kernel both reject attempts to launch it without that mount. This keeps its
+settings and installed applications on persistent storage.
 
 ## Networking
 
@@ -159,11 +166,17 @@ to send a datagram and `net udp-recv [max-bytes]` to poll for one. Rust programs
 can use `eonos_rt::udp_send` and `eonos_rt::udp_receive`. DHCP supplies the DNS
 server address; `nslookup <hostname>` performs a DNS A lookup, and
 `ping <hostname> [count]` resolves names before sending ICMP echo requests.
-The polling TCP client supports one active IPv4 connection at a time. Run
-`curler http://example.com/file.bin [/disk/file.bin]` to download a plain HTTP
-file; it accepts Content-Length and chunked response bodies. Mount the writable
-disk at `/disk` first to keep downloads across reboots. HTTPS, redirects, and
-multiple simultaneous TCP connections are not supported yet. At boot the kernel
+The polling TCP client supports one active IPv4 connection at a time. `curler`
+downloads HTTP and HTTPS files, including raw GitHub files. For example,
+`curler https://raw.githubusercontent.com/OWNER/REPOSITORY/BRANCH/path/app.eonapp /disk/app.eonapp`
+downloads an app package, which can then be installed with
+`install /disk/app.eonapp`. It accepts Content-Length and chunked response
+bodies and verifies HTTPS certificates against the bundled WebPKI root set.
+The kernel supplies TLS randomness through the hardware RDRAND instruction and
+uses the CMOS RTC time for certificate validity checks, so TLS fails safely if
+the CPU has no working RDRAND or the RTC has no valid date. Mount the writable
+disk at `/disk` first to keep downloads across reboots. Redirects and multiple
+simultaneous TCP connections are not supported yet. At boot the kernel
 reads the CMOS real-time clock, treats it as UTC, and advances that reading from
 the monotonic PIT timer. `eonos_rt::wall_time_secs()` returns Unix time for
 certificate validation and user programs; it returns `None` when no valid RTC
@@ -298,7 +311,7 @@ available for an app's own close behavior, and the window close button
 terminates it.
 
 The kernel enforces the application sandbox even when a program bypasses the
-SDK. Executables under `/apps/bin` and their descendants cannot write files,
+SDK. Executables under `/apps/bin`, `/disk/apps/bin`, and their descendants cannot write files,
 change directories through writable handles, mount or sync storage, control
 power, seize physical keyboard focus, use raw framebuffer graphics, control
 networking, or request a kernel panic. Read-only file access, ordinary

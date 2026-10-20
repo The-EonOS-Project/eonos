@@ -2,7 +2,7 @@
 //!
 //! A process is one user address space plus one thread running in it
 //! (there are no threads-within-a-process yet). `spawn` reads an ELF
-//! executable out of the initramfs, loads it into a fresh address space
+//! executable from the VFS, loads it into a fresh address space
 //! (`elf::load`), builds the initial user stack, and hands both to the
 //! scheduler (`scheduler::spawn_user`). The thread owns the address
 //! space from then on: when the process exits, or is killed by a CPU
@@ -66,6 +66,8 @@ static PROCS: IrqMutex<Vec<Record>> = IrqMutex::new(Vec::new());
 pub enum SpawnError {
     /// No such executable in the mounted filesystems.
     NotFound,
+    /// Era requires the persistent data volume to be mounted at `/disk`.
+    DiskNotMounted,
     /// The file isn't a loadable executable.
     Elf(ElfError),
     NoMemory,
@@ -77,6 +79,7 @@ impl fmt::Display for SpawnError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             SpawnError::NotFound => f.write_str("file not found in the initramfs"),
+            SpawnError::DiskNotMounted => f.write_str("Era requires a writable disk mounted at /disk"),
             SpawnError::Elf(e) => write!(f, "cannot load executable: {}", e),
             SpawnError::NoMemory => f.write_str("out of memory"),
             SpawnError::NoThread => f.write_str("no free thread slot"),
@@ -372,6 +375,9 @@ fn spawn_with_io_policy(
     stdout_fd: Option<u64>,
     force_sandbox: bool,
 ) -> Result<u64, SpawnError> {
+    if path == "/bin/era" && !vfs::is_writable_mountpoint("/disk") {
+        return Err(SpawnError::DiskNotMounted);
+    }
     let image = vfs::read_all(path).map_err(|_| SpawnError::NotFound)?;
 
     let aspace = vmm::create_address_space().ok_or(SpawnError::NoMemory)?;
@@ -389,7 +395,9 @@ fn spawn_with_io_policy(
     // Treat every executable installed in the third-party app namespace as
     // untrusted even if it was launched through a raw exec syscall or a
     // malformed/missing manifest. Children inherit the same policy.
-    let sandboxed = force_sandbox || is_sandboxed(parent) || path.starts_with("/apps/bin/");
+    let sandboxed = force_sandbox || is_sandboxed(parent)
+        || path.starts_with("/apps/bin/")
+        || path.starts_with("/disk/apps/bin/");
     let pid = match scheduler::spawn_user("user", aspace, entry, rsp) {
         Some(pid) => pid,
         None => {

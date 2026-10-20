@@ -75,6 +75,7 @@ fi
 
 echo "==> Building userland"
 
+CFLAGS_x86_64_eonos_user="-fno-stack-protector" \
 RUSTFLAGS="-C link-arg=-T$USERLAND_DIR/linker.ld -C link-arg=-z -C link-arg=max-page-size=4096 -C link-arg=-z -C link-arg=noexecstack" \
     cargo build \
         --manifest-path "$USERLAND_DIR/rust/Cargo.toml" \
@@ -183,27 +184,10 @@ cp "$RUST_TAIL_BIN" "$INITRAMFS_ROOT/bin/tail"
 cp "$RUST_DOOM_BIN" "$INITRAMFS_ROOT/bin/doom"
 cp "$RUST_CURLER_BIN" "$INITRAMFS_ROOT/bin/curler"
 if [ -d "$BUILD_DIR/apps" ]; then
-    mkdir -p "$INITRAMFS_ROOT/apps/bin" "$INITRAMFS_ROOT/apps/manifests"
-    for package in "$BUILD_DIR/apps"/*; do
-        [ -d "$package" ] || continue
-        manifest="$package/manifest.eapp"
-        program="$package/program.elf"
-        if [ ! -s "$manifest" ] || [ ! -s "$program" ]; then
-            echo "Skipping incomplete EonOS app package: $package" >&2
-            continue
-        fi
-        mapfile -t app_meta < "$manifest"
-        app_id="${app_meta[1]:-}"
-        app_type="${app_meta[2]:-}"
-        if [ "${app_meta[0]:-}" != "EONOSAPP1" ] || [ "$(basename "$package")" != "$app_id" ] \
-            || [[ ! "$app_id" =~ ^[a-z][a-z0-9_-]{0,31}$ ]] \
-            || { [ "$app_type" != "SHELL" ] && [ "$app_type" != "ERA" ]; } \
-            || ! grep -a -F -q "EONOSAPP1:$app_type" "$program"; then
-            echo "Skipping invalid or mismatched EonOS app package: $package" >&2
-            continue
-        fi
-        cp "$program" "$INITRAMFS_ROOT/apps/bin/$app_id"
-        cp "$manifest" "$INITRAMFS_ROOT/apps/manifests/$app_id.eapp"
+    mkdir -p "$INITRAMFS_ROOT/packages"
+    for package in "$BUILD_DIR/apps"/*.eonapp; do
+        [ -s "$package" ] || continue
+        cp "$package" "$INITRAMFS_ROOT/packages/"
     done
 fi
 mkdir -p "$INITRAMFS_ROOT/doom"
@@ -280,6 +264,10 @@ xorriso -as mkisofs \
 echo "==> Installing BIOS stage 1 into ISO"
 
 "$LIMINE_DIR/limine" bios-install "$ISO_PATH"
+
+# Record which kernel profile produced this ISO. run.sh uses this to avoid
+# silently booting a dev image when an optimized release image was requested.
+printf '%s:%s\n' "$PROFILE" "$DEBUG_BUILD" > "$ISO_PATH.profile"
 
 echo "==> Done: $ISO_PATH"
 echo "==> QEMU launch scripts attach virtual USB keyboard and mouse; run ./run.sh or ./runb.sh to test them"

@@ -14,11 +14,24 @@ elif [ "$#" -ne 0 ]; then
     exit 2
 fi
 
+if [ -n "${EONOS_PROFILE:-}" ]; then
+    PROFILE="$EONOS_PROFILE"
+elif [ "$DEBUG_BUILD" = "1" ]; then
+    PROFILE="dev"
+else
+    PROFILE="release"
+fi
+case "$PROFILE" in
+    dev|release) ;;
+    *) echo "EONOS_PROFILE must be dev or release" >&2; exit 2 ;;
+esac
+
 if [ "$DEBUG_BUILD" = "1" ]; then
     ISO_PATH="$BUILD_DIR/iso_output/eonos_debugbuild.iso"
 else
     ISO_PATH="$BUILD_DIR/iso_output/eonos.iso"
 fi
+PROFILE_STAMP="$ISO_PATH.profile"
 
 if [ -n "${EONOS_NVME_DISK:-}" ]; then
     DISK_PATH="$EONOS_NVME_DISK"
@@ -102,16 +115,19 @@ else
         fi
     done
 fi
+if [ ! -f "$PROFILE_STAMP" ] || [ "$(cat "$PROFILE_STAMP")" != "$PROFILE:$DEBUG_BUILD" ]; then
+    NEEDS_BUILD=1
+fi
 if [ -z "${EONOS_NVME_DISK:-}" ] && [ ! -f "$DISK_PATH" ]; then
     NEEDS_BUILD=1
 fi
 
 if [ "$NEEDS_BUILD" = "1" ]; then
-    echo "No current ISO found, building it first..."
+    echo "No current $PROFILE ISO found, building it first..."
     if [ "$DEBUG_BUILD" = "1" ]; then
-        ./build.sh --debug
+        ./build.sh "$PROFILE" --debug
     else
-        ./build.sh
+        ./build.sh "$PROFILE"
     fi
 fi
 

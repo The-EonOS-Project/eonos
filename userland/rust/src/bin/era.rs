@@ -287,7 +287,7 @@ impl KonsulState {
             .filter_map(|value| value.to_str().ok())
             .map(String::from)
             .collect();
-        set_konsul_env(&mut environment, "PATH", "/apps/bin:/bin");
+        set_konsul_env(&mut environment, "PATH", "/disk/apps/bin:/apps/bin:/bin");
         set_konsul_env(&mut environment, "USER", "superuser");
         set_konsul_env(&mut environment, "HOSTNAME", "eonos");
         if let Ok(path) = eonos_user::current_dir() { set_konsul_env(&mut environment, "PWD", &path); }
@@ -414,23 +414,29 @@ fn view_needs_input(view: View) -> bool {
 }
 
 fn discover_installed_apps() -> Vec<InstalledApp> {
-    let Ok(entries) = eonos_user::list_directory("/apps/manifests") else { return Vec::new(); };
     let mut apps = Vec::new();
-    for filename in entries.lines().take(64) {
-        let Some(id) = filename.strip_suffix(".eapp") else { continue; };
-        if id.is_empty() || id.len() > 32 || !id.bytes().all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'_' || b == b'-') { continue; }
-        let path = format!("/apps/manifests/{}.eapp", id);
-        let Ok(mut file) = eonos_user::File::open(&path, eonos_user::flags::READ_ONLY) else { continue; };
-        let Ok(manifest) = file.read_to_string() else { continue; };
-        let mut lines = manifest.lines();
-        if lines.next() != Some("EONOSAPP1") || lines.next() != Some(id) { continue; }
-        let Some(kind) = lines.next().filter(|kind| *kind == "SHELL" || *kind == "ERA") else { continue; };
-        let Some(name) = lines.next().filter(|name| !name.is_empty() && name.len() <= 80) else { continue; };
-        let Some(description) = lines.next().filter(|value| value.len() <= 160) else { continue; };
-        apps.push(InstalledApp {
-            id: String::from(id), name: String::from(name), description: String::from(description),
-            kind: String::from(kind), executable: format!("/apps/bin/{}", id),
-        });
+    for (directory, executable_directory) in [
+        ("/disk/apps/manifests", "/disk/apps/bin"),
+        ("/apps/manifests", "/apps/bin"),
+    ] {
+        let Ok(entries) = eonos_user::list_directory(directory) else { continue; };
+        for filename in entries.lines().take(64) {
+            let Some(id) = filename.strip_suffix(".eapp") else { continue; };
+            if id.is_empty() || id.len() > 32 || !id.bytes().all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'_' || b == b'-') { continue; }
+            let path = format!("{}/{}.eapp", directory, id);
+            let Ok(mut file) = eonos_user::File::open(&path, eonos_user::flags::READ_ONLY) else { continue; };
+            let Ok(manifest) = file.read_to_string() else { continue; };
+            let mut lines = manifest.lines();
+            if lines.next() != Some("EONOSAPP1") || lines.next() != Some(id) { continue; }
+            let Some(kind) = lines.next().filter(|kind| *kind == "SHELL" || *kind == "ERA") else { continue; };
+            let Some(name) = lines.next().filter(|name| !name.is_empty() && name.len() <= 80) else { continue; };
+            let Some(description) = lines.next().filter(|value| value.len() <= 160) else { continue; };
+            if apps.iter().any(|app: &InstalledApp| app.id == id) { continue; }
+            apps.push(InstalledApp {
+                id: String::from(id), name: String::from(name), description: String::from(description),
+                kind: String::from(kind), executable: format!("{}/{}", executable_directory, id),
+            });
+        }
     }
     apps
 }
@@ -443,7 +449,7 @@ fn start_era_app(apps: &[InstalledApp], app_index: usize, sessions: &mut Vec<App
         Ok(pair) => pair,
         Err(error) => { let _ = eonos_rt::close(to_era_read); let _ = eonos_rt::close(to_era_write); return Err(error.into()); }
     };
-    let env = ["PATH=/apps/bin:/bin", "HOME=/", "USER=superuser", "HOSTNAME=eonos", "EONOS_ERA_SESSION=1"];
+    let env = ["PATH=/disk/apps/bin:/apps/bin:/bin", "HOME=/", "USER=superuser", "HOSTNAME=eonos", "EONOS_ERA_SESSION=1"];
     let process = match eonos_user::Process::spawn_sandboxed_with_stdio(
         &app.executable, &[], &env, Some(to_app_read), Some(to_era_write),
     ) {
@@ -747,6 +753,10 @@ fn append_shell_output(state: &mut KonsulState, output: &str) {
 }
 
 fn main(args: eonos_rt::Args<'_>) -> i32 {
+    if !eonos_user::is_mountpoint("/disk").unwrap_or(false) {
+        eonos_rt::eprintln!("era: a writable data disk must be mounted at /disk first");
+        return 1;
+    }
     let environment: Vec<&CStr> = args.envs().collect();
     let display = match eonos_rt::era::enter() {
         Ok(display) => display,
@@ -1898,7 +1908,7 @@ fn draw_window(layout: &Layout, view: View, files: &FileState, processes: &str, 
                     &app.name, &format!("{} ({})", app.description, app.kind), false);
             }
             if apps.is_empty() {
-                text(x + 44, y + 262, MUTED, "Build a package with ./app.sh and rebuild the image.");
+                text(x + 44, y + 262, MUTED, "Build a .eonapp package, then install it from Konsul.");
             }
             text(x + 34, y + h - 30, MUTED, "Select an application to launch it.");
         }

@@ -121,6 +121,13 @@ bench = false
 [dependencies]
 eonos-rt = { path = "../runtime" }
 eonos-user = { path = "../lib" }
+rustls = { version = "=0.23.34", default-features = false, features = ["ring", "tls12"] }
+ring = { version = "=0.17.14", default-features = false, features = ["alloc", "less-safe-getrandom-custom-or-rdrand"] }
+webpki-roots = "=1.0.3"
+getrandom = { version = "=0.2.17", features = ["custom"] }
+
+[patch.crates-io]
+ring = { path = "../vendor/ring" }
 
 [profile.dev]
 panic = "abort"

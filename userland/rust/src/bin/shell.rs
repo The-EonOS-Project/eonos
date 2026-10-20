@@ -33,7 +33,7 @@ fn main(args: eonos_rt::Args<'_>) -> i32 {
     // such as `-c` begin at argv[1].
     let argv: Vec<String> = args.skip(1).map(|value| value.to_str().unwrap_or("").to_string()).collect();
     if env_value(&environment, "PATH").is_none() {
-        set_env(&mut environment, "PATH", "/bin");
+        set_env(&mut environment, "PATH", "/disk/apps/bin:/bin");
     }
     set_env(&mut environment, "USER", "superuser");
     set_env(&mut environment, "HOSTNAME", "eonos");
@@ -295,6 +295,24 @@ fn run_line(
         "mount" => {
             exact_args(args, 2, "mount <device> <directory>")?;
             mount_device(args)?;
+        }
+        "install" => {
+            exact_args(args, 1, "install <package.eonapp>")?;
+            let package = required(args, 0, "install <package.eonapp>")?;
+            if !eonos_user::is_mountpoint("/disk")? {
+                eonos_rt::println!("install: mount a writable data disk at /disk first");
+            } else {
+                install_app_package(package)?;
+            }
+        }
+        "uninstall" => {
+            exact_args(args, 1, "uninstall <app-id>")?;
+            let id = required(args, 0, "uninstall <app-id>")?;
+            if !eonos_user::is_mountpoint("/disk")? {
+                eonos_rt::println!("uninstall: mount a writable data disk at /disk first");
+            } else {
+                uninstall_app(id)?;
+            }
         }
         "jobs" => list_jobs(jobs)?,
         "wait" => wait_jobs(args, jobs)?,
@@ -618,8 +636,9 @@ fn print_listing(listing: String) -> Result<(), Error> {
 fn print_help() {
     eonos_rt::println!("commands: cd [dir], pwd, ls [dir], tree [dir], cat <file>..., head [-n lines] <file>, wc <file>..., echo [-n] [text...], sleep <ms>, mouse, nslookup <hostname>, ping <host> [count], net [dhcp|recv|udp-send|udp-recv],");
     eonos_rt::println!("text filters: grep [-n] [-i] <pattern> [file...], tail [-n lines] [file]; tools accept pipes on standard input");
-    eonos_rt::println!("curler <http://host/path> [output-file] downloads a plain HTTP response");
-    eonos_rt::println!("lsblk, mounts, mount <device> <dir>, exec <file> [args...] [&],");
+    eonos_rt::println!("curler <http[s]://host/path> [output-file] downloads HTTP/HTTPS files (HTTPS certificates are verified)");
+    eonos_rt::println!("example: curler https://raw.githubusercontent.com/user/repo/main/app.eonapp /disk/app.eonapp; install /disk/app.eonapp");
+    eonos_rt::println!("lsblk, mounts, mount <device> <dir>, install <package.eonapp>, uninstall <app-id>, exec <file> [args...] [&],");
     eonos_rt::println!("pipelines: command | command; input: command < file; output: command > file or >> file");
     eonos_rt::println!("environment: env, export NAME=value, unset NAME; expand $NAME or ${{NAME}}; PATH selects command directories");
     eonos_rt::println!("scripts: source <file> (or run <file>) executes lines in this shell; startup settings load from /etc/profile");
@@ -706,6 +725,10 @@ fn launch_program(
     let end = args.len() - usize::from(background);
     let child_args: Vec<_> = args[..end].iter().map(String::as_str).collect();
     let env_values: Vec<&str> = environment.iter().map(String::as_str).collect();
+    if path == "/bin/era" && !eonos_user::is_mountpoint("/disk")? {
+        eonos_rt::println!("ERROR: Era requires a writable data disk mounted at /disk.");
+        return Ok(());
+    }
     let app_type = packaged_app_type(path);
     if app_type.as_deref() == Some("ERA") {
         eonos_rt::println!("{}: this is an ERA app; open it from Era's Apps window", path);
@@ -748,19 +771,114 @@ fn packaged_app_type(path: &str) -> Option<String> {
         || !id.bytes().all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'_' || byte == b'-') {
         return None;
     }
-    let mut file = eonos_user::File::open(
-        &alloc::format!("/apps/manifests/{}.eapp", id),
-        eonos_user::flags::READ_ONLY,
-    ).ok()?;
-    let manifest = file.read_to_string().ok()?;
-    let mut lines = manifest.lines();
-    if lines.next() != Some("EONOSAPP1") || lines.next() != Some(id) { return None; }
-    let kind = lines.next()?;
-    if kind == "SHELL" || kind == "ERA" {
-        Some(String::from(kind))
-    } else {
-        None
+    for manifest_path in [
+        alloc::format!("/disk/apps/manifests/{}.eapp", id),
+        alloc::format!("/apps/manifests/{}.eapp", id),
+    ] {
+        let Ok(mut file) = eonos_user::File::open(&manifest_path, eonos_user::flags::READ_ONLY) else { continue; };
+        let Ok(manifest) = file.read_to_string() else { continue; };
+        let mut lines = manifest.lines();
+        if lines.next() != Some("EONOSAPP1") || lines.next() != Some(id) { continue; }
+        let Some(kind) = lines.next() else { continue; };
+        if kind == "SHELL" || kind == "ERA" { return Some(String::from(kind)); }
     }
+    None
+}
+
+const MAX_EONAPP_BYTES: usize = 64 * 1024 * 1024 + 1044;
+
+fn install_app_package(path: &str) -> Result<(), Error> {
+    if !path.ends_with(".eonapp") { return Err(Error::Usage("install <package.eonapp>")); }
+    let mut package_file = File::open(path, eonos_user::flags::READ_ONLY)?;
+    let mut package = Vec::new();
+    let mut chunk = [0u8; 4096];
+    loop {
+        let count = package_file.read(&mut chunk)?;
+        if count == 0 { break; }
+        if package.len().checked_add(count).is_none_or(|size| size > MAX_EONAPP_BYTES) {
+            return Err(Error::InvalidArgument);
+        }
+        package.extend_from_slice(&chunk[..count]);
+    }
+    if package.len() < 20 || &package[..8] != b"EONAPP1\0" { return Err(Error::InvalidArgument); }
+    let metadata_len = u32::from_le_bytes(package[8..12].try_into().map_err(|_| Error::InvalidArgument)?) as usize;
+    let elf_len = usize::try_from(u64::from_le_bytes(package[12..20].try_into().map_err(|_| Error::InvalidArgument)?))
+        .map_err(|_| Error::InvalidArgument)?;
+    let elf_offset = 20usize.checked_add(metadata_len).ok_or(Error::InvalidArgument)?;
+    let end = elf_offset.checked_add(elf_len).ok_or(Error::InvalidArgument)?;
+    if metadata_len == 0 || metadata_len > 1024 || elf_len == 0 || end != package.len() {
+        return Err(Error::InvalidArgument);
+    }
+    let metadata = core::str::from_utf8(&package[20..elf_offset]).map_err(|_| Error::InvalidArgument)?;
+    let mut fields = metadata.lines();
+    if fields.next() != Some("EONOSAPP1") { return Err(Error::InvalidArgument); }
+    let id = fields.next().ok_or(Error::InvalidArgument)?;
+    let kind = fields.next().ok_or(Error::InvalidArgument)?;
+    let name = fields.next().ok_or(Error::InvalidArgument)?;
+    let description = fields.next().ok_or(Error::InvalidArgument)?;
+    if fields.next().is_some() || !valid_app_id(id)
+        || (kind != "SHELL" && kind != "ERA")
+        || name.is_empty() || name.len() > 80 || description.is_empty() || description.len() > 160
+        || name.bytes().chain(description.bytes()).any(|byte| byte < 0x20 || byte == 0x7f)
+    { return Err(Error::InvalidArgument); }
+    let filename = path.rsplit('/').next().unwrap_or(path);
+    if filename != alloc::format!("{}.eonapp", id) { return Err(Error::InvalidArgument); }
+    let elf = &package[elf_offset..end];
+    let marker = if kind == "ERA" { b"EONOSAPP1:ERA".as_slice() } else { b"EONOSAPP1:SHELL".as_slice() };
+    if elf.len() < 64 || &elf[..4] != b"\x7fELF" || !elf.windows(marker.len()).any(|part| part == marker) {
+        return Err(Error::InvalidArgument);
+    }
+
+    ensure_directory("/disk/apps")?;
+    ensure_directory("/disk/apps/bin")?;
+    ensure_directory("/disk/apps/manifests")?;
+    let installed_manifest = alloc::format!("/disk/apps/manifests/{}.eapp", id);
+    if eonos_user::File::open(&installed_manifest, eonos_user::flags::READ_ONLY).is_ok() {
+        eonos_rt::println!("install: '{}' is already installed; uninstall it first", id);
+        return Ok(());
+    }
+    let executable = alloc::format!("/disk/apps/bin/{}", id);
+    if eonos_user::File::open(&executable, eonos_user::flags::READ_ONLY).is_ok() {
+        let _ = eonos_user::remove(&executable);
+    }
+    let mut program = File::open(
+        &executable,
+        eonos_user::flags::WRITE_ONLY | eonos_user::flags::CREATE | eonos_user::flags::TRUNCATE,
+    )?;
+    program.write_all(elf)?;
+    program.close()?;
+    let mut manifest = File::open(
+        &installed_manifest,
+        eonos_user::flags::WRITE_ONLY | eonos_user::flags::CREATE | eonos_user::flags::TRUNCATE,
+    )?;
+    manifest.write_all(metadata.as_bytes())?;
+    manifest.close()?;
+    eonos_rt::sync()?;
+    eonos_rt::println!("Installed {} app '{}' ({})", kind, name, id);
+    Ok(())
+}
+
+fn valid_app_id(id: &str) -> bool {
+    !id.is_empty() && id.len() <= 32 && id.as_bytes()[0].is_ascii_lowercase()
+        && id.bytes().all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'_' || byte == b'-')
+}
+
+fn ensure_directory(path: &str) -> Result<(), Error> {
+    match eonos_user::mkdir(path) {
+        Ok(()) | Err(Error::System(eonos_rt::Error(17))) => Ok(()),
+        Err(error) => Err(error),
+    }
+}
+
+fn uninstall_app(id: &str) -> Result<(), Error> {
+    if !valid_app_id(id) { return Err(Error::InvalidArgument); }
+    let manifest = alloc::format!("/disk/apps/manifests/{}.eapp", id);
+    let executable = alloc::format!("/disk/apps/bin/{}", id);
+    eonos_user::remove(&manifest)?;
+    eonos_user::remove(&executable)?;
+    eonos_rt::sync()?;
+    eonos_rt::println!("Uninstalled app '{}'", id);
+    Ok(())
 }
 
 fn env_value<'a>(environment: &'a [String], name: &str) -> Option<&'a str> {

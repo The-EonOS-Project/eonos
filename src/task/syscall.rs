@@ -273,6 +273,7 @@ pub const SYS_TCP_CONNECT: u64 = 9041;
 pub const SYS_TCP_SEND: u64 = 9042;
 pub const SYS_TCP_RECEIVE: u64 = 9043;
 pub const SYS_TCP_CLOSE: u64 = 9044;
+pub const SYS_SECURE_RANDOM: u64 = 9046;
 /// Read one focused keyboard edge event into a user buffer (0 if none).
 pub const SYS_KEYBOARD_EVENT: u64 = 9035;
 /// Claim or release keyboard-event focus (operation: 1 claim, 0 release).
@@ -1517,6 +1518,32 @@ fn sys_tcp_close() -> u64 {
     }
 }
 
+fn sys_secure_random(pointer: u64, length: u64) -> u64 {
+    let length = length as usize;
+    if length > 4096 { return errno(EINVAL); }
+    if length == 0 { return 0; }
+    if !vmm::validate_user_range(pointer, length, true) { return errno(EFAULT); }
+    if core::arch::x86_64::__cpuid(1).ecx & (1 << 30) == 0 { return errno(ENOTSUP); }
+    let mut output = alloc::vec![0u8; length];
+    for chunk in output.chunks_mut(8) {
+        let mut ready = false;
+        let mut value = 0u64;
+        for _ in 0..10 {
+            let carry: u8;
+            unsafe {
+                core::arch::asm!("rdrand {value}", "setc {carry}",
+                    value = lateout(reg) value, carry = lateout(reg_byte) carry,
+                    options(nomem, nostack));
+            }
+            if carry != 0 { ready = true; break; }
+        }
+        if !ready { return errno(EAGAIN); }
+        chunk.copy_from_slice(&value.to_ne_bytes()[..chunk.len()]);
+    }
+    if !vmm::copy_to_user(pointer, &output) { return errno(EFAULT); }
+    length as u64
+}
+
 fn sys_dns_lookup(name_ptr: u64, name_len: u64, output_ptr: u64) -> u64 {
     let name_len = name_len as usize;
     if name_len == 0 || name_len > 253 { return errno(EINVAL); }
@@ -1990,6 +2017,7 @@ fn sys_exec_with_io_policy(
     match spawned {
         Ok(pid) => pid,
         Err(process::SpawnError::NotFound) => errno(ENOENT),
+        Err(process::SpawnError::DiskNotMounted) => errno(ENODEV),
         Err(process::SpawnError::Elf(_)) => errno(ENOEXEC),
         Err(process::SpawnError::NoMemory) => errno(ENOMEM),
         Err(process::SpawnError::NoThread) => errno(EAGAIN),
@@ -2580,6 +2608,7 @@ extern "C" fn syscall_dispatch(frame: &mut SyscallFrame) {
         SYS_TCP_SEND => frame.rax = sys_tcp_send(frame.rdi, frame.rsi),
         SYS_TCP_RECEIVE => frame.rax = sys_tcp_receive(frame.rdi, frame.rsi, frame.rdx),
         SYS_TCP_CLOSE => frame.rax = sys_tcp_close(),
+        SYS_SECURE_RANDOM => frame.rax = sys_secure_random(frame.rdi, frame.rsi),
         SYS_KEYBOARD_EVENT => frame.rax = sys_keyboard_event(frame.rdi),
         SYS_KEYBOARD_FOCUS => frame.rax = sys_keyboard_focus(frame.rdi),
         SYS_SEEK => frame.rax = sys_seek(frame.rdi, frame.rsi as i64, frame.rdx),
