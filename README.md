@@ -242,20 +242,30 @@ Third-party programs are freestanding Rust ELF applications. They use the
 `eonos-app` SDK, which builds against the same x86-64 EonOS user ABI as the
 system programs. Every package declares `type = "SHELL"` or `type = "ERA"` in
 `Cargo.toml` and repeats that type in `eonos_app::app!(SHELL, main)` or
-`eonos_app::app!(ERA, main)`. `./app.sh build <app-directory>` checks that the
-manifest and embedded ELF marker agree, then creates a typed package under
-`build/apps/<id>`.
+`eonos_app::app!(ERA, main)`. The external
+[`The-EonOS-Project/eon-apps`](https://github.com/The-EonOS-Project/eon-apps)
+repository contains the app builder and projects. Check it out as `eon-apps/`
+next to this repository. `eon-apps/app.sh build <app-directory>` checks that
+the manifest and embedded ELF marker agree, then creates a portable
+`.eonapp` package containing the description, type, id, and ELF executable.
+Copy the package onto the data disk and install it at runtime.
 
 ```sh
-./app.sh new examples/apps/hello-shell SHELL
-./app.sh build examples/apps/hello-shell
-./app.sh new examples/apps/hello-window ERA
-./app.sh build examples/apps/hello-window
+(cd eon-apps && ./app.sh new hello-shell SHELL)
+(cd eon-apps && ./app.sh build hello-shell)
+EONOS_BUILD_DIR=build eon-apps/app.sh build eon-apps/hello-shell
 ./build.sh release
 ```
 
-The image builder installs valid packages in `/apps/bin` and their manifests
-in `/apps/manifests`. Era discovers them in its Applications window. `SHELL`
+To bundle an app into the ISO, build it with `EONOS_BUILD_DIR=build` before
+`./build.sh release`; the ISO includes packages from `build/apps` in
+`/packages`. Mount the disk in EonOS, then install a bundled package with
+`install /packages/hello-shell.eonapp`. Packages copied onto the disk can be
+installed from `/disk/<id>.eonapp` instead. The installer validates its metadata and
+ELF marker and writes the app to `/disk/apps/bin` with its manifest under
+`/disk/apps/manifests`. Installed apps survive rebuilds and reboots; Era scans
+the persistent registry at startup and shows them in its Applications window.
+Use `uninstall <app-id>` to remove one. `SHELL`
 apps run as commands and, when selected in Era, open in Konsul with their output
 shown there. They can also be invoked from a normal EonOS shell. `ERA` apps
 launch only from Era; the shell reports that they must be opened from the Apps
