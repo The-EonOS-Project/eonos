@@ -10,8 +10,9 @@
 //! `interrupts::unmask_isa_irq`, and a `self_test()` that's safe to call once
 //! interrupts are on. `main.rs` calls both in order.
 
+pub mod ahci;
+pub mod e1000;
+pub mod nvme;
 pub mod ps2;
 pub mod usb;
-pub mod ahci;
-pub mod nvme;
 pub mod virtio_gpu;

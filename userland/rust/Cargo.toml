@@ -1,0 +1,126 @@
+[package]
+name = "eonos-rust-hello"
+version = "0.1.0"
+edition = "2021"
+build = "../doom/build.rs"
+
+[[bin]]
+name = "rust-hello"
+path = "src/main.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "rust-file-demo"
+path = "src/bin/file_demo.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "rust-process-demo"
+path = "src/bin/process_demo.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "rust-input-demo"
+path = "src/bin/input_demo.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "rust-shell"
+path = "src/bin/shell.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "echo"
+path = "src/bin/echo.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "cat"
+path = "src/bin/cat.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "ls"
+path = "src/bin/ls.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "sleep"
+path = "src/bin/sleep.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "pwd"
+path = "src/bin/pwd.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "env"
+path = "src/bin/env.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "head"
+path = "src/bin/head.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "wc"
+path = "src/bin/wc.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "grep"
+path = "src/bin/grep.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "tail"
+path = "src/bin/tail.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "era"
+path = "src/bin/era.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "fb-test"
+path = "src/bin/fb_test.rs"
+test = false
+bench = false
+
+[[bin]]
+name = "doom"
+path = "src/bin/doom.rs"
+test = false
+bench = false
+
+[dependencies]
+eonos-rt = { path = "../runtime" }
+eonos-user = { path = "../lib" }
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+lto = true
+opt-level = 2
+strip = true

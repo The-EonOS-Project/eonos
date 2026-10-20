@@ -3,35 +3,71 @@
 
 extern crate alloc;
 
-pub mod blocking;
-pub mod block;
+// Keep crate module names stable while grouping subsystem files by directory.
+#[path = "arch/acpi.rs"]
 pub mod acpi;
+#[path = "io/block.rs"]
+pub mod block;
+#[path = "task/blocking.rs"]
+pub mod blocking;
+#[path = "io/console.rs"]
 pub mod console;
 pub mod drivers;
+#[path = "task/elf.rs"]
 pub mod elf;
-pub mod fs_probe;
+#[path = "filesystem/fat32.rs"]
 pub mod fat32;
+#[path = "io/framebuffer.rs"]
 pub mod framebuffer;
+#[path = "filesystem/fs_probe.rs"]
+pub mod fs_probe;
+#[path = "arch/gdt.rs"]
 pub mod gdt;
+#[path = "arch/fpu.rs"]
+pub mod fpu;
+#[path = "memory/heap.rs"]
 pub mod heap;
+#[path = "arch/idt.rs"]
 pub mod idt;
-pub mod interrupts;
-pub mod ioapic;
+#[path = "filesystem/initramfs.rs"]
 pub mod initramfs;
-pub mod logger;
+#[path = "input.rs"]
+pub mod input;
+#[path = "arch/interrupts.rs"]
+pub mod interrupts;
+#[path = "arch/ioapic.rs"]
+pub mod ioapic;
+#[path = "arch/lapic.rs"]
 pub mod lapic;
+#[path = "io/logger.rs"]
+pub mod logger;
+pub mod network;
+#[path = "io/panic_screen.rs"]
 pub mod panic_screen;
-pub mod pic;
-pub mod pit;
-pub mod pmm;
+#[path = "filesystem/partition.rs"]
 pub mod partition;
+#[path = "arch/pic.rs"]
+pub mod pic;
+#[path = "arch/power.rs"]
+pub mod power;
+#[path = "arch/pit.rs"]
+pub mod pit;
+#[path = "memory/pmm.rs"]
+pub mod pmm;
+#[path = "task/process.rs"]
 pub mod process;
+#[path = "task/scheduler.rs"]
 pub mod scheduler;
+#[path = "io/serial.rs"]
 pub mod serial;
+#[path = "task/sync.rs"]
 pub mod sync;
+#[path = "task/syscall.rs"]
 pub mod syscall;
-pub mod vmm;
+#[path = "filesystem/vfs.rs"]
 pub mod vfs;
+#[path = "memory/vmm.rs"]
+pub mod vmm;
 
 use core::fmt::Write;
 use core::panic::PanicInfo;
@@ -43,7 +79,8 @@ static BASE_REVISION: BaseRevision = BaseRevision::new();
 
 #[used]
 #[link_section = ".requests_start_marker"]
-static _START_MARKER: limine::request::RequestsStartMarker = limine::request::RequestsStartMarker::new();
+static _START_MARKER: limine::request::RequestsStartMarker =
+    limine::request::RequestsStartMarker::new();
 
 #[used]
 #[link_section = ".requests_end_marker"]
@@ -63,9 +100,14 @@ unsafe extern "C" fn _start() -> ! {
 
     gdt::init();
     idt::init();
+    fpu::init();
 
     core::arch::asm!("int3");
-    log_ok!("IDT", "SelfTest", "Breakpoint exception handled and returned");
+    log_ok!(
+        "IDT",
+        "SelfTest",
+        "Breakpoint exception handled and returned"
+    );
 
     // Kernel Exceptions!
     // core::arch::asm!("ud2");                                      // #UD invalid opcode
@@ -99,7 +141,11 @@ unsafe extern "C" fn _start() -> ! {
         }
     }
     if !apic_ready {
-        log_ok!("IRQ", "Init", "APIC setup unavailable; continuing with legacy PIC routing");
+        log_ok!(
+            "IRQ",
+            "Init",
+            "APIC setup unavailable; continuing with legacy PIC routing"
+        );
     }
     pit::init(1000); // 1kHz tick, i.e. 1ms resolution
     idt::enable_interrupts();
@@ -112,6 +158,7 @@ unsafe extern "C" fn _start() -> ! {
     drivers::usb::init();
     drivers::ahci::init();
     drivers::nvme::init();
+    drivers::e1000::init();
 
     scheduler::init();
     scheduler::self_test();
@@ -135,7 +182,11 @@ unsafe extern "C" fn _start() -> ! {
     }
     process::start_init();
 
-    log_ok!("Kernel", "Init", "Initialization complete, handing over to the scheduler");
+    log_ok!(
+        "Kernel",
+        "Init",
+        "Initialization complete, handing over to the scheduler"
+    );
 
     // The boot thread is done; the idle thread takes over from here.
     scheduler::exit();

@@ -1,0 +1,8 @@
+Project: https://github.com/ozkl/doomgeneric
+Revision: e257a09527062bfb986b6e5e0780839b6cbd5b71
+Selected source snapshot: 2026-10-11
+License: GNU General Public License version 2 or later; see LICENSE.
+
+EonOS keeps the upstream engine sources intact except for the documented,
+small EONOS-specific error-dialog change in doomgeneric/i_system.c. The
+EonOS platform hooks and freestanding C runtime live under userland/doom.

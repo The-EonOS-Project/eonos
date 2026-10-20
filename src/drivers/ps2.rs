@@ -20,8 +20,8 @@
 
 use core::sync::atomic::{AtomicBool, Ordering};
 
-use crate::sync::IrqMutex;
 use crate::idt;
+use crate::sync::IrqMutex;
 use crate::{log_fail, log_ok};
 
 const DATA_PORT: u16 = 0x60;
@@ -66,7 +66,12 @@ struct RingBuffer {
 
 impl RingBuffer {
     const fn new() -> Self {
-        RingBuffer { buf: [0; BUFFER_CAP], head: 0, tail: 0, len: 0 }
+        RingBuffer {
+            buf: [0; BUFFER_CAP],
+            head: 0,
+            tail: 0,
+            len: 0,
+        }
     }
 
     fn push(&mut self, byte: u8) {
@@ -94,7 +99,7 @@ impl RingBuffer {
 }
 
 static ASCII_QUEUE: IrqMutex<RingBuffer> = IrqMutex::new(RingBuffer::new());
-static SHIFT_HELD: AtomicBool = AtomicBool::new(false);
+static SHIFT_HELD: core::sync::atomic::AtomicU8 = core::sync::atomic::AtomicU8::new(0);
 static CAPS_LOCK: AtomicBool = AtomicBool::new(false);
 static READY: AtomicBool = AtomicBool::new(false);
 
@@ -165,7 +170,11 @@ pub fn init() {
         // `-machine ...,i8042=off`; recognize it before trying to drain
         // the output buffer, whose full bit would otherwise look stuck.
         if inb(STATUS_PORT) == 0xFF {
-            log_ok!("PS2", "Init", "No PS/2 controller detected; continuing without it");
+            log_ok!(
+                "PS2",
+                "Init",
+                "No PS/2 controller detected; continuing without it"
+            );
             return;
         }
 
@@ -185,29 +194,51 @@ pub fn init() {
         }
 
         if !write_command(CMD_SELF_TEST) {
-            log_fail!("PS2", "Init", "Controller did not accept the self-test command");
+            log_fail!(
+                "PS2",
+                "Init",
+                "Controller did not accept the self-test command"
+            );
             return;
         }
         match read_data() {
             Some(SELF_TEST_OK) => {}
             Some(other) => {
-                log_fail!("PS2", "Init", "Controller self-test failed (response {:#04x})", other);
+                log_fail!(
+                    "PS2",
+                    "Init",
+                    "Controller self-test failed (response {:#04x})",
+                    other
+                );
                 return;
             }
             None => {
-                log_fail!("PS2", "Init", "Controller self-test timed out -- no PS/2 controller?");
+                log_fail!(
+                    "PS2",
+                    "Init",
+                    "Controller self-test timed out -- no PS/2 controller?"
+                );
                 return;
             }
         }
 
         if !write_command(CMD_TEST_PORT1) {
-            log_fail!("PS2", "Init", "Controller did not accept the port-1 test command");
+            log_fail!(
+                "PS2",
+                "Init",
+                "Controller did not accept the port-1 test command"
+            );
             return;
         }
         match read_data() {
             Some(PORT_TEST_OK) => {}
             Some(other) => {
-                log_fail!("PS2", "Init", "Port 1 test failed (response {:#04x})", other);
+                log_fail!(
+                    "PS2",
+                    "Init",
+                    "Port 1 test failed (response {:#04x})",
+                    other
+                );
                 return;
             }
             None => {
@@ -220,7 +251,11 @@ pub fn init() {
         // IRQ and its scancode translation (set 2 -> set 1, done by the
         // controller itself; simplest for us since we only speak set 1).
         if !write_command(CMD_READ_CONFIG) {
-            log_fail!("PS2", "Init", "Controller did not accept read-config command");
+            log_fail!(
+                "PS2",
+                "Init",
+                "Controller did not accept read-config command"
+            );
             return;
         }
         let Some(mut config) = read_data() else {
@@ -229,7 +264,11 @@ pub fn init() {
         };
         config |= CONFIG_PORT1_IRQ | CONFIG_PORT1_TRANSLATION;
         if !write_command(CMD_WRITE_CONFIG) || !write_data(config) {
-            log_fail!("PS2", "Init", "Failed to write back controller configuration");
+            log_fail!(
+                "PS2",
+                "Init",
+                "Failed to write back controller configuration"
+            );
             return;
         }
 
@@ -269,7 +308,11 @@ pub fn init() {
     crate::interrupts::unmask_isa_irq(IRQ_LINE);
     READY.store(true, Ordering::Release);
 
-    log_ok!("PS2", "Init", "Controller and keyboard ready, IRQ1 registered and unmasked");
+    log_ok!(
+        "PS2",
+        "Init",
+        "Controller and keyboard ready, IRQ1 registered and unmasked"
+    );
 }
 
 /// Whether `init()` completed successfully. `syscall::sys_read` checks
@@ -323,6 +366,7 @@ const SET1_SHIFTED: [u8; 0x60] = [
 
 const SCANCODE_LSHIFT: u8 = 0x2A;
 const SCANCODE_RSHIFT: u8 = 0x36;
+const SCANCODE_LCTRL: u8 = 0x1D;
 const SCANCODE_CAPS_LOCK: u8 = 0x3A;
 /// High bit set on the make code marks a break (key-release) code in
 /// scancode set 1; 0xE0 prefixes an extended-key scancode (arrows,
@@ -334,6 +378,8 @@ const BREAK_BIT: u8 = 0x80;
 const EXTENDED_PREFIX: u8 = 0xE0;
 
 static EXPECT_EXTENDED: AtomicBool = AtomicBool::new(false);
+static CTRL_HELD: core::sync::atomic::AtomicU8 = core::sync::atomic::AtomicU8::new(0);
+static ALT_HELD: core::sync::atomic::AtomicU8 = core::sync::atomic::AtomicU8::new(0);
 
 // Extended (0xE0-prefixed) scancodes this driver gives meaning to.
 const EXT_UP: u8 = 0x48;
@@ -343,6 +389,58 @@ const EXT_LEFT: u8 = 0x4B;
 const EXT_HOME: u8 = 0x47;
 const EXT_END: u8 = 0x4F;
 const EXT_DELETE: u8 = 0x53;
+const EXT_RCTRL: u8 = 0x1D;
+
+fn set_modifier(state: &core::sync::atomic::AtomicU8, side: u8, pressed: bool) {
+    if pressed { state.fetch_or(side, Ordering::Relaxed); }
+    else { state.fetch_and(!side, Ordering::Relaxed); }
+}
+
+fn hid_usage(code: u8, extended: bool) -> Option<u8> {
+    if extended {
+        return Some(match code {
+            EXT_RCTRL => 0xE4, 0x38 => 0xE6, 0x5B => 0xE3, 0x5C => 0xE7,
+            0x1C => 0x58, 0x35 => 0x54,
+            EXT_HOME => 0x4A, 0x4F => 0x4D, 0x49 => 0x4B,
+            0x51 => 0x4E, 0x52 => 0x49, EXT_DELETE => 0x4C,
+            EXT_UP => 0x52, EXT_DOWN => 0x51, EXT_RIGHT => 0x4F, EXT_LEFT => 0x50,
+            _ => return None,
+        });
+    }
+    Some(match code {
+        0x01 => 0x29,
+        0x02..=0x0A => 0x1E + code - 0x02,
+        0x0B => 0x27, 0x0C => 0x2D, 0x0D => 0x2E, 0x0E => 0x2A, 0x0F => 0x2B,
+        0x10 => 0x14, 0x11 => 0x1A, 0x12 => 0x08, 0x13 => 0x15, 0x14 => 0x17,
+        0x15 => 0x1C, 0x16 => 0x18, 0x17 => 0x0C, 0x18 => 0x12, 0x19 => 0x13,
+        0x1A => 0x2F, 0x1B => 0x30, 0x1C => 0x28, 0x1D => 0xE0,
+        0x1E => 0x04, 0x1F => 0x16, 0x20 => 0x07, 0x21 => 0x09, 0x22 => 0x0A,
+        0x23 => 0x0B, 0x24 => 0x0D, 0x25 => 0x0E, 0x26 => 0x0F, 0x27 => 0x33,
+        0x28 => 0x34, 0x29 => 0x35, 0x2A => 0xE1, 0x2B => 0x31,
+        0x2C => 0x1D, 0x2D => 0x1B, 0x2E => 0x06, 0x2F => 0x19,
+        0x30 => 0x05, 0x31 => 0x11, 0x32 => 0x10, 0x33 => 0x36, 0x34 => 0x37,
+        0x35 => 0x38, 0x36 => 0xE5, 0x37 => 0x55, 0x38 => 0xE2, 0x39 => 0x2C,
+        0x3A => 0x39, 0x3B..=0x44 => 0x3A + code - 0x3B, 0x45 => 0x53,
+        0x47 => 0x5F, 0x48 => 0x60, 0x49 => 0x61, 0x4A => 0x56, 0x4B => 0x5C,
+        0x4C => 0x5D, 0x4D => 0x5E, 0x4E => 0x57, 0x4F => 0x59, 0x50 => 0x5A,
+        0x51 => 0x5B, 0x52 => 0x62, 0x53 => 0x63, 0x57 => 0x44, 0x58 => 0x45,
+        _ => return None,
+    })
+}
+
+fn modifier_mask() -> u8 {
+    let mut bits = 0;
+    let shift = SHIFT_HELD.load(Ordering::Relaxed);
+    let ctrl = CTRL_HELD.load(Ordering::Relaxed);
+    let alt = ALT_HELD.load(Ordering::Relaxed);
+    if shift & 1 != 0 { bits |= 1 << 1; }
+    if shift & 2 != 0 { bits |= 1 << 5; }
+    if ctrl & 1 != 0 { bits |= 1; }
+    if ctrl & 2 != 0 { bits |= 1 << 4; }
+    if alt & 1 != 0 { bits |= 1 << 2; }
+    if alt & 2 != 0 { bits |= 1 << 6; }
+    bits
+}
 
 /// Push a multi-byte ANSI escape sequence onto the queue as one unit.
 /// The line editor (`syscall::read_line`) reads and interprets these
@@ -366,10 +464,29 @@ fn handle_scancode(code: u8) {
     let make_code = code & !BREAK_BIT;
     let extended = EXPECT_EXTENDED.swap(false, Ordering::Relaxed);
 
+    let usage = hid_usage(make_code, extended);
+    match usage {
+        Some(0xE1) => set_modifier(&SHIFT_HELD, 1, !is_break),
+        Some(0xE5) => set_modifier(&SHIFT_HELD, 2, !is_break),
+        Some(0xE0) => set_modifier(&CTRL_HELD, 1, !is_break),
+        Some(0xE4) => set_modifier(&CTRL_HELD, 2, !is_break),
+        Some(0xE2) => set_modifier(&ALT_HELD, 1, !is_break),
+        Some(0xE6) => set_modifier(&ALT_HELD, 2, !is_break),
+        Some(0x39) if !is_break => CAPS_LOCK.store(!CAPS_LOCK.load(Ordering::Relaxed), Ordering::Relaxed),
+        _ => {}
+    }
+    let focused = usage
+        .map(|usage| crate::input::push(usage, !is_break, modifier_mask()))
+        .unwrap_or(false);
+
     if extended {
+        if make_code == EXT_RCTRL {
+            return;
+        }
         if is_break {
             return; // only act on the press, same as the normal-key path
         }
+        if focused { return; }
         match make_code {
             EXT_UP => push_escape(b"\x1b[A"),
             EXT_DOWN => push_escape(b"\x1b[B"),
@@ -385,14 +502,12 @@ fn handle_scancode(code: u8) {
 
     match make_code {
         SCANCODE_LSHIFT | SCANCODE_RSHIFT => {
-            SHIFT_HELD.store(!is_break, Ordering::Relaxed);
+            return;
+        }
+        SCANCODE_LCTRL => {
             return;
         }
         SCANCODE_CAPS_LOCK => {
-            if !is_break {
-                let cur = CAPS_LOCK.load(Ordering::Relaxed);
-                CAPS_LOCK.store(!cur, Ordering::Relaxed);
-            }
             return;
         }
         _ => {}
@@ -401,14 +516,19 @@ fn handle_scancode(code: u8) {
     if is_break {
         return; // only make (press) codes produce a character
     }
+    if focused { return; }
 
     if (make_code as usize) >= SET1_UNSHIFTED.len() {
         return;
     }
 
-    let shift = SHIFT_HELD.load(Ordering::Relaxed);
+    let shift = SHIFT_HELD.load(Ordering::Relaxed) != 0;
     let caps = CAPS_LOCK.load(Ordering::Relaxed);
-    let mut ascii = if shift { SET1_SHIFTED[make_code as usize] } else { SET1_UNSHIFTED[make_code as usize] };
+    let mut ascii = if shift {
+        SET1_SHIFTED[make_code as usize]
+    } else {
+        SET1_UNSHIFTED[make_code as usize]
+    };
 
     if ascii == 0 {
         return;
@@ -422,6 +542,10 @@ fn handle_scancode(code: u8) {
         ascii = ascii.to_ascii_uppercase();
     } else if caps && ascii.is_ascii_uppercase() && shift {
         ascii = ascii.to_ascii_lowercase();
+    }
+
+    if CTRL_HELD.load(Ordering::Relaxed) != 0 && ascii.is_ascii_alphabetic() {
+        ascii = ascii.to_ascii_uppercase() & 0x1F;
     }
 
     ASCII_QUEUE.lock().push(ascii);

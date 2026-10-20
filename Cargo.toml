@@ -25,6 +25,9 @@ debug = true
 [profile.release]
 panic = "abort"
 opt-level = 2
-lto = true
+# Kernel whole-program LTO miscompiles the core formatter's stack argument
+# pointers with this higher-half target, causing a page fault during boot logs.
+# Keep optimized codegen, but leave LTO enabled only for the userland target.
+lto = false
 debug = false
 strip = true

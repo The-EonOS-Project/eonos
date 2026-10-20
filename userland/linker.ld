@@ -23,6 +23,7 @@ SECTIONS
     . = ALIGN(4096);
     .rodata : {
         *(.rodata .rodata.*)
+        KEEP(*(.eonos_app))
     } :rodata
 
     . = ALIGN(4096);

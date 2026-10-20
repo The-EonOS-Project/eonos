@@ -529,6 +529,19 @@ impl Driver {
         transfer[28..32].copy_from_slice(&(y as u32).to_le_bytes());
         transfer[32..36].copy_from_slice(&(width as u32).to_le_bytes());
         transfer[36..40].copy_from_slice(&(height as u32).to_le_bytes());
+        // TRANSFER_TO_HOST_2D's offset is the source byte offset in guest
+        // backing memory. QEMU advances by one stride per row but does not
+        // add rect.x, so start at this rectangle's actual top-left pixel.
+        let Some(offset) = y
+            .checked_mul(self.pitch)
+            .and_then(|row| x.checked_mul(4).and_then(|column| row.checked_add(column)))
+        else {
+            return false;
+        };
+        let Ok(offset) = u64::try_from(offset) else {
+            return false;
+        };
+        transfer[40..48].copy_from_slice(&offset.to_le_bytes());
         transfer[48..52].copy_from_slice(&RESOURCE_ID.to_le_bytes());
         if self.submit(&transfer, GPU_RESP_OK_NODATA, 24).is_none() {
             return false;

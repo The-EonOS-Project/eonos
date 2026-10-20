@@ -26,6 +26,7 @@ ISO_OUTPUT="$BUILD_DIR/iso_output"
 LIMINE_DIR="$ROOT/limine"
 USERLAND_DIR="$ROOT/userland"
 INITRAMFS_SRC="$ROOT/initramfs"
+DOOM_WAD="$ROOT/assets/doom/freedoom1.wad"
 
 INITRAMFS_ROOT="$BUILD_DIR/initramfs_root"
 INITRAMFS_NAME="initramfs.tar"
@@ -35,6 +36,11 @@ else
     ISO_NAME="eonos.iso"
 fi
 ISO_PATH="$ISO_OUTPUT/$ISO_NAME"
+
+if [ ! -s "$DOOM_WAD" ]; then
+    echo "Required Freedoom IWAD is missing: $DOOM_WAD" >&2
+    exit 1
+fi
 
 TARGET_DIR="$ROOT/target/x86_64-eonos"
 
@@ -53,21 +59,49 @@ BUILD_STD_FLAGS=(
 
 if [ "$PROFILE" = "release" ]; then
     if [ "$DEBUG_BUILD" = "1" ]; then
-        cargo build --release --features debug-logs "${BUILD_STD_FLAGS[@]}" --target x86_64-eonos.json
+        cargo build --release --features debug-logs "${BUILD_STD_FLAGS[@]}" --target config/targets/x86_64-eonos.json
     else
-        cargo build --release "${BUILD_STD_FLAGS[@]}" --target x86_64-eonos.json
+        cargo build --release "${BUILD_STD_FLAGS[@]}" --target config/targets/x86_64-eonos.json
     fi
     KERNEL_BIN="$TARGET_DIR/release/eonos"
 else
     if [ "$DEBUG_BUILD" = "1" ]; then
-        cargo build --features debug-logs "${BUILD_STD_FLAGS[@]}" --target x86_64-eonos.json
+        cargo build --features debug-logs "${BUILD_STD_FLAGS[@]}" --target config/targets/x86_64-eonos.json
     else
-        cargo build "${BUILD_STD_FLAGS[@]}" --target x86_64-eonos.json
+        cargo build "${BUILD_STD_FLAGS[@]}" --target config/targets/x86_64-eonos.json
     fi
     KERNEL_BIN="$TARGET_DIR/debug/eonos"
 fi
 
 echo "==> Building userland"
+
+RUSTFLAGS="-C link-arg=-T$USERLAND_DIR/linker.ld -C link-arg=-z -C link-arg=max-page-size=4096 -C link-arg=-z -C link-arg=noexecstack" \
+    cargo build \
+        --manifest-path "$USERLAND_DIR/rust/Cargo.toml" \
+        --target "$ROOT/config/targets/x86_64-eonos-user.json" \
+        --target-dir "$BUILD_DIR/rust-target" \
+        --release \
+        -Zjson-target-spec \
+        -Zbuild-std=core,alloc,compiler_builtins \
+        -Zbuild-std-features=compiler-builtins-mem
+RUST_HELLO_BIN="$BUILD_DIR/rust-target/x86_64-eonos-user/release/rust-hello"
+RUST_FILE_DEMO_BIN="$BUILD_DIR/rust-target/x86_64-eonos-user/release/rust-file-demo"
+RUST_PROCESS_DEMO_BIN="$BUILD_DIR/rust-target/x86_64-eonos-user/release/rust-process-demo"
+RUST_INPUT_DEMO_BIN="$BUILD_DIR/rust-target/x86_64-eonos-user/release/rust-input-demo"
+RUST_SHELL_BIN="$BUILD_DIR/rust-target/x86_64-eonos-user/release/rust-shell"
+RUST_ECHO_BIN="$BUILD_DIR/rust-target/x86_64-eonos-user/release/echo"
+RUST_CAT_BIN="$BUILD_DIR/rust-target/x86_64-eonos-user/release/cat"
+RUST_LS_BIN="$BUILD_DIR/rust-target/x86_64-eonos-user/release/ls"
+RUST_SLEEP_BIN="$BUILD_DIR/rust-target/x86_64-eonos-user/release/sleep"
+RUST_PWD_BIN="$BUILD_DIR/rust-target/x86_64-eonos-user/release/pwd"
+RUST_ENV_BIN="$BUILD_DIR/rust-target/x86_64-eonos-user/release/env"
+RUST_ERA_BIN="$BUILD_DIR/rust-target/x86_64-eonos-user/release/era"
+RUST_FB_TEST_BIN="$BUILD_DIR/rust-target/x86_64-eonos-user/release/fb-test"
+RUST_DOOM_BIN="$BUILD_DIR/rust-target/x86_64-eonos-user/release/doom"
+RUST_HEAD_BIN="$BUILD_DIR/rust-target/x86_64-eonos-user/release/head"
+RUST_WC_BIN="$BUILD_DIR/rust-target/x86_64-eonos-user/release/wc"
+RUST_GREP_BIN="$BUILD_DIR/rust-target/x86_64-eonos-user/release/grep"
+RUST_TAIL_BIN="$BUILD_DIR/rust-target/x86_64-eonos-user/release/tail"
 
 as --64 "$USERLAND_DIR/init.S" -o "$BUILD_DIR/init.o"
 
@@ -123,8 +157,57 @@ echo "==> Packing initramfs"
 mkdir -p "$INITRAMFS_ROOT"
 
 cp -r "$INITRAMFS_SRC"/. "$INITRAMFS_ROOT"/
-cp "$BUILD_DIR/init.elf" "$INITRAMFS_ROOT/init"
+cp "$BUILD_DIR/init.elf" "$INITRAMFS_ROOT/asm-shell"
 cp "$BUILD_DIR/hello.elf" "$INITRAMFS_ROOT/hello"
+cp "$RUST_HELLO_BIN" "$INITRAMFS_ROOT/rust-hello"
+cp "$RUST_FILE_DEMO_BIN" "$INITRAMFS_ROOT/rust-file-demo"
+cp "$RUST_PROCESS_DEMO_BIN" "$INITRAMFS_ROOT/rust-process-demo"
+cp "$RUST_INPUT_DEMO_BIN" "$INITRAMFS_ROOT/rust-input-demo"
+cp "$RUST_SHELL_BIN" "$INITRAMFS_ROOT/rust-shell"
+cp "$RUST_SHELL_BIN" "$INITRAMFS_ROOT/init"
+mkdir -p "$INITRAMFS_ROOT/bin"
+cp "$RUST_SHELL_BIN" "$INITRAMFS_ROOT/bin/rust-shell"
+cp "$RUST_ECHO_BIN" "$INITRAMFS_ROOT/bin/echo"
+cp "$RUST_CAT_BIN" "$INITRAMFS_ROOT/bin/cat"
+cp "$RUST_LS_BIN" "$INITRAMFS_ROOT/bin/ls"
+cp "$RUST_SLEEP_BIN" "$INITRAMFS_ROOT/bin/sleep"
+cp "$RUST_PWD_BIN" "$INITRAMFS_ROOT/bin/pwd"
+cp "$RUST_ENV_BIN" "$INITRAMFS_ROOT/bin/env"
+cp "$RUST_ERA_BIN" "$INITRAMFS_ROOT/bin/era"
+cp "$RUST_FB_TEST_BIN" "$INITRAMFS_ROOT/bin/fb-test"
+cp "$RUST_HEAD_BIN" "$INITRAMFS_ROOT/bin/head"
+cp "$RUST_WC_BIN" "$INITRAMFS_ROOT/bin/wc"
+cp "$RUST_GREP_BIN" "$INITRAMFS_ROOT/bin/grep"
+cp "$RUST_TAIL_BIN" "$INITRAMFS_ROOT/bin/tail"
+cp "$RUST_DOOM_BIN" "$INITRAMFS_ROOT/bin/doom"
+if [ -d "$BUILD_DIR/apps" ]; then
+    mkdir -p "$INITRAMFS_ROOT/apps/bin" "$INITRAMFS_ROOT/apps/manifests"
+    for package in "$BUILD_DIR/apps"/*; do
+        [ -d "$package" ] || continue
+        manifest="$package/manifest.eapp"
+        program="$package/program.elf"
+        if [ ! -s "$manifest" ] || [ ! -s "$program" ]; then
+            echo "Skipping incomplete EonOS app package: $package" >&2
+            continue
+        fi
+        mapfile -t app_meta < "$manifest"
+        app_id="${app_meta[1]:-}"
+        app_type="${app_meta[2]:-}"
+        if [ "${app_meta[0]:-}" != "EONOSAPP1" ] || [ "$(basename "$package")" != "$app_id" ] \
+            || [[ ! "$app_id" =~ ^[a-z][a-z0-9_-]{0,31}$ ]] \
+            || { [ "$app_type" != "SHELL" ] && [ "$app_type" != "ERA" ]; } \
+            || ! grep -a -F -q "EONOSAPP1:$app_type" "$program"; then
+            echo "Skipping invalid or mismatched EonOS app package: $package" >&2
+            continue
+        fi
+        cp "$program" "$INITRAMFS_ROOT/apps/bin/$app_id"
+        cp "$manifest" "$INITRAMFS_ROOT/apps/manifests/$app_id.eapp"
+    done
+fi
+mkdir -p "$INITRAMFS_ROOT/doom"
+cp "$DOOM_WAD" "$INITRAMFS_ROOT/doom/freedoom1.wad"
+cp "$ROOT/assets/doom/COPYING.txt" "$INITRAMFS_ROOT/doom/COPYING.txt"
+cp "$ROOT/assets/doom/CREDITS.txt" "$INITRAMFS_ROOT/doom/CREDITS.txt"
 
 tar --format=ustar \
     -cf "$BUILD_DIR/$INITRAMFS_NAME" \
@@ -151,10 +234,10 @@ mkdir -p \
 cp "$KERNEL_BIN" \
     "$ISO_ROOT/boot/eonos.elf"
 
-cp "$ROOT/limine.conf" \
+cp "$ROOT/config/boot/limine.conf" \
     "$ISO_ROOT/boot/limine/limine.conf"
 
-cp "$ROOT/limine.conf" \
+cp "$ROOT/config/boot/limine.conf" \
     "$ISO_ROOT/limine.conf"
 
 cp "$BUILD_DIR/$INITRAMFS_NAME" \
@@ -197,4 +280,4 @@ echo "==> Installing BIOS stage 1 into ISO"
 "$LIMINE_DIR/limine" bios-install "$ISO_PATH"
 
 echo "==> Done: $ISO_PATH"
-echo "==> QEMU launch scripts attach a virtual USB keyboard; run ./run.sh or ./runb.sh to test it"
+echo "==> QEMU launch scripts attach virtual USB keyboard and mouse; run ./run.sh or ./runb.sh to test them"

@@ -27,15 +27,75 @@ else
 fi
 
 UEFI="${UEFI:-1}"
+QEMU_VIDEO="${EONOS_QEMU_VIDEO:-auto}"
+QEMU_DEVICE_LIST="$(qemu-system-x86_64 -device help 2>&1 || true)"
+qemu_display_starts() {
+    local model="$1"
+    # Device help only reports registered models. Some split QEMU installs
+    # advertise a module that crashes during realization, so probe it without
+    # booting a guest before selecting it for the real run.
+    command -v timeout >/dev/null 2>&1 || return 0
+    local status=0
+    (
+        ulimit -c 0
+        timeout --signal=TERM --kill-after=1s 1s qemu-system-x86_64 \
+            -M q35 -nodefaults -display none -S -monitor none -serial none \
+            -device "$model" >/dev/null 2>&1
+    ) || status=$?
+    [[ "$status" -eq 124 || "$status" -eq 137 ]]
+}
+if [ "$QEMU_VIDEO" = "auto" ]; then
+    # Prefer the standalone PCI GPU. It avoids the legacy VGA compatibility
+    # wrapper used by virtio-vga, which crashes in some QEMU builds.
+    QEMU_VIDEO="std"
+    for model in virtio-gpu-pci virtio-vga; do
+        if [[ "$QEMU_DEVICE_LIST" == *"name \"$model\""* ]]; then
+            if qemu_display_starts "$model" 2>/dev/null; then
+                QEMU_VIDEO="$model"
+                break
+            fi
+            echo "QEMU reports $model but it failed the startup probe." >&2
+        fi
+    done
+    if [ "$QEMU_VIDEO" = "std" ]; then
+        echo "Check that the QEMU virtio-gpu backend module is installed and matches the QEMU version." >&2
+        echo "On Arch Linux, install qemu-hw-display-virtio-gpu with the PCI/VGA device package." >&2
+    fi
+fi
+case "$QEMU_VIDEO" in
+    virtio-gpu-pci|virtio-vga)
+        if [[ "$QEMU_DEVICE_LIST" != *"name \"$QEMU_VIDEO\""* ]]; then
+            echo "QEMU does not have the $QEMU_VIDEO device model installed." >&2
+            if [ "$QEMU_VIDEO" = "virtio-gpu-pci" ]; then
+                echo "On Arch Linux, install qemu-hw-display-virtio-gpu-pci." >&2
+            else
+                echo "On Arch Linux, install qemu-hw-display-virtio-vga." >&2
+            fi
+            exit 2
+        fi
+        if ! qemu_display_starts "$QEMU_VIDEO" 2>/dev/null; then
+            echo "QEMU advertises $QEMU_VIDEO, but it crashed or exited during the startup probe." >&2
+            echo "On Arch Linux, also install qemu-hw-display-virtio-gpu (the shared backend module)." >&2
+            echo "Use EONOS_QEMU_VIDEO=std to boot, then check the host QEMU packages/core dump." >&2
+            exit 2
+        fi
+        # The standalone PCI model is not VGA-compatible. Disable QEMU's
+        # implicit VGA adapter so its window follows the device EonOS drives.
+        # Keep 1:1 pixel scaling and use 1.5x the previous 960x540 mode.
+        VIDEO_ARGS=(-vga none -device "$QEMU_VIDEO,xres=1440,yres=810")
+        ;;
+    std) VIDEO_ARGS=(-vga std) ;;
+    *) echo "EONOS_QEMU_VIDEO must be auto, virtio-gpu-pci, virtio-vga, or std" >&2; exit 2 ;;
+esac
+echo "QEMU display device: $QEMU_VIDEO"
 
 NEEDS_BUILD=0
 if [ ! -f "$ISO_PATH" ]; then
     NEEDS_BUILD=1
-elif [ -n "$(find src userland initramfs tools -type f -newer "$ISO_PATH" -print -quit)" ]; then
+elif [ -n "$(find src userland initramfs tools config assets -type f -newer "$ISO_PATH" -print -quit)" ]; then
     NEEDS_BUILD=1
 else
-    for source in README.md Cargo.toml Cargo.lock build.sh limine.conf linker.ld \
-        x86_64-eonos.json baseline-target.json font.psf .cargo/config.toml; do
+    for source in README.md Cargo.toml Cargo.lock build.sh .cargo/config.toml; do
         if [ -f "$source" ] && [ "$source" -nt "$ISO_PATH" ]; then
             NEEDS_BUILD=1
             break
@@ -56,15 +116,19 @@ if [ "$NEEDS_BUILD" = "1" ]; then
 fi
 
 ARGS=(
-    # Disable the emulated i8042 so keyboard input must come through USB.
+    # Disable the emulated i8042 so input must come through USB.
     -M q35,i8042=off
-    -vga std
+    "${VIDEO_ARGS[@]}"
+    -display gtk,zoom-to-fit=off
     -m 2G
     -serial stdio
     -cdrom "$ISO_PATH"
     -boot d
     -device qemu-xhci,id=xhci
     -device usb-kbd,bus=xhci.0
+    -device usb-mouse,bus=xhci.0
+    -netdev user,id=net0
+    -device e1000,netdev=net0
 )
 
 if [ "$UEFI" = "1" ]; then

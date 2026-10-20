@@ -1,0 +1,20 @@
+[package]
+name = "testing-app"
+version = "0.1.0"
+edition = "2021"
+
+[package.metadata.eonos]
+id = "testing-app"
+type = "ERA"
+name = "testing app"
+description = "An EonOS ERA application"
+
+[dependencies]
+eonos-app = { path = "../../userland/app-sdk" }
+
+
+[profile.release]
+panic = "abort"
+strip = true
+lto = true
+opt-level = 2

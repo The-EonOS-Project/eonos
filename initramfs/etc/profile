@@ -1,0 +1,3 @@
+# EonOS shell startup configuration.
+# Edit this file before building to set defaults for every shell session.
+export PATH=/apps/bin:/bin

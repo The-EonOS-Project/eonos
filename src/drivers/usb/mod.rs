@@ -1,19 +1,20 @@
 //! USB, staged in on top of PS/2.
 //!
-//! Getting from here to a working USB keyboard is a lot more machinery
+//! Getting from here to working USB input is a lot more machinery
 //! than PS/2: find the host controller on the PCI bus, map its MMIO
 //! registers, bring up an xHCI controller (command ring, event ring,
 //! device context base array), enumerate whatever's plugged into each
-//! port, and speak the HID boot-keyboard protocol to the result. Real
+//! port, and speak the HID boot protocol to the result. Real
 //! hardware may also require dropping USB legacy support (BIOS/SMM
 //! keeps ownership of the controller for PS/2 emulation until the OS
 //! explicitly asks for it) before any of that works at all.
 //!
 //! `init()` discovers PCI USB controllers and starts each xHCI
-//! controller for direct-attached HID boot keyboards. The xHCI worker
+//! controller for direct-attached HID boot keyboards and mice. The xHCI worker
 //! polls root ports for hot-plug changes. External hubs and non-xHCI
 //! controllers are not supported yet.
 
+pub mod mouse;
 pub mod pci;
 pub mod xhci;
 
@@ -22,6 +23,7 @@ use crate::log_ok;
 /// Discover USB host controllers and initialize every xHCI controller.
 pub fn init() {
     xhci::self_test();
+    mouse::init();
     let controllers = pci::find_usb_controllers();
 
     if controllers.is_empty() {
@@ -43,7 +45,10 @@ pub fn init() {
     }
 
     let mut found_xhci = false;
-    for xhci_ctrl in controllers.iter().filter(|c| c.kind == pci::ControllerKind::Xhci) {
+    for xhci_ctrl in controllers
+        .iter()
+        .filter(|c| c.kind == pci::ControllerKind::Xhci)
+    {
         found_xhci = true;
         xhci::probe(xhci_ctrl);
     }
