@@ -112,6 +112,8 @@ pub enum Error {
     Timeout,
     ArpTimeout,
     InvalidFrame,
+    TcpReset,
+    TcpNotConnected,
 }
 
 static DEVICE: Mutex<Option<E1000>> = Mutex::new(None);

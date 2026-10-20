@@ -228,6 +228,8 @@ pub const SYS_READ_FILE: u64 = 9002;
 /// (it's normally read out of /proc), so this gets an EonOS-specific
 /// number like the two above rather than trying to match a real one.
 pub const SYS_UPTIME_MS: u64 = 9003;
+/// Seconds since 1970-01-01 UTC, or zero when the RTC is unavailable.
+pub const SYS_WALL_TIME: u64 = 9045;
 pub const SYS_SLEEP_MS: u64 = 9004;
 pub const SYS_EXEC: u64 = 9005;
 pub const SYS_LIST_PROCESSES: u64 = 9006;
@@ -267,6 +269,10 @@ pub const SYS_UDP_SEND: u64 = 9031;
 pub const SYS_UDP_RECEIVE: u64 = 9032;
 pub const SYS_NET_PING: u64 = 9033;
 pub const SYS_DNS_LOOKUP: u64 = 9034;
+pub const SYS_TCP_CONNECT: u64 = 9041;
+pub const SYS_TCP_SEND: u64 = 9042;
+pub const SYS_TCP_RECEIVE: u64 = 9043;
+pub const SYS_TCP_CLOSE: u64 = 9044;
 /// Read one focused keyboard edge event into a user buffer (0 if none).
 pub const SYS_KEYBOARD_EVENT: u64 = 9035;
 /// Claim or release keyboard-event focus (operation: 1 claim, 0 release).
@@ -367,6 +373,8 @@ const ENETDOWN: i64 = 100;
 const EHOSTUNREACH: i64 = 113;
 const ENOBUFS: i64 = 105;
 const ETIMEDOUT: i64 = 110;
+const ECONNRESET: i64 = 104;
+const ENOTCONN: i64 = 107;
 const ENOTSUP: i64 = 95;
 const EPIPE: i64 = 32;
 const ESPIPE: i64 = 29;
@@ -1357,6 +1365,8 @@ fn net_errno(error: crate::drivers::e1000::Error) -> u64 {
         N::Timeout => ETIMEDOUT,
         N::ArpTimeout => EHOSTUNREACH,
         N::InvalidFrame => EINVAL,
+        N::TcpReset => ECONNRESET,
+        N::TcpNotConnected => ENOTCONN,
     })
 }
 
@@ -1458,6 +1468,51 @@ fn sys_net_ping(address_ptr: u64, timeout_ms: u64) -> u64 {
     match crate::network::ping(address, timeout_ms) {
         Ok(Some(elapsed)) => elapsed.saturating_add(1),
         Ok(None) => 0,
+        Err(error) => net_errno(error),
+    }
+}
+
+fn sys_tcp_connect(address_ptr: u64, port: u64) -> u64 {
+    if port == 0 || port > u16::MAX as u64 { return errno(EINVAL); }
+    if crate::network::config().configured == 0 { return errno(EADDRNOTAVAIL); }
+    let mut address = [0u8; 4];
+    if !vmm::copy_from_user(&mut address, address_ptr) { return errno(EFAULT); }
+    match crate::network::tcp_connect(address, port as u16) {
+        Ok(()) => 0,
+        Err(error) => net_errno(error),
+    }
+}
+
+fn sys_tcp_send(pointer: u64, length: u64) -> u64 {
+    let length = length as usize;
+    if length > 64 * 1024 { return errno(EINVAL); }
+    if length == 0 { return 0; }
+    if !vmm::validate_user_range(pointer, length, false) { return errno(EFAULT); }
+    let mut payload = alloc::vec![0u8; length];
+    if !vmm::copy_from_user(&mut payload, pointer) { return errno(EFAULT); }
+    match crate::network::tcp_send(&payload) {
+        Ok(sent) => sent as u64,
+        Err(error) => net_errno(error),
+    }
+}
+
+fn sys_tcp_receive(pointer: u64, capacity: u64, timeout_ms: u64) -> u64 {
+    let capacity = capacity as usize;
+    if capacity > 8192 || timeout_ms == 0 || timeout_ms > 30_000 { return errno(EINVAL); }
+    if capacity != 0 && !vmm::validate_user_range(pointer, capacity, true) { return errno(EFAULT); }
+    let mut payload = alloc::vec![0u8; capacity];
+    match crate::network::tcp_receive(&mut payload, timeout_ms) {
+        Ok(length) => {
+            if length != 0 && !vmm::copy_to_user(pointer, &payload[..length]) { return errno(EFAULT); }
+            length as u64
+        }
+        Err(error) => net_errno(error),
+    }
+}
+
+fn sys_tcp_close() -> u64 {
+    match crate::network::tcp_close() {
+        Ok(()) => 0,
         Err(error) => net_errno(error),
     }
 }
@@ -2453,6 +2508,10 @@ extern "C" fn syscall_dispatch(frame: &mut SyscallFrame) {
                 | SYS_UDP_RECEIVE
                 | SYS_NET_PING
                 | SYS_DNS_LOOKUP
+                | SYS_TCP_CONNECT
+                | SYS_TCP_SEND
+                | SYS_TCP_RECEIVE
+                | SYS_TCP_CLOSE
                 | SYS_KEYBOARD_FOCUS
                 | SYS_ERA_GRAPHICS
                 | SYS_KILL
@@ -2492,6 +2551,7 @@ extern "C" fn syscall_dispatch(frame: &mut SyscallFrame) {
         ),
         SYS_READ_FILE => frame.rax = sys_read_file(frame.rdi, frame.rsi, frame.rdx, frame.r10),
         SYS_UPTIME_MS => frame.rax = pit::uptime_ms(),
+        SYS_WALL_TIME => frame.rax = crate::rtc::unix_seconds().unwrap_or(0),
         SYS_SLEEP_MS => {
             scheduler::sleep_ms(frame.rdi);
             frame.rax = 0;
@@ -2516,6 +2576,10 @@ extern "C" fn syscall_dispatch(frame: &mut SyscallFrame) {
         SYS_UDP_RECEIVE => frame.rax = sys_udp_receive(frame.rdi, frame.rsi, frame.rdx),
         SYS_NET_PING => frame.rax = sys_net_ping(frame.rdi, frame.rsi),
         SYS_DNS_LOOKUP => frame.rax = sys_dns_lookup(frame.rdi, frame.rsi, frame.rdx),
+        SYS_TCP_CONNECT => frame.rax = sys_tcp_connect(frame.rdi, frame.rsi),
+        SYS_TCP_SEND => frame.rax = sys_tcp_send(frame.rdi, frame.rsi),
+        SYS_TCP_RECEIVE => frame.rax = sys_tcp_receive(frame.rdi, frame.rsi, frame.rdx),
+        SYS_TCP_CLOSE => frame.rax = sys_tcp_close(),
         SYS_KEYBOARD_EVENT => frame.rax = sys_keyboard_event(frame.rdi),
         SYS_KEYBOARD_FOCUS => frame.rax = sys_keyboard_focus(frame.rdi),
         SYS_SEEK => frame.rax = sys_seek(frame.rdi, frame.rsi as i64, frame.rdx),

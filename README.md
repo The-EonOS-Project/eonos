@@ -90,12 +90,18 @@ creates `build/iso_output/eonos.iso`. Use `./runb.sh --debug` to include
 `DEBUG` logs and create `build/iso_output/eonos_debugbuild.iso`.
 `run.sh` prefers QEMU's standalone `virtio-gpu-pci` device, then tries
 `virtio-vga`, and falls back to standard VGA. It performs a host-only startup
-probe before selecting either VirtIO model. For VirtIO it disables QEMU's
-implicit VGA adapter, requests a 1440×810 scanout, and keeps GTK zoom-to-fit
-off for 1:1 pixel scaling. Set `EONOS_QEMU_VIDEO=std`,
+probe before selecting either VirtIO model. It requests a 1360×765 scanout for
+VirtIO and standard VGA, and the VirtIO driver sets its scanout to that size
+instead of inheriting QEMU's initial 640×480 mode. This is 85% of the previous
+1600×900 dimensions, with GTK zoom-to-fit still off. Limine requests the same
+resolution for the guest framebuffer. The script disables QEMU's implicit VGA
+adapter for the standalone VirtIO device and keeps GTK zoom-to-fit off for 1:1
+pixel scaling. Set
+`EONOS_QEMU_VIDEO=std`,
 `EONOS_QEMU_VIDEO=virtio-gpu-pci`, or `EONOS_QEMU_VIDEO=virtio-vga` to select
 one explicitly. On Arch Linux, install the standalone PCI model and its shared
-backend with `sudo pacman -Syu qemu-hw-display-virtio-gpu
+backend with
+`sudo pacman -Syu qemu-hw-display-virtio-gpu
 qemu-hw-display-virtio-gpu-pci`. The backend package is required by both the
 PCI and VGA frontends; installing only a frontend can make QEMU crash while
 creating the device.
@@ -153,21 +159,33 @@ to send a datagram and `net udp-recv [max-bytes]` to poll for one. Rust programs
 can use `eonos_rt::udp_send` and `eonos_rt::udp_receive`. DHCP supplies the DNS
 server address; `nslookup <hostname>` performs a DNS A lookup, and
 `ping <hostname> [count]` resolves names before sending ICMP echo requests.
+The polling TCP client supports one active IPv4 connection at a time. Run
+`curler http://example.com/file.bin [/disk/file.bin]` to download a plain HTTP
+file; it accepts Content-Length and chunked response bodies. Mount the writable
+disk at `/disk` first to keep downloads across reboots. HTTPS, redirects, and
+multiple simultaneous TCP connections are not supported yet. At boot the kernel
+reads the CMOS real-time clock, treats it as UTC, and advances that reading from
+the monotonic PIT timer. `eonos_rt::wall_time_secs()` returns Unix time for
+certificate validation and user programs; it returns `None` when no valid RTC
+date is available. Era's taskbar clock shows UTC time and displays `--:--` when
+the RTC could not be read. QEMU is launched with its RTC in UTC mode.
 The QEMU launch scripts attach an E1000 adapter to an isolated user-mode
-network. This is an early protocol implementation: UDP is polling and
-unconnected, DNS supports A records only, TCP, DHCP lease renewal, and full ARP
-neighbor management are not implemented yet.
+network. TCP, UDP, and DNS are polling implementations; DNS supports A records
+only, DHCP lease renewal and full ARP neighbor management are not implemented.
 
 The xHCI driver accepts directly connected USB HID boot keyboards and mice.
+USB arrow keys feed the same line-editor sequences as PS/2, so command history,
+cursor movement, and Tab completion work in the regular shell as well as Konsul.
 The QEMU launcher attaches both; use the shell's `mouse` command to inspect
 pointer coordinates and button state. Rust programs can poll the same state
 with `eonos_rt::mouse_state()`.
 
 Run `era` from the shell to open the Era graphical environment. Its desktop has
 a clickable welcome window, a navigable Files app with an 8 KiB text preview, a
-System Monitor showing uptime, memory, process listings, and storage
-devices, an Apps directory with command examples, and a dock that opens the Rust
-shell. The top-right button returns to the terminal. Era draws into a RAM
+System Monitor with General, Network, and OS tabs, an Apps directory with
+command examples, and a dock that opens the Rust
+shell. Konsul supports USB keyboard command history with Up/Down and command
+and path completion with Tab. The top-right button returns to the terminal. Era draws into a RAM
 back buffer and presents changed regions; mouse movement updates only the small
 cursor area. Rust programs can use `eonos_rt::era` for clipped rectangles,
 PSF-font text, and explicit presentation. General Rust programs can use
@@ -248,11 +266,26 @@ child connected to its Era window session.
 The SDK exposes `eonos_app::system` for stdout, time, sleeping, memory status,
 directory listing, and bounded read-only file access. For graphics, an ERA app
 uses `eonos_app::era::Window`: `open`, `fill_rect`, `text`, `present`, and
-`poll_event`. Its drawing commands and input events travel over pipes to Era;
+`poll_event`. It also provides `button(x, y, width, height, label)`, which
+draws a standard button and returns true when clicked, and
+`dropdown(x, y, width, height, options, &mut selected)`, which draws a
+selectable list and returns true when the selection changes. Form controls
+also include `text_input(x, y, width, height, &mut value, placeholder)` for
+single-line editing and `checkbox(x, y, label, &mut checked)` for toggles.
+Redraw widgets each frame, polling events before drawing and calling
+`present()` afterward. Text input supports printable keys, Backspace/Delete,
+Left/Right, and Home/End, with a 256-byte value limit.
+Tab and Shift+Tab move the visible focus between widgets in draw order. Enter
+or Space activates a focused button or opens/closes a focused dropdown; arrow
+keys change the focused dropdown's selection. Focus is shown with a blue
+outline.
+For example, `window.button(24, 24, 140, 36, "Continue")?` can be used as an
+`if` condition. Its drawing commands and input events travel over pipes to Era;
 the app never receives a framebuffer address. Era validates packet sizes,
-clips drawing to the app window, and routes keyboard events only to the active
-app. The event key value is a USB HID usage code. Escape is available for an
-app's own close behavior, and the window close button terminates it.
+clips drawing to the app window, and routes keyboard and pointer events only to
+the active app. The event key value is a USB HID usage code. Escape is
+available for an app's own close behavior, and the window close button
+terminates it.
 
 The kernel enforces the application sandbox even when a program bypasses the
 SDK. Executables under `/apps/bin` and their descendants cannot write files,
@@ -261,6 +294,6 @@ power, seize physical keyboard focus, use raw framebuffer graphics, control
 networking, or request a kernel panic. Read-only file access, ordinary
 process-local memory, sleeping, and assigned standard pipes remain available.
 This first SDK version has no general filesystem write API, network API, audio,
-mouse events, shared-memory surfaces, or independently managed app lifecycle
-service. Era apps use a single bounded drawing-command stream rather than a
-GPU-backed surface; shell apps get terminal output through Konsul.
+shared-memory surfaces, or independently managed app lifecycle service. Era
+apps use a single bounded drawing-command stream rather than a GPU-backed
+surface; shell apps get terminal output through Konsul.

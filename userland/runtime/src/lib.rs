@@ -112,6 +112,7 @@ const SYS_GETPID: usize = 39;
 const SYS_EXIT: usize = 60;
 const SYS_WAIT4: usize = 61;
 const SYS_UPTIME_MS: usize = 9003;
+const SYS_WALL_TIME: usize = 9045;
 const SYS_SLEEP_MS: usize = 9004;
 const SYS_SYNC: usize = 9009;
 const SYS_EXEC: usize = 9005;
@@ -144,6 +145,10 @@ const SYS_UDP_SEND: usize = 9031;
 const SYS_UDP_RECEIVE: usize = 9032;
 const SYS_NET_PING: usize = 9033;
 const SYS_DNS_LOOKUP: usize = 9034;
+const SYS_TCP_CONNECT: usize = 9041;
+const SYS_TCP_SEND: usize = 9042;
+const SYS_TCP_RECEIVE: usize = 9043;
+const SYS_TCP_CLOSE: usize = 9044;
 const SYS_KILL: usize = 62;
 const SYS_SCHED_YIELD: usize = 24;
 const SYS_KEYBOARD_EVENT: usize = 9035;
@@ -462,6 +467,13 @@ pub fn uptime_ms() -> usize {
     unsafe { syscall3(SYS_UPTIME_MS, 0, 0, 0) as usize }
 }
 
+/// Current Unix time in seconds, using the CMOS RTC initialized at boot.
+/// Returns None when the RTC was missing or contained an invalid date.
+pub fn wall_time_secs() -> Option<u64> {
+    let seconds = unsafe { syscall3(SYS_WALL_TIME, 0, 0, 0) };
+    (seconds > 0).then_some(seconds as u64)
+}
+
 /// Sleep for at least the requested number of milliseconds.
 pub fn sleep_ms(milliseconds: usize) -> Result<()> {
     checked(unsafe { syscall3(SYS_SLEEP_MS, milliseconds, 0, 0) }).map(|_| ())
@@ -548,6 +560,30 @@ pub fn ping(destination: [u8; 4], timeout_ms: u64) -> Result<Option<u64>> {
         syscall3(SYS_NET_PING, destination.as_ptr() as usize, timeout_ms as usize, 0)
     })?;
     Ok(if result == 0 { None } else { Some((result - 1) as u64) })
+}
+
+/// Connect the single kernel-managed TCP stream to an IPv4 address and port.
+pub fn tcp_connect(destination: [u8; 4], port: u16) -> Result<()> {
+    checked(unsafe {
+        syscall3(SYS_TCP_CONNECT, destination.as_ptr() as usize, port as usize, 0)
+    }).map(|_| ())
+}
+
+/// Send all bytes over the active TCP stream; returns the accepted byte count.
+pub fn tcp_send(bytes: &[u8]) -> Result<usize> {
+    checked(unsafe { syscall3(SYS_TCP_SEND, bytes.as_ptr() as usize, bytes.len(), 0) })
+}
+
+/// Receive TCP bytes, waiting up to `timeout_ms`. Returns zero after peer EOF.
+pub fn tcp_receive(buffer: &mut [u8], timeout_ms: u64) -> Result<usize> {
+    checked(unsafe {
+        syscall4(SYS_TCP_RECEIVE, buffer.as_mut_ptr() as usize, buffer.len(), timeout_ms as usize, 0)
+    })
+}
+
+/// Close the active TCP stream.
+pub fn tcp_close() -> Result<()> {
+    checked(unsafe { syscall3(SYS_TCP_CLOSE, 0, 0, 0) }).map(|_| ())
 }
 
 /// Resolve a DNS hostname to its first IPv4 A record.

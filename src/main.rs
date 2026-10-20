@@ -52,6 +52,8 @@ pub mod pic;
 pub mod power;
 #[path = "arch/pit.rs"]
 pub mod pit;
+#[path = "arch/rtc.rs"]
+pub mod rtc;
 #[path = "memory/pmm.rs"]
 pub mod pmm;
 #[path = "task/process.rs"]
@@ -150,6 +152,7 @@ unsafe extern "C" fn _start() -> ! {
     pit::init(1000); // 1kHz tick, i.e. 1ms resolution
     idt::enable_interrupts();
     pit::self_test();
+    rtc::init();
 
     // Keyboard drivers need the IDT and interrupt controller (for IRQ1)
     // already up, but come before the scheduler so a typed

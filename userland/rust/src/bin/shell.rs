@@ -618,6 +618,7 @@ fn print_listing(listing: String) -> Result<(), Error> {
 fn print_help() {
     eonos_rt::println!("commands: cd [dir], pwd, ls [dir], tree [dir], cat <file>..., head [-n lines] <file>, wc <file>..., echo [-n] [text...], sleep <ms>, mouse, nslookup <hostname>, ping <host> [count], net [dhcp|recv|udp-send|udp-recv],");
     eonos_rt::println!("text filters: grep [-n] [-i] <pattern> [file...], tail [-n lines] [file]; tools accept pipes on standard input");
+    eonos_rt::println!("curler <http://host/path> [output-file] downloads a plain HTTP response");
     eonos_rt::println!("lsblk, mounts, mount <device> <dir>, exec <file> [args...] [&],");
     eonos_rt::println!("pipelines: command | command; input: command < file; output: command > file or >> file");
     eonos_rt::println!("environment: env, export NAME=value, unset NAME; expand $NAME or ${{NAME}}; PATH selects command directories");

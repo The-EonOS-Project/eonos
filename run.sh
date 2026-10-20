@@ -81,10 +81,10 @@ case "$QEMU_VIDEO" in
         fi
         # The standalone PCI model is not VGA-compatible. Disable QEMU's
         # implicit VGA adapter so its window follows the device EonOS drives.
-        # Keep 1:1 pixel scaling and use 1.5x the previous 960x540 mode.
-        VIDEO_ARGS=(-vga none -device "$QEMU_VIDEO,xres=1440,yres=810")
+        # Use 85% of the former 1600x900 desktop size; keep GTK at 1:1 scaling.
+        VIDEO_ARGS=(-vga none -device "$QEMU_VIDEO,xres=1360,yres=765")
         ;;
-    std) VIDEO_ARGS=(-vga std) ;;
+    std) VIDEO_ARGS=(-device VGA,xres=1360,yres=765,xmax=1360,ymax=765) ;;
     *) echo "EONOS_QEMU_VIDEO must be auto, virtio-gpu-pci, virtio-vga, or std" >&2; exit 2 ;;
 esac
 echo "QEMU display device: $QEMU_VIDEO"
@@ -120,6 +120,7 @@ ARGS=(
     -M q35,i8042=off
     "${VIDEO_ARGS[@]}"
     -display gtk,zoom-to-fit=off
+    -rtc base=utc
     -m 2G
     -serial stdio
     -cdrom "$ISO_PATH"

@@ -29,6 +29,8 @@ const RESOURCE_ID: u32 = 1;
 const PIXEL_FORMAT_B8G8R8X8_UNORM: u32 = 2;
 const MAX_WIDTH: u32 = 4096;
 const MAX_HEIGHT: u32 = 2160;
+const SCANOUT_WIDTH: u32 = 1360;
+const SCANOUT_HEIGHT: u32 = 765;
 
 const GPU_CMD_GET_DISPLAY_INFO: u32 = 0x0100;
 const GPU_CMD_RESOURCE_CREATE_2D: u32 = 0x0101;
@@ -607,7 +609,13 @@ unsafe fn initialize(location: PciLocation, caps: VirtioCaps) -> Option<Driver> 
     }
     driver.set_status(STATUS_ACKNOWLEDGE | STATUS_DRIVER | STATUS_FEATURES_OK | STATUS_DRIVER_OK);
 
-    let (width, height) = driver.get_display_info().unwrap_or((1280, 800));
+    // QEMU reports its initial blank display as 640x480 even when a larger
+    // xres/yres mode was requested. Use the intended guest mode for the
+    // resource and SET_SCANOUT rectangle instead of inheriting that default.
+    if driver.get_display_info().is_none() {
+        return None;
+    }
+    let (width, height) = (SCANOUT_WIDTH, SCANOUT_HEIGHT);
     if width > MAX_WIDTH || height > MAX_HEIGHT || width == 0 || height == 0 {
         return None;
     }

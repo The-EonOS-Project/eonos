@@ -1947,6 +1947,11 @@ impl RingBuffer {
 }
 static ASCII_QUEUE: IrqMutex<RingBuffer> = IrqMutex::new(RingBuffer::new());
 
+fn push_ascii_escape(sequence: &[u8]) {
+    let mut queue = ASCII_QUEUE.lock();
+    for &byte in sequence { queue.push(byte); }
+}
+
 fn handle_hid_report(keyboard: &mut UsbHidDevice, buffer: usize, actual_len: usize) {
     let report = unsafe {
         core::slice::from_raw_parts(pmm::phys_to_virt(keyboard.report_phys[buffer]), actual_len)
@@ -1971,6 +1976,7 @@ fn handle_hid_report(keyboard: &mut UsbHidDevice, buffer: usize, actual_len: usi
     };
     let keys = [report[2], report[3], report[4], report[5], report[6], report[7]];
     if keys.iter().any(|code| (1..=3).contains(code)) { return; } // HID rollover/error report
+    let previous_keys = keyboard.prev_keys;
     let mut focused = false;
     for modifier in 0..8 {
         let mask = 1 << modifier;
@@ -1993,6 +1999,23 @@ fn handle_hid_report(keyboard: &mut UsbHidDevice, buffer: usize, actual_len: usi
     let (bytes, count) = translate_boot_report(&mut keyboard.prev_keys, &mut caps, report);
     CAPS_LOCK.store(caps, Ordering::Relaxed);
     if focused { return; }
+
+    // The canonical shell consumes bytes rather than raw HID events. Match
+    // the PS/2 driver's ANSI sequences so its history and line editor work
+    // with directly connected USB keyboards too.
+    for &code in &keys {
+        if code == 0 || previous_keys.contains(&code) { continue; }
+        match code {
+            0x4a => push_ascii_escape(b"\x1b[H"), // Home
+            0x4c => push_ascii_escape(b"\x1b[3~"), // Delete
+            0x4d => push_ascii_escape(b"\x1b[F"), // End
+            0x4f => push_ascii_escape(b"\x1b[C"), // Right
+            0x50 => push_ascii_escape(b"\x1b[D"), // Left
+            0x51 => push_ascii_escape(b"\x1b[B"), // Down
+            0x52 => push_ascii_escape(b"\x1b[A"), // Up
+            _ => {}
+        }
+    }
     let mut queue = ASCII_QUEUE.lock();
     for byte in bytes[..count].iter().copied() {
         queue.push(byte);

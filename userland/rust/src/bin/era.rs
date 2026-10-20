@@ -8,7 +8,7 @@ use alloc::format;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::ffi::CStr;
-use core::sync::atomic::{AtomicBool, AtomicU8, Ordering};
+use core::sync::atomic::{AtomicBool, AtomicI8, AtomicU8, Ordering};
 
 const PANEL: u32 = 0xC0C0C0;
 const PANEL_RAISED: u32 = 0xC0C0C0;
@@ -24,6 +24,9 @@ static RESTORE_SESSION: AtomicBool = AtomicBool::new(true);
 static DISK_MOUNTED: AtomicBool = AtomicBool::new(false);
 static SETTINGS_SAVE_STATUS: AtomicU8 = AtomicU8::new(0);
 static APP_LAUNCH_STATUS: AtomicU8 = AtomicU8::new(0);
+static SYSTEM_TAB: AtomicU8 = AtomicU8::new(0);
+static SETTINGS_TAB: AtomicU8 = AtomicU8::new(0);
+static TIMEZONE_OFFSET: AtomicI8 = AtomicI8::new(0);
 
 struct RegisteredApp { name: &'static str, description: &'static str, executable: &'static str }
 const APPLICATIONS: [RegisteredApp; 1] = [RegisteredApp {
@@ -80,12 +83,18 @@ fn load_settings() {
     let Ok(mut file) = eonos_user::File::open(SETTINGS_PATH, eonos_user::flags::READ_ONLY) else { return; };
     let Ok(contents) = file.read_to_string() else { return; };
     let mut lines = contents.lines();
-    if lines.next() != Some("ERA-SETTINGS-1") { return; }
+    let version = lines.next();
+    if version != Some("ERA-SETTINGS-1") && version != Some("ERA-SETTINGS-2") { return; }
     if let Some(theme) = lines.next().and_then(|value| value.parse::<u8>().ok()).filter(|value| *value < 3) {
         WALLPAPER_THEME.store(theme, Ordering::Relaxed);
     }
     if let Some(restore) = lines.next() {
         RESTORE_SESSION.store(restore == "1", Ordering::Relaxed);
+    }
+    if version == Some("ERA-SETTINGS-2") {
+        if let Some(offset) = lines.next().and_then(|value| value.parse::<i8>().ok()).filter(|value| (-12..=14).contains(value)) {
+            TIMEZONE_OFFSET.store(offset, Ordering::Relaxed);
+        }
     }
 }
 
@@ -99,7 +108,7 @@ fn save_settings() {
             SETTINGS_PATH,
             eonos_user::flags::WRITE_ONLY | eonos_user::flags::CREATE | eonos_user::flags::TRUNCATE,
         )?;
-        let data = format!("ERA-SETTINGS-1\n{}\n{}\n", WALLPAPER_THEME.load(Ordering::Relaxed), RESTORE_SESSION.load(Ordering::Relaxed) as u8);
+        let data = format!("ERA-SETTINGS-2\n{}\n{}\n{}\n", WALLPAPER_THEME.load(Ordering::Relaxed), RESTORE_SESSION.load(Ordering::Relaxed) as u8, TIMEZONE_OFFSET.load(Ordering::Relaxed));
         file.write_all(data.as_bytes())?;
         file.close()?;
         eonos_rt::sync()?;
@@ -259,6 +268,7 @@ struct KonsulState {
     output: Vec<String>,
     history: Vec<String>,
     history_index: usize,
+    history_draft: Option<String>,
     environment: Vec<String>,
     running: Option<KonsulCommand>,
 }
@@ -281,7 +291,7 @@ impl KonsulState {
         set_konsul_env(&mut environment, "USER", "superuser");
         set_konsul_env(&mut environment, "HOSTNAME", "eonos");
         if let Ok(path) = eonos_user::current_dir() { set_konsul_env(&mut environment, "PWD", &path); }
-        let mut state = Self { input: String::new(), output: Vec::new(), history: Vec::new(), history_index: 0, environment, running: None };
+        let mut state = Self { input: String::new(), output: Vec::new(), history: Vec::new(), history_index: 0, history_draft: None, environment, running: None };
         state.push_output("EonOS Konsul — interactive system shell");
         state.push_output("Type 'help' to list commands.");
         state
@@ -313,6 +323,80 @@ fn set_konsul_env(environment: &mut Vec<String>, name: &str, value: &str) {
     let prefix = format!("{}=", name);
     environment.retain(|entry| !entry.starts_with(prefix.as_str()));
     environment.push(format!("{}{}", prefix, value));
+}
+
+fn complete_konsul_input(state: &mut KonsulState) {
+    let start = state.input.as_bytes().iter().rposition(|byte| byte.is_ascii_whitespace()).map_or(0, |index| index + 1);
+    let prefix = &state.input[start..];
+
+    let (directory_part, name_prefix) = match prefix.rsplit_once('/') {
+        Some((directory, name)) => (Some(directory), name),
+        None => (None, prefix),
+    };
+    let mut candidates: Vec<(String, bool)> = Vec::new();
+    if start == 0 && directory_part.is_none() {
+        for command in ["cat", "cd", "clear", "cp", "echo", "edit", "env", "exec", "exit", "export", "grep", "help", "head", "jobs", "kill", "ls", "lsblk", "mkdir", "mount", "mouse", "net", "nslookup", "ping", "pwd", "rm", "sleep", "sync", "tail", "touch", "tree", "unset", "uptime", "wait", "wc", "which", "write", "era", "curler"] {
+            if command.starts_with(name_prefix) {
+                candidates.push((String::from(command), false));
+            }
+        }
+        if let Some(path) = state.environment.iter().find_map(|entry| entry.strip_prefix("PATH=")) {
+            for directory in path.split(':').filter(|directory| !directory.is_empty()) {
+                if let Ok(entries) = eonos_user::list_directory(directory) {
+                    for entry in entries.lines().filter(|entry| !entry.ends_with('/')) {
+                        if entry.starts_with(name_prefix) && !candidates.iter().any(|(name, _)| name == entry) {
+                            candidates.push((String::from(entry), false));
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        let directory = match directory_part {
+            Some("") => String::from("/"),
+            Some(path) if path.starts_with('/') => String::from(path),
+            Some(path) => format!("{}/{}", state.cwd().trim_end_matches('/'), path),
+            None => String::from(state.cwd()),
+        };
+        if let Ok(entries) = eonos_user::list_directory(&directory) {
+            for entry in entries.lines() {
+                let is_directory = entry.ends_with('/');
+                let name = entry.strip_suffix('/').unwrap_or(entry);
+                if !name.starts_with(name_prefix) { continue; }
+                let candidate = match directory_part {
+                    Some(part) => format!("{}/{}{}", part, name, if is_directory { "/" } else { "" }),
+                    None => String::from(name),
+                };
+                candidates.push((candidate, is_directory));
+            }
+        }
+    }
+
+    candidates.sort_by(|left, right| left.0.cmp(&right.0));
+    if candidates.is_empty() { return; }
+    if candidates.len() == 1 {
+        let (candidate, is_directory) = candidates.pop().unwrap();
+        state.input.truncate(start);
+        state.input.push_str(&candidate);
+        if is_directory {
+            if !state.input.ends_with('/') { state.input.push('/'); }
+        } else {
+            state.input.push(' ');
+        }
+        return;
+    }
+
+    let mut common = candidates[0].0.clone();
+    for (candidate, _) in candidates.iter().skip(1) {
+        let shared = common.chars().zip(candidate.chars()).take_while(|(a, b)| a == b).count();
+        common = common.chars().take(shared).collect();
+    }
+    if common.len() > prefix.len() {
+        state.input.truncate(start);
+        state.input.push_str(&common);
+    } else {
+        state.push_output(&candidates.iter().map(|(name, _)| name.as_str()).collect::<Vec<_>>().join("  "));
+    }
 }
 
 fn set_konsul_focus(state: &mut KonsulState, focused: bool) {
@@ -387,6 +471,15 @@ fn send_app_event(session: &mut AppSession, event: [u8; 16]) {
         session.pending_events.extend_from_slice(&event);
     }
     flush_app_events(session);
+}
+
+fn send_app_pointer(session: &mut AppSession, x: i32, y: i32, buttons: u8) {
+    let mut event = [0u8; 16];
+    event[0] = 3;
+    event[1..5].copy_from_slice(&x.to_le_bytes());
+    event[5..9].copy_from_slice(&y.to_le_bytes());
+    event[9] = buttons;
+    send_app_event(session, event);
 }
 
 fn flush_app_events(session: &mut AppSession) {
@@ -697,7 +790,9 @@ fn main(args: eonos_rt::Args<'_>) -> i32 {
     if view.is_some_and(view_needs_input) { set_konsul_focus(&mut konsul, true); }
     draw_era(&layout, view, minimized, &konsul, &files, &processes, &devices, &installed_apps, &app_sessions);
     let _ = eonos_rt::era::present();
-    let mut last_clock_minute = eonos_rt::uptime_ms() / 60_000;
+    let mut last_clock_minute = eonos_rt::wall_time_secs().unwrap_or(0) / 60;
+    let mut last_app_pointer: Option<(usize, i32, i32, u8)> = None;
+    let mut app_pointer_armed = false;
 
     // Debounce the physical button state. A single noisy USB report should
     // not open or close a window, and returning from the terminal must not
@@ -719,7 +814,7 @@ fn main(args: eonos_rt::Args<'_>) -> i32 {
             draw_era(&layout, view, minimized, &konsul, &files, &processes, &devices, &installed_apps, &app_sessions);
         }
         let now = eonos_rt::uptime_ms();
-        let clock_minute = now / 60_000;
+        let clock_minute = eonos_rt::wall_time_secs().unwrap_or(0) / 60;
         if clock_minute != last_clock_minute {
             last_clock_minute = clock_minute;
             draw_taskbar(&layout, view, minimized);
@@ -738,6 +833,28 @@ fn main(args: eonos_rt::Args<'_>) -> i32 {
             stable_left = candidate_left;
             left_pressed = stable_left;
             if !stable_left { drag_offset = None; }
+        }
+
+        if !minimized && !start_menu && !power_menu {
+            if let Some(View::AppWindow(index)) = view {
+                let pointer_x = mouse.x - (layout.window_x + 4);
+                let pointer_y = mouse.y - (layout.window_y + 28);
+                if !app_pointer_armed && !stable_left { app_pointer_armed = true; }
+                let buttons = (mouse.buttons & !1) | ((stable_left && app_pointer_armed) as u8);
+                let state = (index, pointer_x, pointer_y, buttons);
+                if last_app_pointer != Some(state) {
+                    if let Some(session) = app_sessions.get_mut(index) {
+                        send_app_pointer(session, pointer_x, pointer_y, buttons);
+                    }
+                    last_app_pointer = Some(state);
+                }
+            } else {
+                last_app_pointer = None;
+                app_pointer_armed = false;
+            }
+        } else {
+            last_app_pointer = None;
+            app_pointer_armed = false;
         }
 
         if stable_left {
@@ -773,20 +890,33 @@ fn main(args: eonos_rt::Args<'_>) -> i32 {
                             let prompt = konsul.prompt();
                             konsul.push_output(&format!("{}{}", prompt, command));
                             konsul.history.push(command.clone());
+                            if konsul.history.len() > 128 { konsul.history.remove(0); }
                             konsul.history_index = konsul.history.len();
+                            konsul.history_draft = None;
                             start_konsul_command(&mut konsul, &command);
                         }
                         changed = true;
                     }
                     0x2A => { konsul.input.pop(); changed = true; }
                     0x52 if !konsul.history.is_empty() => {
+                        if konsul.history_index == konsul.history.len() {
+                            konsul.history_draft = Some(konsul.input.clone());
+                        }
                         konsul.history_index = konsul.history_index.saturating_sub(1);
                         konsul.input = konsul.history[konsul.history_index].clone();
                         changed = true;
                     }
                     0x51 if konsul.history_index < konsul.history.len() => {
                         konsul.history_index += 1;
-                        konsul.input = konsul.history.get(konsul.history_index).cloned().unwrap_or_default();
+                        konsul.input = if konsul.history_index == konsul.history.len() {
+                            konsul.history_draft.take().unwrap_or_default()
+                        } else {
+                            konsul.history[konsul.history_index].clone()
+                        };
+                        changed = true;
+                    }
+                    0x2B => {
+                        complete_konsul_input(&mut konsul);
                         changed = true;
                     }
                     0x0F if event.modifiers & 0x11 != 0 => { konsul.output.clear(); changed = true; }
@@ -1041,6 +1171,20 @@ fn main(args: eonos_rt::Args<'_>) -> i32 {
                     save_settings();
                     draw_era(&layout, view, minimized, &konsul, &files, &processes, &devices, &installed_apps, &app_sessions);
                 }
+                Action::TimezoneStep(direction) => {
+                    let current = TIMEZONE_OFFSET.load(Ordering::Relaxed);
+                    TIMEZONE_OFFSET.store((current + direction).clamp(-12, 14), Ordering::Relaxed);
+                    save_settings();
+                    draw_era(&layout, view, minimized, &konsul, &files, &processes, &devices, &installed_apps, &app_sessions);
+                }
+                Action::SettingsTab(tab) => {
+                    SETTINGS_TAB.store(tab, Ordering::Relaxed);
+                    draw_era(&layout, view, minimized, &konsul, &files, &processes, &devices, &installed_apps, &app_sessions);
+                }
+                Action::SystemTab(tab) => {
+                    SYSTEM_TAB.store(tab, Ordering::Relaxed);
+                    draw_era(&layout, view, minimized, &konsul, &files, &processes, &devices, &installed_apps, &app_sessions);
+                }
                 Action::Navigate(path) => {
                     files.navigate(path);
                     if view != Some(View::Files) { leave_maximized(&mut layout, view, normal_window, &mut maximized); }
@@ -1121,6 +1265,9 @@ enum Action {
     ConfirmPower,
     WallpaperNext,
     ToggleRestore,
+    SystemTab(u8),
+    SettingsTab(u8),
+    TimezoneStep(i8),
 }
 
 #[derive(Clone, Copy)]
@@ -1354,18 +1501,36 @@ fn hit_test(layout: &Layout, view: Option<View>, minimized: bool, x: i32, y: i32
             && y >= layout.window_y + layout.window_h - 60
         {
             return Action::BackToFiles;
+        } else if view == View::System
+            && y >= layout.window_y + 90
+            && y < layout.window_y + 120
+        {
+            let tab_x = layout.window_x + 34;
+            if x >= tab_x && x < tab_x + 92 { return Action::SystemTab(0); }
+            if x >= tab_x + 100 && x < tab_x + 192 { return Action::SystemTab(1); }
+            if x >= tab_x + 200 && x < tab_x + 284 { return Action::SystemTab(2); }
         } else if view == View::Settings {
-            if y >= layout.window_y + 122 && y < layout.window_y + 170
+            if y >= layout.window_y + 90 && y < layout.window_y + 120 {
+                let tab_x = layout.window_x + 34;
+                if x >= tab_x && x < tab_x + 92 { return Action::SettingsTab(0); }
+                if x >= tab_x + 100 && x < tab_x + 192 { return Action::SettingsTab(1); }
+            }
+            let tab = SETTINGS_TAB.load(Ordering::Relaxed);
+            if tab == 0 && y >= layout.window_y + 122 && y < layout.window_y + 170
                 && x >= layout.window_x + layout.window_w - 190
                 && x < layout.window_x + layout.window_w - 34
             {
                 return Action::WallpaperNext;
             }
-            if y >= layout.window_y + 190 && y < layout.window_y + 238
+            if tab == 0 && y >= layout.window_y + 190 && y < layout.window_y + 238
                 && x >= layout.window_x + layout.window_w - 190
                 && x < layout.window_x + layout.window_w - 34
             {
                 return Action::ToggleRestore;
+            }
+            if tab == 1 && y >= layout.window_y + 142 && y < layout.window_y + 190 {
+                if x >= layout.window_x + layout.window_w - 190 && x < layout.window_x + layout.window_w - 114 { return Action::TimezoneStep(-1); }
+                if x >= layout.window_x + layout.window_w - 108 && x < layout.window_x + layout.window_w - 34 { return Action::TimezoneStep(1); }
             }
         }
     }
@@ -1643,27 +1808,75 @@ fn draw_window(layout: &Layout, view: View, files: &FileState, processes: &str, 
         }
         View::System => {
             text(x + 34, y + 68, TEXT, "System monitor");
-            let uptime = eonos_rt::uptime_ms();
-            let uptime_minutes = uptime / 60_000;
-            text(x + 34, y + 98, AQUA, &format!("Uptime: {}d {}h {}m", uptime_minutes / 1440, (uptime_minutes / 60) % 24, uptime_minutes % 60));
-            text(x + 34, y + 126, MUTED, &format!("Current process: {}", eonos_rt::getpid()));
-            if let Ok(memory) = eonos_rt::memory_info() {
-                text(x + 34, y + 150, MUTED, &format!("Free RAM: {} MiB | Kernel heap: {} / {} KiB", memory.free_physical / (1024 * 1024), memory.heap_used / 1024, memory.heap_total / 1024));
+            let tab = SYSTEM_TAB.load(Ordering::Relaxed).min(2);
+            for (index, (label, width)) in [("General", 92), ("Network", 92), ("OS", 84)].into_iter().enumerate() {
+                let tab_x = x + 34 + index as i32 * 100;
+                if index as u8 == tab {
+                    rect(tab_x, y + 91, width, 29, 0xFFFFFF);
+                    rect(tab_x, y + 91, width, 2, ACCENT);
+                    rect(tab_x, y + 91, 2, 29, ACCENT);
+                    rect(tab_x + width - 2, y + 93, 2, 27, PANEL_EDGE);
+                    text(tab_x + (width - label.len() as i32 * 8) / 2, y + 98, ACCENT, label);
+                } else {
+                    button(tab_x, y + 93, width, 27, PANEL_RAISED, label);
+                }
             }
-            let process_panel_height = if h >= 400 { h - 298 } else { (h - 192).max(48) };
-            draw_sunken_panel(x + 34, y + 180, w - 68, process_panel_height);
-            text(x + 42, y + 184, GOLD, "Processes");
-            let process_rows = if h < 420 { 2 } else { 5 };
-            for (index, line) in processes.lines().take(process_rows).enumerate() {
-                let value: String = line.chars().take(((w - 90) / 8).max(8) as usize).collect();
-                text(x + 42, y + 208 + index as i32 * 18, TEXT, &value);
-            }
-            if h >= 400 {
-                draw_sunken_panel(x + 34, y + h - 104, w - 68, 70);
-                text(x + 42, y + h - 98, GOLD, "Storage");
-                for (index, line) in devices.lines().take(2).enumerate() {
-                    let value: String = line.chars().take(((w - 90) / 8).max(8) as usize).collect();
-                    text(x + 42, y + h - 72 + index as i32 * 18, MUTED, &value);
+            match tab {
+                1 => {
+                    draw_sunken_panel(x + 34, y + 136, w - 68, (h - 160).max(52));
+                    text(x + 46, y + 146, GOLD, "Network interface");
+                    match (eonos_rt::network_info(), eonos_rt::ipv4_config()) {
+                        (Ok(adapter), Ok(config)) => {
+                            text(x + 46, y + 172, TEXT, &format!("Device: Intel E1000 | Link: {}", if adapter.link_up != 0 { "up" } else { "down" }));
+                            text(x + 46, y + 194, TEXT, &format!("MAC: {:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}", adapter.mac[0], adapter.mac[1], adapter.mac[2], adapter.mac[3], adapter.mac[4], adapter.mac[5]));
+                            if config.configured != 0 {
+                                text(x + 46, y + 216, TEXT, &format!("IPv4: {}.{}.{}.{} / {}.{}.{}.{}", config.address[0], config.address[1], config.address[2], config.address[3], config.netmask[0], config.netmask[1], config.netmask[2], config.netmask[3]));
+                                text(x + 46, y + 238, TEXT, &format!("Gateway: {}.{}.{}.{}", config.gateway[0], config.gateway[1], config.gateway[2], config.gateway[3]));
+                                text(x + 46, y + 260, TEXT, &format!("DNS: {}.{}.{}.{}", config.dns_server[0], config.dns_server[1], config.dns_server[2], config.dns_server[3]));
+                                text(x + 46, y + 282, MUTED, &format!("DHCP lease: {} seconds", config.lease_seconds));
+                            } else {
+                                text(x + 46, y + 216, GOLD, "IPv4 is not configured. Run `net dhcp` in Konsul.");
+                            }
+                            text(x + 46, y + 318, AQUA, &format!("Packets received: {}", adapter.received));
+                            text(x + 46, y + 340, AQUA, &format!("Packets sent: {}", adapter.transmitted));
+                        }
+                        _ => text(x + 46, y + 172, MUTED, "Network adapter information unavailable."),
+                    }
+                }
+                2 => {
+                    draw_sunken_panel(x + 34, y + 136, w - 68, (h - 160).max(52));
+                    text(x + 46, y + 146, GOLD, "Operating system");
+                    text(x + 46, y + 174, TEXT, "Name: EonOS");
+                    text(x + 46, y + 198, TEXT, "Architecture: x86_64");
+                    text(x + 46, y + 222, TEXT, "Bootloader: Limine");
+                    text(x + 46, y + 246, TEXT, "Desktop: Era");
+                    text(x + 46, y + 270, TEXT, "Root filesystem: read-only initramfs");
+                    text(x + 46, y + 294, TEXT, &format!("Data disk: {}", if eonos_user::is_mountpoint("/disk").unwrap_or(false) { "mounted at /disk" } else { "not mounted" }));
+                    text(x + 46, y + 326, MUTED, &format!("Display: {} × {}", layout.width, layout.height));
+                }
+                _ => {
+                    let uptime = eonos_rt::uptime_ms();
+                    let uptime_minutes = uptime / 60_000;
+                    text(x + 34, y + 140, AQUA, &format!("Uptime: {}d {}h {}m", uptime_minutes / 1440, (uptime_minutes / 60) % 24, uptime_minutes % 60));
+                    text(x + 34, y + 164, MUTED, &format!("Current process: {}", eonos_rt::getpid()));
+                    if let Ok(memory) = eonos_rt::memory_info() {
+                        text(x + 34, y + 188, MUTED, &format!("Free RAM: {} MiB | Kernel heap: {} / {} KiB", memory.free_physical / (1024 * 1024), memory.heap_used / 1024, memory.heap_total / 1024));
+                    }
+                    draw_sunken_panel(x + 34, y + 218, w - 68, (h - 330).max(48));
+                    text(x + 42, y + 222, GOLD, "Processes");
+                    let process_rows = ((h - 358) / 18).clamp(1, 4) as usize;
+                    for (index, line) in processes.lines().take(process_rows).enumerate() {
+                        let value: String = line.chars().take(((w - 90) / 8).max(8) as usize).collect();
+                        text(x + 42, y + 242 + index as i32 * 18, TEXT, &value);
+                    }
+                    if h >= 400 {
+                        draw_sunken_panel(x + 34, y + h - 92, w - 68, 58);
+                        text(x + 42, y + h - 88, GOLD, "Storage");
+                        for (index, line) in devices.lines().take(2).enumerate() {
+                            let value: String = line.chars().take(((w - 90) / 8).max(8) as usize).collect();
+                            text(x + 42, y + h - 66 + index as i32 * 18, MUTED, &value);
+                        }
+                    }
                 }
             }
         }
@@ -1705,14 +1918,36 @@ fn draw_window(layout: &Layout, view: View, files: &FileState, processes: &str, 
         }
         View::Settings => {
             text(x + 34, y + 68, TEXT, "Settings");
-            text(x + 34, y + 96, MUTED, "Personalize the desktop and startup behavior.");
-            rect(x + 34, y + 112, w - 68, 1, PANEL_EDGE);
-            text(x + 42, y + 132, TEXT, "Wallpaper");
-            text(x + 190, y + 138, MUTED, wallpaper_name());
-            button(x + w - 190, y + 124, 156, 40, PANEL_RAISED, "Change");
-            text(x + 42, y + 194, TEXT, "Restore last session");
-            let restore_label = if RESTORE_SESSION.load(Ordering::Relaxed) { "On" } else { "Off" };
-            button(x + w - 190, y + 186, 156, 40, ACCENT, restore_label);
+            for (index, (label, width)) in [("General", 92), ("Time", 92)].into_iter().enumerate() {
+                let tab_x = x + 34 + index as i32 * 100;
+                if index as u8 == SETTINGS_TAB.load(Ordering::Relaxed) {
+                    rect(tab_x, y + 91, width, 29, 0xFFFFFF);
+                    rect(tab_x, y + 91, width, 2, ACCENT);
+                    rect(tab_x, y + 91, 2, 29, ACCENT);
+                    rect(tab_x + width - 2, y + 93, 2, 27, PANEL_EDGE);
+                    text(tab_x + (width - label.len() as i32 * 8) / 2, y + 98, ACCENT, label);
+                } else {
+                    button(tab_x, y + 93, width, 27, PANEL_RAISED, label);
+                }
+            }
+            rect(x + 34, y + 120, w - 68, 1, PANEL_EDGE);
+            if SETTINGS_TAB.load(Ordering::Relaxed) == 1 {
+                text(x + 42, y + 152, TEXT, "Timezone");
+                let offset = TIMEZONE_OFFSET.load(Ordering::Relaxed);
+                let zone = format!("UTC{}{}", if offset >= 0 { "+" } else { "" }, offset);
+                text(x + 190, y + 158, MUTED, &zone);
+                button(x + w - 190, y + 142, 76, 40, PANEL_RAISED, "- 1 hour");
+                button(x + w - 108, y + 142, 74, 40, PANEL_RAISED, "+ 1 hour");
+                text(x + 42, y + 208, MUTED, "Choose an offset from UTC-12 through UTC+14.");
+                text(x + 42, y + 236, MUTED, "Offsets use whole hours; no country or city names.");
+            } else {
+                text(x + 42, y + 140, TEXT, "Wallpaper");
+                text(x + 190, y + 146, MUTED, wallpaper_name());
+                button(x + w - 190, y + 132, 156, 40, PANEL_RAISED, "Change");
+                text(x + 42, y + 202, TEXT, "Restore last session");
+                let restore_label = if RESTORE_SESSION.load(Ordering::Relaxed) { "On" } else { "Off" };
+                button(x + w - 190, y + 194, 156, 40, ACCENT, restore_label);
+            }
             if !DISK_MOUNTED.load(Ordering::Relaxed) {
                 text(x + 34, y + h - 70, GOLD, "Warning: no writable disk is mounted at /disk.");
                 text(x + 34, y + h - 46, MUTED, "Settings changes will not be saved after shutdown.");
@@ -1812,12 +2047,17 @@ fn draw_taskbar(layout: &Layout, view: Option<View>, minimized: bool) {
         }
     }
 
-    // Power controls and an uptime clock live in the notification area.
+    // Power controls and the UTC real-time clock live in the notification area.
     classic_button(layout.width - 142, y + 4, 66, 22, "Power");
     rect(layout.width - 72, y + 4, 68, 22, 0xC0C0C0);
     rect(layout.width - 72, y + 4, 1, 22, 0x808080);
-    let uptime = eonos_rt::uptime_ms() / 1000;
-    let clock = format!("UP {:02}:{:02}", (uptime / 3600) % 100, (uptime / 60) % 60);
+    let clock = match eonos_rt::wall_time_secs() {
+        Some(seconds) => {
+            let local_seconds = (seconds as i64 + TIMEZONE_OFFSET.load(Ordering::Relaxed) as i64 * 3600).rem_euclid(86_400) as u64;
+            format!("{:02}:{:02}", local_seconds / 3600, (local_seconds / 60) % 60)
+        }
+        None => String::from("--:--"),
+    };
     text(layout.width - 68, y + 7, 0x101010, &clock);
 }
 

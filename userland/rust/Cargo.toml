@@ -29,6 +29,12 @@ test = false
 bench = false
 
 [[bin]]
+name = "curler"
+path = "src/bin/curler.rs"
+test = false
+bench = false
+
+[[bin]]
 name = "rust-shell"
 path = "src/bin/shell.rs"
 test = false

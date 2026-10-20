@@ -1,7 +1,8 @@
-//! Small polling Ethernet/ARP/IPv4/UDP stack with a synchronous DHCP client.
+//! Small polling Ethernet/ARP/IPv4/TCP/UDP stack with a synchronous DHCP client.
 //!
 //! This is intentionally a minimal IPv4 stack: it supports Ethernet II,
-//! ARP, UDP with optional checksums, and DHCP. It does not fragment packets.
+//! ARP, TCP, UDP with optional checksums, and DHCP. It does not fragment IP
+//! packets and currently permits one active TCP stream.
 
 use alloc::vec;
 use core::sync::atomic::{AtomicU32, Ordering};
@@ -11,6 +12,18 @@ const BROADCAST_MAC: [u8; 6] = [0xff; 6];
 const BROADCAST_IP: [u8; 4] = [255; 4];
 const DHCP_PORT: u16 = 68;
 const SERVER_PORT: u16 = 67;
+const TCP_IDLE: u8 = 0;
+const TCP_SYN_SENT: u8 = 1;
+const TCP_ESTABLISHED: u8 = 2;
+const TCP_CLOSING: u8 = 3;
+const TCP_FAILED: u8 = 4;
+const TCP_RX_CAPACITY: usize = 8192;
+const TCP_MSS: usize = 536;
+const TCP_FIN: u8 = 0x01;
+const TCP_SYN: u8 = 0x02;
+const TCP_RST: u8 = 0x04;
+const TCP_PSH: u8 = 0x08;
+const TCP_ACK: u8 = 0x10;
 
 #[repr(C)]
 #[derive(Clone, Copy, Default)]
@@ -33,6 +46,36 @@ static ARP_CACHE: Mutex<Option<([u8; 4], [u8; 6])>> = Mutex::new(None);
 #[derive(Clone, Copy)]
 struct DnsEntry { name: [u8; 253], len: usize, address: Option<[u8; 4]>, expires_ms: u64 }
 static DNS_CACHE: Mutex<[Option<DnsEntry>; 8]> = Mutex::new([None; 8]);
+static NEXT_TCP_PORT: AtomicU32 = AtomicU32::new(49152);
+
+struct TcpConnection {
+    state: u8,
+    local_port: u16,
+    remote_port: u16,
+    remote_ip: [u8; 4],
+    remote_mac: [u8; 6],
+    send_unacked: u32,
+    send_next: u32,
+    receive_next: u32,
+    receive: [u8; TCP_RX_CAPACITY],
+    receive_head: usize,
+    receive_len: usize,
+    peer_closed: bool,
+    local_fin_acked: bool,
+}
+
+impl TcpConnection {
+    const fn new() -> Self {
+        Self { state: TCP_IDLE, local_port: 0, remote_port: 0, remote_ip: [0; 4],
+            remote_mac: [0; 6], send_unacked: 0, send_next: 0, receive_next: 0,
+            receive: [0; TCP_RX_CAPACITY], receive_head: 0, receive_len: 0,
+            peer_closed: false, local_fin_acked: false }
+    }
+    fn reset(&mut self) { *self = Self::new(); }
+    fn window(&self) -> u16 { (TCP_RX_CAPACITY - self.receive_len).min(u16::MAX as usize) as u16 }
+}
+
+static TCP_CONNECTION: Mutex<TcpConnection> = Mutex::new(TcpConnection::new());
 
 pub fn config() -> Config { *CONFIG.lock() }
 
@@ -157,6 +200,322 @@ pub fn udp_receive(output: &mut [u8]) -> Result<Option<([u8; 4], u16, usize)>, c
     let source_ip = frame[26..30].try_into().unwrap();
     let source_port = u16::from_be_bytes([frame[udp], frame[udp + 1]]);
     Ok(Some((source_ip, source_port, payload_len)))
+}
+
+fn tcp_packet(destination_mac: [u8; 6], destination_ip: [u8; 4], source_port: u16,
+    destination_port: u16, sequence: u32, acknowledgement: u32, flags: u8,
+    window: u16, payload: &[u8]) -> Result<(), crate::drivers::e1000::Error> {
+    let source_ip = config().address;
+    let option_len = if flags & TCP_SYN != 0 { 4 } else { 0 };
+    let header_len = 20 + option_len;
+    let tcp_len = header_len + payload.len();
+    if tcp_len > u16::MAX as usize || tcp_len + 20 > 1500 {
+        return Err(crate::drivers::e1000::Error::InvalidFrame);
+    }
+    let mut tcp = vec![0u8; tcp_len];
+    tcp[0..2].copy_from_slice(&source_port.to_be_bytes());
+    tcp[2..4].copy_from_slice(&destination_port.to_be_bytes());
+    tcp[4..8].copy_from_slice(&sequence.to_be_bytes());
+    tcp[8..12].copy_from_slice(&acknowledgement.to_be_bytes());
+    tcp[12] = ((header_len / 4) as u8) << 4;
+    tcp[13] = flags;
+    tcp[14..16].copy_from_slice(&window.to_be_bytes());
+    if option_len != 0 {
+        tcp[20..24].copy_from_slice(&[2, 4, (TCP_MSS >> 8) as u8, TCP_MSS as u8]);
+    }
+    tcp[header_len..].copy_from_slice(payload);
+    let mut pseudo = vec![0u8; 12 + tcp_len];
+    pseudo[0..4].copy_from_slice(&source_ip);
+    pseudo[4..8].copy_from_slice(&destination_ip);
+    pseudo[9] = 6;
+    pseudo[10..12].copy_from_slice(&(tcp_len as u16).to_be_bytes());
+    pseudo[12..].copy_from_slice(&tcp);
+    let tcp_sum = checksum(&pseudo);
+    tcp[16..18].copy_from_slice(&tcp_sum.to_be_bytes());
+
+    let mut packet = vec![0u8; 20 + tcp_len];
+    packet[0] = 0x45;
+    let packet_len = packet.len() as u16;
+    packet[2..4].copy_from_slice(&packet_len.to_be_bytes());
+    packet[4..6].copy_from_slice(&NEXT_XID.fetch_add(1, Ordering::Relaxed).to_be_bytes()[2..]);
+    packet[8] = 64;
+    packet[9] = 6;
+    packet[12..16].copy_from_slice(&source_ip);
+    packet[16..20].copy_from_slice(&destination_ip);
+    packet[20..].copy_from_slice(&tcp);
+    let ip_sum = checksum(&packet[..20]);
+    packet[10..12].copy_from_slice(&ip_sum.to_be_bytes());
+    ethernet(0x0800, destination_mac, &packet)
+}
+
+fn tcp_emit_current(flags: u8, sequence: u32, acknowledgement: u32, payload: &[u8])
+    -> Result<(), crate::drivers::e1000::Error> {
+    let (mac, ip, local_port, remote_port, window) = {
+        let connection = TCP_CONNECTION.lock();
+        if connection.state == TCP_IDLE || connection.state == TCP_FAILED {
+            return Err(crate::drivers::e1000::Error::TcpNotConnected);
+        }
+        (connection.remote_mac, connection.remote_ip, connection.local_port,
+            connection.remote_port, connection.window())
+    };
+    tcp_packet(mac, ip, local_port, remote_port, sequence, acknowledgement, flags, window, payload)
+}
+
+fn tcp_poll_frame() -> Result<bool, crate::drivers::e1000::Error> {
+    let mut frame = [0u8; 1518];
+    let Some(length) = crate::drivers::e1000::receive(&mut frame)? else { return Ok(false); };
+    if length >= 42 && frame[12..14] == [8, 6] { send_arp_reply(&frame[..length]); return Ok(true); }
+    if length < 54 || frame[12..14] != [8, 0] || frame[23] != 6 { return Ok(true); }
+    let ip = 14;
+    let ihl = (frame[ip] as usize & 15) * 4;
+    let total = u16::from_be_bytes([frame[ip + 2], frame[ip + 3]]) as usize;
+    if ihl < 20 || total < ihl + 20 || ip + total > length
+        || checksum(&frame[ip..ip + ihl]) != 0
+        || u16::from_be_bytes([frame[ip + 6], frame[ip + 7]]) & 0x3fff != 0 {
+        return Ok(true);
+    }
+    let source_ip: [u8; 4] = frame[ip + 12..ip + 16].try_into().unwrap();
+    let destination_ip: [u8; 4] = frame[ip + 16..ip + 20].try_into().unwrap();
+    let cfg = config();
+    if destination_ip != cfg.address { return Ok(true); }
+    let tcp = ip + ihl;
+    let tcp_len = total - ihl;
+    let header_len = (frame[tcp + 12] as usize >> 4) * 4;
+    if header_len < 20 || header_len > tcp_len { return Ok(true); }
+    let mut pseudo = vec![0u8; 12 + tcp_len];
+    pseudo[0..4].copy_from_slice(&source_ip);
+    pseudo[4..8].copy_from_slice(&destination_ip);
+    pseudo[9] = 6;
+    pseudo[10..12].copy_from_slice(&(tcp_len as u16).to_be_bytes());
+    pseudo[12..].copy_from_slice(&frame[tcp..tcp + tcp_len]);
+    if checksum(&pseudo) != 0 { return Ok(true); }
+
+    let source_port = u16::from_be_bytes([frame[tcp], frame[tcp + 1]]);
+    let destination_port = u16::from_be_bytes([frame[tcp + 2], frame[tcp + 3]]);
+    let sequence = u32::from_be_bytes(frame[tcp + 4..tcp + 8].try_into().unwrap());
+    let acknowledgement = u32::from_be_bytes(frame[tcp + 8..tcp + 12].try_into().unwrap());
+    let flags = frame[tcp + 13];
+    let payload = &frame[tcp + header_len..tcp + tcp_len];
+    let mut send_ack = false;
+    let mut ack_sequence = 0;
+    let mut ack_number = 0;
+    let source_mac: [u8; 6] = frame[6..12].try_into().unwrap();
+    {
+        let mut connection = TCP_CONNECTION.lock();
+        if destination_port != connection.local_port || source_port != connection.remote_port
+            || source_ip != connection.remote_ip || connection.state == TCP_IDLE {
+            return Ok(true);
+        }
+        if flags & TCP_RST != 0 {
+            crate::log_fail!("TCP", "Input", "RST from {}.{}.{}.{}:{} while connection state {}",
+                source_ip[0], source_ip[1], source_ip[2], source_ip[3], source_port, connection.state);
+            connection.state = TCP_FAILED;
+            return Ok(true);
+        }
+        if connection.state == TCP_SYN_SENT {
+            if flags & (TCP_SYN | TCP_ACK) == (TCP_SYN | TCP_ACK)
+                && acknowledgement == connection.send_next {
+                connection.receive_next = sequence.wrapping_add(1);
+                connection.send_unacked = acknowledgement;
+                connection.state = TCP_ESTABLISHED;
+                send_ack = true;
+            }
+        } else if connection.state == TCP_ESTABLISHED || connection.state == TCP_CLOSING {
+            if flags & TCP_ACK != 0
+                && acknowledgement.wrapping_sub(connection.send_unacked)
+                    <= connection.send_next.wrapping_sub(connection.send_unacked) {
+                connection.send_unacked = acknowledgement;
+                if connection.state == TCP_CLOSING && acknowledgement == connection.send_next {
+                    connection.local_fin_acked = true;
+                }
+            }
+            let mut expected = connection.receive_next;
+            if !payload.is_empty() {
+                if sequence == expected {
+                    let available = TCP_RX_CAPACITY - connection.receive_len;
+                    if payload.len() <= available {
+                        for byte in payload {
+                            let tail = (connection.receive_head + connection.receive_len) % TCP_RX_CAPACITY;
+                            connection.receive[tail] = *byte;
+                            connection.receive_len += 1;
+                        }
+                        connection.receive_next = connection.receive_next.wrapping_add(payload.len() as u32);
+                        expected = connection.receive_next;
+                    }
+                }
+                send_ack = true;
+            }
+            if flags & TCP_FIN != 0 {
+                if sequence.wrapping_add(payload.len() as u32) == expected {
+                    connection.receive_next = connection.receive_next.wrapping_add(1);
+                    connection.peer_closed = true;
+                }
+                send_ack = true;
+            }
+        }
+        if send_ack {
+            connection.remote_mac = source_mac;
+            ack_sequence = connection.send_next;
+            ack_number = connection.receive_next;
+        }
+    }
+    if send_ack {
+        tcp_emit_current(TCP_ACK, ack_sequence, ack_number, &[])?;
+    }
+    Ok(true)
+}
+
+/// Open the single polling TCP connection used by current userland tools.
+pub fn tcp_connect(destination: [u8; 4], destination_port: u16) -> Result<(), crate::drivers::e1000::Error> {
+    let cfg = config();
+    if cfg.configured == 0 { return Err(crate::drivers::e1000::Error::NoDevice); }
+    if destination_port == 0 || destination == [0; 4] || destination == BROADCAST_IP {
+        return Err(crate::drivers::e1000::Error::InvalidFrame);
+    }
+    {
+        let connection = TCP_CONNECTION.lock();
+        if connection.state != TCP_IDLE { return Err(crate::drivers::e1000::Error::Busy); }
+    }
+    let same_subnet = (0..4).all(|i| (cfg.address[i] & cfg.netmask[i]) == (destination[i] & cfg.netmask[i]));
+    let next_hop = if same_subnet { destination } else { cfg.gateway };
+    let mac = resolve_mac(next_hop)?;
+    let local_port = (NEXT_TCP_PORT.fetch_add(1, Ordering::Relaxed) as u16).max(49152);
+    let initial = NEXT_XID.fetch_add(1, Ordering::Relaxed).wrapping_mul(0x9e37_79b9);
+    {
+        let mut connection = TCP_CONNECTION.lock();
+        *connection = TcpConnection::new();
+        connection.state = TCP_SYN_SENT;
+        connection.local_port = local_port;
+        connection.remote_port = destination_port;
+        connection.remote_ip = destination;
+        connection.remote_mac = mac;
+        connection.send_unacked = initial;
+        connection.send_next = initial.wrapping_add(1);
+    }
+    let mut last_sent = crate::pit::uptime_ms();
+    if let Err(error) = tcp_emit_current(TCP_SYN, initial, 0, &[]) {
+        TCP_CONNECTION.lock().reset();
+        return Err(error);
+    }
+    loop {
+        let state = TCP_CONNECTION.lock().state;
+        if state == TCP_ESTABLISHED { return Ok(()); }
+        if state == TCP_FAILED { TCP_CONNECTION.lock().reset(); return Err(crate::drivers::e1000::Error::TcpReset); }
+        let now = crate::pit::uptime_ms();
+        if now.saturating_sub(last_sent) >= 1000 {
+            if now.saturating_sub(last_sent) >= 5000 {
+                TCP_CONNECTION.lock().reset();
+                return Err(crate::drivers::e1000::Error::Timeout);
+            }
+            if let Err(error) = tcp_emit_current(TCP_SYN, initial, 0, &[]) {
+                TCP_CONNECTION.lock().reset();
+                return Err(error);
+            }
+            last_sent = now;
+        }
+        match tcp_poll_frame() {
+            Ok(false) => crate::scheduler::yield_now(),
+            Ok(true) => {}
+            Err(error) => { TCP_CONNECTION.lock().reset(); return Err(error); }
+        }
+    }
+}
+
+/// Send all bytes on the active TCP connection, retransmitting each segment
+/// until cumulatively acknowledged. The peer's advertised MSS defaults to 536.
+pub fn tcp_send(mut bytes: &[u8]) -> Result<usize, crate::drivers::e1000::Error> {
+    if TCP_CONNECTION.lock().state != TCP_ESTABLISHED {
+        return Err(crate::drivers::e1000::Error::TcpNotConnected);
+    }
+    let total = bytes.len();
+    while !bytes.is_empty() {
+        let chunk_len = bytes.len().min(TCP_MSS);
+        let chunk = &bytes[..chunk_len];
+        let (sequence, acknowledgement) = {
+            let mut connection = TCP_CONNECTION.lock();
+            if connection.state != TCP_ESTABLISHED { return Err(crate::drivers::e1000::Error::TcpReset); }
+            let sequence = connection.send_next;
+            connection.send_next = connection.send_next.wrapping_add(chunk_len as u32);
+            (sequence, connection.receive_next)
+        };
+        let mut acknowledged = false;
+        for _ in 0..5 {
+            tcp_emit_current(TCP_ACK | TCP_PSH, sequence, acknowledgement, chunk)?;
+            let started = crate::pit::uptime_ms();
+            loop {
+                {
+                    let connection = TCP_CONNECTION.lock();
+                    if connection.state == TCP_FAILED { return Err(crate::drivers::e1000::Error::TcpReset); }
+                    if connection.send_unacked == sequence.wrapping_add(chunk_len as u32) {
+                        acknowledged = true;
+                        break;
+                    }
+                }
+                if crate::pit::uptime_ms().saturating_sub(started) >= 1000 { break; }
+                let _ = tcp_poll_frame()?;
+                crate::scheduler::yield_now();
+            }
+            if acknowledged { break; }
+        }
+        if !acknowledged { return Err(crate::drivers::e1000::Error::Timeout); }
+        bytes = &bytes[chunk_len..];
+    }
+    Ok(total)
+}
+
+/// Receive available TCP bytes, waiting at most `timeout_ms`; zero is EOF.
+pub fn tcp_receive(output: &mut [u8], timeout_ms: u64) -> Result<usize, crate::drivers::e1000::Error> {
+    if output.is_empty() { return Ok(0); }
+    let started = crate::pit::uptime_ms();
+    loop {
+        {
+            let mut connection = TCP_CONNECTION.lock();
+            if connection.state == TCP_FAILED { return Err(crate::drivers::e1000::Error::TcpReset); }
+            if connection.state == TCP_IDLE { return Err(crate::drivers::e1000::Error::TcpNotConnected); }
+            if connection.receive_len != 0 {
+                let count = output.len().min(connection.receive_len);
+                for slot in &mut output[..count] {
+                    *slot = connection.receive[connection.receive_head];
+                    connection.receive_head = (connection.receive_head + 1) % TCP_RX_CAPACITY;
+                    connection.receive_len -= 1;
+                }
+                let sequence = connection.send_next;
+                let acknowledgement = connection.receive_next;
+                drop(connection);
+                // Advertise the space just freed by the application read.
+                tcp_emit_current(TCP_ACK, sequence, acknowledgement, &[])?;
+                return Ok(count);
+            }
+            if connection.peer_closed { return Ok(0); }
+        }
+        if crate::pit::uptime_ms().saturating_sub(started) >= timeout_ms {
+            return Err(crate::drivers::e1000::Error::Timeout);
+        }
+        if !tcp_poll_frame()? { crate::scheduler::yield_now(); }
+    }
+}
+
+/// Send FIN and wait briefly for the peer's close acknowledgment.
+pub fn tcp_close() -> Result<(), crate::drivers::e1000::Error> {
+    let (sequence, acknowledgement) = {
+        let mut connection = TCP_CONNECTION.lock();
+        if connection.state == TCP_IDLE { return Ok(()); }
+        if connection.state == TCP_FAILED { connection.reset(); return Ok(()); }
+        let sequence = connection.send_next;
+        connection.send_next = connection.send_next.wrapping_add(1);
+        connection.state = TCP_CLOSING;
+        (sequence, connection.receive_next)
+    };
+    let _ = tcp_emit_current(TCP_FIN | TCP_ACK, sequence, acknowledgement, &[]);
+    let started = crate::pit::uptime_ms();
+    while crate::pit::uptime_ms().saturating_sub(started) < 1000 {
+        let connection = TCP_CONNECTION.lock();
+        if connection.local_fin_acked && connection.peer_closed { break; }
+        drop(connection);
+        if !tcp_poll_frame()? { crate::scheduler::yield_now(); }
+    }
+    TCP_CONNECTION.lock().reset();
+    Ok(())
 }
 
 fn skip_dns_name(packet: &[u8], offset: &mut usize) -> Option<()> {
