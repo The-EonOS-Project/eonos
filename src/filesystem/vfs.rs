@@ -292,6 +292,36 @@ pub fn write_at(path: &str, offset: usize, data: &[u8]) -> Result<usize, FsError
     }
 }
 
+/// Replace `/disk/crashlog.txt` without waiting for the VFS mount lock.
+/// This is used only by the terminal panic path, where blocking on a lock
+/// held by the faulting code would prevent the machine from halting.
+pub fn try_write_crashlog(data: &[u8]) -> Result<(), FsError> {
+    let mounts = MOUNTS.try_lock().ok_or(FsError::Io)?;
+    let mount = mounts
+        .iter()
+        .find(|mount| mount.prefix == "/disk")
+        .ok_or(FsError::NotFound)?;
+    let Filesystem::Fat32(fs) = &mount.fs else {
+        return Err(FsError::ReadOnly);
+    };
+
+    match fs.stat("crashlog.txt") {
+        Ok(entry) if entry.is_dir => return Err(FsError::IsDirectory),
+        Ok(_) => fs.truncate("crashlog.txt").map_err(map_fat_error)?,
+        Err(crate::fat32::FatError::NotFound) => {
+            fs.create_file("crashlog.txt").map_err(map_fat_error)?;
+        }
+        Err(error) => return Err(map_fat_error(error)),
+    }
+    let written = fs
+        .write_at("crashlog.txt", 0, data)
+        .map_err(map_fat_error)?;
+    if written != data.len() {
+        return Err(FsError::Io);
+    }
+    flush_filesystem(fs)
+}
+
 pub fn file_size(path: &str) -> Result<usize, FsError> {
     let path = normalize(path)?;
     let mounts = MOUNTS.lock();

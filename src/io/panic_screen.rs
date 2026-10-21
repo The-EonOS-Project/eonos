@@ -12,7 +12,7 @@ pub fn force_unlock_all() {
 
 /// Print a bounded hexdump of memory already known to be readable by the
 /// caller. Panic paths pass only their saved exception frame or current stack.
-pub fn write_memory_dump(console: &mut Console, address: usize, bytes: &[u8]) {
+pub fn write_memory_dump<W: Write>(console: &mut W, address: usize, bytes: &[u8]) {
     let length = bytes.len().min(64);
     let _ = writeln!(console, "Memory dump ({} bytes):", length);
     for offset in (0..length).step_by(16) {
@@ -27,7 +27,7 @@ pub fn write_memory_dump(console: &mut Console, address: usize, bytes: &[u8]) {
 /// Print the active thread and (when it is a user process) process name.
 /// The scheduler and process table are only sampled with try-locks because
 /// either lock may be held by the code that just crashed.
-pub fn write_crash_context(console: &mut Console, fault_cs: Option<u64>) -> Option<(u64, u64)> {
+pub fn write_crash_context<W: Write>(console: &mut W, fault_cs: Option<u64>) -> Option<(u64, u64)> {
     let Some(context) = crate::scheduler::try_crash_context() else {
         let _ = writeln!(console, "Execution context: unavailable (scheduler busy)");
         return None;
@@ -78,8 +78,8 @@ pub fn write_crash_context(console: &mut Console, fault_cs: Option<u64>) -> Opti
 
 /// Walk a short x86-64 frame-pointer chain. Every read is checked against
 /// the current thread's known kernel stack bounds before it is dereferenced.
-pub fn write_stack_trace(
-    console: &mut Console,
+pub fn write_stack_trace<W: Write>(
+    console: &mut W,
     frame_pointer: u64,
     initial_ip: Option<u64>,
     bounds: Option<(u64, u64)>,
@@ -130,29 +130,71 @@ pub fn write_stack_trace(
     }
 }
 
+const CRASHLOG_CAPACITY: usize = 4096;
+
+/// A formatting target that displays panic text and keeps a bounded copy
+/// for `/disk/crashlog.txt`. The fixed buffer avoids allocating in a panic.
+pub struct PanicOutput<'a> {
+    console: &'a mut Console,
+    report: [u8; CRASHLOG_CAPACITY],
+    length: usize,
+}
+
+impl PanicOutput<'_> {
+    fn save(&self) -> Result<(), crate::vfs::FsError> {
+        crate::vfs::try_write_crashlog(&self.report[..self.length])
+    }
+}
+
+impl Write for PanicOutput<'_> {
+    fn write_str(&mut self, text: &str) -> core::fmt::Result {
+        self.console.write_str(text)?;
+        let available = self.report.len().saturating_sub(self.length);
+        let copied = available.min(text.len());
+        self.report[self.length..self.length + copied].copy_from_slice(&text.as_bytes()[..copied]);
+        self.length += copied;
+        Ok(())
+    }
+}
+
 pub fn show<F>(cause: &str, error_code: u32, body: F) -> !
 where
-    F: FnOnce(&mut Console),
+    F: FnOnce(&mut PanicOutput<'_>),
 {
     crate::idt::disable_interrupts();
     force_unlock_all();
 
     if let Some(console) = CONSOLE.lock().as_mut() {
         // Classic full-screen panic blue, with white foreground text.
-        let _ = write!(console, "\x1b[48;2;0;0;170m\x1b[97m");
         console.clear();
 
-        let _ = writeln!(console, "EonOS Kernel v{}", env!("CARGO_PKG_VERSION"));
-        let _ = writeln!(console, "*** KERNEL PANIC : {} ***", cause);
-        let _ = writeln!(console, "ERROR CODE: 0x{:08X}", error_code);
-        let _ = writeln!(console);
+        let _ = write!(console, "\x1b[48;2;0;0;170m\x1b[97m");
+        let mut output = PanicOutput {
+            console,
+            report: [0; CRASHLOG_CAPACITY],
+            length: 0,
+        };
 
-        body(console);
+        let _ = writeln!(output, "EonOS Kernel v{}", env!("CARGO_PKG_VERSION"));
+        let _ = writeln!(output, "*** KERNEL PANIC : {} ***", cause);
+        let _ = writeln!(output, "ERROR CODE: 0x{:08X}", error_code);
+        let _ = writeln!(output);
 
-        let _ = writeln!(console);
-        let _ = writeln!(console, "System halted. If this repeats, file an issue:");
-        let _ = writeln!(console, "https://github.com/The-EonOS-Project/eonos/issues");
-        let _ = write!(console, "\x1b[0m");
+        body(&mut output);
+
+        let _ = writeln!(output);
+        let _ = writeln!(output, "System halted. If this repeats, file an issue:");
+        let _ = writeln!(output, "https://github.com/The-EonOS-Project/eonos/issues");
+        let save_result = output.save();
+        match save_result {
+            Ok(()) => {
+                let _ = writeln!(output, "Crash report saved to /disk/crashlog.txt");
+            }
+            Err(error) => {
+                let _ = writeln!(output, "Crash report not saved ({:?}).", error);
+            }
+        }
+        let _ = write!(output.console, "\x1b[0m");
     }
 
     crate::hcf()

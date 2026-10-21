@@ -59,6 +59,9 @@ fn main(args: eonos_rt::Args<'_>) -> i32 {
         return 0;
     }
     eonos_rt::println!("EonOS shell -- type 'help' for commands");
+    eonos_rt::println!("Welcome to EonOS!");
+    eonos_rt::println!("Mount a writable disk at /disk to keep files and installed apps across restarts.");
+    eonos_rt::println!("Crash reports are saved there too. Use `lsblk` to find a disk, then `mount <device> /disk`.");
     match run_script("/etc/profile", &mut jobs, &mut environment, 0) {
         Ok(true) => return 0,
         Ok(false) => {}

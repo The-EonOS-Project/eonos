@@ -8,7 +8,7 @@ use alloc::format;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::ffi::CStr;
-use core::sync::atomic::{AtomicBool, AtomicI8, AtomicU8, Ordering};
+use core::sync::atomic::{AtomicBool, AtomicI8, AtomicU8, AtomicUsize, Ordering};
 
 const PANEL: u32 = 0xC0C0C0;
 const PANEL_RAISED: u32 = 0xC0C0C0;
@@ -27,6 +27,7 @@ static APP_LAUNCH_STATUS: AtomicU8 = AtomicU8::new(0);
 static SYSTEM_TAB: AtomicU8 = AtomicU8::new(0);
 static SETTINGS_TAB: AtomicU8 = AtomicU8::new(0);
 static TIMEZONE_OFFSET: AtomicI8 = AtomicI8::new(0);
+static APP_PAGE: AtomicUsize = AtomicUsize::new(0);
 
 struct RegisteredApp { name: &'static str, description: &'static str, executable: &'static str }
 const APPLICATIONS: [RegisteredApp; 1] = [RegisteredApp {
@@ -1168,6 +1169,18 @@ fn main(args: eonos_rt::Args<'_>) -> i32 {
                     }
                     draw_era(&layout, view, minimized, &konsul, &files, &processes, &devices, &installed_apps, &app_sessions);
                 }
+                Action::AppsPage(direction) => {
+                    let page_size = if layout.window_h >= 410 { 3 } else { 2 };
+                    let last_page = installed_apps.len().saturating_sub(1) / page_size;
+                    let current = APP_PAGE.load(Ordering::Relaxed).min(last_page);
+                    let next = if direction < 0 {
+                        current.saturating_sub(1)
+                    } else {
+                        (current + 1).min(last_page)
+                    };
+                    APP_PAGE.store(next, Ordering::Relaxed);
+                    draw_era(&layout, view, minimized, &konsul, &files, &processes, &devices, &installed_apps, &app_sessions);
+                }
                 Action::Open(next) => {
                     minimized = false;
                     if view != Some(next) { leave_maximized(&mut layout, view, normal_window, &mut maximized); }
@@ -1275,6 +1288,7 @@ enum Action {
     Terminal,
     LaunchDoom,
     LaunchPackage(usize),
+    AppsPage(i8),
     Open(View),
     Navigate(String),
     OpenFile(String),
@@ -1513,9 +1527,28 @@ fn hit_test(layout: &Layout, view: Option<View>, minimized: bool, x: i32, y: i32
             && y < layout.window_y + 224
         {
             return Action::Open(View::Konsul);
+        } else if view == View::Apps
+            && y >= layout.window_y + 222
+            && y < layout.window_y + 248
+            && apps.len() > if layout.window_h >= 410 { 3 } else { 2 }
+        {
+            let controls_x = layout.window_x + layout.window_w - 190;
+            let page_size = if layout.window_h >= 410 { 3 } else { 2 };
+            let page = APP_PAGE.load(Ordering::Relaxed).min(apps.len().saturating_sub(1) / page_size);
+            if x >= controls_x && x < controls_x + 48 && page > 0 {
+                return Action::AppsPage(-1);
+            }
+            if x >= controls_x + 98 && x < controls_x + 146
+                && page < apps.len().saturating_sub(1) / page_size
+            {
+                return Action::AppsPage(1);
+            }
         } else if view == View::Apps && y >= layout.window_y + 252 {
-            let index = ((y - layout.window_y - 252) / 54) as usize;
-            if index < 4 && apps.get(index).is_some() {
+            let page_size = if layout.window_h >= 410 { 3 } else { 2 };
+            let page = APP_PAGE.load(Ordering::Relaxed).min(apps.len().saturating_sub(1) / page_size);
+            let row = ((y - layout.window_y - 252) / 54) as usize;
+            let index = page * page_size + row;
+            if row < page_size && apps.get(index).is_some() {
                 return Action::LaunchPackage(index);
             }
         } else if view == View::TextViewer
@@ -1916,14 +1949,23 @@ fn draw_window(layout: &Layout, view: View, files: &FileState, processes: &str, 
                 _ => {}
             }
             text(x + 34, y + 230, TEXT, "Installed Rust applications");
-            for (index, app) in apps.iter().take(3).enumerate() {
-                draw_app_row(x + 34, y + 252 + index as i32 * 54, w - 68,
+            let page_size = if h >= 410 { 3 } else { 2 };
+            let page_count = apps.len().max(1).div_ceil(page_size);
+            let page = APP_PAGE.load(Ordering::Relaxed).min(page_count - 1);
+            APP_PAGE.store(page, Ordering::Relaxed);
+            if page_count > 1 {
+                let controls_x = x + w - 190;
+                classic_button(controls_x, y + 222, 48, 24, "Prev");
+                text(controls_x + 54, y + 227, MUTED, &format!("{}/{}", page + 1, page_count));
+                classic_button(controls_x + 98, y + 222, 48, 24, "Next");
+            }
+            for (row, app) in apps.iter().skip(page * page_size).take(page_size).enumerate() {
+                draw_app_row(x + 34, y + 252 + row as i32 * 54, w - 68,
                     &app.name, &format!("{} ({})", app.description, app.kind), false);
             }
             if apps.is_empty() {
                 text(x + 44, y + 262, MUTED, "Build a .eonapp package, then install it from Konsul.");
             }
-            text(x + 34, y + h - 30, MUTED, "Select an application to launch it.");
         }
         View::About => {
             rect(x + 34, y + 72, 42, 42, ACCENT);
