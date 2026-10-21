@@ -165,7 +165,10 @@ impl TlsStream {
             .with_root_certificates(root_store)
             .with_no_client_auth();
         let server_name = ServerName::try_from(host.to_string()).map_err(|_| 22)?;
-        let connection = UnbufferedClientConnection::new(Arc::new(config), server_name).map_err(|_| 71)?;
+        let connection = UnbufferedClientConnection::new(Arc::new(config), server_name).map_err(|error| {
+            eonos_rt::eprintln!("curler: TLS client setup failed: {:?}", error);
+            71
+        })?;
         let mut stream = Self {
             connection,
             incoming: Vec::new(),

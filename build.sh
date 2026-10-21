@@ -56,19 +56,22 @@ BUILD_STD_FLAGS=(
     -Zbuild-std=core,alloc,compiler_builtins
     -Zbuild-std-features=compiler-builtins-mem
 )
+# Setting RUSTFLAGS in the environment replaces target rustflags from
+# .cargo/config.toml, so keep the kernel linker script here as well.
+KERNEL_RUSTFLAGS="${RUSTFLAGS:+$RUSTFLAGS }-C link-arg=-Tconfig/linker.ld -C force-frame-pointers=yes"
 
 if [ "$PROFILE" = "release" ]; then
     if [ "$DEBUG_BUILD" = "1" ]; then
-        cargo build --release --features debug-logs "${BUILD_STD_FLAGS[@]}" --target config/targets/x86_64-eonos.json
+        RUSTFLAGS="$KERNEL_RUSTFLAGS" cargo build --release --features debug-logs "${BUILD_STD_FLAGS[@]}" --target config/targets/x86_64-eonos.json
     else
-        cargo build --release "${BUILD_STD_FLAGS[@]}" --target config/targets/x86_64-eonos.json
+        RUSTFLAGS="$KERNEL_RUSTFLAGS" cargo build --release "${BUILD_STD_FLAGS[@]}" --target config/targets/x86_64-eonos.json
     fi
     KERNEL_BIN="$TARGET_DIR/release/eonos"
 else
     if [ "$DEBUG_BUILD" = "1" ]; then
-        cargo build --features debug-logs "${BUILD_STD_FLAGS[@]}" --target config/targets/x86_64-eonos.json
+        RUSTFLAGS="$KERNEL_RUSTFLAGS" cargo build --features debug-logs "${BUILD_STD_FLAGS[@]}" --target config/targets/x86_64-eonos.json
     else
-        cargo build "${BUILD_STD_FLAGS[@]}" --target config/targets/x86_64-eonos.json
+        RUSTFLAGS="$KERNEL_RUSTFLAGS" cargo build "${BUILD_STD_FLAGS[@]}" --target config/targets/x86_64-eonos.json
     fi
     KERNEL_BIN="$TARGET_DIR/debug/eonos"
 fi

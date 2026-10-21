@@ -35,7 +35,7 @@ const APPLICATIONS: [RegisteredApp; 1] = [RegisteredApp {
     executable: "/bin/doom",
 }];
 
-#[derive(Clone)]
+#[derive(Clone, Eq, PartialEq)]
 struct InstalledApp { id: String, name: String, description: String, kind: String, executable: String }
 
 #[derive(Clone)]
@@ -441,6 +441,13 @@ fn discover_installed_apps() -> Vec<InstalledApp> {
     apps
 }
 
+fn refresh_installed_apps(apps: &mut Vec<InstalledApp>) -> bool {
+    let discovered = discover_installed_apps();
+    if *apps == discovered { return false; }
+    *apps = discovered;
+    true
+}
+
 fn start_era_app(apps: &[InstalledApp], app_index: usize, sessions: &mut Vec<AppSession>) -> Result<usize, eonos_user::Error> {
     let app = apps.get(app_index).ok_or(eonos_user::Error::InvalidArgument)?;
     if app.kind != "ERA" { return Err(eonos_user::Error::InvalidArgument); }
@@ -779,7 +786,7 @@ fn main(args: eonos_rt::Args<'_>) -> i32 {
     let mut normal_window = (layout.window_x, layout.window_y, layout.window_w, layout.window_h);
     let mut files = FileState::new();
     let mut konsul = KonsulState::new(&environment);
-    let installed_apps = discover_installed_apps();
+    let mut installed_apps = discover_installed_apps();
     let mut app_sessions: Vec<AppSession> = Vec::new();
     let mut processes = eonos_user::list_processes().unwrap_or_else(|_| String::from("Process data unavailable"));
     let mut devices = eonos_user::list_block_devices().unwrap_or_else(|_| String::from("No block devices"));
@@ -820,7 +827,9 @@ fn main(args: eonos_rt::Args<'_>) -> i32 {
         let output_line_count = konsul.output.len();
         let was_running = konsul.running.is_some();
         poll_konsul_command(&mut konsul);
-        if was_running && (konsul.running.is_none() || konsul.output.len() != output_line_count) {
+        let apps_changed = was_running && konsul.running.is_none()
+            && refresh_installed_apps(&mut installed_apps);
+        if was_running && (konsul.running.is_none() || konsul.output.len() != output_line_count || apps_changed) {
             draw_era(&layout, view, minimized, &konsul, &files, &processes, &devices, &installed_apps, &app_sessions);
         }
         let now = eonos_rt::uptime_ms();
@@ -944,6 +953,7 @@ fn main(args: eonos_rt::Args<'_>) -> i32 {
                 open_window(&mut layout, next);
                 view = Some(next);
                 minimized = false;
+                if next == View::Apps { refresh_installed_apps(&mut installed_apps); }
                 set_konsul_focus(&mut konsul, view_needs_input(next));
                 draw_era(&layout, view, minimized, &konsul, &files, &processes, &devices, &installed_apps, &app_sessions);
                 left_pressed = false;
@@ -1015,6 +1025,7 @@ fn main(args: eonos_rt::Args<'_>) -> i32 {
                             open_window(&mut layout, next);
                             view = Some(next);
                             minimized = false;
+                            if next == View::Apps { refresh_installed_apps(&mut installed_apps); }
                             set_konsul_focus(&mut konsul, view_needs_input(next));
                         }
                     }
@@ -1087,6 +1098,7 @@ fn main(args: eonos_rt::Args<'_>) -> i32 {
                                 Some(View::Welcome)
                             };
                             if let Some(restored) = view { open_window(&mut layout, restored); }
+                            refresh_installed_apps(&mut installed_apps);
                             set_konsul_focus(&mut konsul, view.is_some_and(view_needs_input));
                             stable_left = eonos_rt::mouse_state().map(|state| state.buttons & 1 != 0).unwrap_or(false);
                             candidate_left = stable_left;
@@ -1160,6 +1172,7 @@ fn main(args: eonos_rt::Args<'_>) -> i32 {
                     minimized = false;
                     if view != Some(next) { leave_maximized(&mut layout, view, normal_window, &mut maximized); }
                     open_window(&mut layout, next);
+                    if next == View::Apps { refresh_installed_apps(&mut installed_apps); }
                     set_konsul_focus(&mut konsul, view_needs_input(next));
                     if next == View::Settings {
                         refresh_disk_status();

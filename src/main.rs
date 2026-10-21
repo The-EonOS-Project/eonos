@@ -17,14 +17,14 @@ pub mod drivers;
 pub mod elf;
 #[path = "filesystem/fat32.rs"]
 pub mod fat32;
+#[path = "arch/fpu.rs"]
+pub mod fpu;
 #[path = "io/framebuffer.rs"]
 pub mod framebuffer;
 #[path = "filesystem/fs_probe.rs"]
 pub mod fs_probe;
 #[path = "arch/gdt.rs"]
 pub mod gdt;
-#[path = "arch/fpu.rs"]
-pub mod fpu;
 #[path = "memory/heap.rs"]
 pub mod heap;
 #[path = "arch/idt.rs"]
@@ -48,16 +48,16 @@ pub mod panic_screen;
 pub mod partition;
 #[path = "arch/pic.rs"]
 pub mod pic;
-#[path = "arch/power.rs"]
-pub mod power;
 #[path = "arch/pit.rs"]
 pub mod pit;
-#[path = "arch/rtc.rs"]
-pub mod rtc;
 #[path = "memory/pmm.rs"]
 pub mod pmm;
+#[path = "arch/power.rs"]
+pub mod power;
 #[path = "task/process.rs"]
 pub mod process;
+#[path = "arch/rtc.rs"]
+pub mod rtc;
 #[path = "task/scheduler.rs"]
 pub mod scheduler;
 #[path = "io/serial.rs"]
@@ -206,9 +206,18 @@ fn hcf() -> ! {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     log_critical!("Kernel", "Panic", "{}", info);
-    panic_screen::show("KERNEL PANIC", (90, 0, 110), |w| {
+    let stack_pointer: *const u8;
+    let frame_pointer: u64;
+    unsafe {
+        core::arch::asm!("mov {}, rsp", out(reg) stack_pointer, options(nomem, nostack, preserves_flags));
+        core::arch::asm!("mov {}, rbp", out(reg) frame_pointer, options(nomem, nostack, preserves_flags));
+    }
+    panic_screen::show("INTERNAL KERNEL ERROR", 0xE000_0001, |w| {
         let _ = writeln!(w, "{}", info);
+        let stack_bounds = panic_screen::write_crash_context(w, None);
+        panic_screen::write_stack_trace(w, frame_pointer, None, stack_bounds);
+        let stack_bytes = unsafe { core::slice::from_raw_parts(stack_pointer, 128) };
         let _ = writeln!(w);
-        let _ = writeln!(w, "Full details are on the serial log.");
+        panic_screen::write_memory_dump(w, stack_pointer as usize, stack_bytes);
     });
 }

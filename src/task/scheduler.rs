@@ -57,7 +57,12 @@ extern "C" {
     /// Save callee-saved registers on the current stack, store the
     /// resulting RSP through `old_rsp`, load `new_rsp` and restore the
     /// registers saved there.
-    fn switch_context(old_rsp: *mut u64, new_rsp: u64, old_fpu: *mut crate::fpu::FpuState, new_fpu: *const crate::fpu::FpuState);
+    fn switch_context(
+        old_rsp: *mut u64,
+        new_rsp: u64,
+        old_fpu: *mut crate::fpu::FpuState,
+        new_fpu: *const crate::fpu::FpuState,
+    );
     /// First code a new thread executes; see `create_thread`.
     fn thread_trampoline();
 }
@@ -115,6 +120,16 @@ struct Thread {
     user_rsp: u64,
     /// Saved x87/MMX/SSE state. Aligned and restored at every switch.
     fpu: crate::fpu::FpuState,
+}
+
+/// Lock-safe snapshot used only by fatal diagnostics. The scheduler lock is
+/// acquired with `try_lock`, so a panic while scheduling never waits on it.
+pub struct CrashContext {
+    pub id: u64,
+    pub thread_name: &'static str,
+    pub user_process: bool,
+    pub stack_low: u64,
+    pub stack_high: u64,
 }
 
 struct Scheduler {
@@ -222,7 +237,9 @@ fn create_thread(name: &'static str, entry: fn(), is_idle: bool) -> Option<Box<T
             frame.add(k).write(0);
         }
         frame.add(3).write(entry as usize as u64); // r12
-        frame.add(6).write(thread_trampoline as *const () as usize as u64); // return address
+        frame
+            .add(6)
+            .write(thread_trampoline as *const () as usize as u64); // return address
     }
 
     Some(Box::new(Thread {
@@ -572,6 +589,22 @@ pub fn current_id() -> u64 {
 
 pub fn current_name() -> &'static str {
     SCHED.lock().current.as_ref().map(|t| t.name).unwrap_or("?")
+}
+
+pub fn try_crash_context() -> Option<CrashContext> {
+    let scheduler = SCHED.try_lock()?;
+    let thread = scheduler.current.as_ref()?;
+    let (stack_low, stack_high) = thread.stack_slot.map_or((0, 0), |slot| {
+        let base = slot_base(slot);
+        (base + PAGE_SIZE, base + (1 + STACK_PAGES) * PAGE_SIZE)
+    });
+    Some(CrashContext {
+        id: thread.id,
+        thread_name: thread.name,
+        user_process: thread.aspace.is_some(),
+        stack_low,
+        stack_high,
+    })
 }
 
 /// Stack slots currently in use (live threads other than the boot thread).

@@ -565,23 +565,48 @@ fn fatal(frame: &InterruptFrame) -> ! {
     let error_code = frame.error_code;
     let rip = frame.rip;
     let rsp = frame.rsp;
-    crate::panic_screen::show("KERNEL EXCEPTION", (130, 0, 0), |w| {
-        let _ = writeln!(w, "{}", name);
-        let _ = writeln!(w, "vector {}   error code {:#x}", vector, error_code);
+    let dump_address = frame as *const InterruptFrame as usize;
+    crate::panic_screen::show(name, vector as u32, |w| {
+        let _ = writeln!(w, "Exception vector: {}", vector);
+        let _ = writeln!(w, "CPU error code: {:#010x}", error_code);
         if vector == 14 {
             let cr2 = read_cr2();
-            let _ = writeln!(w, "faulting address {:#018x}", cr2);
+            let _ = writeln!(w, "Faulting address: {:#018x}", cr2);
+            let error = error_code;
+            let _ = write!(
+                w,
+                "Page fault: {} access, {}, {}",
+                if error & 2 != 0 { "write" } else { "read" },
+                if error & 4 != 0 {
+                    "user mode"
+                } else {
+                    "supervisor mode"
+                },
+                if error & 1 != 0 {
+                    "protection violation"
+                } else {
+                    "page not present"
+                },
+            );
+            if error & 16 != 0 {
+                let _ = write!(w, ", instruction fetch");
+            }
+            if error & 8 != 0 {
+                let _ = write!(w, ", reserved-bit violation");
+            }
+            let _ = writeln!(w);
             if let Some(phys) = crate::vmm::try_translate(cr2) {
-                let _ = writeln!(
-                    w,
-                    "(that address is mapped to phys {:#018x} -- likely a permission violation)",
-                    phys
-                );
+                let _ = writeln!(w, "Mapped physical address: {:#018x}", phys);
             }
         }
         let _ = writeln!(w);
-        let _ = writeln!(w, "RIP {:#018x}", rip);
-        let _ = writeln!(w, "RSP {:#018x}", rsp);
+        let _ = writeln!(w, "RIP: {:#018x}", rip);
+        let _ = writeln!(w, "RSP: {:#018x}", rsp);
+        let stack_bounds = crate::panic_screen::write_crash_context(w, Some(frame.cs));
+        crate::panic_screen::write_stack_trace(w, frame.rbp, Some(rip), stack_bounds);
+        let _ = writeln!(w);
+        let dump_bytes = unsafe { core::slice::from_raw_parts(dump_address as *const u8, 128) };
+        crate::panic_screen::write_memory_dump(w, dump_address, dump_bytes);
         let _ = writeln!(w);
         let _ = writeln!(w, "Full register dump is on the serial log.");
     });

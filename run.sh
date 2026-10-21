@@ -134,6 +134,9 @@ fi
 ARGS=(
     # Disable the emulated i8042 so input must come through USB.
     -M q35,i8042=off
+    # Expose host-supported CPU features such as RDRAND, which verified TLS
+    # requires for cryptographically secure client nonces.
+    -cpu max
     "${VIDEO_ARGS[@]}"
     -display gtk,zoom-to-fit=off
     -rtc base=utc

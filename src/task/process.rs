@@ -79,7 +79,9 @@ impl fmt::Display for SpawnError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             SpawnError::NotFound => f.write_str("file not found in the initramfs"),
-            SpawnError::DiskNotMounted => f.write_str("Era requires a writable disk mounted at /disk"),
+            SpawnError::DiskNotMounted => {
+                f.write_str("Era requires a writable disk mounted at /disk")
+            }
             SpawnError::Elf(e) => write!(f, "cannot load executable: {}", e),
             SpawnError::NoMemory => f.write_str("out of memory"),
             SpawnError::NoThread => f.write_str("no free thread slot"),
@@ -161,7 +163,11 @@ pub fn cwd(pid: u64) -> String {
 
 /// Whether a process is running with the restricted third-party app policy.
 pub fn is_sandboxed(pid: u64) -> bool {
-    PROCS.lock().iter().find(|record| record.pid == pid).is_some_and(|record| record.sandboxed)
+    PROCS
+        .lock()
+        .iter()
+        .find(|record| record.pid == pid)
+        .is_some_and(|record| record.sandboxed)
 }
 
 /// Set a process's current directory. The path must already be normalized.
@@ -258,6 +264,18 @@ pub fn list() -> Vec<ProcessInfo> {
             exit_status: record.status,
         })
         .collect()
+}
+
+/// Copy the current process name into caller-owned storage for crash
+/// reporting. Never blocks if the process table is already locked.
+pub fn try_copy_name(pid: u64, output: &mut [u8]) -> Option<usize> {
+    let processes = PROCS.try_lock()?;
+    let process = processes
+        .iter()
+        .find(|record| record.pid == pid && record.status.is_none())?;
+    let length = process.name.len().min(output.len());
+    output[..length].copy_from_slice(&process.name.as_bytes()[..length]);
+    Some(length)
 }
 
 /// Map the user stack and lay out its initial contents the way the
@@ -395,7 +413,8 @@ fn spawn_with_io_policy(
     // Treat every executable installed in the third-party app namespace as
     // untrusted even if it was launched through a raw exec syscall or a
     // malformed/missing manifest. Children inherit the same policy.
-    let sandboxed = force_sandbox || is_sandboxed(parent)
+    let sandboxed = force_sandbox
+        || is_sandboxed(parent)
         || path.starts_with("/apps/bin/")
         || path.starts_with("/disk/apps/bin/");
     let pid = match scheduler::spawn_user("user", aspace, entry, rsp) {
@@ -510,7 +529,7 @@ fn make_test_elf(entry: u64, vaddr: u64, filesz: u64, memsz: u64, flags: u32) ->
     b[52..54].copy_from_slice(&64u16.to_le_bytes()); // e_ehsize
     b[54..56].copy_from_slice(&56u16.to_le_bytes()); // e_phentsize
     b[56..58].copy_from_slice(&1u16.to_le_bytes()); // e_phnum
-                                                    // Program header at offset 64
+    // Program header at offset 64
     b[64..68].copy_from_slice(&1u32.to_le_bytes()); // PT_LOAD
     b[68..72].copy_from_slice(&flags.to_le_bytes());
     b[72..80].copy_from_slice(&120u64.to_le_bytes()); // p_offset: the 4 data bytes
