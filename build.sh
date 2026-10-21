@@ -158,6 +158,12 @@ fi
 
 echo "==> Packing initramfs"
 
+if [ ! -x "$ROOT/eon-apps/app.sh" ] || [ ! -f "$ROOT/eon-apps/app-manager/Cargo.toml" ]; then
+    echo "App Manager source is missing. Check out The-EonOS-Project/eon-apps as $ROOT/eon-apps." >&2
+    exit 1
+fi
+(cd "$ROOT/eon-apps" && EONOS_BUILD_DIR="$BUILD_DIR" ./app.sh build app-manager)
+
 mkdir -p "$INITRAMFS_ROOT"
 
 cp -r "$INITRAMFS_SRC"/. "$INITRAMFS_ROOT"/
@@ -192,6 +198,30 @@ if [ -d "$BUILD_DIR/apps" ]; then
         cp "$package" "$INITRAMFS_ROOT/packages/"
     done
 fi
+python3 - "$BUILD_DIR/apps/app-manager.eonapp" "$INITRAMFS_ROOT" <<'PY'
+import pathlib, struct, sys
+
+package_path = pathlib.Path(sys.argv[1])
+root = pathlib.Path(sys.argv[2])
+package = package_path.read_bytes()
+if len(package) < 20 or package[:8] != b"EONAPP1\0":
+    raise SystemExit("App Manager package has an invalid header")
+metadata_len, elf_len = struct.unpack_from("<IQ", package, 8)
+elf_offset = 20 + metadata_len
+if metadata_len == 0 or metadata_len > 1024 or elf_offset + elf_len != len(package):
+    raise SystemExit("App Manager package has invalid lengths")
+metadata = package[20:elf_offset]
+elf = package[elf_offset:]
+fields = metadata.decode("utf-8").splitlines()
+if len(fields) != 5 or fields[:3] != ["EONOSAPP1", "app-manager", "ERA"]:
+    raise SystemExit("App Manager package has invalid metadata")
+if not elf.startswith(b"\x7fELF") or b"EONOSAPP1:ERA" not in elf:
+    raise SystemExit("App Manager package has an invalid ERA executable")
+(root / "apps" / "bin").mkdir(parents=True, exist_ok=True)
+(root / "apps" / "manifests").mkdir(parents=True, exist_ok=True)
+(root / "apps" / "bin" / "app-manager").write_bytes(elf)
+(root / "apps" / "manifests" / "app-manager.eapp").write_bytes(metadata)
+PY
 mkdir -p "$INITRAMFS_ROOT/doom"
 cp "$DOOM_WAD" "$INITRAMFS_ROOT/doom/freedoom1.wad"
 cp "$ROOT/assets/doom/COPYING.txt" "$INITRAMFS_ROOT/doom/COPYING.txt"

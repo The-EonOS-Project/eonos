@@ -152,6 +152,15 @@ Era requires a writable filesystem mounted exactly at `/disk`; the shell and
 kernel both reject attempts to launch it without that mount. This keeps its
 settings and installed applications on persistent storage.
 
+The separate `The-EonOS-Project/eon-apps` repository must be checked out beside
+this repository as `eon-apps` to build system images. The image build compiles
+the App Manager from that checkout, registers it as a built-in Era application,
+and includes `/packages/app-manager.eonapp` so it can be restored after removal
+of persistent app data. Open **App Manager** from Era to review installed apps,
+install or update packages found in `/disk/eonappfiles`, `/disk`, or
+`/packages`, and remove user-installed apps. Changes to installed apps require
+a writable `/disk` mount.
+
 ## Networking
 
 EonOS currently has a polling Intel E1000 Ethernet driver for common

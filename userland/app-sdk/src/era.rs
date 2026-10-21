@@ -40,10 +40,13 @@ pub struct Window {
     pointer_buttons: u8,
     open_dropdown: Option<(i32, i32)>,
     focused_widget: usize,
+    keyboard_widget_activation: bool,
     dropdown_widgets: Vec<usize>,
     next_dropdown_widgets: Vec<usize>,
     text_widgets: Vec<usize>,
     next_text_widgets: Vec<usize>,
+    text_input_bounds: Vec<(usize, i32, i32, u32, u32)>,
+    next_text_input_bounds: Vec<(usize, i32, i32, u32, u32)>,
     pending_text_keys: Vec<(usize, u8, u8)>,
     cursor_widget: Option<usize>,
     text_cursors: Vec<(usize, usize)>,
@@ -57,7 +60,18 @@ pub struct Window {
 impl Window {
 
     pub fn open(title: &str, width: u32, height: u32) -> Result<Self> {
-        if title.is_empty() || title.len() > 80 || width == 0 || height == 0 || width > 1920 || height > 1080 {
+        if width == 0 || height == 0 || width > 1920 || height > 1080 {
+            return Err(Error(22));
+        }
+        Self::open_inner(title, width, height)
+    }
+
+    pub fn open_auto(title: &str) -> Result<Self> {
+        Self::open_inner(title, 0, 0)
+    }
+
+    fn open_inner(title: &str, width: u32, height: u32) -> Result<Self> {
+        if title.is_empty() || title.len() > 80 {
             return Err(Error(22));
         }
         let mut payload = Vec::with_capacity(title.len() + 6);
@@ -84,10 +98,13 @@ impl Window {
             pointer_buttons: 0,
             open_dropdown: None,
             focused_widget: 0,
+            keyboard_widget_activation: false,
             dropdown_widgets: Vec::new(),
             next_dropdown_widgets: Vec::new(),
             text_widgets: Vec::new(),
             next_text_widgets: Vec::new(),
+            text_input_bounds: Vec::new(),
+            next_text_input_bounds: Vec::new(),
             pending_text_keys: Vec::new(),
             cursor_widget: None,
             text_cursors: Vec::new(),
@@ -101,6 +118,10 @@ impl Window {
 
     pub fn title(&self) -> &str { &self.title }
     pub fn dimensions(&self) -> (u32, u32) { (self.width, self.height) }
+
+    pub fn set_keyboard_widget_activation(&mut self, enabled: bool) {
+        self.keyboard_widget_activation = enabled;
+    }
 
     pub fn fill_rect(&mut self, x: i32, y: i32, width: u32, height: u32, color: u32) -> Result<()> {
         if self.command_count >= MAX_COMMANDS || self.frame.len() + 21 > MAX_FRAME_BYTES { return Err(Error(7)); }
@@ -353,6 +374,7 @@ impl Window {
         let widget_rows = (panel_height.saturating_sub(218) / 24).clamp(1, 6);
         let mut selected_path = None;
         let mut cancelled = false;
+        let mut cached_listing: Option<(String, Option<String>)> = None;
 
         self.widget_count = 2 + 1 + widget_rows + 2;
         self.focused_widget = 2;
@@ -360,6 +382,8 @@ impl Window {
         self.activate_widget = None;
         self.text_widgets.clear();
         self.next_text_widgets.clear();
+        self.text_input_bounds.clear();
+        self.next_text_input_bounds.clear();
         self.dropdown_widgets.clear();
         self.next_dropdown_widgets.clear();
         self.pending_text_keys.clear();
@@ -381,8 +405,18 @@ impl Window {
             }
             if cancelled { break; }
             let normalized_directory = normalize_disk_directory(&directory);
-            let listing = normalized_directory.as_ref()
-                .and_then(|path| crate::system::list_directory(path).ok());
+            if let Some(path) = normalized_directory.as_ref() {
+                let refresh = match cached_listing.as_ref() {
+                    Some((cached_path, _)) => cached_path != path,
+                    None => true,
+                };
+                if refresh {
+                    cached_listing = Some((path.clone(), crate::system::list_directory(path).ok()));
+                }
+            }
+            let listing = cached_listing.as_ref().and_then(|(path, entries)| {
+                if normalized_directory.as_ref() == Some(path) { entries.as_deref() } else { None }
+            });
             let folders: Vec<String> = listing.as_deref().unwrap_or("").lines()
                 .filter(|entry| entry.ends_with('/') && entry.len() > 1)
                 .take(widget_rows)
@@ -486,6 +520,8 @@ impl Window {
         self.next_widget = 0;
         self.text_widgets.clear();
         self.next_text_widgets.clear();
+        self.text_input_bounds.clear();
+        self.next_text_input_bounds.clear();
         self.dropdown_widgets.clear();
         self.next_dropdown_widgets.clear();
         self.pending_text_keys.clear();
@@ -549,6 +585,8 @@ impl Window {
         self.pending_text_keys.clear();
         self.text_widgets.clear();
         self.next_text_widgets.clear();
+        self.text_input_bounds.clear();
+        self.next_text_input_bounds.clear();
         self.dropdown_widgets.clear();
         self.next_dropdown_widgets.clear();
 
@@ -594,6 +632,8 @@ impl Window {
         self.next_widget = 0;
         self.text_widgets.clear();
         self.next_text_widgets.clear();
+        self.text_input_bounds.clear();
+        self.next_text_input_bounds.clear();
         self.dropdown_widgets.clear();
         self.next_dropdown_widgets.clear();
         let restore = self.present();
@@ -660,6 +700,8 @@ impl Window {
         self.activate_widget = None;
         self.text_widgets.clear();
         self.next_text_widgets.clear();
+        self.text_input_bounds.clear();
+        self.next_text_input_bounds.clear();
         self.dropdown_widgets.clear();
         self.next_dropdown_widgets.clear();
         self.pending_text_keys.clear();
@@ -707,6 +749,8 @@ impl Window {
         self.next_widget = 0;
         self.text_widgets.clear();
         self.next_text_widgets.clear();
+        self.text_input_bounds.clear();
+        self.next_text_input_bounds.clear();
         self.dropdown_widgets.clear();
         self.next_dropdown_widgets.clear();
         self.cursor_widget = None;
@@ -745,6 +789,9 @@ impl Window {
         if width < 40 || height < 24 || value.len() > MAX_INPUT_BYTES { return Err(Error(22)); }
         let index = self.register_widget();
         if !self.next_text_widgets.contains(&index) { self.next_text_widgets.push(index); }
+        if !self.next_text_input_bounds.iter().any(|(widget, ..)| *widget == index) {
+            self.next_text_input_bounds.push((index, x, y, width, height));
+        }
         let mut focused = index == self.focused_widget;
         if self.cursor_widget != Some(index) {
             if let Some(previous) = self.cursor_widget {
@@ -760,10 +807,15 @@ impl Window {
         }
         self.text_cursor = self.text_cursor.min(value.len());
         while !value.is_char_boundary(self.text_cursor) { self.text_cursor -= 1; }
-        if self.take_click(x, y, width, height) {
+        if let Some((click_x, _)) = self.take_click_at(|cx, cy| cx >= x && cx < x + width as i32 && cy >= y && cy < y + height as i32) {
             self.focused_widget = index;
             focused = true;
-            self.text_cursor = value.len();
+            let visible_chars = ((width as usize).saturating_sub(16) / 8).max(1);
+            let old_column = value[..self.text_cursor].chars().count();
+            let start_char = old_column.saturating_sub(visible_chars.saturating_sub(1));
+            let clicked_column = ((click_x - x - 6).max(0) / 8) as usize;
+            let target_char = (start_char + clicked_column).min(value.chars().count());
+            self.text_cursor = value.char_indices().nth(target_char).map(|(at, _)| at).unwrap_or(value.len());
         }
 
         let mut changed = false;
@@ -839,12 +891,14 @@ impl Window {
 
     pub fn present(&mut self) -> Result<()> {
         self.draw_active_toast()?;
-        let mut payload = Vec::with_capacity(self.frame.len() + 2);
-        payload.extend_from_slice(&self.command_count.to_le_bytes());
-        payload.extend_from_slice(&self.frame);
-        send_packet(PACKET_FRAME, &payload)?;
-        self.last_frame.clone_from(&self.frame);
-        self.last_command_count = self.command_count;
+        if self.frame != self.last_frame || self.command_count != self.last_command_count {
+            let mut payload = Vec::with_capacity(self.frame.len() + 2);
+            payload.extend_from_slice(&self.command_count.to_le_bytes());
+            payload.extend_from_slice(&self.frame);
+            send_packet(PACKET_FRAME, &payload)?;
+            self.last_frame.clone_from(&self.frame);
+            self.last_command_count = self.command_count;
+        }
         self.frame.clear();
         self.command_count = 0;
         self.pointer_clicks.clear();
@@ -854,6 +908,8 @@ impl Window {
         self.next_dropdown_widgets.clear();
         core::mem::swap(&mut self.text_widgets, &mut self.next_text_widgets);
         self.next_text_widgets.clear();
+        core::mem::swap(&mut self.text_input_bounds, &mut self.next_text_input_bounds);
+        self.next_text_input_bounds.clear();
         if self.widget_count == 0 { self.focused_widget = 0; }
         else if self.focused_widget >= self.widget_count { self.focused_widget = self.widget_count - 1; }
         self.activate_widget = None;
@@ -871,9 +927,17 @@ impl Window {
         raw.copy_from_slice(&self.input[..EVENT_SIZE]);
         self.input.drain(..EVENT_SIZE);
         let event = decode_event(&raw);
+        if let Some(Event::Resized { width, height }) = event {
+            self.width = width;
+            self.height = height;
+        }
         if let Some(Event::Pointer { x, y, buttons }) = event {
             if buttons & 1 != 0 && self.pointer_buttons & 1 == 0 && self.pointer_clicks.len() < 32 {
                 self.pointer_clicks.push((x, y));
+                if let Some((widget, ..)) = self.text_input_bounds.iter()
+                    .find(|(_, left, top, width, height)| x >= *left && x < *left + *width as i32 && y >= *top && y < *top + *height as i32) {
+                    self.focused_widget = *widget;
+                }
             }
             self.pointer_buttons = buttons;
         }
@@ -887,7 +951,7 @@ impl Window {
                         (self.focused_widget + 1) % self.widget_count
                     };
                 }
-                0x28 | 0x2c if !self.text_widgets.contains(&self.focused_widget) => {
+                0x28 | 0x2c if self.keyboard_widget_activation && !self.text_widgets.contains(&self.focused_widget) => {
                     self.activate_widget = Some(self.focused_widget);
                 }
                 usage if self.text_widgets.contains(&self.focused_widget) => {
@@ -1003,6 +1067,8 @@ impl ProgressDialog<'_> {
         self.window.next_widget = 0;
         self.window.text_widgets.clear();
         self.window.next_text_widgets.clear();
+        self.window.text_input_bounds.clear();
+        self.window.next_text_input_bounds.clear();
         self.window.dropdown_widgets.clear();
         self.window.next_dropdown_widgets.clear();
         self.window.present()

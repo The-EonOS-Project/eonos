@@ -4,6 +4,15 @@
 third-party Era applications. Controls are drawn each frame, so keep the same
 control order from frame to frame to preserve keyboard focus.
 
+Open a window with `Window::open(title, width, height)` to request a content
+size, or `Window::open_auto(title)` to let Era fit it to the desktop with a
+48-pixel margin around the window. `dimensions()` reports the accepted content
+size. When a window is maximized or restored, `poll_event()` returns
+`Event::Resized`; redraw using the updated dimensions for responsive layouts.
+Keyboard activation of SDK buttons is opt-in through
+`window.set_keyboard_widget_activation(true)`. It is off by default so an app's
+own text editor or keyboard shortcuts do not also activate a focused button.
+
 ```rust
 let mut enabled = true;
 let mut choice_a = true;
@@ -47,3 +56,9 @@ From the `eon-apps` repository root, build an external application with:
 ```sh
 ./app.sh build <app-directory>
 ```
+
+Era applications can call `eonos_app::system::install_app_package(path)` to
+install a validated `.eonapp` package from `/disk` or `/packages`, and
+`eonos_app::system::uninstall_app(id)` to remove a user-installed app. Both
+operations run through the system shell's package commands, require a writable
+`/disk` mount, and return an error when the command reports a failure.

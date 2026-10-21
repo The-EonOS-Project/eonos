@@ -14,6 +14,7 @@ const PANEL: u32 = 0xC0C0C0;
 const PANEL_RAISED: u32 = 0xC0C0C0;
 const PANEL_EDGE: u32 = 0x808080;
 const TEXT: u32 = 0x101010;
+const APP_WINDOW_MARGIN: i32 = 48;
 const MUTED: u32 = 0x404040;
 const ACCENT: u32 = 0x12377B;
 const AQUA: u32 = 0x12377B;
@@ -39,7 +40,7 @@ const APPLICATIONS: [RegisteredApp; 1] = [RegisteredApp {
 #[derive(Clone, Eq, PartialEq)]
 struct InstalledApp { id: String, name: String, description: String, kind: String, executable: String }
 
-#[derive(Clone)]
+#[derive(Clone, Eq, PartialEq)]
 enum AppDrawOp {
     Rect(i32, i32, u32, u32, u32),
     Text(i32, i32, u32, String),
@@ -54,6 +55,7 @@ struct AppSession {
     input_fd: usize,
     pending_events: Vec<u8>,
     incoming: Vec<u8>,
+    last_frame_packet: Vec<u8>,
     drawing: Vec<AppDrawOp>,
     closed: bool,
     resources_closed: bool,
@@ -474,7 +476,7 @@ fn start_era_app(apps: &[InstalledApp], app_index: usize, sessions: &mut Vec<App
     sessions.push(AppSession {
         title: app.name.clone(), width: 480, height: 300, process,
         output_fd: to_era_read, input_fd: to_app_write,
-        pending_events: Vec::new(), incoming: Vec::new(), drawing: Vec::new(), closed: false,
+        pending_events: Vec::new(), incoming: Vec::new(), last_frame_packet: Vec::new(), drawing: Vec::new(), closed: false,
         resources_closed: false, reaped: false,
     });
     Ok(session_id)
@@ -506,10 +508,10 @@ fn flush_app_events(session: &mut AppSession) {
     }
 }
 
-fn poll_app_sessions(sessions: &mut [AppSession], layout: &Layout) -> bool {
+fn poll_app_sessions(sessions: &mut [AppSession], layout: &mut Layout, active_view: Option<View>) -> bool {
     let mut redraw = false;
     let mut chunk = [0u8; 4096];
-    for session in sessions {
+    for (session_id, session) in sessions.iter_mut().enumerate() {
         if session.closed {
             if !session.resources_closed {
                 let _ = session.process.signal(15);
@@ -538,6 +540,16 @@ fn poll_app_sessions(sessions: &mut [AppSession], layout: &Layout) -> bool {
             let len = u32::from_le_bytes(session.incoming[5..9].try_into().unwrap()) as usize;
             if len > 24 * 1024 { session.closed = true; break; }
             if session.incoming.len() < 9 + len { break; }
+            if kind == 2 {
+                let end = 9 + len;
+                if session.last_frame_packet.as_slice() != &session.incoming[9..end] {
+                    let packet = session.incoming[9..end].to_vec();
+                    session.last_frame_packet.clone_from(&packet);
+                    redraw |= parse_app_frame(session, &packet);
+                }
+                session.incoming.drain(..end);
+                continue;
+            }
             let packet = session.incoming.drain(..9 + len).skip(9).collect::<Vec<_>>();
             match kind {
                 1 if packet.len() >= 6 => {
@@ -548,10 +560,32 @@ fn poll_app_sessions(sessions: &mut [AppSession], layout: &Layout) -> bool {
                     if let Ok(title) = core::str::from_utf8(&packet[6..]) {
                         if !title.is_empty() { session.title = String::from(title); }
                     }
-                    let max_w = (layout.width - 80).clamp(240, 1920);
-                    let max_h = (layout.taskbar_y - 80).clamp(160, 1080);
-                    session.width = requested_w.clamp(240, max_w);
-                    session.height = requested_h.clamp(160, max_h);
+                    if !((requested_w == 0 && requested_h == 0)
+                        || (requested_w > 0 && requested_h > 0)) {
+                        session.closed = true;
+                        break;
+                    }
+                    let max_w = (layout.width - 2 * APP_WINDOW_MARGIN - 8).clamp(240, 1920);
+                    let max_h = (layout.taskbar_y - 2 * APP_WINDOW_MARGIN - 32).clamp(160, 1080);
+                    if requested_w == 0 {
+                        session.width = max_w;
+                        session.height = max_h;
+                    } else {
+                        session.width = requested_w.clamp(240, max_w);
+                        session.height = requested_h.clamp(160, max_h);
+                    }
+                    let frame_w = session.width + 8;
+                    let frame_h = session.height + 32;
+                    let app_view = View::AppWindow(session_id);
+                    if let Some(frame) = layout.placements.iter_mut().find(|frame| frame.view == app_view) {
+                        frame.w = frame_w;
+                        frame.h = frame_h;
+                        frame.x = ((layout.width - frame_w) / 2).max(0);
+                        frame.y = ((layout.taskbar_y - frame_h) / 2).max(0);
+                    }
+                    if active_view == Some(app_view) {
+                        sync_window_layout(layout, app_view);
+                    }
                     let mut response = [0u8; 16];
                     response[0] = 1;
                     response[1..5].copy_from_slice(&(session.width as u32).to_le_bytes());
@@ -559,7 +593,6 @@ fn poll_app_sessions(sessions: &mut [AppSession], layout: &Layout) -> bool {
                     send_app_event(session, response);
                     redraw = true;
                 }
-                2 => { parse_app_frame(session, &packet); redraw = true; }
                 3 => { session.closed = true; redraw = true; }
                 _ => { session.closed = true; break; }
             }
@@ -592,14 +625,14 @@ fn close_app_sessions(sessions: &mut [AppSession]) {
     }
 }
 
-fn parse_app_frame(session: &mut AppSession, payload: &[u8]) {
-    if payload.len() < 2 { return; }
+fn parse_app_frame(session: &mut AppSession, payload: &[u8]) -> bool {
+    if payload.len() < 2 { return false; }
     let count = u16::from_le_bytes([payload[0], payload[1]]) as usize;
-    if count > 256 { return; }
+    if count > 256 { return false; }
     let mut pos = 2;
     let mut ops = Vec::with_capacity(count);
     for _ in 0..count {
-        let Some(tag) = payload.get(pos).copied() else { return; }; pos += 1;
+        let Some(tag) = payload.get(pos).copied() else { return false; }; pos += 1;
         match tag {
             1 if pos + 20 <= payload.len() => {
                 let x = i32::from_le_bytes(payload[pos..pos+4].try_into().unwrap()); pos += 4;
@@ -614,14 +647,16 @@ fn parse_app_frame(session: &mut AppSession, payload: &[u8]) {
                 let y = i32::from_le_bytes(payload[pos..pos+4].try_into().unwrap()); pos += 4;
                 let color = u32::from_le_bytes(payload[pos..pos+4].try_into().unwrap()) & 0x00ff_ffff; pos += 4;
                 let len = u16::from_le_bytes(payload[pos..pos+2].try_into().unwrap()) as usize; pos += 2;
-                if len > 1024 || pos + len > payload.len() { return; }
-                let Ok(value) = core::str::from_utf8(&payload[pos..pos+len]) else { return; };
+                if len > 1024 || pos + len > payload.len() { return false; }
+                let Ok(value) = core::str::from_utf8(&payload[pos..pos+len]) else { return false; };
                 ops.push(AppDrawOp::Text(x, y, color, String::from(value))); pos += len;
             }
-            _ => return,
+            _ => return false,
         }
     }
-    if pos == payload.len() { session.drawing = ops; }
+    if pos != payload.len() || session.drawing == ops { return false; }
+    session.drawing = ops;
+    true
 }
 
 fn konsul_character(usage: u8, shifted: bool) -> Option<char> {
@@ -816,7 +851,7 @@ fn main(args: eonos_rt::Args<'_>) -> i32 {
     let mut candidate_since = eonos_rt::uptime_ms();
     loop {
         let _ = eonos_rt::sleep_ms(16);
-        let app_changed = poll_app_sessions(&mut app_sessions, &layout);
+        let app_changed = poll_app_sessions(&mut app_sessions, &mut layout, view);
         if app_changed && matches!(view, Some(View::AppWindow(_))) {
             draw_era(&layout, view, minimized, &konsul, &files, &processes, &devices, &installed_apps, &app_sessions);
         }
@@ -1265,6 +1300,21 @@ fn main(args: eonos_rt::Args<'_>) -> i32 {
                     draw_era(&layout, view, minimized, &konsul, &files, &processes, &devices, &installed_apps, &app_sessions);
                 }
                 Action::None => {}
+            }
+        }
+        if let Some(View::AppWindow(index)) = view {
+            if let Some(session) = app_sessions.get_mut(index) {
+                let width = (layout.window_w - 8).max(1);
+                let height = (layout.window_h - 32).max(1);
+                if session.width != width || session.height != height {
+                    session.width = width;
+                    session.height = height;
+                    let mut resized = [0u8; 16];
+                    resized[0] = 1;
+                    resized[1..5].copy_from_slice(&(width as u32).to_le_bytes());
+                    resized[5..9].copy_from_slice(&(height as u32).to_le_bytes());
+                    send_app_event(session, resized);
+                }
             }
         }
         let _ = eonos_rt::era::present();
