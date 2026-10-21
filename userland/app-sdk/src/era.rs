@@ -233,6 +233,83 @@ impl Window {
         Ok(activated)
     }
 
+    pub fn radio_button(&mut self, x: i32, y: i32, label: &str, selected: &mut bool) -> Result<bool> {
+        if label.len() > MAX_TEXT_BYTES { return Err(Error(7)); }
+        let index = self.register_widget();
+        let width = 24u32.saturating_add((label.len() as u32).saturating_mul(8));
+        let pointer_clicked = self.take_click(x, y, width, 22);
+        let focused = if pointer_clicked {
+            self.focused_widget = index;
+            true
+        } else {
+            index == self.focused_widget
+        };
+        let activated = pointer_clicked || (focused && self.take_activation(index));
+        let changed = activated && !*selected;
+        if activated { *selected = true; }
+        self.fill_rect(x + 1, y + 2, 16, 16, 0xFFFFFF)?;
+        self.fill_rect(x + 4, y + 1, 10, 1, BUTTON_DARK)?;
+        self.fill_rect(x + 2, y + 3, 1, 14, BUTTON_DARK)?;
+        self.fill_rect(x + 15, y + 3, 1, 14, BUTTON_LIGHT)?;
+        self.fill_rect(x + 4, y + 18, 10, 1, BUTTON_LIGHT)?;
+        if *selected {
+            self.fill_rect(x + 6, y + 6, 6, 6, 0x12377B)?;
+        }
+        self.text(x + 24, y + 2, BUTTON_TEXT, label)?;
+        if focused { self.draw_focus(x, y, width.max(24), 22)?; }
+        Ok(changed)
+    }
+
+    pub fn slider(&mut self, x: i32, y: i32, width: u32, height: u32, min: i32, max: i32, value: &mut i32) -> Result<bool> {
+        if width < 64 || height < 24 || min >= max { return Err(Error(22)); }
+        *value = (*value).clamp(min, max);
+        let index = self.register_widget();
+        let click = self.take_click_at(|cx, cy| {
+            cx >= x && cx < x + width as i32 && cy >= y && cy < y + height as i32
+        });
+        let focused = if let Some((cx, _)) = click {
+            self.focused_widget = index;
+            let track_x = x + 8;
+            let track_width = (width as i64 - 16).max(1);
+            let offset = (cx as i64 - track_x as i64).clamp(0, track_width);
+            let range = max as i64 - min as i64;
+            *value = (min as i64 + (offset * range + track_width / 2) / track_width) as i32;
+            true
+        } else {
+            index == self.focused_widget
+        };
+        self.fill_rect(x + 4, y + 7, width - 8, 10, BUTTON_FACE)?;
+        self.fill_rect(x + 4, y + 7, width - 8, 1, BUTTON_DARK)?;
+        self.fill_rect(x + 4, y + 8, 1, 8, BUTTON_DARK)?;
+        self.fill_rect(x + width as i32 - 5, y + 8, 1, 8, BUTTON_LIGHT)?;
+        let track_width = (width - 16) as i64;
+        let offset = ((*value as i64 - min as i64) * track_width / (max as i64 - min as i64)) as i32;
+        let thumb_x = x + 8 + offset;
+        self.fill_rect(thumb_x - 4, y + 2, 9, 20, BUTTON_FACE)?;
+        self.fill_rect(thumb_x - 4, y + 2, 9, 1, BUTTON_LIGHT)?;
+        self.fill_rect(thumb_x - 4, y + 2, 1, 20, BUTTON_LIGHT)?;
+        self.fill_rect(thumb_x + 4, y + 3, 1, 19, BUTTON_DARK)?;
+        self.fill_rect(thumb_x - 3, y + 21, 7, 1, BUTTON_DARK)?;
+        if focused { self.draw_focus(x, y, width, height)?; }
+        Ok(click.is_some())
+    }
+
+    pub fn progress_bar(&mut self, x: i32, y: i32, width: u32, height: u32, value: u32, max: u32) -> Result<()> {
+        if width < 8 || height < 8 || max == 0 { return Err(Error(22)); }
+        let bounded = value.min(max);
+        self.fill_rect(x, y, width, height, 0xFFFFFF)?;
+        self.fill_rect(x, y, width, 1, BUTTON_DARK)?;
+        self.fill_rect(x, y, 1, height, BUTTON_DARK)?;
+        self.fill_rect(x + width as i32 - 1, y + 1, 1, height - 1, BUTTON_LIGHT)?;
+        self.fill_rect(x + 1, y + height as i32 - 1, width - 2, 1, BUTTON_LIGHT)?;
+        let inner_width = width - 4;
+        let filled = ((inner_width as u64 * bounded as u64) / max as u64) as u32;
+        if filled != 0 {
+            self.fill_rect(x + 2, y + 2, filled, height - 4, 0x12377B)?;
+        }
+        Ok(())
+    }
+
     pub fn confirm_dialog(&mut self, title: &str, message: &str) -> Result<bool> {
         self.run_dialog(title, message, true)
     }
