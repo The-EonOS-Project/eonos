@@ -3,6 +3,7 @@
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::fmt;
+use core::sync::atomic::{AtomicBool, Ordering};
 
 use crate::elf::{self, ElfError};
 use crate::pmm::{self, PAGE_SIZE};
@@ -25,6 +26,7 @@ struct Record {
     name: String,
     cwd: String,
     sandboxed: bool,
+    web_fetcher: bool,
 
     status: Option<i64>,
 }
@@ -36,6 +38,7 @@ pub struct ProcessInfo {
 }
 
 static PROCS: IrqMutex<Vec<Record>> = IrqMutex::new(Vec::new());
+static WEB_FETCH_ACTIVE: AtomicBool = AtomicBool::new(false);
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum SpawnError {
@@ -64,7 +67,7 @@ impl fmt::Display for SpawnError {
     }
 }
 
-fn register(pid: u64, parent: u64, name: &str, cwd: String, sandboxed: bool) {
+fn register(pid: u64, parent: u64, name: &str, cwd: String, sandboxed: bool, web_fetcher: bool) {
     let mut procs = PROCS.lock();
     match procs.iter().position(|r| r.pid == pid) {
         Some(i) => {
@@ -72,6 +75,7 @@ fn register(pid: u64, parent: u64, name: &str, cwd: String, sandboxed: bool) {
             procs[i].name = String::from(name);
             procs[i].cwd = cwd;
             procs[i].sandboxed = sandboxed;
+            procs[i].web_fetcher = web_fetcher;
         }
         None => procs.push(Record {
             pid,
@@ -79,6 +83,7 @@ fn register(pid: u64, parent: u64, name: &str, cwd: String, sandboxed: bool) {
             name: String::from(name),
             cwd,
             sandboxed,
+            web_fetcher,
             status: None,
         }),
     }
@@ -86,6 +91,7 @@ fn register(pid: u64, parent: u64, name: &str, cwd: String, sandboxed: bool) {
 
 pub fn exit_current(code: i64) -> ! {
     let pid = scheduler::current_id();
+    if is_web_fetcher(pid) { release_web_fetch(); }
     crate::input::release(pid);
     if let Some(console) = crate::console::CONSOLE.lock().as_mut() {
         console.graphics_exit(pid);
@@ -105,6 +111,7 @@ pub fn exit_current(code: i64) -> ! {
                     name: String::new(),
                     cwd: String::from("/"),
                     sandboxed: false,
+                    web_fetcher: false,
                     status: Some(code),
                 });
                 String::new()
@@ -137,6 +144,18 @@ pub fn is_sandboxed(pid: u64) -> bool {
         .iter()
         .find(|record| record.pid == pid)
         .is_some_and(|record| record.sandboxed)
+}
+
+pub fn is_web_fetcher(pid: u64) -> bool {
+    PROCS.lock().iter().find(|record| record.pid == pid).is_some_and(|record| record.web_fetcher)
+}
+
+pub fn reserve_web_fetch() -> bool {
+    WEB_FETCH_ACTIVE.compare_exchange(false, true, Ordering::AcqRel, Ordering::Acquire).is_ok()
+}
+
+pub fn release_web_fetch() {
+    WEB_FETCH_ACTIVE.store(false, Ordering::Release);
 }
 
 pub fn set_cwd(pid: u64, cwd: String) -> bool {
@@ -202,12 +221,14 @@ pub fn terminate_child(parent: u64, pid: u64, status: i64) -> bool {
         crate::sync::irq_restore(saved);
         return false;
     };
+    let was_web_fetcher = PROCS.lock()[index].web_fetcher;
     crate::syscall::close_process_files(pid);
     if !scheduler::kill_user(pid) {
         PROCS.lock()[index].status = None;
         crate::sync::irq_restore(saved);
         return false;
     }
+    if was_web_fetcher { release_web_fetch(); }
     if let Some(console) = crate::console::CONSOLE.lock().as_mut() {
         console.graphics_exit(pid);
     }
@@ -308,7 +329,7 @@ pub fn spawn_with_io(
     stdin_fd: Option<u64>,
     stdout_fd: Option<u64>,
 ) -> Result<u64, SpawnError> {
-    spawn_with_io_policy(path, argv, env, stdin_fd, stdout_fd, false)
+    spawn_with_io_policy(path, argv, env, stdin_fd, stdout_fd, false, false)
 }
 
 pub fn spawn_sandboxed_with_io(
@@ -318,7 +339,17 @@ pub fn spawn_sandboxed_with_io(
     stdin_fd: Option<u64>,
     stdout_fd: Option<u64>,
 ) -> Result<u64, SpawnError> {
-    spawn_with_io_policy(path, argv, env, stdin_fd, stdout_fd, true)
+    spawn_with_io_policy(path, argv, env, stdin_fd, stdout_fd, true, false)
+}
+
+pub fn spawn_web_fetch_with_io(
+    path: &str,
+    argv: &[String],
+    env: &[String],
+    stdout_fd: Option<u64>,
+) -> Result<u64, SpawnError> {
+    if path != "/bin/curler" { return Err(SpawnError::NotFound); }
+    spawn_with_io_policy(path, argv, env, None, stdout_fd, true, true)
 }
 
 fn spawn_with_io_policy(
@@ -328,6 +359,7 @@ fn spawn_with_io_policy(
     stdin_fd: Option<u64>,
     stdout_fd: Option<u64>,
     force_sandbox: bool,
+    web_fetcher: bool,
 ) -> Result<u64, SpawnError> {
     if path == "/bin/era" && !vfs::is_writable_mountpoint("/disk") {
         return Err(SpawnError::DiskNotMounted);
@@ -354,7 +386,7 @@ fn spawn_with_io_policy(
         }
     };
     crate::syscall::init_process_files(pid, parent, stdin_fd, stdout_fd);
-    register(pid, parent, path, cwd, sandboxed);
+    register(pid, parent, path, cwd, sandboxed, web_fetcher);
     crate::sync::irq_restore(irq_state);
     Ok(pid)
 }

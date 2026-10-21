@@ -232,6 +232,7 @@ pub const SYS_SEEK: u64 = 9037;
 pub const SYS_PIPE_READ_AVAILABLE: u64 = 9038;
 pub const SYS_PIPE_WRITE_AVAILABLE: u64 = 9039;
 pub const SYS_EXEC_APP_IO: u64 = 9040;
+pub const SYS_EXEC_WEB_FETCH: u64 = 9050;
 
 const ERA_GRAPHICS_ENTER: u64 = 0;
 const ERA_GRAPHICS_FILL_RECT: u64 = 1;
@@ -1824,6 +1825,43 @@ fn sys_exec_app_io(
     sys_exec_with_io_policy(path_ptr, path_len, argv_ptr, env_ptr, input, output, true)
 }
 
+fn sys_exec_web_fetch(url_ptr: u64, url_len: u64, stdout_fd: u64) -> u64 {
+    let length = url_len as usize;
+    if length == 0 || length > 2048 { return errno(EINVAL); }
+    let mut bytes = alloc::vec![0; length];
+    if !vmm::copy_from_user(&mut bytes, url_ptr) { return errno(EFAULT); }
+    let Ok(url) = core::str::from_utf8(&bytes) else { return errno(EINVAL); };
+    if !(url.starts_with("https://") || url.starts_with("http://"))
+        || url.bytes().any(|byte| byte <= 0x20 || byte == 0x7f)
+    { return errno(EINVAL); }
+    let parent = scheduler::current_id();
+    if !OPEN_FILES.lock().iter().any(|file| {
+        file.pid == parent && file.fd == stdout_fd && file.writable
+            && matches!(file.kind, FdKind::PipeWrite(_))
+    }) {
+        return errno(EBADF);
+    }
+    let argv = alloc::vec![
+        alloc::string::String::from("/bin/curler"),
+        alloc::string::String::from("--fetch"),
+        alloc::string::String::from(url),
+    ];
+    if !process::reserve_web_fetch() { return errno(EAGAIN); }
+    match process::spawn_web_fetch_with_io("/bin/curler", &argv, &[], Some(stdout_fd)) {
+        Ok(pid) => pid,
+        Err(error) => {
+            process::release_web_fetch();
+            match error {
+                process::SpawnError::NotFound => errno(ENOENT),
+                process::SpawnError::DiskNotMounted => errno(ENODEV),
+                process::SpawnError::Elf(_) => errno(ENOEXEC),
+                process::SpawnError::NoMemory => errno(ENOMEM),
+                process::SpawnError::NoThread => errno(EAGAIN),
+            }
+        }
+    }
+}
+
 fn sys_exec_with_io(
     path_ptr: u64,
     path_len: u64,
@@ -2387,34 +2425,26 @@ extern "C" fn syscall_dispatch(frame: &mut SyscallFrame) {
     crate::idt::enable_interrupts();
 
     let pid = scheduler::current_id();
-    if process::is_sandboxed(pid)
-        && matches!(
+    let sandboxed = process::is_sandboxed(pid);
+    let web_fetcher = process::is_web_fetcher(pid);
+    let denied_syscall = matches!(
             frame.rax,
             SYS_SYNC
                 | SYS_MOUNT
                 | SYS_PANIC
                 | SYS_POWER_CONTROL
-                | SYS_NET_SEND
-                | SYS_NET_RECEIVE
-                | SYS_NET_DHCP
-                | SYS_NET_CONFIG
-                | SYS_UDP_SEND
-                | SYS_UDP_RECEIVE
-                | SYS_NET_PING
-                | SYS_DNS_LOOKUP
-                | SYS_TCP_CONNECT
-                | SYS_TCP_SEND
-                | SYS_TCP_RECEIVE
-                | SYS_TCP_CLOSE
                 | SYS_KEYBOARD_FOCUS
                 | SYS_ERA_GRAPHICS
                 | SYS_KILL
-                | SYS_PIPE
                 | SYS_EXEC
                 | SYS_EXEC_IO
                 | SYS_EXEC_APP_IO
-        )
-    {
+        ) || (sandboxed && !web_fetcher && matches!(frame.rax,
+            SYS_NET_SEND | SYS_NET_RECEIVE | SYS_NET_DHCP | SYS_NET_CONFIG
+                | SYS_UDP_SEND | SYS_UDP_RECEIVE | SYS_NET_PING | SYS_DNS_LOOKUP
+                | SYS_TCP_CONNECT | SYS_TCP_SEND | SYS_TCP_RECEIVE | SYS_TCP_CLOSE
+        ));
+    if sandboxed && denied_syscall {
         frame.rax = errno(EPERM);
         return;
     }
@@ -2481,6 +2511,7 @@ extern "C" fn syscall_dispatch(frame: &mut SyscallFrame) {
         SYS_PIPE_READ_AVAILABLE => frame.rax = sys_pipe_read_available(frame.rdi, frame.rsi, frame.rdx as usize),
         SYS_PIPE_WRITE_AVAILABLE => frame.rax = sys_pipe_write_available(frame.rdi, frame.rsi, frame.rdx as usize),
         SYS_EXEC_APP_IO => frame.rax = sys_exec_app_io(frame.rdi, frame.rsi, frame.rdx, frame.r10, frame.r8, frame.r9),
+        SYS_EXEC_WEB_FETCH => frame.rax = sys_exec_web_fetch(frame.rdi, frame.rsi, frame.rdx),
         SYS_ERA_GRAPHICS => {
             frame.rax = sys_era_graphics(
                 frame.rdi, frame.rsi, frame.rdx, frame.r10, frame.r8, frame.r9,

@@ -19,6 +19,9 @@ const HEADER_LIMIT: usize = 16 * 1024;
 const READ_TIMEOUT_MS: u64 = 15_000;
 const TLS_BUFFER_LIMIT: usize = 256 * 1024;
 const TLS_RECORD_BUFFER: usize = 32 * 1024;
+const MAX_URL_BYTES: usize = 2048;
+const MAX_REDIRECTS: usize = 5;
+const FETCH_BODY_LIMIT: u64 = 256 * 1024;
 
 fn eonos_getrandom(buffer: &mut [u8]) -> Result<(), getrandom::Error> {
     eonos_rt::secure_random(buffer).map_err(|_| {
@@ -37,9 +40,9 @@ impl rustls::time_provider::TimeProvider for EonosTime {
     }
 }
 
-struct Url<'a> {
-    authority: &'a str,
-    host: &'a str,
+struct Url {
+    authority: String,
+    host: String,
     port: u16,
     path: String,
     https: bool,
@@ -49,6 +52,12 @@ struct Headers {
     status: u16,
     content_length: Option<u64>,
     chunked: bool,
+    location: Option<String>,
+}
+
+enum FetchResult {
+    Complete(u64),
+    Redirect(String),
 }
 
 struct ChunkDecoder {
@@ -104,8 +113,8 @@ impl ChunkDecoder {
     fn is_done(&self) -> bool { self.state == 4 }
 }
 
-fn parse_url(value: &str) -> Result<Url<'_>, ()> {
-    if value.bytes().any(|byte| byte <= 0x20 || byte == 0x7f) { return Err(()); }
+fn parse_url(value: &str) -> Result<Url, ()> {
+    if value.len() > MAX_URL_BYTES || value.bytes().any(|byte| byte <= 0x20 || byte == 0x7f) { return Err(()); }
     let (rest, https, default_port) = if let Some(rest) = value.strip_prefix("https://") {
         (rest, true, 443)
     } else if let Some(rest) = value.strip_prefix("http://") {
@@ -125,7 +134,57 @@ fn parse_url(value: &str) -> Result<Url<'_>, ()> {
     let path = if suffix.is_empty() { String::from("/") }
         else if suffix.starts_with('?') { alloc::format!("/{}", suffix) }
         else { suffix.to_string() };
-    Ok(Url { authority, host, port, path, https })
+    Ok(Url {
+        authority: String::from(authority),
+        host: String::from(host),
+        port,
+        path,
+        https,
+    })
+}
+
+fn resolve_url(base: &Url, location: &str) -> Result<Url, ()> {
+    let location = location.trim().split('#').next().unwrap_or("");
+    if location.is_empty() { return Err(()); }
+    if location.starts_with("http://") || location.starts_with("https://") {
+        return parse_url(location);
+    }
+    let scheme = if base.https { "https://" } else { "http://" };
+    if location.starts_with("//") {
+        return parse_url(&alloc::format!("{}{}", if base.https { "https:" } else { "http:" }, location));
+    }
+    let target = if location.starts_with('/') {
+        alloc::format!("{}{}{}", scheme, base.authority, location)
+    } else if location.starts_with('?') {
+        let current_path = base.path.split('?').next().unwrap_or("/");
+        alloc::format!("{}{}{}{}", scheme, base.authority, current_path, location)
+    } else {
+        let current_path = base.path.split('?').next().unwrap_or("/");
+        let directory = current_path.rsplit_once('/').map(|(parent, _)| parent).unwrap_or("");
+        let joined = normalize_location_path(&alloc::format!("{}/{}", directory, location));
+        alloc::format!("{}{}{}", scheme, base.authority, joined)
+    };
+    parse_url(&target)
+}
+
+fn normalize_location_path(value: &str) -> String {
+    let (path, query) = value.split_once('?').unwrap_or((value, ""));
+    let mut components = Vec::new();
+    for component in path.split('/') {
+        match component {
+            "" | "." => {}
+            ".." => { components.pop(); }
+            other => components.push(other),
+        }
+    }
+    let mut normalized = String::from("/");
+    normalized.push_str(&components.join("/"));
+    if path.ends_with('/') && !normalized.ends_with('/') { normalized.push('/'); }
+    if !query.is_empty() {
+        normalized.push('?');
+        normalized.push_str(query);
+    }
+    normalized
 }
 
 trait HttpStream {
@@ -386,6 +445,7 @@ fn parse_headers(bytes: &[u8]) -> Result<Headers, ()> {
     let status = status_parts.next().ok_or(())?.parse::<u16>().map_err(|_| ())?;
     let mut content_length = None;
     let mut chunked = false;
+    let mut location = None;
     for line in lines {
         if line.is_empty() { break; }
         let Some((name, value)) = line.split_once(':') else { continue; };
@@ -393,23 +453,46 @@ fn parse_headers(bytes: &[u8]) -> Result<Headers, ()> {
             content_length = Some(value.trim().parse::<u64>().map_err(|_| ())?);
         } else if name.eq_ignore_ascii_case("transfer-encoding") {
             chunked = value.split(',').any(|part| part.trim().eq_ignore_ascii_case("chunked"));
+        } else if name.eq_ignore_ascii_case("location") {
+            let value = value.trim();
+            if value.len() > MAX_URL_BYTES { return Err(()); }
+            location = Some(String::from(value));
         }
     }
-    Ok(Headers { status, content_length, chunked })
+    Ok(Headers { status, content_length, chunked, location })
 }
 
-fn write_body(file: &mut File, bytes: &[u8], written: &mut u64) -> Result<(), i32> {
+struct BodyWriter {
+    file: Option<File>,
+    written: u64,
+    limit: Option<u64>,
+}
+
+impl BodyWriter {
+    fn write(&mut self, bytes: &[u8]) -> Result<(), i32> {
+        let next = self.written.checked_add(bytes.len() as u64).ok_or(27)?;
+        if self.limit.is_some_and(|limit| next > limit) { return Err(27); }
+        if let Some(file) = self.file.as_mut() {
+            file.write_all(bytes).map_err(|error| match error {
+                eonos_user::Error::System(system) => system.0,
+                _ => 5,
+            })?;
+        } else {
+            eonos_rt::write_all(1, bytes).map_err(|error| error.0)?;
+        }
+        self.written = next;
+        Ok(())
+    }
+}
+
+fn write_body(writer: &mut BodyWriter, bytes: &[u8]) -> Result<(), i32> {
     if !bytes.is_empty() {
-        file.write_all(bytes).map_err(|error| match error {
-            eonos_user::Error::System(system) => system.0,
-            _ => 5,
-        })?;
-        *written = written.saturating_add(bytes.len() as u64);
+        writer.write(bytes)?;
     }
     Ok(())
 }
 
-fn receive_response(stream: &mut impl HttpStream, file: &mut File, url: &Url<'_>) -> Result<u64, i32> {
+fn receive_response(stream: &mut impl HttpStream, writer: &mut BodyWriter, url: &Url) -> Result<FetchResult, i32> {
     eonos_rt::eprintln!("curler: sending HTTP request");
     let request = alloc::format!(
         "GET {} HTTP/1.0\r\nHost: {}\r\nUser-Agent: curler/0.1\r\nAccept: */*\r\nConnection: close\r\n\r\n",
@@ -423,9 +506,8 @@ fn receive_response(stream: &mut impl HttpStream, file: &mut File, url: &Url<'_>
     let mut header_bytes = Vec::new();
     let mut receive = [0u8; 4096];
     let mut body_started = false;
-    let mut headers = Headers { status: 0, content_length: None, chunked: false };
+    let mut headers = Headers { status: 0, content_length: None, chunked: false, location: None };
     let mut content_received = 0u64;
-    let mut written = 0u64;
     let mut decoder = ChunkDecoder::new();
     let mut done = false;
     eonos_rt::eprintln!("curler: waiting for HTTP response");
@@ -446,6 +528,13 @@ fn receive_response(stream: &mut impl HttpStream, file: &mut File, url: &Url<'_>
             if header_bytes.len() > HEADER_LIMIT { return Err(71); }
             let Some(marker) = header_bytes.windows(4).position(|window| window == b"\r\n\r\n") else { continue; };
             headers = parse_headers(&header_bytes[..marker + 2]).map_err(|_| 71)?;
+            if matches!(headers.status, 301 | 302 | 303 | 307 | 308) {
+                if let Some(location) = headers.location.take() {
+                    return Ok(FetchResult::Redirect(location));
+                }
+                eonos_rt::eprintln!("curler: HTTP {} response has no Location header", headers.status);
+                return Err(71);
+            }
             if !(200..300).contains(&headers.status) {
                 eonos_rt::eprintln!("curler: server returned HTTP {}", headers.status);
                 return Err(0);
@@ -456,53 +545,81 @@ fn receive_response(stream: &mut impl HttpStream, file: &mut File, url: &Url<'_>
         if headers.chunked {
             let mut decoded = Vec::new();
             decoder.feed(body, &mut decoded).map_err(|_| 71)?;
-            write_body(file, &decoded, &mut written)?;
+            write_body(writer, &decoded)?;
             if decoder.is_done() { done = true; }
         } else if let Some(length) = headers.content_length {
             let remaining = length.saturating_sub(content_received) as usize;
             let take = body.len().min(remaining);
-            write_body(file, &body[..take], &mut written)?;
+            write_body(writer, &body[..take])?;
             content_received = content_received.saturating_add(take as u64);
             if content_received == length { done = true; }
         } else {
-            write_body(file, body, &mut written)?;
+            write_body(writer, body)?;
         }
     }
-    Ok(written)
+    Ok(FetchResult::Complete(writer.written))
 }
 
-fn download(url_text: &str, output: &str) -> Result<u64, i32> {
-    let url = parse_url(url_text).map_err(|_| 22)?;
+fn download(url_text: &str, output: Option<&str>) -> Result<u64, i32> {
+    let mut url = parse_url(url_text).map_err(|_| 22)?;
     let config = eonos_rt::ipv4_config().map_err(|error| error.0)?;
     if config.configured == 0 { eonos_rt::dhcp().map_err(|error| error.0)?; }
-    let address = match parse_ipv4(url.host) {
-        Some(address) => address,
-        None => eonos_rt::resolve_ipv4(url.host).map_err(|error| error.0)?,
-    };
-    let mut file = File::open(output, flags::WRITE_ONLY | flags::CREATE | flags::TRUNCATE)
-        .map_err(|error| match error { eonos_user::Error::System(system) => system.0, _ => 5 })?;
-    eonos_rt::eprintln!("curler: connecting to {}:{}", url.host, url.port);
-    if let Err(error) = eonos_rt::tcp_connect(address, url.port) {
-        eonos_rt::eprintln!("curler: TCP connect failed (error {})", error.0);
-        return Err(error.0);
-    }
-    let result = (|| -> Result<u64, i32> {
-        if url.https {
+    let file = output.map(|path| File::open(path, flags::WRITE_ONLY | flags::CREATE | flags::TRUNCATE)
+        .map_err(|error| match error { eonos_user::Error::System(system) => system.0, _ => 5 })).transpose()?;
+    let mut writer = BodyWriter { file, written: 0, limit: if output.is_some() { None } else { Some(FETCH_BODY_LIMIT) } };
+    for redirect in 0..=MAX_REDIRECTS {
+        let address = match parse_ipv4(&url.host) {
+            Some(address) => address,
+            None => eonos_rt::resolve_ipv4(&url.host).map_err(|error| error.0)?,
+        };
+        eonos_rt::eprintln!("curler: connecting to {}:{}", url.host, url.port);
+        if let Err(error) = eonos_rt::tcp_connect(address, url.port) {
+            eonos_rt::eprintln!("curler: TCP connect failed (error {})", error.0);
+            return Err(error.0);
+        }
+        let result = if url.https {
             eonos_rt::eprintln!("curler: starting verified TLS connection");
-            let mut stream = TlsStream::connect(url.host)?;
-            receive_response(&mut stream, &mut file, &url)
+            match TlsStream::connect(&url.host) {
+            Ok(mut stream) => receive_response(&mut stream, &mut writer, &url),
+                Err(error) => Err(error),
+            }
         } else {
             let mut stream = PlainStream;
-            receive_response(&mut stream, &mut file, &url)
+            receive_response(&mut stream, &mut writer, &url)
+        };
+        let _ = eonos_rt::tcp_close();
+        match result? {
+            FetchResult::Complete(bytes) => return Ok(bytes),
+            FetchResult::Redirect(location) => {
+                if redirect == MAX_REDIRECTS {
+                    eonos_rt::eprintln!("curler: too many redirects");
+                    return Err(40);
+                }
+                let next = resolve_url(&url, &location).map_err(|_| 22)?;
+                if url.https && !next.https {
+                    eonos_rt::eprintln!("curler: refusing HTTPS to HTTP redirect");
+                    return Err(71);
+                }
+                eonos_rt::eprintln!("curler: following redirect to {}", next.host);
+                url = next;
+            }
         }
-    })();
-    let _ = eonos_rt::tcp_close();
-    result
+    }
+    Err(40)
 }
 
 fn main(args: eonos_rt::Args<'_>) -> i32 {
     let mut values = args.skip(1);
-    let Some(url) = values.next().and_then(|arg| arg.to_str().ok()) else {
+    let Some(first) = values.next() else {
+        eonos_rt::eprintln!("{}", USAGE);
+        return 2;
+    };
+    if first.to_str().ok() == Some("--fetch") {
+        let Some(url) = values.next().and_then(|arg| arg.to_str().ok()) else { return 2; };
+        if values.next().is_some() { return 2; }
+        return match download(url, None) { Ok(_) => 0, Err(error) => { eonos_rt::eprintln!("curler: fetch failed (error {})", error); 1 } };
+    }
+    let Some(url) = first.to_str().ok() else {
         eonos_rt::eprintln!("{}", USAGE);
         return 2;
     };
@@ -517,7 +634,7 @@ fn main(args: eonos_rt::Args<'_>) -> i32 {
         },
         Some(_) => { eonos_rt::eprintln!("{}", USAGE); return 2; }
     };
-    match download(url, &output) {
+    match download(url, Some(&output)) {
         Ok(bytes) => { eonos_rt::println!("curler: saved {} bytes to {}", bytes, output); 0 }
         Err(0) => 1,
         Err(error) => { eonos_rt::eprintln!("curler: download failed (error {})", error); 1 }

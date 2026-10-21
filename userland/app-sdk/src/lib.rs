@@ -4,6 +4,7 @@ extern crate alloc;
 
 pub mod era;
 pub mod system;
+pub mod web;
 
 pub use eonos_rt::Args;
 pub use eonos_rt::entry;

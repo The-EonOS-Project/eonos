@@ -114,6 +114,7 @@ const SYS_GETCWD: usize = 9016;
 const SYS_LIST_DIRECTORY: usize = 9017;
 const SYS_EXEC_IO: usize = 9018;
 const SYS_EXEC_APP_IO: usize = 9040;
+const SYS_EXEC_WEB_FETCH: usize = 9050;
 const SYS_PIPE: usize = 9019;
 const SYS_MOUSE_STATE: usize = 9020;
 const SYS_MEMORY_INFO: usize = 9022;
@@ -332,6 +333,12 @@ pub fn pipe() -> Result<(usize, usize)> {
         )
     })?;
     Ok((descriptors[0], descriptors[1]))
+}
+
+pub fn start_web_fetch(url: &str, stdout_fd: usize) -> Result<usize> {
+    checked(unsafe {
+        syscall3(SYS_EXEC_WEB_FETCH, url.as_ptr() as usize, url.len(), stdout_fd)
+    })
 }
 
 pub fn pipe_read_available(fd: usize, buffer: &mut [u8]) -> Result<usize> {

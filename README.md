@@ -175,7 +175,8 @@ bodies and verifies HTTPS certificates against the bundled WebPKI root set.
 The kernel supplies TLS randomness through the hardware RDRAND instruction and
 uses the CMOS RTC time for certificate validity checks, so TLS fails safely if
 the CPU has no working RDRAND or the RTC has no valid date. Mount the writable
-disk at `/disk` first to keep downloads across reboots. Redirects and multiple
+disk at `/disk` first to keep downloads across reboots. `curler` follows up to
+five HTTP redirects and refuses redirects that downgrade HTTPS to HTTP. Multiple
 simultaneous TCP connections are not supported yet. At boot the kernel
 reads the CMOS real-time clock, treats it as UTC, and advances that reading from
 the monotonic PIT timer. `eonos_rt::wall_time_secs()` returns Unix time for
@@ -311,12 +312,15 @@ available for an app's own close behavior, and the window close button
 terminates it.
 
 The kernel enforces the application sandbox even when a program bypasses the
-SDK. Executables under `/apps/bin`, `/disk/apps/bin`, and their descendants cannot write files,
-change directories through writable handles, mount or sync storage, control
-power, seize physical keyboard focus, use raw framebuffer graphics, control
-networking, or request a kernel panic. Read-only file access, ordinary
+SDK. Executables under `/apps/bin`, `/disk/apps/bin`, and their descendants
+cannot mount or sync storage, control power, seize physical keyboard focus, use
+raw framebuffer graphics, open raw network sockets, or request a kernel panic.
+The SDK provides a bounded HTTP(S) GET operation through a fixed system helper:
+TLS certificates are verified, redirects are limited, and response bodies are
+capped at 256 KiB. Apps receive response bytes rather than raw network access.
+SDK file operations are restricted to the mounted `/disk`; ordinary
 process-local memory, sleeping, and assigned standard pipes remain available.
-This first SDK version has no general filesystem write API, network API, audio,
-shared-memory surfaces, or independently managed app lifecycle service. Era
-apps use a single bounded drawing-command stream rather than a GPU-backed
-surface; shell apps get terminal output through Konsul.
+Audio, shared-memory surfaces, and an
+independently managed app lifecycle service are not provided. Era apps use a
+single bounded drawing-command stream rather than a GPU-backed surface; shell
+apps get terminal output through Konsul.

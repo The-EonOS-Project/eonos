@@ -31,6 +31,17 @@ the caller clears other values in a group. `slider` changes its value on a
 pointer click and clamps it to the supplied inclusive range. `progress_bar`
 clamps values above its nonzero maximum.
 
+`eonos_app::web::fetch` downloads a bounded HTTP(S) response through the
+system's verified `curler` helper. TLS certificates are checked, HTTPS cannot
+redirect down to HTTP, redirects are limited, and the response body is capped
+at 256 KiB. Apps receive the body bytes, not a raw network socket. `fetch_html`
+combines this with `parse_html`. The HTML parser provides a bounded, basic
+HTML-to-text conversion. It removes markup and script/style bodies, decodes
+common named and numeric entities, captures the document title, and records
+link destinations with byte offsets into the normalized text. It is not a full
+HTML or CSS browser engine. This is groundwork for a lightweight text browser,
+not a full browser engine.
+
 From the `eon-apps` repository root, build an external application with:
 
 ```sh
