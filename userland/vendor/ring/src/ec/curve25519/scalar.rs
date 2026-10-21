@@ -1,16 +1,16 @@
-// Copyright 2015-2019 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use crate::{
     arithmetic::limbs_from_hex,
@@ -25,8 +25,8 @@ pub struct Scalar([u8; SCALAR_LEN]);
 pub const SCALAR_LEN: usize = 32;
 
 impl Scalar {
-    // Constructs a `Scalar` from `bytes`, failing if `bytes` encodes a scalar
-    // that is not in the range [0, n).
+    
+    
     pub fn from_bytes_checked(bytes: [u8; SCALAR_LEN]) -> Result<Self, error::Unspecified> {
         const ORDER: [limb::Limb; SCALAR_LEN / limb::LIMB_BYTES] =
             limbs_from_hex("1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed");
@@ -42,7 +42,7 @@ impl Scalar {
         Ok(Self(bytes))
     }
 
-    // Constructs a `Scalar` from `digest` reduced modulo n.
+    
     pub fn from_sha512_digest_reduced(digest: digest::Digest) -> Self {
         prefixed_extern! {
             fn x25519_sc_reduce(s: &mut UnreducedScalar);

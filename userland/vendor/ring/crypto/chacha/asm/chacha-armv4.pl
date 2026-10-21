@@ -27,17 +27,17 @@
 #
 #			IALU/gcc-4.4    1xNEON      3xNEON+1xIALU
 #
-# Cortex-A5		19.3(*)/+95%    21.8        14.1
-# Cortex-A8		10.5(*)/+160%   13.9        6.35
-# Cortex-A9		12.9(**)/+110%  14.3        6.50
-# Cortex-A15		11.0/+40%       16.0        5.00
-# Snapdragon S4		11.5/+125%      13.6        4.90
+# Cortex-A5		19.3(*)/+95 
+# Cortex-A8		10.5(*)/+160 
+# Cortex-A9		12.9(**)/+110 
+# Cortex-A15		11.0/+40 
+# Snapdragon S4		11.5/+125 
 #
 # (*)	most "favourable" result for aligned data on little-endian
-#	processor, result for misaligned data is 10-15% lower;
-# (**)	this result is a trade-off: it can be improved by 20%,
+#	processor, result for misaligned data is 10-15 
+# (**)	this result is a trade-off: it can be improved by 20 
 #	but then Snapdragon S4 and Cortex-A8 results get
-#	20-25% worse;
+#	20-25 
 
 $flavour = shift;
 if ($flavour=~/\w[\w\-]*\.\w+$/) { $output=$flavour; undef $flavour; }

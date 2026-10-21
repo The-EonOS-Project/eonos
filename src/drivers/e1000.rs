@@ -1,7 +1,7 @@
-//! Polling Intel E1000 Ethernet driver (82540EM/82545EM/82574L family).
-//!
-//! This first network layer deliberately stops at Ethernet frames: it does
-//! not configure an IP address, run DHCP, or install an interrupt handler.
+
+
+
+
 
 use alloc::vec::Vec;
 use core::ptr::{read_volatile, write_volatile};
@@ -196,7 +196,7 @@ pub fn init() {
         core::hint::spin_loop();
     }
     reg_write(registers, REG_IMC, 0xffff_ffff);
-    let _ = reg_read(registers, 0x00c0); // acknowledge any pending causes
+    let _ = reg_read(registers, 0x00c0); 
 
     let Some(rx_ring_page) = DmaPage::allocate() else { crate::log_fail!("Ethernet", "Init", "DMA memory unavailable"); return; };
     let Some(tx_ring_page) = DmaPage::allocate() else { crate::log_fail!("Ethernet", "Init", "DMA memory unavailable"); return; };
@@ -276,7 +276,7 @@ pub fn transmit(frame: &[u8]) -> Result<(), Error> {
     unsafe {
         core::ptr::copy_nonoverlapping(frame.as_ptr(), device.tx_buffers[index].virtual_address, frame.len());
         write_volatile(core::ptr::addr_of_mut!((*device.tx_ring.add(index)).length), frame.len() as u16);
-        write_volatile(core::ptr::addr_of_mut!((*device.tx_ring.add(index)).command), 0x0b); // EOP | IFCS | RS
+        write_volatile(core::ptr::addr_of_mut!((*device.tx_ring.add(index)).command), 0x0b); 
         write_volatile(core::ptr::addr_of_mut!((*device.tx_ring.add(index)).status), 0);
     }
     fence(Ordering::Release);
@@ -286,7 +286,7 @@ pub fn transmit(frame: &[u8]) -> Result<(), Error> {
     Ok(())
 }
 
-/// Poll one received frame. Returns None when the RX ring is currently empty.
+
 pub fn receive(output: &mut [u8]) -> Result<Option<usize>, Error> {
     let mut guard = DEVICE.lock();
     let device = guard.as_mut().ok_or(Error::NoDevice)?;

@@ -1,4 +1,4 @@
-//doomgeneric for soso os
+
 
 #include "doomkeys.h"
 #include "m_argv.h"
@@ -90,7 +90,7 @@ static unsigned char convertToDoomKey(unsigned char scancode)
 
 static void addKeyToQueue(int pressed, unsigned char keyCode)
 {
-	//printf("key hex %x decimal %d\n", keyCode, keyCode);
+	
 
         unsigned char key = convertToDoomKey(keyCode);
 
@@ -106,7 +106,7 @@ struct termios orig_termios;
 
 void disableRawMode()
 {
-  //printf("returning original termios\n");
+  
   tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
 }
 
@@ -162,7 +162,7 @@ void DG_Init()
 
     if (KeyboardFd >= 0)
     {
-        //enter non-blocking mode
+        
         ioctl(KeyboardFd, 1, (void*)1);
     }
 
@@ -197,7 +197,7 @@ static void handleKeyInput()
 
         scancode = (0x7F & scancode);
 
-        //printf("scancode:%x pressed:%d\n", scancode, 0 == keyRelease);
+        
 
         if (0 == keyRelease)
         {
@@ -235,14 +235,14 @@ uint32_t DG_GetTicksMs()
 
     gettimeofday(&tp, &tzp);
 
-    return (tp.tv_sec * 1000) + (tp.tv_usec / 1000); /* return milliseconds */
+    return (tp.tv_sec * 1000) + (tp.tv_usec / 1000); 
 }
 
 int DG_GetKey(int* pressed, unsigned char* doomKey)
 {
     if (s_KeyQueueReadIndex == s_KeyQueueWriteIndex)
     {
-        //key queue is empty
+        
 
         return 0;
     }

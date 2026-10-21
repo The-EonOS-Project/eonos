@@ -1,19 +1,19 @@
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 2005-2014 Simon Howard
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// DESCRIPTION:  none
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,25 +34,25 @@
 #include "m_argv.h"
 #include "m_config.h"
 
-// Sound sample rate to use for digital output (Hz)
+
 
 int snd_samplerate = 44100;
 
-// Maximum number of bytes to dedicate to allocated sound effects.
-// (Default: 64MB)
+
+
 
 int snd_cachesize = 64 * 1024 * 1024;
 
-// Config variable that controls the sound buffer size.
-// We default to 28ms (1000 / 35fps = 1 buffer per tic).
+
+
 
 int snd_maxslicetime_ms = 28;
 
-// External command to invoke to play back music.
+
 
 char *snd_musiccmd = "";
 
-// Low-level sound and music modules we are using
+
 
 static sound_module_t *sound_module = NULL;
 static music_module_t *music_module = NULL;
@@ -60,16 +60,16 @@ static music_module_t *music_module = NULL;
 int snd_musicdevice = SNDDEVICE_SB;
 int snd_sfxdevice = SNDDEVICE_SB;
 
-// DOS-specific options: These are unused but should be maintained
-// so that the config file can be shared between chocolate
-// doom and doom.exe
+
+
+
 
 static int snd_sbport = 0;
 static int snd_sbirq = 0;
 static int snd_sbdma = 0;
 static int snd_mport = 0;
 
-// Compiled-in sound modules:
+
 
 static sound_module_t *sound_modules[] = 
 {
@@ -79,7 +79,7 @@ static sound_module_t *sound_modules[] =
     NULL,
 };
 
-// Check if a sound device is in the given list of devices
+
 
 static boolean SndDeviceInList(snddevice_t device, snddevice_t *list,
                                int len)
@@ -97,8 +97,8 @@ static boolean SndDeviceInList(snddevice_t device, snddevice_t *list,
     return false;
 }
 
-// Find and initialize a sound_module_t appropriate for the setting
-// in snd_sfxdevice.
+
+
 
 static void InitSfxModule(boolean use_sfx_prefix)
 {
@@ -108,14 +108,14 @@ static void InitSfxModule(boolean use_sfx_prefix)
 
     for (i=0; sound_modules[i] != NULL; ++i)
     {
-        // Is the sfx device in the list of devices supported by
-        // this module?
+        
+        
 
         if (SndDeviceInList(snd_sfxdevice, 
                             sound_modules[i]->sound_devices,
                             sound_modules[i]->num_sound_devices))
         {
-            // Initialize the module
+            
 
             if (sound_modules[i]->Init(use_sfx_prefix))
             {
@@ -126,62 +126,62 @@ static void InitSfxModule(boolean use_sfx_prefix)
     }
 }
 
-// Initialize music according to snd_musicdevice.
+
 
 static void InitMusicModule(void)
 {
 #ifdef FEATURE_SOUND
     music_module = &DG_music_module;
-#endif /* FEATURE_SOUND */
+#endif 
 }
 
-//
-// Initializes sound stuff, including volume
-// Sets channels, SFX and music volume,
-//  allocates channel buffer, sets S_sfx lookup.
-//
+
+
+
+
+
 
 void I_InitSound(boolean use_sfx_prefix)
 {  
     boolean nosound, nosfx, nomusic;
 
-    //!
-    // @vanilla
-    //
-    // Disable all sound output.
-    //
+    
+    
+    
+    
+    
 
     nosound = M_CheckParm("-nosound") > 0;
 
-    //!
-    // @vanilla
-    //
-    // Disable sound effects. 
-    //
+    
+    
+    
+    
+    
 
     nosfx = M_CheckParm("-nosfx") > 0;
 
-    //!
-    // @vanilla
-    //
-    // Disable music.
-    //
+    
+    
+    
+    
+    
 
     nomusic = M_CheckParm("-nomusic") > 0;
 
-    // Initialize the sound and music subsystems.
+    
 
     if (!nosound && !screensaver_mode)
     {
-        // This is kind of a hack. If native MIDI is enabled, set up
-        // the TIMIDITY_CFG environment variable here before SDL_mixer
-        // is opened.
+        
+        
+        
 
         if (!nomusic
          && (snd_musicdevice == SNDDEVICE_GENMIDI
           || snd_musicdevice == SNDDEVICE_GUS))
         {
-            //I_InitTimidityConfig();
+            
         }
 
         if (!nosfx)
@@ -413,8 +413,8 @@ void I_BindSoundVariables(void)
     M_BindVariable("libsamplerate_scale", &libsamplerate_scale);
 #endif
 
-    // Before SDL_mixer version 1.2.11, MIDI music caused the game
-    // to crash when it looped.  If this is an old SDL_mixer version,
-    // disable MIDI.
+    
+    
+    
 }
 

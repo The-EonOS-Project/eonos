@@ -1,4 +1,4 @@
-//doomgeneric emscripten port
+
 
 #include "doomkeys.h"
 #include "m_argv.h"
@@ -149,11 +149,11 @@ void DG_Init()
                             SDL_WINDOW_SHOWN
                             );
 
-  // Setup renderer
+  
   renderer =  SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-  // Clear winow
+  
   SDL_RenderClear( renderer );
-  // Render the rect to the screen
+  
   SDL_RenderPresent(renderer);
 
   texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, DOOMGENERIC_RESX, DOOMGENERIC_RESY);
@@ -184,7 +184,7 @@ int DG_GetKey(int* pressed, unsigned char* doomKey)
 {
   if (s_KeyQueueReadIndex == s_KeyQueueWriteIndex)
   {
-    //key queue is empty
+    
     return 0;
   }
   else

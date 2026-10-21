@@ -30,13 +30,13 @@
 # rearrangement and/or increase bus bandwidth utilization). Dedicated
 # squaring procedure should give further performance improvement...
 # Yet, for being draft, the code improves rsa512 *sign* benchmark by
-# 110%(!), rsa1024 one - by 70% and rsa4096 - by 20%:-)
+# 110 
 
 # December 2006
 #
-# Modulo-scheduling SSE2 loops results in further 15-20% improvement.
+# Modulo-scheduling SSE2 loops results in further 15-20 
 # Integer-only code [being equipped with dedicated squaring procedure]
-# gives ~40% on rsa512 sign benchmark...
+# gives ~40 
 
 $0 =~ m/(.*[\/\\])[^\/\\]+$/; $dir=$1;
 push(@INC,"${dir}","${dir}../../../perlasm");

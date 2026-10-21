@@ -1,23 +1,23 @@
-// Copyright 2015-2016 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-//! Build the non-Rust components.
 
-// It seems like it would be a good idea to use `log!` for logging, but it
-// isn't worth having the external dependencies (one for the `log` crate, and
-// another for the concrete logging implementation). Instead we use `eprintln!`
-// to log everything to stderr.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use std::{
     ffi::{OsStr, OsString},
@@ -30,10 +30,10 @@ use std::{
 mod env {
     use std::ffi::OsString;
 
-    /// Read an environment variable and tell Cargo that we depend on it.
-    ///
-    /// The name is static since we intend to only read a static set of environment
-    /// variables.
+    
+    
+    
+    
     pub fn var_os(name: &'static str) -> Option<OsString> {
         println!("cargo:rerun-if-env-changed={}", name);
         std::env::var_os(name)
@@ -128,7 +128,7 @@ fn cpp_flags(compiler: &cc::Tool) -> &'static [&'static str] {
     if !compiler.is_like_msvc() {
         static NON_MSVC_FLAGS: &[&str] = &[
             "-fvisibility=hidden",
-            "-std=c1x", // GCC 4.6 requires "c1x" instead of "c11"
+            "-std=c1x", 
             "-Wall",
             "-Wbad-function-cast",
             "-Wcast-align",
@@ -148,27 +148,27 @@ fn cpp_flags(compiler: &cc::Tool) -> &'static [&'static str] {
         NON_MSVC_FLAGS
     } else {
         static MSVC_FLAGS: &[&str] = &[
-            "/Gy", // Enable function-level linking.
+            "/Gy", 
             "/Zc:wchar_t",
             "/Zc:forScope",
             "/Zc:inline",
-            // Warnings.
+            
             "/Wall",
-            "/wd4127", // C4127: conditional expression is constant
-            "/wd4464", // C4464: relative include path contains '..'
-            "/wd4514", // C4514: <name>: unreferenced inline function has be
-            "/wd4710", // C4710: function not inlined
-            "/wd4711", // C4711: function 'function' selected for inline expansion
-            "/wd4820", // C4820: <struct>: <n> bytes padding added after <name>
-            "/wd5045", /* C5045: Compiler will insert Spectre mitigation for memory load if
-                        * /Qspectre switch specified */
+            "/wd4127", 
+            "/wd4464", 
+            "/wd4514", 
+            "/wd4710", 
+            "/wd4711", 
+            "/wd4820", 
+            "/wd5045",  
+  
         ];
         MSVC_FLAGS
     }
 }
 
-// None means "any OS" or "any target". The first match in sequence order is
-// taken.
+
+
 const ASM_TARGETS: &[AsmTarget] = &[
     AsmTarget {
         oss: LINUX_ABI,
@@ -223,13 +223,13 @@ const ASM_TARGETS: &[AsmTarget] = &[
 ];
 
 struct AsmTarget {
-    /// Operating systems.
+    
     oss: &'static [&'static str],
 
-    /// Architectures.
+    
     arch: &'static str,
 
-    /// The PerlAsm format name.
+    
     perlasm_format: &'static str,
 }
 
@@ -239,11 +239,11 @@ impl AsmTarget {
     }
 }
 
-/// Operating systems that have the same ABI as Linux on every architecture
-/// mentioned in `ASM_TARGETS`.
+
+
 const LINUX_ABI: &[&str] = &[
-    // EonOS user programs use the x86-64 System V ELF ABI, so the Linux
-    // perlasm ELF output is also correct for this freestanding target.
+    
+    
     "none",
     "android",
     "dragonfly",
@@ -262,30 +262,30 @@ const LINUX_ABI: &[&str] = &[
 const WIN32N: &str = "win32n";
 const NASM: &str = "nasm";
 
-/// Operating systems that have the same ABI as macOS on every architecture
-/// mentioned in `ASM_TARGETS`.
+
+
 const APPLE_ABI: &[&str] = &["ios", "macos", "tvos", "visionos", "watchos"];
 
 const WINDOWS: &str = "windows";
 
 fn main() {
-    // Avoid assuming the working directory is the same is the $CARGO_MANIFEST_DIR so that toolchains
-    // which may assume other working directories can still build this code.
+    
+    
     let c_root_dir = PathBuf::from(
         env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR should always be set"),
     );
 
-    // Keep in sync with `core_name_and_version!` in prefixed.rs.
+    
     let core_name_and_version = [
         &env::var("CARGO_PKG_NAME").unwrap(),
         "core",
         &env::var("CARGO_PKG_VERSION_MAJOR").unwrap(),
         &env::var("CARGO_PKG_VERSION_MINOR").unwrap(),
         &env::var("CARGO_PKG_VERSION_PATCH").unwrap(),
-        &env::var("CARGO_PKG_VERSION_PRE").unwrap(), // Often empty
+        &env::var("CARGO_PKG_VERSION_PRE").unwrap(), 
     ]
     .join("_");
-    // Ensure `links` in Cargo.toml is consistent with the version.
+    
     assert_eq!(
         &env::var("CARGO_MANIFEST_LINKS").unwrap(),
         &core_name_and_version
@@ -315,13 +315,13 @@ fn ring_build_rs_main(c_root_dir: &Path, core_name_and_version: &str) {
 
     let is_git = fs::metadata(c_root_dir.join(".git")).is_ok();
 
-    // Published builds are always built in release mode.
+    
     let is_debug = is_git && env::var("DEBUG").unwrap() != "false";
 
-    // During local development, force warnings in non-Rust code to be treated
-    // as errors. Since warnings are highly compiler-dependent and compilers
-    // don't maintain backward compatibility w.r.t. which warnings they issue,
-    // don't do this for packaged builds.
+    
+    
+    
+    
     let force_warnings_into_errors = is_git;
 
     let target = Target {
@@ -340,14 +340,14 @@ fn ring_build_rs_main(c_root_dir: &Path, core_name_and_version: &str) {
         None
     };
 
-    // If `.git` exists then assume this is the "local hacking" case where
-    // we want to make it easy to build *ring* using `cargo build`/`cargo test`
-    // without a prerequisite `package` step, at the cost of needing additional
-    // tools like `Perl` and/or `nasm`.
-    //
-    // If `.git` doesn't exist then assume that this is a packaged build where
-    // we want to optimize for minimizing the build tools required: No Perl,
-    // no nasm, etc.
+    
+    
+    
+    
+    
+    
+    
+    
     let generated_dir = if !is_git {
         c_root_dir.join(PREGENERATED)
     } else {
@@ -397,9 +397,9 @@ fn generate_sources_and_preassemble<'a>(
         perlasm(&perl_exe, &perlasm_src_dsts, asm_target, c_root_dir);
 
         if asm_target.use_nasm() {
-            // Package pregenerated object files in addition to pregenerated
-            // assembly language source files, so that the user doesn't need
-            // to install the assembler.
+            
+            
+            
             let srcs = asm_srcs(perlasm_src_dsts);
             for src in srcs {
                 nasm(&src, asm_target.arch, out_dir, out_dir, c_root_dir);
@@ -413,12 +413,12 @@ struct Target {
     os: String,
     env: String,
 
-    /// Is this a debug build? This affects whether assertions might be enabled
-    /// in the C code. For packaged builds, this should always be `false`.
+    
+    
     is_debug: bool,
 
-    /// true: Force warnings to be treated as errors.
-    /// false: Use the default behavior (perhaps determined by `$CFLAGS`, etc.)
+    
+    
     force_warnings_into_errors: bool,
 }
 
@@ -436,8 +436,8 @@ fn build_c_code(
         let asm_srcs = asm_srcs(perlasm_src_dsts);
 
         if asm_target.use_nasm() {
-            // Nasm was already used to generate the object files, so use them instead of
-            // assembling.
+            
+            
             let obj_srcs = asm_srcs
                 .iter()
                 .map(|src| obj_path(generated_dir, src.as_path()))
@@ -455,8 +455,8 @@ fn build_c_code(
         .filter(|p| !is_perlasm(p))
         .filter(|p| {
             if let Some(extension) = p.extension() {
-                // We don't (and can't) use any .S on Windows since MSVC and NASM can't assemble
-                // them.
+                
+                
                 if extension == "S"
                     && (target.arch == X86_64 || target.arch == X86)
                     && target.os == WINDOWS
@@ -485,8 +485,8 @@ fn build_c_code(
         ),
     ];
 
-    // XXX: Ideally, ring-test would only be built for `cargo test`, but Cargo
-    // can't do that yet.
+    
+    
     libs.iter()
         .for_each(|&(lib_name, srcs, asm_srcs, obj_srcs)| {
             let srcs = srcs.iter().chain(asm_srcs);
@@ -524,7 +524,7 @@ fn build_library<'a>(
 ) {
     let mut c = new_build(target, c_root_dir, include_dir);
 
-    // Compile all the (dirty) source files into object files.
+    
     srcs.for_each(|src| {
         c.file(c_root_dir.join(src));
     });
@@ -533,10 +533,10 @@ fn build_library<'a>(
         c.object(obj);
     });
 
-    // Rebuild the library if necessary.
+    
     let lib_path = PathBuf::from(out_dir).join(format!("lib{}.a", lib_name));
 
-    // Handled below.
+    
     let _ = c.cargo_metadata(false);
 
     c.compile(
@@ -546,23 +546,23 @@ fn build_library<'a>(
             .expect("No filename"),
     );
 
-    // Link the library. This works even when the library doesn't need to be
-    // rebuilt.
+    
+    
     println!("cargo:rustc-link-lib=static={}", lib_name);
 }
 
 fn obj_path(out_dir: &Path, src: &Path) -> PathBuf {
     let mut out_path = out_dir.join(src.file_name().unwrap());
-    // To eliminate unnecessary conditional logic, use ".o" as the extension,
-    // even when the compiler (e.g. MSVC) would normally use something else
-    // (e.g. ".obj"). cc-rs seems to do the same.
+    
+    
+    
     assert!(out_path.set_extension("o"));
     out_path
 }
 
 fn configure_cc(c: &mut cc::Build, target: &Target, c_root_dir: &Path, include_dir: &Path) {
     let compiler = c.get_compiler();
-    // FIXME: On Windows AArch64 we currently must use Clang to compile C code
+    
     let compiler = if target.os == WINDOWS && target.arch == AARCH64 && !compiler.is_like_clang() {
         let _ = c.compiler("clang");
         c.get_compiler()
@@ -577,7 +577,7 @@ fn configure_cc(c: &mut cc::Build, target: &Target, c_root_dir: &Path, include_d
     }
 
     if APPLE_ABI.contains(&target.os.as_str()) {
-        // ``-gfull`` is required for Darwin's |-dead_strip|.
+        
         let _ = c.flag("-gfull");
     } else if !compiler.is_like_msvc() {
         let _ = c.flag("-g3");
@@ -594,11 +594,11 @@ fn configure_cc(c: &mut cc::Build, target: &Target, c_root_dir: &Path, include_d
         }
     }
 
-    // Allow cross-compiling without a target sysroot for these targets.
+    
     if (target.arch == WASM32)
         || (target.os == "linux" && target.env == "musl" && target.arch != X86_64)
     {
-        // TODO: Expand this to non-clang compilers in 0.17.0 if practical.
+        
         if compiler.is_like_clang() {
             let _ = c.flag("-nostdlibinc");
             let _ = c.define("RING_CORE_NOSTDLIBINC", "1");
@@ -618,7 +618,7 @@ fn nasm(file: &Path, arch: &str, include_dir: &Path, out_dir: &Path, c_root_dir:
         _ => panic!("unsupported arch: {}", arch),
     };
 
-    // Nasm requires that the path end in a path separator.
+    
     let mut include_dir = include_dir.as_os_str().to_os_string();
     include_dir.push(OsString::from(String::from(std::path::MAIN_SEPARATOR)));
 
@@ -671,10 +671,10 @@ fn perlasm_src_dsts(out_dir: &Path, asm_target: &AsmTarget) -> Vec<(PathBuf, Pat
         .map(|src| (src.clone(), asm_path(out_dir, src, asm_target)))
         .collect::<Vec<_>>();
 
-    // Some PerlAsm source files need to be run multiple times with different
-    // output paths.
+    
+    
     {
-        // Appease the borrow checker.
+        
         let mut maybe_synthesize = |concrete, synthesized| {
             let concrete_path = PathBuf::from(concrete);
             if srcs.contains(&concrete_path) {
@@ -726,8 +726,8 @@ fn perlasm(
         if asm_target.arch == X86 {
             args.push("-fPIC".into());
         }
-        // Work around PerlAsm issue for ARM and AAarch64 targets by replacing
-        // back slashes with forward slashes.
+        
+        
         args.push(join_components_with_forward_slashes(dst));
         run_command_with_args(perl_exe, &args);
     }
@@ -746,8 +746,8 @@ fn get_command(var: &'static str, default: &str) -> PathBuf {
     PathBuf::from(env::var_os(var).unwrap_or_else(|| default.into()))
 }
 
-// TODO: We should emit `cargo:rerun-if-changed-env` for the various
-// environment variables that affect the build.
+
+
 fn emit_rerun_if_changed() {
     for path in &["crypto", "include", "third_party/fiat"] {
         walk_dir(&PathBuf::from(path), &|entry| {
@@ -757,7 +757,7 @@ fn emit_rerun_if_changed() {
                     println!("cargo:rerun-if-changed={}", path.to_str().unwrap());
                 }
                 _ => {
-                    // Ignore other types of files.
+                    
                 }
             }
         })
@@ -778,10 +778,10 @@ fn walk_dir(dir: &Path, cb: &impl Fn(&DirEntry)) {
     }
 }
 
-/// Creates the necessary header files for symbol renaming.
-///
-/// For simplicity, both non-Nasm- and Nasm- style headers are always
-/// generated, even though local non-packaged builds need only one of them.
+
+
+
+
 fn generate_prefix_symbols_headers(
     out_dir: &Path,
     core_name_and_version: &str,
@@ -849,8 +849,8 @@ fn generate_prefix_symbols_header(
 }
 
 fn prefix_all_symbols(pp: char, prefix_prefix: &str, prefix: &str) -> String {
-    // Rename some nistz256 assembly functions to match the names of their
-    // polyfills.
+    
+    
     static SYMBOLS_TO_RENAME: &[(&str, &str)] = &[
         ("ecp_nistz256_point_double", "p256_point_double"),
         ("ecp_nistz256_point_add", "p256_point_add"),

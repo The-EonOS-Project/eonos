@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# EonOS build script.
+
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -56,8 +56,8 @@ BUILD_STD_FLAGS=(
     -Zbuild-std=core,alloc,compiler_builtins
     -Zbuild-std-features=compiler-builtins-mem
 )
-# Setting RUSTFLAGS in the environment replaces target rustflags from
-# .cargo/config.toml, so keep the kernel linker script here as well.
+
+
 KERNEL_RUSTFLAGS="${RUSTFLAGS:+$RUSTFLAGS }-C link-arg=-Tconfig/linker.ld -C force-frame-pointers=yes"
 
 if [ "$PROFILE" = "release" ]; then
@@ -268,8 +268,8 @@ echo "==> Installing BIOS stage 1 into ISO"
 
 "$LIMINE_DIR/limine" bios-install "$ISO_PATH"
 
-# Record which kernel profile produced this ISO. run.sh uses this to avoid
-# silently booting a dev image when an optimized release image was requested.
+
+
 printf '%s:%s\n' "$PROFILE" "$DEBUG_BUILD" > "$ISO_PATH.profile"
 
 echo "==> Done: $ISO_PATH"

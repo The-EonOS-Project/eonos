@@ -1,4 +1,4 @@
-/* EonOS doomgeneric hooks; all OS services go through Rust userland APIs. */
+
 #include <stdint.h>
 #include "doomgeneric.h"
 

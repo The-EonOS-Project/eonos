@@ -1,20 +1,20 @@
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 2005-2014 Simon Howard
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// DESCRIPTION:
-//	Floor animation: raising stairs.
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -24,20 +24,20 @@
 
 #include "s_sound.h"
 
-// State.
+
 #include "doomstat.h"
 #include "r_state.h"
-// Data.
+
 #include "sounds.h"
 
 
-//
-// FLOORS
-//
 
-//
-// Move a plane (floor or ceiling) and check for crushing
-//
+
+
+
+
+
+
 result_e
 T_MovePlane
 ( sector_t*	sector,
@@ -53,11 +53,11 @@ T_MovePlane
     switch(floorOrCeiling)
     {
       case 0:
-	// FLOOR
+	
 	switch(direction)
 	{
 	  case -1:
-	    // DOWN
+	    
 	    if (sector->floorheight - speed < dest)
 	    {
 		lastpos = sector->floorheight;
@@ -67,7 +67,7 @@ T_MovePlane
 		{
 		    sector->floorheight =lastpos;
 		    P_ChangeSector(sector,crush);
-		    //return crushed;
+		    
 		}
 		return pastdest;
 	    }
@@ -86,7 +86,7 @@ T_MovePlane
 	    break;
 						
 	  case 1:
-	    // UP
+	    
 	    if (sector->floorheight + speed > dest)
 	    {
 		lastpos = sector->floorheight;
@@ -96,13 +96,13 @@ T_MovePlane
 		{
 		    sector->floorheight = lastpos;
 		    P_ChangeSector(sector,crush);
-		    //return crushed;
+		    
 		}
 		return pastdest;
 	    }
 	    else
 	    {
-		// COULD GET CRUSHED
+		
 		lastpos = sector->floorheight;
 		sector->floorheight += speed;
 		flag = P_ChangeSector(sector,crush);
@@ -120,11 +120,11 @@ T_MovePlane
 	break;
 									
       case 1:
-	// CEILING
+	
 	switch(direction)
 	{
 	  case -1:
-	    // DOWN
+	    
 	    if (sector->ceilingheight - speed < dest)
 	    {
 		lastpos = sector->ceilingheight;
@@ -135,13 +135,13 @@ T_MovePlane
 		{
 		    sector->ceilingheight = lastpos;
 		    P_ChangeSector(sector,crush);
-		    //return crushed;
+		    
 		}
 		return pastdest;
 	    }
 	    else
 	    {
-		// COULD GET CRUSHED
+		
 		lastpos = sector->ceilingheight;
 		sector->ceilingheight -= speed;
 		flag = P_ChangeSector(sector,crush);
@@ -158,7 +158,7 @@ T_MovePlane
 	    break;
 						
 	  case 1:
-	    // UP
+	    
 	    if (sector->ceilingheight + speed > dest)
 	    {
 		lastpos = sector->ceilingheight;
@@ -168,7 +168,7 @@ T_MovePlane
 		{
 		    sector->ceilingheight = lastpos;
 		    P_ChangeSector(sector,crush);
-		    //return crushed;
+		    
 		}
 		return pastdest;
 	    }
@@ -177,14 +177,14 @@ T_MovePlane
 		lastpos = sector->ceilingheight;
 		sector->ceilingheight += speed;
 		flag = P_ChangeSector(sector,crush);
-// UNUSED
-#if 0
-		if (flag == true)
-		{
-		    sector->ceilingheight = lastpos;
-		    P_ChangeSector(sector,crush);
-		    return crushed;
-		}
+
+#if 0 
+
+
+
+
+
+
 #endif
 	    }
 	    break;
@@ -196,9 +196,9 @@ T_MovePlane
 }
 
 
-//
-// MOVE A FLOOR TO IT'S DESTINATION (UP OR DOWN)
-//
+
+
+
 void T_MoveFloor(floormove_t* floor)
 {
     result_e	res;
@@ -244,9 +244,9 @@ void T_MoveFloor(floormove_t* floor)
 
 }
 
-//
-// HANDLE FLOOR TYPES
-//
+
+
+
 int
 EV_DoFloor
 ( line_t*	line,
@@ -264,11 +264,11 @@ EV_DoFloor
     {
 	sec = &sectors[secnum];
 		
-	// ALREADY MOVING?  IF SO, KEEP GOING...
+	
 	if (sec->specialdata)
 	    continue;
 	
-	// new floor thinker
+	
 	rtn = 1;
 	floor = Z_Malloc (sizeof(*floor), PU_LEVSPEC, 0);
 	P_AddThinker (&floor->thinker);
@@ -437,9 +437,9 @@ EV_DoFloor
 
 
 
-//
-// BUILD A STAIRCASE!
-//
+
+
+
 int
 EV_BuildStairs
 ( line_t*	line,
@@ -467,11 +467,11 @@ EV_BuildStairs
     {
 	sec = &sectors[secnum];
 		
-	// ALREADY MOVING?  IF SO, KEEP GOING...
+	
 	if (sec->specialdata)
 	    continue;
 	
-	// new floor thinker
+	
 	rtn = 1;
 	floor = Z_Malloc (sizeof(*floor), PU_LEVSPEC, 0);
 	P_AddThinker (&floor->thinker);
@@ -496,9 +496,9 @@ EV_BuildStairs
 		
 	texture = sec->floorpic;
 	
-	// Find next sector to raise
-	// 1.	Find 2-sided line with same sector side[0]
-	// 2.	Other side is the next sector to raise
+	
+	
+	
 	do
 	{
 	    ok = 0;

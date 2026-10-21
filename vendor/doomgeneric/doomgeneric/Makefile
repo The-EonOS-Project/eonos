@@ -1,9 +1,9 @@
-################################################################
-#
-# $Id:$
-#
-# $Log:$
-#
+
+
+
+
+
+
 
 ifeq ($(V),1)
 	VB=''
@@ -12,13 +12,13 @@ else
 endif
 
 
-CC=clang  # gcc or g++
+CC=clang  
 CFLAGS+=-ggdb3 -Os
 LDFLAGS+=-Wl,--gc-sections
-CFLAGS+=-ggdb3 -Wall -DNORMALUNIX -DLINUX -DSNDSERV -D_DEFAULT_SOURCE # -DUSEASM
+CFLAGS+=-ggdb3 -Wall -DNORMALUNIX -DLINUX -DSNDSERV -D_DEFAULT_SOURCE 
 LIBS+=-lm -lc -lX11
 
-# subdirectory for objects
+
 OBJDIR=build
 OUTPUT=doomgeneric
 

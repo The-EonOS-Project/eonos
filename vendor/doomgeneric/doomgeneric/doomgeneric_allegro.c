@@ -1,4 +1,4 @@
-// doomgeneric for Allegro library
+
 
 #include "doomkeys.h"
 #include "i_system.h"
@@ -13,7 +13,7 @@
 
 #define ALLEGRO_NO_KEY_DEFINES 1
 #include <allegro.h>
-#undef uint32_t // ugly hack because Allegro is Old and doesn't know modern GCC has stdint.h
+#undef uint32_t 
 
 
 static bool videomode_set = false;
@@ -32,7 +32,7 @@ static volatile unsigned int s_ticks = 0;
 
 
 void key_callback(int scancode) {
-	// this is in interrupt context, avoid heavy processing and be careful about volatile writes
+	
 	s_KeyQueue[s_KeyQueueWriteIndex] = scancode;
 	s_KeyQueueWriteIndex = (s_KeyQueueWriteIndex + 1) % KEYQUEUE_SIZE;
 }
@@ -40,7 +40,7 @@ END_OF_FUNCTION(key_callback);
 
 
 void timer_callback(void) {
-	// also in interrupt context
+	
 	s_ticks++;
 }
 END_OF_FUNCTION(timer_callback);
@@ -76,7 +76,7 @@ void DG_Init() {
 		I_Error("Unable to install timer: %d %s\n", result, allegro_error);
 	}
 
-	// don't set video mode yet so initialization messages stay on screen
+	
 }
 
 
@@ -97,19 +97,19 @@ void DG_DrawFrame()
 
 #ifdef CMAP256
 		set_color_depth(8);
-#else  // CMAP256
-		// does not seem to work on real DOS hardware
+#else  
+		
 		set_color_depth(32);
-#endif  // CMAP256
+#endif  
 
 		result = set_gfx_mode(GFX_AUTODETECT_FULLSCREEN, DOOMGENERIC_RESX, DOOMGENERIC_RESY, 0, 0);
 		if (result < 0) {
 			I_Error("Failed to set video mode: %s\n", allegro_error);
 		}
 
-		// register an exit handler to return to text mode
-		// while this is also done by allegro_exit handler registered earlier
-		// that's too late for ENDOOM screen to work correctly
+		
+		
+		
 		I_AtExit(back_to_text_mode, true);
 
 		if (!screen) {
@@ -121,10 +121,10 @@ void DG_DrawFrame()
 			I_Error("Failed to create temp bitmap\n");
 		}
 
-		// this is an evil hack
-		// replace the internal line pointers with pointers into DG_ScreenBuffer
-		// this avoids some copying
-		// it might crash when freeing the bitmap but we never do
+		
+		
+		
+		
 		for (y = 0; y < DOOMGENERIC_RESY; y++) {
 			temp_bitmap->line[y] = (unsigned char *) &DG_ScreenBuffer[y * DOOMGENERIC_RESX];
 		}
@@ -137,13 +137,13 @@ void DG_DrawFrame()
 
 #ifdef CMAP256
 
-	// changing palette implicitly waits for vsync
-	// TODO: should do it explicitly in case where we don't change palette
+	
+	
 	if (palette_changed) {
 		int i;
 
 		for (i = 0; i < 256; i++) {
-			// allegro uses VGA range 0..63
+			
 			pal[i].r = colors[i].r >> 2;
 			pal[i].g = colors[i].g >> 2;
 			pal[i].b = colors[i].b >> 2;
@@ -153,7 +153,7 @@ void DG_DrawFrame()
 		palette_changed = false;
 	}
 
-#endif  // CMAP256
+#endif  
 
 	blit(temp_bitmap, screen, 0, 0, 0, 0, DOOMGENERIC_RESX, DOOMGENERIC_RESY);
 }
@@ -174,7 +174,7 @@ uint32_t DG_GetTicksMs()
 int DG_GetKey(int *pressed, unsigned char *doomKey)
 {
 	if (s_KeyQueueReadIndex == s_KeyQueueWriteIndex){
-		//key queue is empty
+		
 		return 0;
 	} else {
 		bool released;

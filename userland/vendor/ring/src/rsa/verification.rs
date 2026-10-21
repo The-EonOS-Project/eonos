@@ -1,18 +1,18 @@
-// Copyright 2015-2016 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-//! Verification of RSA signatures.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use super::{
     parse_public_key, public_key, PublicExponent, RsaParameters, PUBLIC_KEY_PUBLIC_MODULUS_MAX_LEN,
@@ -51,8 +51,8 @@ macro_rules! rsa_params {
     ( $VERIFY_ALGORITHM:ident, $min_bits:expr, $PADDING_ALGORITHM:expr,
       $doc_str:expr ) => {
         #[doc=$doc_str]
-        ///
-        /// Only available in `alloc` mode.
+        
+        
         pub static $VERIFY_ALGORITHM: RsaParameters = RsaParameters {
             padding_alg: $PADDING_ALGORITHM,
             min_bits: bits::BitLength::from_bits($min_bits),
@@ -156,26 +156,26 @@ impl<B> super::PublicKeyComponents<B>
 where
     B: AsRef<[u8]>,
 {
-    /// Verifies that `signature` is a valid signature of `message` using `self`
-    /// as the public key. `params` determine what algorithm parameters
-    /// (padding, digest algorithm, key length range, etc.) are used in the
-    /// verification.
-    ///
-    /// When the public key is in DER-encoded PKCS#1 ASN.1 format, it is
-    /// recommended to use `ring::signature::verify()` with
-    /// `ring::signature::RSA_PKCS1_*`, because `ring::signature::verify()`
-    /// will handle the parsing in that case. Otherwise, this function can be used
-    /// to pass in the raw bytes for the public key components as
-    /// `untrusted::Input` arguments.
-    //
-    // There are a small number of tests that test this directly, but the
-    // test coverage for this function mostly depends on the test coverage for the
-    // `signature::VerificationAlgorithm` implementation for `RsaParameters`. If we
-    // change that, test coverage for `verify_rsa()` will need to be reconsidered.
-    // (The NIST test vectors were originally in a form that was optimized for
-    // testing `verify_rsa` directly, but the testing work for RSA PKCS#1
-    // verification was done during the implementation of
-    // `signature::VerificationAlgorithm`, before `verify_rsa` was factored out).
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     pub fn verify(
         &self,
         params: &RsaParameters,
@@ -206,10 +206,10 @@ pub(crate) fn verify_rsa_(
         bits::BitLength::from_byte_len(PUBLIC_KEY_PUBLIC_MODULUS_MAX_LEN)
             .map_err(error::erase::<InputTooLongError>)?;
 
-    // XXX: FIPS 186-4 seems to indicate that the minimum
-    // exponent value is 2**16 + 1, but it isn't clear if this is just for
-    // signing or also for verification. We support exponents of 3 and larger
-    // for compatibility with other commonly-used crypto libraries.
+    
+    
+    
+    
     let key = public_key::Inner::from_modulus_and_exponent(
         n,
         e,
@@ -219,11 +219,11 @@ pub(crate) fn verify_rsa_(
         cpu_features,
     )?;
 
-    // RFC 8017 Section 5.2.2: RSAVP1.
+    
     let mut decoded = [0u8; PUBLIC_KEY_PUBLIC_MODULUS_MAX_LEN];
     let decoded = key.exponentiate(signature, &mut decoded, cpu_features)?;
 
-    // Verify the padded message is correct.
+    
     let m_hash = digest::digest(params.padding_alg.digest_alg(), msg.as_slice_less_safe());
     untrusted::Input::from(decoded).read_all(error::Unspecified, |m| {
         params.padding_alg.verify(m_hash, m, key.n().len_bits())

@@ -1,21 +1,21 @@
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 2005-2014 Simon Howard
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// DESCRIPTION:
-//	Preparation of data for rendering,
-//	generation of lookups, caching, retrieval by name.
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include <stdio.h>
 
@@ -38,24 +38,24 @@
 
 #include "r_data.h"
 
-//
-// Graphics.
-// DOOM graphics for walls and sprites
-// is stored in vertical runs of opaque pixels (posts).
-// A column is composed of zero or more posts,
-// a patch or sprite is composed of zero or more columns.
-// 
 
 
 
-//
-// Texture definition.
-// Each texture is composed of one or more patches,
-// with patches being lumps stored in the WAD.
-// The lumps are referenced by number, and patched
-// into the rectangular texture space using origin
-// and possibly other attributes.
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 typedef struct
 {
     short	originx;
@@ -66,11 +66,11 @@ typedef struct
 } PACKEDATTR mappatch_t;
 
 
-//
-// Texture definition.
-// A DOOM wall texture is a list of patches
-// which are to be combined in a predefined order.
-//
+
+
+
+
+
 typedef struct
 {
     char		name[8];
@@ -83,43 +83,43 @@ typedef struct
 } PACKEDATTR maptexture_t;
 
 
-// A single patch from a texture definition,
-//  basically a rectangular area within
-//  the texture rectangle.
+
+
+
 typedef struct
 {
-    // Block origin (allways UL),
-    // which has allready accounted
-    // for the internal origin of the patch.
+    
+    
+    
     short	originx;	
     short	originy;
     int		patch;
 } texpatch_t;
 
 
-// A maptexturedef_t describes a rectangular texture,
-//  which is composed of one or more mappatch_t structures
-//  that arrange graphic patches.
+
+
+
 
 typedef struct texture_s texture_t;
 
 struct texture_s
 {
-    // Keep name for switch changing, etc.
+    
     char	name[8];		
     short	width;
     short	height;
 
-    // Index in textures list
+    
 
     int         index;
 
-    // Next in hash table chain
+    
 
     texture_t  *next;
     
-    // All the patches[patchcount]
-    //  are drawn back to front into the cached texture.
+    
+    
     short	patchcount;
     texpatch_t	patches[1];		
 };
@@ -144,18 +144,18 @@ texture_t**     textures_hashtable;
 
 
 int*			texturewidthmask;
-// needed for texture pegging
+
 fixed_t*		textureheight;		
 int*			texturecompositesize;
 short**			texturecolumnlump;
 unsigned short**	texturecolumnofs;
 byte**			texturecomposite;
 
-// for global animation
+
 int*		flattranslation;
 int*		texturetranslation;
 
-// needed for pre rendering
+
 fixed_t*	spritewidth;	
 fixed_t*	spriteoffset;
 fixed_t*	spritetopoffset;
@@ -163,25 +163,25 @@ fixed_t*	spritetopoffset;
 lighttable_t	*colormaps;
 
 
-//
-// MAPTEXTURE_T CACHING
-// When a texture is first needed,
-//  it counts the number of composite columns
-//  required in the texture and allocates space
-//  for a column directory and any new columns.
-// The directory will simply point inside other patches
-//  if there is only one patch in a given column,
-//  but any columns with multiple patches
-//  will have new column_ts generated.
-//
 
 
 
-//
-// R_DrawColumnInCache
-// Clip and draw a column
-//  from a patch into a cached post.
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void
 R_DrawColumnInCache
 ( column_t*	patch,
@@ -217,12 +217,12 @@ R_DrawColumnInCache
 
 
 
-//
-// R_GenerateComposite
-// Using the texture definition,
-//  the composite texture is created from the patches,
-//  and each column is cached.
-//
+
+
+
+
+
+
 void R_GenerateComposite (int texnum)
 {
     byte*		block;
@@ -246,7 +246,7 @@ void R_GenerateComposite (int texnum)
     collump = texturecolumnlump[texnum];
     colofs = texturecolumnofs[texnum];
     
-    // Composite the columns together.
+    
     patch = texture->patches;
 		
     for (i=0 , patch = texture->patches;
@@ -267,7 +267,7 @@ void R_GenerateComposite (int texnum)
 
 	for ( ; x<x2 ; x++)
 	{
-	    // Column does not have multiple patches?
+	    
 	    if (collump[x] >= 0)
 		continue;
 	    
@@ -281,20 +281,20 @@ void R_GenerateComposite (int texnum)
 						
     }
 
-    // Now that the texture has been built in column cache,
-    //  it is purgable from zone memory.
+    
+    
     Z_ChangeTag (block, PU_CACHE);
 }
 
 
 
-//
-// R_GenerateLookup
-//
+
+
+
 void R_GenerateLookup (int texnum)
 {
     texture_t*		texture;
-    byte*		patchcount;	// patchcount[texture->width]
+    byte*		patchcount;	
     texpatch_t*		patch;	
     patch_t*		realpatch;
     int			x;
@@ -306,17 +306,17 @@ void R_GenerateLookup (int texnum)
 	
     texture = textures[texnum];
 
-    // Composited texture not created yet.
+    
     texturecomposite[texnum] = 0;
     
     texturecompositesize[texnum] = 0;
     collump = texturecolumnlump[texnum];
     colofs = texturecolumnofs[texnum];
     
-    // Now count the number of columns
-    //  that are covered by more than one patch.
-    // Fill in the lump / offset, so columns
-    //  with only a single patch are all done.
+    
+    
+    
+    
     patchcount = (byte *) Z_Malloc(texture->width, PU_STATIC, &patchcount);
     memset (patchcount, 0, texture->width);
     patch = texture->patches;
@@ -352,11 +352,11 @@ void R_GenerateLookup (int texnum)
 		    texture->name);
 	    return;
 	}
-	// I_Error ("R_GenerateLookup: column without a patch");
+	
 	
 	if (patchcount[x] > 1)
 	{
-	    // Use the cached block.
+	    
 	    collump[x] = -1;	
 	    colofs[x] = texturecompositesize[texnum];
 	    
@@ -376,9 +376,9 @@ void R_GenerateLookup (int texnum)
 
 
 
-//
-// R_GetColumn
-//
+
+
+
 byte*
 R_GetColumn
 ( int		tex,
@@ -412,19 +412,19 @@ static void GenerateTextureHashTable(void)
 
     memset(textures_hashtable, 0, sizeof(texture_t *) * numtextures);
 
-    // Add all textures to hash table
+    
 
     for (i=0; i<numtextures; ++i)
     {
-        // Store index
+        
 
         textures[i]->index = i;
 
-        // Vanilla Doom does a linear search of the texures array
-        // and stops at the first entry it finds.  If there are two
-        // entries with the same name, the first one in the array
-        // wins. The new entry must therefore be added at the end
-        // of the hash chain, so that earlier entries win.
+        
+        
+        
+        
+        
 
         key = W_LumpNameHash(textures[i]->name) % numtextures;
 
@@ -435,7 +435,7 @@ static void GenerateTextureHashTable(void)
             rover = &(*rover)->next;
         }
 
-        // Hook into hash table
+        
 
         textures[i]->next = NULL;
         *rover = textures[i];
@@ -443,11 +443,11 @@ static void GenerateTextureHashTable(void)
 }
 
 
-//
-// R_InitTextures
-// Initializes the texture list
-//  with the textures from the world map.
-//
+
+
+
+
+
 void R_InitTextures (void)
 {
     maptexture_t*	mtexture;
@@ -483,7 +483,7 @@ void R_InitTextures (void)
     int			temp3;
 
     
-    // Load the patch names from pnames.lmp.
+    
     name[8] = 0;
     names = W_CacheLumpName (DEH_String("PNAMES"), PU_STATIC);
     nummappatches = LONG ( *((int *)names) );
@@ -497,9 +497,9 @@ void R_InitTextures (void)
     }
     W_ReleaseLumpName(DEH_String("PNAMES"));
 
-    // Load the map texture definitions from textures.lmp.
-    // The data is contained in one or two lumps,
-    //  TEXTURE1 for shareware, plus TEXTURE2 for commercial.
+    
+    
+    
     maptex = maptex1 = W_CacheLumpName (DEH_String("TEXTURE1"), PU_STATIC);
     numtextures1 = LONG(*maptex);
     maxoff = W_LumpLength (W_GetNumForName (DEH_String("TEXTURE1")));
@@ -529,14 +529,14 @@ void R_InitTextures (void)
 
     totalwidth = 0;
     
-    //	Really complex printing shit...
-    temp1 = W_GetNumForName (DEH_String("S_START"));  // P_???????
+    
+    temp1 = W_GetNumForName (DEH_String("S_START"));  
     temp2 = W_GetNumForName (DEH_String("S_END")) - 1;
     temp3 = ((temp2-temp1+63)/64) + ((numtextures+63)/64);
 
-    // If stdout is a real console, use the classic vanilla "filling
-    // up the box" effect, which uses backspace to "step back" inside
-    // the box.  If stdout is a file, don't draw the box.
+    
+    
+    
 
     if (I_ConsoleStdout())
     {
@@ -555,7 +555,7 @@ void R_InitTextures (void)
 
 	if (i == numtextures1)
 	{
-	    // Start looking in second texture file.
+	    
 	    maptex = maptex2;
 	    maxoff = maxoff2;
 	    directory = maptex+1;
@@ -611,12 +611,12 @@ void R_InitTextures (void)
     if (maptex2)
         W_ReleaseLumpName(DEH_String("TEXTURE2"));
     
-    // Precalculate whatever possible.	
+    
 
     for (i=0 ; i<numtextures ; i++)
 	R_GenerateLookup (i);
     
-    // Create translation table for global animation.
+    
     texturetranslation = Z_Malloc ((numtextures+1)*sizeof(*texturetranslation), PU_STATIC, 0);
     
     for (i=0 ; i<numtextures ; i++)
@@ -627,9 +627,9 @@ void R_InitTextures (void)
 
 
 
-//
-// R_InitFlats
-//
+
+
+
 void R_InitFlats (void)
 {
     int		i;
@@ -638,7 +638,7 @@ void R_InitFlats (void)
     lastflat = W_GetNumForName (DEH_String("F_END")) - 1;
     numflats = lastflat - firstflat + 1;
 	
-    // Create translation table for global animation.
+    
     flattranslation = Z_Malloc ((numflats+1)*sizeof(*flattranslation), PU_STATIC, 0);
     
     for (i=0 ; i<numflats ; i++)
@@ -646,12 +646,12 @@ void R_InitFlats (void)
 }
 
 
-//
-// R_InitSpriteLumps
-// Finds the width and hoffset of all sprites in the wad,
-//  so the sprite does not need to be cached completely
-//  just for having the header info ready during rendering.
-//
+
+
+
+
+
+
 void R_InitSpriteLumps (void)
 {
     int		i;
@@ -679,27 +679,27 @@ void R_InitSpriteLumps (void)
 
 
 
-//
-// R_InitColormaps
-//
+
+
+
 void R_InitColormaps (void)
 {
     int	lump;
 
-    // Load in the light tables, 
-    //  256 byte align tables.
+    
+    
     lump = W_GetNumForName(DEH_String("COLORMAP"));
     colormaps = W_CacheLumpNum(lump, PU_STATIC);
 }
 
 
 
-//
-// R_InitData
-// Locates all the lumps
-//  that will be used by all views
-// Must be called after W_Init.
-//
+
+
+
+
+
+
 void R_InitData (void)
 {
     R_InitTextures ();
@@ -713,10 +713,10 @@ void R_InitData (void)
 
 
 
-//
-// R_FlatNumForName
-// Retrieval, get a flat number for a flat name.
-//
+
+
+
+
 int R_FlatNumForName (char* name)
 {
     int		i;
@@ -736,17 +736,17 @@ int R_FlatNumForName (char* name)
 
 
 
-//
-// R_CheckTextureNumForName
-// Check whether texture is available.
-// Filter out NoTexture indicator.
-//
+
+
+
+
+
 int	R_CheckTextureNumForName (char *name)
 {
     texture_t *texture;
     int key;
 
-    // "NoTexture" marker.
+    
     if (name[0] == '-')		
 	return 0;
 		
@@ -767,11 +767,11 @@ int	R_CheckTextureNumForName (char *name)
 
 
 
-//
-// R_TextureNumForName
-// Calls R_CheckTextureNumForName,
-//  aborts with error message.
-//
+
+
+
+
+
 int	R_TextureNumForName (char* name)
 {
     int		i;
@@ -789,10 +789,10 @@ int	R_TextureNumForName (char* name)
 
 
 
-//
-// R_PrecacheLevel
-// Preloads all relevant graphics for the level.
-//
+
+
+
+
 int		flatmemory;
 int		texturememory;
 int		spritememory;
@@ -815,7 +815,7 @@ void R_PrecacheLevel (void)
     if (demoplayback)
 	return;
     
-    // Precache flats.
+    
     flatpresent = Z_Malloc(numflats, PU_STATIC, NULL);
     memset (flatpresent,0,numflats);	
 
@@ -839,7 +839,7 @@ void R_PrecacheLevel (void)
 
     Z_Free(flatpresent);
     
-    // Precache textures.
+    
     texturepresent = Z_Malloc(numtextures, PU_STATIC, NULL);
     memset (texturepresent,0, numtextures);
 	
@@ -850,12 +850,12 @@ void R_PrecacheLevel (void)
 	texturepresent[sides[i].bottomtexture] = 1;
     }
 
-    // Sky texture is always present.
-    // Note that F_SKY1 is the name used to
-    //  indicate a sky floor/ceiling as a flat,
-    //  while the sky texture is stored like
-    //  a wall texture, with an episode dependend
-    //  name.
+    
+    
+    
+    
+    
+    
     texturepresent[skytexture] = 1;
 	
     texturememory = 0;
@@ -876,7 +876,7 @@ void R_PrecacheLevel (void)
 
     Z_Free(texturepresent);
     
-    // Precache sprites.
+    
     spritepresent = Z_Malloc(numsprites, PU_STATIC, NULL);
     memset (spritepresent,0, numsprites);
 	

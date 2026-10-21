@@ -1,16 +1,16 @@
-// Copyright 2015-2023 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use super::Modulus;
 use crate::{
@@ -23,11 +23,11 @@ use core::{
     ops::{Deref, DerefMut},
 };
 
-/// All `BoxedLimbs<M>` are stored in the same number of limbs.
+
 pub(super) struct BoxedLimbs<M> {
     limbs: Box<[Limb]>,
 
-    /// The modulus *m* that determines the size of `limbx`.
+    
     m: PhantomData<M>,
 }
 
@@ -46,8 +46,8 @@ impl<M> DerefMut for BoxedLimbs<M> {
     }
 }
 
-// TODO: `derive(Clone)` after https://github.com/rust-lang/rust/issues/26925
-// is resolved or restrict `M: Clone`.
+
+
 impl<M> Clone for BoxedLimbs<M> {
     fn clone(&self) -> Self {
         Self {

@@ -1,9 +1,9 @@
-################################################################
-#
-# $Id:$
-#
-# $Log:$
-#
+
+
+
+
+
+
 
 ifeq ($(V),1)
 	VB=''
@@ -18,7 +18,7 @@ LDFLAGS+=-Wl,--gc-sections
 CFLAGS+=-ggdb3 -Wall -DSNDSERV -D_DEFAULT_SOURCE
 LIBS+=-lm -lgdi32
 
-# subdirectory for objects
+
 OBJDIR=build
 OUTPUT=doomgeneric.exe
 

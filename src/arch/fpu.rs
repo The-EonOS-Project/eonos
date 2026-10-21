@@ -1,9 +1,9 @@
-//! Eager x87/SSE state management for preemptive threads.
-//!
-//! The Rust kernel is built for soft-float, while freestanding x86-64 C uses
-//! the System V SSE ABI. Enable FXSAVE and preserve the 512-byte architectural
-//! state at every context switch so C user processes can use floating point
-//! without leaking registers between preempted threads.
+
+
+
+
+
+
 
 #[repr(C, align(16))]
 #[derive(Clone, Copy)]
@@ -46,6 +46,6 @@ pub fn init() {
 }
 
 pub fn default_state() -> FpuState {
-    // SAFETY: init writes this once before the scheduler creates any thread.
+    
     unsafe { DEFAULT_STATE }
 }

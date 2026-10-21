@@ -21,7 +21,7 @@ open STDOUT,">$output" || die "can't open $output: $!";
 
 $flavour = "linux32" if (!$flavour or $flavour eq "void");
 
-my %GLOBALS;
+my 
 my $dotinlocallabels=($flavour=~/linux/)?1:0;
 
 ################################################################
@@ -83,13 +83,13 @@ my $extern = sub {
 };
 my $type = sub {
     if ($flavour =~ /linux/)	{ ".type\t".join(',',@_); }
-    elsif ($flavour =~ /ios32/)	{ if (join(',',@_) =~ /(\w+),%function/) {
+    elsif ($flavour =~ /ios32/)	{ if (join(',',@_) =~ /(\w+), 
 					"#ifdef __thumb2__\n".
 					".thumb_func	$1\n".
 					"#endif";
 				  }
 			        }
-    elsif ($flavour =~ /win64/) { if (join(',',@_) =~ /(\w+),%function/) {
+    elsif ($flavour =~ /win64/) { if (join(',',@_) =~ /(\w+), 
                 # See https://sourceware.org/binutils/docs/as/Pseudo-Ops.html
                 # Per https://docs.microsoft.com/en-us/windows/win32/debug/pe-format#coff-symbol-table,
                 # the type for functions is 0x20, or 32.

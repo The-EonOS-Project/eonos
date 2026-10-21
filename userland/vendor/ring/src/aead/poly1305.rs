@@ -1,18 +1,18 @@
-// Copyright 2015-2025 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-// TODO: enforce maximum input length.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use super::{Tag, TAG_LEN};
 #[cfg(all(target_arch = "arm", target_endian = "little"))]
@@ -22,7 +22,7 @@ use crate::{cpu, polyfill::slice::AsChunks};
 mod ffi_arm_neon;
 mod ffi_fallback;
 
-/// A Poly1305 key.
+
 pub(super) struct Key {
     key_and_nonce: [u8; KEY_LEN],
 }
@@ -80,10 +80,10 @@ impl Context {
     }
 }
 
-/// Implements the original, non-IETF padding semantics.
-///
-/// This is used by chacha20_poly1305_openssh and the standalone
-/// poly1305 test vectors.
+
+
+
+
 pub(super) fn sign(key: Key, input: &[u8], cpu_features: cpu::Features) -> Tag {
     let ctx = Context::from_key(key, cpu_features);
     ctx.finish(input)
@@ -94,7 +94,7 @@ mod tests {
     use super::*;
     use crate::testutil as test;
 
-    // Adapted from BoringSSL's crypto/poly1305/poly1305_test.cc.
+    
     #[test]
     pub fn test_poly1305() {
         let cpu_features = cpu::features();

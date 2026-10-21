@@ -1,5 +1,5 @@
-; This file is generated from a similarly-named Perl script in the BoringSSL
-; source tree. Do not edit by hand.
+
+
 
 %ifidn __OUTPUT_FORMAT__, win64
 default	rel
@@ -579,7 +579,7 @@ global	vpaes_set_encrypt_key
 
 ALIGN	16
 vpaes_set_encrypt_key:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_vpaes_set_encrypt_key:
@@ -628,7 +628,7 @@ $L$enc_key_body:
 	lea	rsp,[184+rsp]
 $L$enc_key_epilogue:
 	xor	eax,eax
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -637,7 +637,7 @@ global	vpaes_ctr32_encrypt_blocks
 
 ALIGN	16
 vpaes_ctr32_encrypt_blocks:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_vpaes_ctr32_encrypt_blocks:
@@ -728,7 +728,7 @@ $L$ctr32_done:
 	lea	rsp,[184+rsp]
 $L$ctr32_epilogue:
 $L$ctr32_abort:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -935,6 +935,6 @@ $L$SEH_info_vpaes_ctr32_encrypt_blocks:
 	DD	se_handler wrt ..imagebase
 	DD	$L$ctr32_body wrt ..imagebase,$L$ctr32_epilogue wrt ..imagebase
 %else
-; Work around https://bugzilla.nasm.us/show_bug.cgi?id=3392738
+
 ret
 %endif

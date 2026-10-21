@@ -31,20 +31,20 @@
 #
 #		IALU/gcc 4.8(i)	1xSSSE3/SSE2	4xSSSE3	    NxAVX(v)
 #
-# P4		9.48/+99%	-/22.7(ii)	-
-# Core2		7.83/+55%	7.90/8.08	4.35
-# Westmere	7.19/+50%	5.60/6.70	3.00
-# Sandy Bridge	8.31/+42%	5.45/6.76	2.72
-# Ivy Bridge	6.71/+46%	5.40/6.49	2.41
-# Haswell	5.92/+43%	5.20/6.45	2.42	    1.23
-# Skylake[-X]	5.87/+39%	4.70/-		2.31	    1.19[0.57]
-# Silvermont	12.0/+33%	7.75/7.40	7.03(iii)
+# P4		9.48/+99 
+# Core2		7.83/+55 
+# Westmere	7.19/+50 
+# Sandy Bridge	8.31/+42 
+# Ivy Bridge	6.71/+46 
+# Haswell	5.92/+43 
+# Skylake[-X]	5.87/+39 
+# Silvermont	12.0/+33 
 # Knights L	11.7/-		-		9.60(iii)   0.80
-# Goldmont	10.6/+17%	5.10/-		3.28
-# Sledgehammer	7.28/+52%	-/14.2(ii)	-
-# Bulldozer	9.66/+28%	9.85/11.1	3.06(iv)
-# Ryzen		5.96/+50%	5.19/-		2.40        2.09
-# VIA Nano	10.5/+46%	6.72/8.60	6.05
+# Goldmont	10.6/+17 
+# Sledgehammer	7.28/+52 
+# Bulldozer	9.66/+28 
+# Ryzen		5.96/+50 
+# VIA Nano	10.5/+46 
 #
 # (i)	compared to older gcc 3.x one can observe >2x improvement on
 #	most platforms;
@@ -121,7 +121,7 @@ sub AUTOLOAD()          # thunk [simplified] 32-bit style perlasm
     $code .= "\t$opcode\t".join(',',$arg,reverse @_)."\n";
 }
 
-@x=("%eax","%ebx","%ecx","%edx",map("%r${_}d",(8..11)),
+@x=(" 
     "%nox","%nox","%nox","%nox",map("%r${_}d",(12..15)));
 @t=("%esi","%edi");
 
@@ -235,33 +235,33 @@ $code.=<<___;
 ChaCha20_ctr32_nohw:
 .cfi_startproc
 	_CET_ENDBR
-	push	%rbx
+	push	
 .cfi_push	rbx
-	push	%rbp
+	push	
 .cfi_push	rbp
-	push	%r12
+	push	
 .cfi_push	r12
-	push	%r13
+	push	
 .cfi_push	r13
-	push	%r14
+	push	
 .cfi_push	r14
-	push	%r15
+	push	
 .cfi_push	r15
-	sub	\$64+24,%rsp
+	sub	\$64+24, 
 .cfi_adjust_cfa_offset	`64+24`
 .Lctr32_body:
 
-	#movdqa	.Lsigma(%rip),%xmm0
-	movdqu	($key),%xmm1
-	movdqu	16($key),%xmm2
-	movdqu	($counter),%xmm3
-	movdqa	.Lone(%rip),%xmm4
+	#movdqa	.Lsigma( 
+	movdqu	($key), 
+	movdqu	16($key), 
+	movdqu	($counter), 
+	movdqa	.Lone( 
 
-	#movdqa	%xmm0,4*0(%rsp)		# key[0]
-	movdqa	%xmm1,4*4(%rsp)		# key[1]
-	movdqa	%xmm2,4*8(%rsp)		# key[2]
-	movdqa	%xmm3,4*12(%rsp)	# key[3]
-	mov	$len,%rbp		# reassign $len
+	#movdqa	
+	movdqa	
+	movdqa	
+	movdqa	
+	mov	$len, 
 	jmp	.Loop_outer
 
 .align	32
@@ -270,22 +270,22 @@ ChaCha20_ctr32_nohw:
 	mov	\$0x3320646e,@x[1]      # 'nd 3'
 	mov	\$0x79622d32,@x[2]      # '2-by'
 	mov	\$0x6b206574,@x[3]      # 'te k'
-	mov	4*4(%rsp),@x[4]
-	mov	4*5(%rsp),@x[5]
-	mov	4*6(%rsp),@x[6]
-	mov	4*7(%rsp),@x[7]
-	movd	%xmm3,@x[12]
-	mov	4*13(%rsp),@x[13]
-	mov	4*14(%rsp),@x[14]
-	mov	4*15(%rsp),@x[15]
+	mov	4*4( 
+	mov	4*5( 
+	mov	4*6( 
+	mov	4*7( 
+	movd	
+	mov	4*13( 
+	mov	4*14( 
+	mov	4*15( 
 
-	mov	%rbp,64+0(%rsp)		# save len
-	mov	\$10,%ebp
-	mov	$inp,64+8(%rsp)		# save inp
-	movq	%xmm2,%rsi		# "@x[8]"
-	mov	$out,64+16(%rsp)	# save out
-	mov	%rsi,%rdi
-	shr	\$32,%rdi		# "@x[9]"
+	mov	
+	mov	\$10, 
+	mov	$inp,64+8( 
+	movq	
+	mov	$out,64+16( 
+	mov	
+	shr	\$32, 
 	jmp	.Loop
 
 .align	32
@@ -297,29 +297,29 @@ ___
 	&jnz	(".Loop");
 
 $code.=<<___;
-	mov	@t[1],4*9(%rsp)		# modulo-scheduled
-	mov	@t[0],4*8(%rsp)
-	mov	64(%rsp),%rbp		# load len
-	movdqa	%xmm2,%xmm1
-	mov	64+8(%rsp),$inp		# load inp
-	paddd	%xmm4,%xmm3		# increment counter
-	mov	64+16(%rsp),$out	# load out
+	mov	@t[1],4*9( 
+	mov	@t[0],4*8( 
+	mov	64( 
+	movdqa	
+	mov	64+8( 
+	paddd	
+	mov	64+16( 
 
 	add	\$0x61707865,@x[0]      # 'expa'
 	add	\$0x3320646e,@x[1]      # 'nd 3'
 	add	\$0x79622d32,@x[2]      # '2-by'
 	add	\$0x6b206574,@x[3]      # 'te k'
-	add	4*4(%rsp),@x[4]
-	add	4*5(%rsp),@x[5]
-	add	4*6(%rsp),@x[6]
-	add	4*7(%rsp),@x[7]
-	add	4*12(%rsp),@x[12]
-	add	4*13(%rsp),@x[13]
-	add	4*14(%rsp),@x[14]
-	add	4*15(%rsp),@x[15]
-	paddd	4*8(%rsp),%xmm1
+	add	4*4( 
+	add	4*5( 
+	add	4*6( 
+	add	4*7( 
+	add	4*12( 
+	add	4*13( 
+	add	4*14( 
+	add	4*15( 
+	paddd	4*8( 
 
-	cmp	\$64,%rbp
+	cmp	\$64, 
 	jb	.Ltail
 
 	xor	4*0($inp),@x[0]		# xor with input
@@ -330,16 +330,16 @@ $code.=<<___;
 	xor	4*5($inp),@x[5]
 	xor	4*6($inp),@x[6]
 	xor	4*7($inp),@x[7]
-	movdqu	4*8($inp),%xmm0
+	movdqu	4*8($inp), 
 	xor	4*12($inp),@x[12]
 	xor	4*13($inp),@x[13]
 	xor	4*14($inp),@x[14]
 	xor	4*15($inp),@x[15]
 	lea	4*16($inp),$inp		# inp+=64
-	pxor	%xmm1,%xmm0
+	pxor	
 
-	movdqa	%xmm2,4*8(%rsp)
-	movd	%xmm3,4*12(%rsp)
+	movdqa	
+	movd	
 
 	mov	@x[0],4*0($out)		# write output
 	mov	@x[1],4*1($out)
@@ -349,59 +349,59 @@ $code.=<<___;
 	mov	@x[5],4*5($out)
 	mov	@x[6],4*6($out)
 	mov	@x[7],4*7($out)
-	movdqu	%xmm0,4*8($out)
+	movdqu	
 	mov	@x[12],4*12($out)
 	mov	@x[13],4*13($out)
 	mov	@x[14],4*14($out)
 	mov	@x[15],4*15($out)
 	lea	4*16($out),$out		# out+=64
 
-	sub	\$64,%rbp
+	sub	\$64, 
 	jnz	.Loop_outer
 
 	jmp	.Ldone
 
 .align	16
 .Ltail:
-	mov	@x[0],4*0(%rsp)
-	mov	@x[1],4*1(%rsp)
-	xor	%rbx,%rbx
-	mov	@x[2],4*2(%rsp)
-	mov	@x[3],4*3(%rsp)
-	mov	@x[4],4*4(%rsp)
-	mov	@x[5],4*5(%rsp)
-	mov	@x[6],4*6(%rsp)
-	mov	@x[7],4*7(%rsp)
-	movdqa	%xmm1,4*8(%rsp)
-	mov	@x[12],4*12(%rsp)
-	mov	@x[13],4*13(%rsp)
-	mov	@x[14],4*14(%rsp)
-	mov	@x[15],4*15(%rsp)
+	mov	@x[0],4*0( 
+	mov	@x[1],4*1( 
+	xor	
+	mov	@x[2],4*2( 
+	mov	@x[3],4*3( 
+	mov	@x[4],4*4( 
+	mov	@x[5],4*5( 
+	mov	@x[6],4*6( 
+	mov	@x[7],4*7( 
+	movdqa	
+	mov	@x[12],4*12( 
+	mov	@x[13],4*13( 
+	mov	@x[14],4*14( 
+	mov	@x[15],4*15( 
 
 .Loop_tail:
-	movzb	($inp,%rbx),%eax
-	movzb	(%rsp,%rbx),%edx
-	lea	1(%rbx),%rbx
-	xor	%edx,%eax
-	mov	%al,-1($out,%rbx)
-	dec	%rbp
+	movzb	($inp, 
+	movzb	( 
+	lea	1( 
+	xor	
+	mov	
+	dec	
 	jnz	.Loop_tail
 
 .Ldone:
-	lea	64+24+48(%rsp),%rsi
-	mov	-48(%rsi),%r15
+	lea	64+24+48( 
+	mov	-48( 
 .cfi_restore	r15
-	mov	-40(%rsi),%r14
+	mov	-40( 
 .cfi_restore	r14
-	mov	-32(%rsi),%r13
+	mov	-32( 
 .cfi_restore	r13
-	mov	-24(%rsi),%r12
+	mov	-24( 
 .cfi_restore	r12
-	mov	-16(%rsi),%rbp
+	mov	-16( 
 .cfi_restore	rbp
-	mov	-8(%rsi),%rbx
+	mov	-8( 
 .cfi_restore	rbx
-	lea	(%rsi),%rsp
+	lea	( 
 .cfi_adjust_cfa_offset	`-64-24-48`
 .Lno_data:
 	ret
@@ -467,7 +467,7 @@ my @x=map("\"$_\"",@xx);
 	 "&pslld	(@x[$b1],12)",
 	"&por		(@x[$b0],$t0)",
 	 "&psrld	($t1,20)",
-	"&movdqa	($t0,'(%r11)')",	# .Lrot24(%rip)
+	"&movdqa	($t0,'(%r11)')",	# .Lrot24( 
 	 "&por		(@x[$b1],$t1)",
 
 	"&paddd		(@x[$a0],@x[$b0])",
@@ -488,7 +488,7 @@ my @x=map("\"$_\"",@xx);
 	 "&pslld	(@x[$b1],7)",
 	"&por		(@x[$b0],$t1)",
 	 "&psrld	($t0,25)",
-	"&movdqa	($t1,'(%r10)')",	# .Lrot16(%rip)
+	"&movdqa	($t1,'(%r10)')",	# .Lrot16( 
 	 "&por		(@x[$b1],$t0)",
 
 	"&movdqa	(\"`16*($c0-8)`(%rsp)\",$xc)",	# reload pair of 'c's
@@ -514,7 +514,7 @@ my @x=map("\"$_\"",@xx);
 	 "&pslld	(@x[$b3],12)",
 	"&por		(@x[$b2],$t0)",
 	 "&psrld	($t1,20)",
-	"&movdqa	($t0,'(%r11)')",	# .Lrot24(%rip)
+	"&movdqa	($t0,'(%r11)')",	# .Lrot24( 
 	 "&por		(@x[$b3],$t1)",
 
 	"&paddd		(@x[$a2],@x[$b2])",
@@ -535,7 +535,7 @@ my @x=map("\"$_\"",@xx);
 	 "&pslld	(@x[$b3],7)",
 	"&por		(@x[$b2],$t1)",
 	 "&psrld	($t0,25)",
-	"&movdqa	($t1,'(%r10)')",	# .Lrot16(%rip)
+	"&movdqa	($t1,'(%r10)')",	# .Lrot16( 
 	 "&por		(@x[$b3],$t0)"
 	);
 }
@@ -549,11 +549,11 @@ $code.=<<___;
 ChaCha20_ctr32_ssse3_4x:
 .cfi_startproc
 	_CET_ENDBR
-	mov		%rsp,%r9		# frame pointer
+	mov		
 .cfi_def_cfa_register	r9
 ___
 $code.=<<___;
-	sub		\$0x140+$xframe,%rsp
+	sub		\$0x140+$xframe, 
 ___
 	################ stack layout
 	# +0x00		SIMD equivalent of @x[8-12]
@@ -564,91 +564,91 @@ ___
 	# ...
 	# +0x140
 $code.=<<___	if ($win64);
-	movaps		%xmm6,-0xa8(%r9)
-	movaps		%xmm7,-0x98(%r9)
-	movaps		%xmm8,-0x88(%r9)
-	movaps		%xmm9,-0x78(%r9)
-	movaps		%xmm10,-0x68(%r9)
-	movaps		%xmm11,-0x58(%r9)
-	movaps		%xmm12,-0x48(%r9)
-	movaps		%xmm13,-0x38(%r9)
-	movaps		%xmm14,-0x28(%r9)
-	movaps		%xmm15,-0x18(%r9)
+	movaps		
+	movaps		
+	movaps		
+	movaps		
+	movaps		
+	movaps		
+	movaps		
+	movaps		
+	movaps		
+	movaps		
 .L4x_body:
 ___
 $code.=<<___;
-	movdqa		.Lsigma(%rip),$xa3	# key[0]
+	movdqa		.Lsigma( 
 	movdqu		($key),$xb3		# key[1]
 	movdqu		16($key),$xt3		# key[2]
 	movdqu		($counter),$xd3		# key[3]
-	lea		0x100(%rsp),%rcx	# size optimization
-	lea		.Lrot16(%rip),%r10
-	lea		.Lrot24(%rip),%r11
+	lea		0x100( 
+	lea		.Lrot16( 
+	lea		.Lrot24( 
 
 	pshufd		\$0x00,$xa3,$xa0	# smash key by lanes...
 	pshufd		\$0x55,$xa3,$xa1
-	movdqa		$xa0,0x40(%rsp)		# ... and offload
+	movdqa		$xa0,0x40( 
 	pshufd		\$0xaa,$xa3,$xa2
-	movdqa		$xa1,0x50(%rsp)
+	movdqa		$xa1,0x50( 
 	pshufd		\$0xff,$xa3,$xa3
-	movdqa		$xa2,0x60(%rsp)
-	movdqa		$xa3,0x70(%rsp)
+	movdqa		$xa2,0x60( 
+	movdqa		$xa3,0x70( 
 
 	pshufd		\$0x00,$xb3,$xb0
 	pshufd		\$0x55,$xb3,$xb1
-	movdqa		$xb0,0x80-0x100(%rcx)
+	movdqa		$xb0,0x80-0x100( 
 	pshufd		\$0xaa,$xb3,$xb2
-	movdqa		$xb1,0x90-0x100(%rcx)
+	movdqa		$xb1,0x90-0x100( 
 	pshufd		\$0xff,$xb3,$xb3
-	movdqa		$xb2,0xa0-0x100(%rcx)
-	movdqa		$xb3,0xb0-0x100(%rcx)
+	movdqa		$xb2,0xa0-0x100( 
+	movdqa		$xb3,0xb0-0x100( 
 
 	pshufd		\$0x00,$xt3,$xt0	# "$xc0"
 	pshufd		\$0x55,$xt3,$xt1	# "$xc1"
-	movdqa		$xt0,0xc0-0x100(%rcx)
+	movdqa		$xt0,0xc0-0x100( 
 	pshufd		\$0xaa,$xt3,$xt2	# "$xc2"
-	movdqa		$xt1,0xd0-0x100(%rcx)
+	movdqa		$xt1,0xd0-0x100( 
 	pshufd		\$0xff,$xt3,$xt3	# "$xc3"
-	movdqa		$xt2,0xe0-0x100(%rcx)
-	movdqa		$xt3,0xf0-0x100(%rcx)
+	movdqa		$xt2,0xe0-0x100( 
+	movdqa		$xt3,0xf0-0x100( 
 
 	pshufd		\$0x00,$xd3,$xd0
 	pshufd		\$0x55,$xd3,$xd1
-	paddd		.Linc(%rip),$xd0	# don't save counters yet
+	paddd		.Linc( 
 	pshufd		\$0xaa,$xd3,$xd2
-	movdqa		$xd1,0x110-0x100(%rcx)
+	movdqa		$xd1,0x110-0x100( 
 	pshufd		\$0xff,$xd3,$xd3
-	movdqa		$xd2,0x120-0x100(%rcx)
-	movdqa		$xd3,0x130-0x100(%rcx)
+	movdqa		$xd2,0x120-0x100( 
+	movdqa		$xd3,0x130-0x100( 
 
 	jmp		.Loop_enter4x
 
 .align	32
 .Loop_outer4x:
-	movdqa		0x40(%rsp),$xa0		# re-load smashed key
-	movdqa		0x50(%rsp),$xa1
-	movdqa		0x60(%rsp),$xa2
-	movdqa		0x70(%rsp),$xa3
-	movdqa		0x80-0x100(%rcx),$xb0
-	movdqa		0x90-0x100(%rcx),$xb1
-	movdqa		0xa0-0x100(%rcx),$xb2
-	movdqa		0xb0-0x100(%rcx),$xb3
-	movdqa		0xc0-0x100(%rcx),$xt0	# "$xc0"
-	movdqa		0xd0-0x100(%rcx),$xt1	# "$xc1"
-	movdqa		0xe0-0x100(%rcx),$xt2	# "$xc2"
-	movdqa		0xf0-0x100(%rcx),$xt3	# "$xc3"
-	movdqa		0x100-0x100(%rcx),$xd0
-	movdqa		0x110-0x100(%rcx),$xd1
-	movdqa		0x120-0x100(%rcx),$xd2
-	movdqa		0x130-0x100(%rcx),$xd3
-	paddd		.Lfour(%rip),$xd0	# next SIMD counters
+	movdqa		0x40( 
+	movdqa		0x50( 
+	movdqa		0x60( 
+	movdqa		0x70( 
+	movdqa		0x80-0x100( 
+	movdqa		0x90-0x100( 
+	movdqa		0xa0-0x100( 
+	movdqa		0xb0-0x100( 
+	movdqa		0xc0-0x100( 
+	movdqa		0xd0-0x100( 
+	movdqa		0xe0-0x100( 
+	movdqa		0xf0-0x100( 
+	movdqa		0x100-0x100( 
+	movdqa		0x110-0x100( 
+	movdqa		0x120-0x100( 
+	movdqa		0x130-0x100( 
+	paddd		.Lfour( 
 
 .Loop_enter4x:
-	movdqa		$xt2,0x20(%rsp)		# SIMD equivalent of "@x[10]"
-	movdqa		$xt3,0x30(%rsp)		# SIMD equivalent of "@x[11]"
-	movdqa		(%r10),$xt3		# .Lrot16(%rip)
-	mov		\$10,%eax
-	movdqa		$xd0,0x100-0x100(%rcx)	# save SIMD counters
+	movdqa		$xt2,0x20( 
+	movdqa		$xt3,0x30( 
+	movdqa		( 
+	mov		\$10, 
+	movdqa		$xd0,0x100-0x100( 
 	jmp		.Loop4x
 
 .align	32
@@ -657,13 +657,13 @@ ___
 	foreach (&SSSE3_lane_ROUND(0, 4, 8,12)) { eval; }
 	foreach (&SSSE3_lane_ROUND(0, 5,10,15)) { eval; }
 $code.=<<___;
-	dec		%eax
+	dec		
 	jnz		.Loop4x
 
-	paddd		0x40(%rsp),$xa0		# accumulate key material
-	paddd		0x50(%rsp),$xa1
-	paddd		0x60(%rsp),$xa2
-	paddd		0x70(%rsp),$xa3
+	paddd		0x40( 
+	paddd		0x50( 
+	paddd		0x60( 
+	paddd		0x70( 
 
 	movdqa		$xa0,$xt2		# "de-interlace" data
 	punpckldq	$xa1,$xa0
@@ -680,15 +680,15 @@ $code.=<<___;
 ___
 	($xa2,$xt2)=($xt2,$xa2);
 $code.=<<___;
-	paddd		0x80-0x100(%rcx),$xb0
-	paddd		0x90-0x100(%rcx),$xb1
-	paddd		0xa0-0x100(%rcx),$xb2
-	paddd		0xb0-0x100(%rcx),$xb3
+	paddd		0x80-0x100( 
+	paddd		0x90-0x100( 
+	paddd		0xa0-0x100( 
+	paddd		0xb0-0x100( 
 
-	movdqa		$xa0,0x00(%rsp)		# offload $xaN
-	movdqa		$xa1,0x10(%rsp)
-	movdqa		0x20(%rsp),$xa0		# "xc2"
-	movdqa		0x30(%rsp),$xa1		# "xc3"
+	movdqa		$xa0,0x00( 
+	movdqa		$xa1,0x10( 
+	movdqa		0x20( 
+	movdqa		0x30( 
 
 	movdqa		$xb0,$xt2
 	punpckldq	$xb1,$xb0
@@ -706,13 +706,13 @@ ___
 	($xb2,$xt2)=($xt2,$xb2);
 	my ($xc0,$xc1,$xc2,$xc3)=($xt0,$xt1,$xa0,$xa1);
 $code.=<<___;
-	paddd		0xc0-0x100(%rcx),$xc0
-	paddd		0xd0-0x100(%rcx),$xc1
-	paddd		0xe0-0x100(%rcx),$xc2
-	paddd		0xf0-0x100(%rcx),$xc3
+	paddd		0xc0-0x100( 
+	paddd		0xd0-0x100( 
+	paddd		0xe0-0x100( 
+	paddd		0xf0-0x100( 
 
-	movdqa		$xa2,0x20(%rsp)		# keep offloading $xaN
-	movdqa		$xa3,0x30(%rsp)
+	movdqa		$xa2,0x20( 
+	movdqa		$xa3,0x30( 
 
 	movdqa		$xc0,$xt2
 	punpckldq	$xc1,$xc0
@@ -730,10 +730,10 @@ ___
 	($xc2,$xt2)=($xt2,$xc2);
 	($xt0,$xt1)=($xa2,$xa3);		# use $xaN as temporary
 $code.=<<___;
-	paddd		0x100-0x100(%rcx),$xd0
-	paddd		0x110-0x100(%rcx),$xd1
-	paddd		0x120-0x100(%rcx),$xd2
-	paddd		0x130-0x100(%rcx),$xd3
+	paddd		0x100-0x100( 
+	paddd		0x110-0x100( 
+	paddd		0x120-0x100( 
+	paddd		0x130-0x100( 
 
 	movdqa		$xd0,$xt2
 	punpckldq	$xd1,$xd0
@@ -757,7 +757,7 @@ $code.=<<___;
 	movdqu		0x10($inp),$xt1
 	movdqu		0x20($inp),$xt2
 	movdqu		0x30($inp),$xt3
-	pxor		0x00(%rsp),$xt0		# $xaN is offloaded, remember?
+	pxor		0x00( 
 	pxor		$xb0,$xt1
 	pxor		$xc0,$xt2
 	pxor		$xd0,$xt3
@@ -771,7 +771,7 @@ $code.=<<___;
 	 movdqu		$xt3,0x30($out)
 	movdqu		0x70($inp),$xt3
 	lea		0x80($inp),$inp		# size optimization
-	pxor		0x10(%rsp),$xt0
+	pxor		0x10( 
 	pxor		$xb1,$xt1
 	pxor		$xc1,$xt2
 	pxor		$xd1,$xt3
@@ -785,7 +785,7 @@ $code.=<<___;
 	 movdqu		$xt3,0x70($out)
 	 lea		0x80($out),$out		# size optimization
 	movdqu		0x30($inp),$xt3
-	pxor		0x20(%rsp),$xt0
+	pxor		0x20( 
 	pxor		$xb2,$xt1
 	pxor		$xc2,$xt2
 	pxor		$xd2,$xt3
@@ -799,7 +799,7 @@ $code.=<<___;
 	 movdqu		$xt3,0x30($out)
 	movdqu		0x70($inp),$xt3
 	lea		0x80($inp),$inp		# inp+=64*4
-	pxor		0x30(%rsp),$xt0
+	pxor		0x30( 
 	pxor		$xb3,$xt1
 	pxor		$xc3,$xt2
 	pxor		$xd3,$xt3
@@ -822,12 +822,12 @@ $code.=<<___;
 	cmp		\$64,$len
 	jae		.L64_or_more4x
 
-	#movdqa		0x00(%rsp),$xt0		# $xaN is offloaded, remember?
-	xor		%r10,%r10
-	#movdqa		$xt0,0x00(%rsp)
-	movdqa		$xb0,0x10(%rsp)
-	movdqa		$xc0,0x20(%rsp)
-	movdqa		$xd0,0x30(%rsp)
+	#movdqa		0x00( 
+	xor		
+	#movdqa		$xt0,0x00( 
+	movdqa		$xb0,0x10( 
+	movdqa		$xc0,0x20( 
+	movdqa		$xd0,0x30( 
 	jmp		.Loop_tail4x
 
 .align	32
@@ -836,7 +836,7 @@ $code.=<<___;
 	movdqu		0x10($inp),$xt1
 	movdqu		0x20($inp),$xt2
 	movdqu		0x30($inp),$xt3
-	pxor		0x00(%rsp),$xt0		# $xaxN is offloaded, remember?
+	pxor		0x00( 
 	pxor		$xb0,$xt1
 	pxor		$xc0,$xt2
 	pxor		$xd0,$xt3
@@ -846,15 +846,15 @@ $code.=<<___;
 	movdqu		$xt3,0x30($out)
 	je		.Ldone4x
 
-	movdqa		0x10(%rsp),$xt0		# $xaN is offloaded, remember?
+	movdqa		0x10( 
 	lea		0x40($inp),$inp		# inp+=64*1
-	xor		%r10,%r10
-	movdqa		$xt0,0x00(%rsp)
-	movdqa		$xb1,0x10(%rsp)
+	xor		
+	movdqa		$xt0,0x00( 
+	movdqa		$xb1,0x10( 
 	lea		0x40($out),$out		# out+=64*1
-	movdqa		$xc1,0x20(%rsp)
+	movdqa		$xc1,0x20( 
 	sub		\$64,$len		# len-=64*1
-	movdqa		$xd1,0x30(%rsp)
+	movdqa		$xd1,0x30( 
 	jmp		.Loop_tail4x
 
 .align	32
@@ -863,7 +863,7 @@ $code.=<<___;
 	movdqu		0x10($inp),$xt1
 	movdqu		0x20($inp),$xt2
 	movdqu		0x30($inp),$xt3
-	pxor		0x00(%rsp),$xt0		# $xaN is offloaded, remember?
+	pxor		0x00( 
 	pxor		$xb0,$xt1
 	pxor		$xc0,$xt2
 	pxor		$xd0,$xt3
@@ -876,7 +876,7 @@ $code.=<<___;
 	movdqu		0x60($inp),$xt2
 	 movdqu		$xt3,0x30($out)
 	movdqu		0x70($inp),$xt3
-	pxor		0x10(%rsp),$xt0
+	pxor		0x10( 
 	pxor		$xb1,$xt1
 	pxor		$xc1,$xt2
 	pxor		$xd1,$xt3
@@ -886,15 +886,15 @@ $code.=<<___;
 	movdqu		$xt3,0x70($out)
 	je		.Ldone4x
 
-	movdqa		0x20(%rsp),$xt0		# $xaN is offloaded, remember?
+	movdqa		0x20( 
 	lea		0x80($inp),$inp		# inp+=64*2
-	xor		%r10,%r10
-	movdqa		$xt0,0x00(%rsp)
-	movdqa		$xb2,0x10(%rsp)
+	xor		
+	movdqa		$xt0,0x00( 
+	movdqa		$xb2,0x10( 
 	lea		0x80($out),$out		# out+=64*2
-	movdqa		$xc2,0x20(%rsp)
+	movdqa		$xc2,0x20( 
 	sub		\$128,$len		# len-=64*2
-	movdqa		$xd2,0x30(%rsp)
+	movdqa		$xd2,0x30( 
 	jmp		.Loop_tail4x
 
 .align	32
@@ -903,7 +903,7 @@ $code.=<<___;
 	movdqu		0x10($inp),$xt1
 	movdqu		0x20($inp),$xt2
 	movdqu		0x30($inp),$xt3
-	pxor		0x00(%rsp),$xt0		# $xaN is offloaded, remember?
+	pxor		0x00( 
 	pxor		$xb0,$xt1
 	pxor		$xc0,$xt2
 	pxor		$xd0,$xt3
@@ -917,7 +917,7 @@ $code.=<<___;
 	 movdqu		$xt3,0x30($out)
 	movdqu		0x70($inp),$xt3
 	lea		0x80($inp),$inp		# size optimization
-	pxor		0x10(%rsp),$xt0
+	pxor		0x10( 
 	pxor		$xb1,$xt1
 	pxor		$xc1,$xt2
 	pxor		$xd1,$xt3
@@ -931,7 +931,7 @@ $code.=<<___;
 	 movdqu		$xt3,0x70($out)
 	 lea		0x80($out),$out		# size optimization
 	movdqu		0x30($inp),$xt3
-	pxor		0x20(%rsp),$xt0
+	pxor		0x20( 
 	pxor		$xb2,$xt1
 	pxor		$xc2,$xt2
 	pxor		$xd2,$xt3
@@ -941,41 +941,41 @@ $code.=<<___;
 	movdqu		$xt3,0x30($out)
 	je		.Ldone4x
 
-	movdqa		0x30(%rsp),$xt0		# $xaN is offloaded, remember?
+	movdqa		0x30( 
 	lea		0x40($inp),$inp		# inp+=64*3
-	xor		%r10,%r10
-	movdqa		$xt0,0x00(%rsp)
-	movdqa		$xb3,0x10(%rsp)
+	xor		
+	movdqa		$xt0,0x00( 
+	movdqa		$xb3,0x10( 
 	lea		0x40($out),$out		# out+=64*3
-	movdqa		$xc3,0x20(%rsp)
+	movdqa		$xc3,0x20( 
 	sub		\$192,$len		# len-=64*3
-	movdqa		$xd3,0x30(%rsp)
+	movdqa		$xd3,0x30( 
 
 .Loop_tail4x:
-	movzb		($inp,%r10),%eax
-	movzb		(%rsp,%r10),%ecx
-	lea		1(%r10),%r10
-	xor		%ecx,%eax
-	mov		%al,-1($out,%r10)
+	movzb		($inp, 
+	movzb		( 
+	lea		1( 
+	xor		
+	mov		
 	dec		$len
 	jnz		.Loop_tail4x
 
 .Ldone4x:
 ___
 $code.=<<___	if ($win64);
-	movaps		-0xa8(%r9),%xmm6
-	movaps		-0x98(%r9),%xmm7
-	movaps		-0x88(%r9),%xmm8
-	movaps		-0x78(%r9),%xmm9
-	movaps		-0x68(%r9),%xmm10
-	movaps		-0x58(%r9),%xmm11
-	movaps		-0x48(%r9),%xmm12
-	movaps		-0x38(%r9),%xmm13
-	movaps		-0x28(%r9),%xmm14
-	movaps		-0x18(%r9),%xmm15
+	movaps		-0xa8( 
+	movaps		-0x98( 
+	movaps		-0x88( 
+	movaps		-0x78( 
+	movaps		-0x68( 
+	movaps		-0x58( 
+	movaps		-0x48( 
+	movaps		-0x38( 
+	movaps		-0x28( 
+	movaps		-0x18( 
 ___
 $code.=<<___;
-	lea		(%r9),%rsp
+	lea		( 
 .cfi_def_cfa_register	rsp
 .L4x_epilogue:
 	ret
@@ -1035,7 +1035,7 @@ my @x=map("\"$_\"",@xx);
 	"&vpslld	($t0,@x[$b0],12)",
 	"&vpsrld	(@x[$b0],@x[$b0],20)",
 	"&vpor		(@x[$b0],$t0,@x[$b0])",
-	"&vbroadcasti128($t0,'(%r11)')",		# .Lrot24(%rip)
+	"&vbroadcasti128($t0,'(%r11)')",		# .Lrot24( 
 	 "&vpaddd	($xc_,$xc_,@x[$d1])",
 	 "&vpxor	(@x[$b1],$xc_,@x[$b1])",
 	 "&vpslld	($t1,@x[$b1],12)",
@@ -1054,7 +1054,7 @@ my @x=map("\"$_\"",@xx);
 	"&vpslld	($t1,@x[$b0],7)",
 	"&vpsrld	(@x[$b0],@x[$b0],25)",
 	"&vpor		(@x[$b0],$t1,@x[$b0])",
-	"&vbroadcasti128($t1,'(%r10)')",		# .Lrot16(%rip)
+	"&vbroadcasti128($t1,'(%r10)')",		# .Lrot16( 
 	 "&vpaddd	($xc_,$xc_,@x[$d1])",
 	 "&vpxor	(@x[$b1],$xc_,@x[$b1])",
 	 "&vpslld	($t0,@x[$b1],7)",
@@ -1078,7 +1078,7 @@ my @x=map("\"$_\"",@xx);
 	"&vpslld	($t0,@x[$b2],12)",
 	"&vpsrld	(@x[$b2],@x[$b2],20)",
 	"&vpor		(@x[$b2],$t0,@x[$b2])",
-	"&vbroadcasti128($t0,'(%r11)')",		# .Lrot24(%rip)
+	"&vbroadcasti128($t0,'(%r11)')",		# .Lrot24( 
 	 "&vpaddd	($xc_,$xc_,@x[$d3])",
 	 "&vpxor	(@x[$b3],$xc_,@x[$b3])",
 	 "&vpslld	($t1,@x[$b3],12)",
@@ -1097,7 +1097,7 @@ my @x=map("\"$_\"",@xx);
 	"&vpslld	($t1,@x[$b2],7)",
 	"&vpsrld	(@x[$b2],@x[$b2],25)",
 	"&vpor		(@x[$b2],$t1,@x[$b2])",
-	"&vbroadcasti128($t1,'(%r10)')",		# .Lrot16(%rip)
+	"&vbroadcasti128($t1,'(%r10)')",		# .Lrot16( 
 	 "&vpaddd	($xc_,$xc_,@x[$d3])",
 	 "&vpxor	(@x[$b3],$xc_,@x[$b3])",
 	 "&vpslld	($t0,@x[$b3],7)",
@@ -1115,22 +1115,22 @@ $code.=<<___;
 ChaCha20_ctr32_avx2:
 .cfi_startproc
 	_CET_ENDBR
-	mov		%rsp,%r9		# frame register
+	mov		
 .cfi_def_cfa_register	r9
-	sub		\$0x280+$xframe,%rsp
-	and		\$-32,%rsp
+	sub		\$0x280+$xframe, 
+	and		\$-32, 
 ___
 $code.=<<___	if ($win64);
-	movaps		%xmm6,-0xa8(%r9)
-	movaps		%xmm7,-0x98(%r9)
-	movaps		%xmm8,-0x88(%r9)
-	movaps		%xmm9,-0x78(%r9)
-	movaps		%xmm10,-0x68(%r9)
-	movaps		%xmm11,-0x58(%r9)
-	movaps		%xmm12,-0x48(%r9)
-	movaps		%xmm13,-0x38(%r9)
-	movaps		%xmm14,-0x28(%r9)
-	movaps		%xmm15,-0x18(%r9)
+	movaps		
+	movaps		
+	movaps		
+	movaps		
+	movaps		
+	movaps		
+	movaps		
+	movaps		
+	movaps		
+	movaps		
 .L8x_body:
 ___
 $code.=<<___;
@@ -1145,79 +1145,79 @@ $code.=<<___;
 	# ...
 	# +0x280
 
-	vbroadcasti128	.Lsigma(%rip),$xa3	# key[0]
+	vbroadcasti128	.Lsigma( 
 	vbroadcasti128	($key),$xb3		# key[1]
 	vbroadcasti128	16($key),$xt3		# key[2]
 	vbroadcasti128	($counter),$xd3		# key[3]
-	lea		0x100(%rsp),%rcx	# size optimization
-	lea		0x200(%rsp),%rax	# size optimization
-	lea		.Lrot16(%rip),%r10
-	lea		.Lrot24(%rip),%r11
+	lea		0x100( 
+	lea		0x200( 
+	lea		.Lrot16( 
+	lea		.Lrot24( 
 
 	vpshufd		\$0x00,$xa3,$xa0	# smash key by lanes...
 	vpshufd		\$0x55,$xa3,$xa1
-	vmovdqa		$xa0,0x80-0x100(%rcx)	# ... and offload
+	vmovdqa		$xa0,0x80-0x100( 
 	vpshufd		\$0xaa,$xa3,$xa2
-	vmovdqa		$xa1,0xa0-0x100(%rcx)
+	vmovdqa		$xa1,0xa0-0x100( 
 	vpshufd		\$0xff,$xa3,$xa3
-	vmovdqa		$xa2,0xc0-0x100(%rcx)
-	vmovdqa		$xa3,0xe0-0x100(%rcx)
+	vmovdqa		$xa2,0xc0-0x100( 
+	vmovdqa		$xa3,0xe0-0x100( 
 
 	vpshufd		\$0x00,$xb3,$xb0
 	vpshufd		\$0x55,$xb3,$xb1
-	vmovdqa		$xb0,0x100-0x100(%rcx)
+	vmovdqa		$xb0,0x100-0x100( 
 	vpshufd		\$0xaa,$xb3,$xb2
-	vmovdqa		$xb1,0x120-0x100(%rcx)
+	vmovdqa		$xb1,0x120-0x100( 
 	vpshufd		\$0xff,$xb3,$xb3
-	vmovdqa		$xb2,0x140-0x100(%rcx)
-	vmovdqa		$xb3,0x160-0x100(%rcx)
+	vmovdqa		$xb2,0x140-0x100( 
+	vmovdqa		$xb3,0x160-0x100( 
 
 	vpshufd		\$0x00,$xt3,$xt0	# "xc0"
 	vpshufd		\$0x55,$xt3,$xt1	# "xc1"
-	vmovdqa		$xt0,0x180-0x200(%rax)
+	vmovdqa		$xt0,0x180-0x200( 
 	vpshufd		\$0xaa,$xt3,$xt2	# "xc2"
-	vmovdqa		$xt1,0x1a0-0x200(%rax)
+	vmovdqa		$xt1,0x1a0-0x200( 
 	vpshufd		\$0xff,$xt3,$xt3	# "xc3"
-	vmovdqa		$xt2,0x1c0-0x200(%rax)
-	vmovdqa		$xt3,0x1e0-0x200(%rax)
+	vmovdqa		$xt2,0x1c0-0x200( 
+	vmovdqa		$xt3,0x1e0-0x200( 
 
 	vpshufd		\$0x00,$xd3,$xd0
 	vpshufd		\$0x55,$xd3,$xd1
-	vpaddd		.Lincy(%rip),$xd0,$xd0	# don't save counters yet
+	vpaddd		.Lincy( 
 	vpshufd		\$0xaa,$xd3,$xd2
-	vmovdqa		$xd1,0x220-0x200(%rax)
+	vmovdqa		$xd1,0x220-0x200( 
 	vpshufd		\$0xff,$xd3,$xd3
-	vmovdqa		$xd2,0x240-0x200(%rax)
-	vmovdqa		$xd3,0x260-0x200(%rax)
+	vmovdqa		$xd2,0x240-0x200( 
+	vmovdqa		$xd3,0x260-0x200( 
 
 	jmp		.Loop_enter8x
 
 .align	32
 .Loop_outer8x:
-	vmovdqa		0x80-0x100(%rcx),$xa0	# re-load smashed key
-	vmovdqa		0xa0-0x100(%rcx),$xa1
-	vmovdqa		0xc0-0x100(%rcx),$xa2
-	vmovdqa		0xe0-0x100(%rcx),$xa3
-	vmovdqa		0x100-0x100(%rcx),$xb0
-	vmovdqa		0x120-0x100(%rcx),$xb1
-	vmovdqa		0x140-0x100(%rcx),$xb2
-	vmovdqa		0x160-0x100(%rcx),$xb3
-	vmovdqa		0x180-0x200(%rax),$xt0	# "xc0"
-	vmovdqa		0x1a0-0x200(%rax),$xt1	# "xc1"
-	vmovdqa		0x1c0-0x200(%rax),$xt2	# "xc2"
-	vmovdqa		0x1e0-0x200(%rax),$xt3	# "xc3"
-	vmovdqa		0x200-0x200(%rax),$xd0
-	vmovdqa		0x220-0x200(%rax),$xd1
-	vmovdqa		0x240-0x200(%rax),$xd2
-	vmovdqa		0x260-0x200(%rax),$xd3
-	vpaddd		.Leight(%rip),$xd0,$xd0	# next SIMD counters
+	vmovdqa		0x80-0x100( 
+	vmovdqa		0xa0-0x100( 
+	vmovdqa		0xc0-0x100( 
+	vmovdqa		0xe0-0x100( 
+	vmovdqa		0x100-0x100( 
+	vmovdqa		0x120-0x100( 
+	vmovdqa		0x140-0x100( 
+	vmovdqa		0x160-0x100( 
+	vmovdqa		0x180-0x200( 
+	vmovdqa		0x1a0-0x200( 
+	vmovdqa		0x1c0-0x200( 
+	vmovdqa		0x1e0-0x200( 
+	vmovdqa		0x200-0x200( 
+	vmovdqa		0x220-0x200( 
+	vmovdqa		0x240-0x200( 
+	vmovdqa		0x260-0x200( 
+	vpaddd		.Leight( 
 
 .Loop_enter8x:
-	vmovdqa		$xt2,0x40(%rsp)		# SIMD equivalent of "@x[10]"
-	vmovdqa		$xt3,0x60(%rsp)		# SIMD equivalent of "@x[11]"
-	vbroadcasti128	(%r10),$xt3
-	vmovdqa		$xd0,0x200-0x200(%rax)	# save SIMD counters
-	mov		\$10,%eax
+	vmovdqa		$xt2,0x40( 
+	vmovdqa		$xt3,0x60( 
+	vbroadcasti128	( 
+	vmovdqa		$xd0,0x200-0x200( 
+	mov		\$10, 
 	jmp		.Loop8x
 
 .align	32
@@ -1226,14 +1226,14 @@ ___
 	foreach (&AVX2_lane_ROUND(0, 4, 8,12)) { eval; }
 	foreach (&AVX2_lane_ROUND(0, 5,10,15)) { eval; }
 $code.=<<___;
-	dec		%eax
+	dec		
 	jnz		.Loop8x
 
-	lea		0x200(%rsp),%rax	# size optimization
-	vpaddd		0x80-0x100(%rcx),$xa0,$xa0	# accumulate key
-	vpaddd		0xa0-0x100(%rcx),$xa1,$xa1
-	vpaddd		0xc0-0x100(%rcx),$xa2,$xa2
-	vpaddd		0xe0-0x100(%rcx),$xa3,$xa3
+	lea		0x200( 
+	vpaddd		0x80-0x100( 
+	vpaddd		0xa0-0x100( 
+	vpaddd		0xc0-0x100( 
+	vpaddd		0xe0-0x100( 
 
 	vpunpckldq	$xa1,$xa0,$xt2		# "de-interlace" data
 	vpunpckldq	$xa3,$xa2,$xt3
@@ -1246,10 +1246,10 @@ $code.=<<___;
 ___
 	($xa0,$xa1,$xa2,$xa3,$xt2)=($xa1,$xt2,$xa3,$xa0,$xa2);
 $code.=<<___;
-	vpaddd		0x100-0x100(%rcx),$xb0,$xb0
-	vpaddd		0x120-0x100(%rcx),$xb1,$xb1
-	vpaddd		0x140-0x100(%rcx),$xb2,$xb2
-	vpaddd		0x160-0x100(%rcx),$xb3,$xb3
+	vpaddd		0x100-0x100( 
+	vpaddd		0x120-0x100( 
+	vpaddd		0x140-0x100( 
+	vpaddd		0x160-0x100( 
 
 	vpunpckldq	$xb1,$xb0,$xt2
 	vpunpckldq	$xb3,$xb2,$xt3
@@ -1274,15 +1274,15 @@ ___
 	($xa0,$xa1,$xa2,$xa3,$xt3)=($xt3,$xa0,$xa1,$xa2,$xa3);
 	my ($xc0,$xc1,$xc2,$xc3)=($xt0,$xt1,$xa0,$xa1);
 $code.=<<___;
-	vmovdqa		$xa0,0x00(%rsp)		# offload $xaN
-	vmovdqa		$xa1,0x20(%rsp)
-	vmovdqa		0x40(%rsp),$xc2		# $xa0
-	vmovdqa		0x60(%rsp),$xc3		# $xa1
+	vmovdqa		$xa0,0x00( 
+	vmovdqa		$xa1,0x20( 
+	vmovdqa		0x40( 
+	vmovdqa		0x60( 
 
-	vpaddd		0x180-0x200(%rax),$xc0,$xc0
-	vpaddd		0x1a0-0x200(%rax),$xc1,$xc1
-	vpaddd		0x1c0-0x200(%rax),$xc2,$xc2
-	vpaddd		0x1e0-0x200(%rax),$xc3,$xc3
+	vpaddd		0x180-0x200( 
+	vpaddd		0x1a0-0x200( 
+	vpaddd		0x1c0-0x200( 
+	vpaddd		0x1e0-0x200( 
 
 	vpunpckldq	$xc1,$xc0,$xt2
 	vpunpckldq	$xc3,$xc2,$xt3
@@ -1295,10 +1295,10 @@ $code.=<<___;
 ___
 	($xc0,$xc1,$xc2,$xc3,$xt2)=($xc1,$xt2,$xc3,$xc0,$xc2);
 $code.=<<___;
-	vpaddd		0x200-0x200(%rax),$xd0,$xd0
-	vpaddd		0x220-0x200(%rax),$xd1,$xd1
-	vpaddd		0x240-0x200(%rax),$xd2,$xd2
-	vpaddd		0x260-0x200(%rax),$xd3,$xd3
+	vpaddd		0x200-0x200( 
+	vpaddd		0x220-0x200( 
+	vpaddd		0x240-0x200( 
+	vpaddd		0x260-0x200( 
 
 	vpunpckldq	$xd1,$xd0,$xt2
 	vpunpckldq	$xd3,$xd2,$xt3
@@ -1325,8 +1325,8 @@ ___
 	($xc0,$xc1,$xc2,$xc3,$xb0,$xb1,$xb2,$xb3);
 	($xa0,$xa1)=($xt2,$xt3);
 $code.=<<___;
-	vmovdqa		0x00(%rsp),$xa0		# $xaN was offloaded, remember?
-	vmovdqa		0x20(%rsp),$xa1
+	vmovdqa		0x00( 
+	vmovdqa		0x20( 
 
 	cmp		\$64*8,$len
 	jb		.Ltail8x
@@ -1396,9 +1396,9 @@ $code.=<<___;
 	cmp		\$64,$len
 	jae		.L64_or_more8x
 
-	xor		%r10,%r10
-	vmovdqa		$xa0,0x00(%rsp)
-	vmovdqa		$xb0,0x20(%rsp)
+	xor		
+	vmovdqa		$xa0,0x00( 
+	vmovdqa		$xb0,0x20( 
 	jmp		.Loop_tail8x
 
 .align	32
@@ -1410,11 +1410,11 @@ $code.=<<___;
 	je		.Ldone8x
 
 	lea		0x40($inp),$inp		# inp+=64*1
-	xor		%r10,%r10
-	vmovdqa		$xc0,0x00(%rsp)
+	xor		
+	vmovdqa		$xc0,0x00( 
 	lea		0x40($out),$out		# out+=64*1
 	sub		\$64,$len		# len-=64*1
-	vmovdqa		$xd0,0x20(%rsp)
+	vmovdqa		$xd0,0x20( 
 	jmp		.Loop_tail8x
 
 .align	32
@@ -1430,11 +1430,11 @@ $code.=<<___;
 	je		.Ldone8x
 
 	lea		0x80($inp),$inp		# inp+=64*2
-	xor		%r10,%r10
-	vmovdqa		$xa1,0x00(%rsp)
+	xor		
+	vmovdqa		$xa1,0x00( 
 	lea		0x80($out),$out		# out+=64*2
 	sub		\$128,$len		# len-=64*2
-	vmovdqa		$xb1,0x20(%rsp)
+	vmovdqa		$xb1,0x20( 
 	jmp		.Loop_tail8x
 
 .align	32
@@ -1454,11 +1454,11 @@ $code.=<<___;
 	je		.Ldone8x
 
 	lea		0xc0($inp),$inp		# inp+=64*3
-	xor		%r10,%r10
-	vmovdqa		$xc1,0x00(%rsp)
+	xor		
+	vmovdqa		$xc1,0x00( 
 	lea		0xc0($out),$out		# out+=64*3
 	sub		\$192,$len		# len-=64*3
-	vmovdqa		$xd1,0x20(%rsp)
+	vmovdqa		$xd1,0x20( 
 	jmp		.Loop_tail8x
 
 .align	32
@@ -1482,11 +1482,11 @@ $code.=<<___;
 	je		.Ldone8x
 
 	lea		0x100($inp),$inp	# inp+=64*4
-	xor		%r10,%r10
-	vmovdqa		$xa2,0x00(%rsp)
+	xor		
+	vmovdqa		$xa2,0x00( 
 	lea		0x100($out),$out	# out+=64*4
 	sub		\$256,$len		# len-=64*4
-	vmovdqa		$xb2,0x20(%rsp)
+	vmovdqa		$xb2,0x20( 
 	jmp		.Loop_tail8x
 
 .align	32
@@ -1514,11 +1514,11 @@ $code.=<<___;
 	je		.Ldone8x
 
 	lea		0x140($inp),$inp	# inp+=64*5
-	xor		%r10,%r10
-	vmovdqa		$xc2,0x00(%rsp)
+	xor		
+	vmovdqa		$xc2,0x00( 
 	lea		0x140($out),$out	# out+=64*5
 	sub		\$320,$len		# len-=64*5
-	vmovdqa		$xd2,0x20(%rsp)
+	vmovdqa		$xd2,0x20( 
 	jmp		.Loop_tail8x
 
 .align	32
@@ -1550,11 +1550,11 @@ $code.=<<___;
 	je		.Ldone8x
 
 	lea		0x180($inp),$inp	# inp+=64*6
-	xor		%r10,%r10
-	vmovdqa		$xa3,0x00(%rsp)
+	xor		
+	vmovdqa		$xa3,0x00( 
 	lea		0x180($out),$out	# out+=64*6
 	sub		\$384,$len		# len-=64*6
-	vmovdqa		$xb3,0x20(%rsp)
+	vmovdqa		$xb3,0x20( 
 	jmp		.Loop_tail8x
 
 .align	32
@@ -1590,18 +1590,18 @@ $code.=<<___;
 	je		.Ldone8x
 
 	lea		0x1c0($inp),$inp	# inp+=64*7
-	xor		%r10,%r10
-	vmovdqa		$xc3,0x00(%rsp)
+	xor		
+	vmovdqa		$xc3,0x00( 
 	lea		0x1c0($out),$out	# out+=64*7
 	sub		\$448,$len		# len-=64*7
-	vmovdqa		$xd3,0x20(%rsp)
+	vmovdqa		$xd3,0x20( 
 
 .Loop_tail8x:
-	movzb		($inp,%r10),%eax
-	movzb		(%rsp,%r10),%ecx
-	lea		1(%r10),%r10
-	xor		%ecx,%eax
-	mov		%al,-1($out,%r10)
+	movzb		($inp, 
+	movzb		( 
+	lea		1( 
+	xor		
+	mov		
 	dec		$len
 	jnz		.Loop_tail8x
 
@@ -1609,19 +1609,19 @@ $code.=<<___;
 	vzeroall
 ___
 $code.=<<___	if ($win64);
-	movaps		-0xa8(%r9),%xmm6
-	movaps		-0x98(%r9),%xmm7
-	movaps		-0x88(%r9),%xmm8
-	movaps		-0x78(%r9),%xmm9
-	movaps		-0x68(%r9),%xmm10
-	movaps		-0x58(%r9),%xmm11
-	movaps		-0x48(%r9),%xmm12
-	movaps		-0x38(%r9),%xmm13
-	movaps		-0x28(%r9),%xmm14
-	movaps		-0x18(%r9),%xmm15
+	movaps		-0xa8( 
+	movaps		-0x98( 
+	movaps		-0x88( 
+	movaps		-0x78( 
+	movaps		-0x68( 
+	movaps		-0x58( 
+	movaps		-0x48( 
+	movaps		-0x38( 
+	movaps		-0x28( 
+	movaps		-0x18( 
 ___
 $code.=<<___;
-	lea		(%r9),%rsp
+	lea		( 
 .cfi_def_cfa_register	rsp
 .L8x_epilogue:
 	ret
@@ -1646,123 +1646,123 @@ $code.=<<___;
 .type	se_handler,\@abi-omnipotent
 .align	16
 se_handler:
-	push	%rsi
-	push	%rdi
-	push	%rbx
-	push	%rbp
-	push	%r12
-	push	%r13
-	push	%r14
-	push	%r15
+	push	
+	push	
+	push	
+	push	
+	push	
+	push	
+	push	
+	push	
 	pushfq
-	sub	\$64,%rsp
+	sub	\$64, 
 
-	mov	120($context),%rax	# pull context->Rax
-	mov	248($context),%rbx	# pull context->Rip
+	mov	120($context), 
+	mov	248($context), 
 
-	mov	8($disp),%rsi		# disp->ImageBase
-	mov	56($disp),%r11		# disp->HandlerData
+	mov	8($disp), 
+	mov	56($disp), 
 
-	lea	.Lctr32_body(%rip),%r10
-	cmp	%r10,%rbx		# context->Rip<.Lprologue
+	lea	.Lctr32_body( 
+	cmp	
 	jb	.Lcommon_seh_tail
 
-	mov	152($context),%rax	# pull context->Rsp
+	mov	152($context), 
 
-	lea	.Lno_data(%rip),%r10	# epilogue label
-	cmp	%r10,%rbx		# context->Rip>=.Lepilogue
+	lea	.Lno_data( 
+	cmp	
 	jae	.Lcommon_seh_tail
 
-	lea	64+24+48(%rax),%rax
+	lea	64+24+48( 
 
-	mov	-8(%rax),%rbx
-	mov	-16(%rax),%rbp
-	mov	-24(%rax),%r12
-	mov	-32(%rax),%r13
-	mov	-40(%rax),%r14
-	mov	-48(%rax),%r15
-	mov	%rbx,144($context)	# restore context->Rbx
-	mov	%rbp,160($context)	# restore context->Rbp
-	mov	%r12,216($context)	# restore context->R12
-	mov	%r13,224($context)	# restore context->R13
-	mov	%r14,232($context)	# restore context->R14
-	mov	%r15,240($context)	# restore context->R14
+	mov	-8( 
+	mov	-16( 
+	mov	-24( 
+	mov	-32( 
+	mov	-40( 
+	mov	-48( 
+	mov	
+	mov	
+	mov	
+	mov	
+	mov	
+	mov	
 
 .Lcommon_seh_tail:
-	mov	8(%rax),%rdi
-	mov	16(%rax),%rsi
-	mov	%rax,152($context)	# restore context->Rsp
-	mov	%rsi,168($context)	# restore context->Rsi
-	mov	%rdi,176($context)	# restore context->Rdi
+	mov	8( 
+	mov	16( 
+	mov	
+	mov	
+	mov	
 
-	mov	40($disp),%rdi		# disp->ContextRecord
-	mov	$context,%rsi		# context
-	mov	\$154,%ecx		# sizeof(CONTEXT)
+	mov	40($disp), 
+	mov	$context, 
+	mov	\$154, 
 	.long	0xa548f3fc		# cld; rep movsq
 
-	mov	$disp,%rsi
-	xor	%rcx,%rcx		# arg1, UNW_FLAG_NHANDLER
-	mov	8(%rsi),%rdx		# arg2, disp->ImageBase
-	mov	0(%rsi),%r8		# arg3, disp->ControlPc
-	mov	16(%rsi),%r9		# arg4, disp->FunctionEntry
-	mov	40(%rsi),%r10		# disp->ContextRecord
-	lea	56(%rsi),%r11		# &disp->HandlerData
-	lea	24(%rsi),%r12		# &disp->EstablisherFrame
-	mov	%r10,32(%rsp)		# arg5
-	mov	%r11,40(%rsp)		# arg6
-	mov	%r12,48(%rsp)		# arg7
-	mov	%rcx,56(%rsp)		# arg8, (NULL)
-	call	*__imp_RtlVirtualUnwind(%rip)
+	mov	$disp, 
+	xor	
+	mov	8( 
+	mov	0( 
+	mov	16( 
+	mov	40( 
+	lea	56( 
+	lea	24( 
+	mov	
+	mov	
+	mov	
+	mov	
+	call	*__imp_RtlVirtualUnwind( 
 
-	mov	\$1,%eax		# ExceptionContinueSearch
-	add	\$64,%rsp
+	mov	\$1, 
+	add	\$64, 
 	popfq
-	pop	%r15
-	pop	%r14
-	pop	%r13
-	pop	%r12
-	pop	%rbp
-	pop	%rbx
-	pop	%rdi
-	pop	%rsi
+	pop	
+	pop	
+	pop	
+	pop	
+	pop	
+	pop	
+	pop	
+	pop	
 	ret
 .size	se_handler,.-se_handler
 
 .type	ssse3_handler,\@abi-omnipotent
 .align	16
 ssse3_handler:
-	push	%rsi
-	push	%rdi
-	push	%rbx
-	push	%rbp
-	push	%r12
-	push	%r13
-	push	%r14
-	push	%r15
+	push	
+	push	
+	push	
+	push	
+	push	
+	push	
+	push	
+	push	
 	pushfq
-	sub	\$64,%rsp
+	sub	\$64, 
 
-	mov	120($context),%rax	# pull context->Rax
-	mov	248($context),%rbx	# pull context->Rip
+	mov	120($context), 
+	mov	248($context), 
 
-	mov	8($disp),%rsi		# disp->ImageBase
-	mov	56($disp),%r11		# disp->HandlerData
+	mov	8($disp), 
+	mov	56($disp), 
 
-	mov	0(%r11),%r10d		# HandlerData[0]
-	lea	(%rsi,%r10),%r10	# prologue label
-	cmp	%r10,%rbx		# context->Rip<prologue label
+	mov	0( 
+	lea	( 
+	cmp	
 	jb	.Lcommon_seh_tail
 
-	mov	192($context),%rax	# pull context->R9
+	mov	192($context), 
 
-	mov	4(%r11),%r10d		# HandlerData[1]
-	lea	(%rsi,%r10),%r10	# epilogue label
-	cmp	%r10,%rbx		# context->Rip>=epilogue label
+	mov	4( 
+	lea	( 
+	cmp	
 	jae	.Lcommon_seh_tail
 
-	lea	-0x28(%rax),%rsi
-	lea	512($context),%rdi	# &context.Xmm6
-	mov	\$4,%ecx
+	lea	-0x28( 
+	lea	512($context), 
+	mov	\$4, 
 	.long	0xa548f3fc		# cld; rep movsq
 
 	jmp	.Lcommon_seh_tail
@@ -1771,38 +1771,38 @@ ssse3_handler:
 .type	full_handler,\@abi-omnipotent
 .align	16
 full_handler:
-	push	%rsi
-	push	%rdi
-	push	%rbx
-	push	%rbp
-	push	%r12
-	push	%r13
-	push	%r14
-	push	%r15
+	push	
+	push	
+	push	
+	push	
+	push	
+	push	
+	push	
+	push	
 	pushfq
-	sub	\$64,%rsp
+	sub	\$64, 
 
-	mov	120($context),%rax	# pull context->Rax
-	mov	248($context),%rbx	# pull context->Rip
+	mov	120($context), 
+	mov	248($context), 
 
-	mov	8($disp),%rsi		# disp->ImageBase
-	mov	56($disp),%r11		# disp->HandlerData
+	mov	8($disp), 
+	mov	56($disp), 
 
-	mov	0(%r11),%r10d		# HandlerData[0]
-	lea	(%rsi,%r10),%r10	# prologue label
-	cmp	%r10,%rbx		# context->Rip<prologue label
+	mov	0( 
+	lea	( 
+	cmp	
 	jb	.Lcommon_seh_tail
 
-	mov	192($context),%rax	# pull context->R9
+	mov	192($context), 
 
-	mov	4(%r11),%r10d		# HandlerData[1]
-	lea	(%rsi,%r10),%r10	# epilogue label
-	cmp	%r10,%rbx		# context->Rip>=epilogue label
+	mov	4( 
+	lea	( 
+	cmp	
 	jae	.Lcommon_seh_tail
 
-	lea	-0xa8(%rax),%rsi
-	lea	512($context),%rdi	# &context.Xmm6
-	mov	\$20,%ecx
+	lea	-0xa8( 
+	lea	512($context), 
+	mov	\$20, 
 	.long	0xa548f3fc		# cld; rep movsq
 
 	jmp	.Lcommon_seh_tail
@@ -1846,7 +1846,7 @@ ___
 foreach (split("\n",$code)) {
 	s/\`([^\`]*)\`/eval $1/ge;
 
-	s/%x#%[yz]/%x/g;	# "down-shift"
+	s/ 
 
 	print $_,"\n";
 }

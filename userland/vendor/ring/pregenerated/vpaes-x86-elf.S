@@ -1,5 +1,5 @@
-// This file is generated from a similarly-named Perl script in the BoringSSL
-// source tree. Do not edit by hand.
+
+
 
 #include <ring-core/asm_base.h>
 
@@ -419,4 +419,4 @@ vpaes_encrypt:
 	popl	%ebp
 	ret
 .size	vpaes_encrypt,.-.L_vpaes_encrypt_begin
-#endif  // !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86) && defined(__ELF__)
+#endif  

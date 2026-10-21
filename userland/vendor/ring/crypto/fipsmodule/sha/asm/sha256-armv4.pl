@@ -27,18 +27,18 @@
 
 # July 2010.
 #
-# Rescheduling for dual-issue pipeline resulted in 22% improvement on
+# Rescheduling for dual-issue pipeline resulted in 22 
 # Cortex A8 core and ~20 cycles per processed byte.
 
 # February 2011.
 #
-# Profiler-assisted and platform-specific optimization resulted in 16%
+# Profiler-assisted and platform-specific optimization resulted in 16 
 # improvement on Cortex A8 core and ~15.4 cycles per processed byte.
 
 # September 2013.
 #
 # Add NEON implementation. On Cortex A8 it was measured to process one
-# byte in 12.5 cycles or 23% faster than integer-only code. Snapdragon
+# byte in 12.5 cycles or 23 
 # S4 does it in 12.5 cycles too, but it's 50% faster than integer-only
 # code (meaning that latter performs sub-optimally, nothing was done
 # about it).
@@ -119,7 +119,7 @@ ___
 $code.=<<___;
 	ldr	$t2,[$Ktbl],#4			@ *K256++
 	add	$h,$h,$t1			@ h+=X[i]
-	str	$t1,[sp,#`$i%16`*4]
+	str	$t1,[sp,#`$i 
 	eor	$t1,$f,$g
 	add	$h,$h,$t0,ror#$Sigma1[0]	@ h+=Sigma1(e)
 	and	$t1,$t1,$e
@@ -139,9 +139,9 @@ $code.=<<___;
 # endif
 	eor	$t2,$a,$b			@ a^b, b^c in next round
 #else
-	ldr	$t1,[sp,#`($i+2)%16`*4]		@ from future BODY_16_xx
+	ldr	$t1,[sp,#`($i+2) 
 	eor	$t2,$a,$b			@ a^b, b^c in next round
-	ldr	$t4,[sp,#`($i+15)%16`*4]	@ from future BODY_16_xx
+	ldr	$t4,[sp,#`($i+15) 
 #endif
 	eor	$t0,$t0,$a,ror#`$Sigma0[2]-$Sigma0[0]`	@ Sigma0(a)
 	and	$t3,$t3,$t2			@ (b^c)&=(a^b)
@@ -157,17 +157,17 @@ sub BODY_16_XX {
 my ($i,$a,$b,$c,$d,$e,$f,$g,$h) = @_;
 
 $code.=<<___;
-	@ ldr	$t1,[sp,#`($i+1)%16`*4]		@ $i
-	@ ldr	$t4,[sp,#`($i+14)%16`*4]
+	@ ldr	$t1,[sp,#`($i+1) 
+	@ ldr	$t4,[sp,#`($i+14) 
 	mov	$t0,$t1,ror#$sigma0[0]
 	add	$a,$a,$t2			@ h+=Maj(a,b,c) from the past
 	mov	$t2,$t4,ror#$sigma1[0]
 	eor	$t0,$t0,$t1,ror#$sigma0[1]
 	eor	$t2,$t2,$t4,ror#$sigma1[1]
 	eor	$t0,$t0,$t1,lsr#$sigma0[2]	@ sigma0(X[i+1])
-	ldr	$t1,[sp,#`($i+0)%16`*4]
+	ldr	$t1,[sp,#`($i+0) 
 	eor	$t2,$t2,$t4,lsr#$sigma1[2]	@ sigma1(X[i+14])
-	ldr	$t4,[sp,#`($i+9)%16`*4]
+	ldr	$t4,[sp,#`($i+9) 
 
 	add	$t2,$t2,$t0
 	eor	$t0,$e,$e,ror#`$Sigma1[1]-$Sigma1[0]`	@ from BODY_00_15
@@ -197,7 +197,7 @@ $code=<<___;
 .code   32
 #endif
 
-.type	K256,%object
+.type	K256, 
 .align	5
 K256:
 .word	0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5
@@ -221,7 +221,7 @@ K256:
 .align	5
 
 .global	sha256_block_data_order_nohw
-.type	sha256_block_data_order_nohw,%function
+.type	sha256_block_data_order_nohw, 
 sha256_block_data_order_nohw:
 	add	$len,$inp,$len,lsl#6	@ len to point at the end of inp
 	stmdb	sp!,{$ctx,$inp,$len,r4-r11,lr}
@@ -469,7 +469,7 @@ $code.=<<___;
 #endif
 
 .global	sha256_block_data_order_neon
-.type	sha256_block_data_order_neon,%function
+.type	sha256_block_data_order_neon, 
 .align	5
 .skip	16
 sha256_block_data_order_neon:

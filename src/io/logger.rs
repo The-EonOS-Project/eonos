@@ -56,8 +56,8 @@ pub struct Logger {
     early_count: usize,
 }
 
-/// Debug log lines are compiled into the kernel only for debug builds
-/// requested with `--debug` in the build scripts.
+
+
 const DEBUG_LOGS: bool = cfg!(feature = "debug-logs");
 
 pub static LOGGER: IrqMutex<Logger> = IrqMutex::new(Logger {

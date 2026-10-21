@@ -1,19 +1,19 @@
-/* Copyright (c) 2014, Google Inc.
- *
- * Permission to use, copy, modify, and/or distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
- * SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
- * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
- * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-// This implementation was taken from the public domain, neon2 version in
-// SUPERCOP by D. J. Bernstein and Peter Schwabe.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include <ring-core/base.h>
 
@@ -22,9 +22,9 @@
 
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 
-// Keep in sync with ffi_arm_neon.rs
+
 typedef struct {
-  uint32_t v[12];  // for alignment; only using 10
+  uint32_t v[12];  
 } fe1305x2;
 
 #define addmulmod openssl_poly1305_neon2_addmulmod
@@ -103,8 +103,8 @@ static void freeze(fe1305x2 *r) {
 
 static void store32(uint8_t out[4], uint32_t v) { OPENSSL_memcpy(out, &v, 4); }
 
-// load32 exists to avoid breaking strict aliasing rules in
-// fe1305x2_frombytearray.
+
+
 static uint32_t load32(const uint8_t t[4]) {
   uint32_t tmp;
   OPENSSL_memcpy(&tmp, t, sizeof(tmp));
@@ -174,7 +174,7 @@ static void fe1305x2_frombytearray(fe1305x2 *r, const uint8_t *x, size_t xlen) {
 
 static const alignas(16) fe1305x2 zero;
 
-// Keep in sync with ffi_arm_neon.rs
+
 struct poly1305_state_st {
   alignas(16) fe1305x2 r;
   fe1305x2 h;
@@ -201,11 +201,11 @@ void CRYPTO_poly1305_init_neon(struct poly1305_state_st *st, const uint8_t key[3
   r->v[9] = r->v[8] = 0x00fffff & (load32(key + 12) >> 8);
 
   for (size_t j = 0; j < 10; j++) {
-    h->v[j] = 0;  // XXX: should fast-forward a bit
+    h->v[j] = 0;  
   }
 
-  addmulmod(precomp, r, r, &zero);                  // precompute r^2
-  addmulmod(precomp + 1, precomp, precomp, &zero);  // precompute r^4
+  addmulmod(precomp, r, r, &zero);                  
+  addmulmod(precomp + 1, precomp, precomp, &zero);  
 
   OPENSSL_memcpy(st->key, key + 16, 16);
   st->buf_used = 0;

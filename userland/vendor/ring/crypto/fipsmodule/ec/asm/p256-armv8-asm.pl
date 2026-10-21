@@ -27,14 +27,14 @@
 # http://eprint.iacr.org/2013/816.
 #
 #			with/without -DECP_NISTZ256_ASM
-# Apple A7		+190-360%
-# Cortex-A53		+190-400%
-# Cortex-A57		+190-350%
-# Denver		+230-400%
+# Apple A7		+190-360 
+# Cortex-A53		+190-400 
+# Cortex-A57		+190-350 
+# Denver		+230-400 
 #
 # Ranges denote minimum and maximum improvement coefficients depending
 # on benchmark. Lower coefficients are for ECDSA sign, server-side
-# operation. Keep in mind that +400% means 5x improvement.
+# operation. Keep in mind that +400 
 
 # The first two arguments should always be the flavour and output file path.
 if ($#ARGV < 1) { die "Not enough arguments provided.
@@ -384,7 +384,7 @@ $code.=<<___;
 // Note that __ecp_nistz256_add_to expects both input vectors pre-loaded to
 // $a0-$a3 and $t0-$t3. This is done because it's used in multiple
 // contexts, e.g. in multiplication by 2 and 3...
-.type	__ecp_nistz256_add_to,%function
+.type	__ecp_nistz256_add_to, 
 .align	4
 __ecp_nistz256_add_to:
 	adds	$acc0,$acc0,$t0		// ret = a+b
@@ -409,7 +409,7 @@ __ecp_nistz256_add_to:
 	ret
 .size	__ecp_nistz256_add_to,.-__ecp_nistz256_add_to
 
-.type	__ecp_nistz256_sub_from,%function
+.type	__ecp_nistz256_sub_from, 
 .align	4
 __ecp_nistz256_sub_from:
 	ldp	$t0,$t1,[$bp]
@@ -436,7 +436,7 @@ __ecp_nistz256_sub_from:
 	ret
 .size	__ecp_nistz256_sub_from,.-__ecp_nistz256_sub_from
 
-.type	__ecp_nistz256_sub_morf,%function
+.type	__ecp_nistz256_sub_morf, 
 .align	4
 __ecp_nistz256_sub_morf:
 	ldp	$t0,$t1,[$bp]
@@ -463,7 +463,7 @@ __ecp_nistz256_sub_morf:
 	ret
 .size	__ecp_nistz256_sub_morf,.-__ecp_nistz256_sub_morf
 
-.type	__ecp_nistz256_div_by_2,%function
+.type	__ecp_nistz256_div_by_2, 
 .align	4
 __ecp_nistz256_div_by_2:
 	subs	$t0,$acc0,#1		// adds	$t0,$a0,#-1 // tmp = a+modulus
@@ -508,7 +508,7 @@ my ($rp_real,$ap_real) = map("x$_",(21,22));
 
 $code.=<<___;
 .globl	ecp_nistz256_point_double
-.type	ecp_nistz256_point_double,%function
+.type	ecp_nistz256_point_double, 
 .align	5
 ecp_nistz256_point_double:
 	AARCH64_SIGN_LINK_REGISTER
@@ -668,7 +668,7 @@ my ($rp_real,$ap_real,$bp_real,$in1infty,$in2infty,$temp0,$temp1,$temp2)=map("x$
 
 $code.=<<___;
 .globl	ecp_nistz256_point_add
-.type	ecp_nistz256_point_add,%function
+.type	ecp_nistz256_point_add, 
 .align	5
 ecp_nistz256_point_add:
 	AARCH64_SIGN_LINK_REGISTER
@@ -927,7 +927,7 @@ my ($rp_real,$ap_real,$bp_real,$in1infty,$in2infty,$temp)=map("x$_",(21..26));
 
 $code.=<<___;
 .globl	ecp_nistz256_point_add_affine
-.type	ecp_nistz256_point_add_affine,%function
+.type	ecp_nistz256_point_add_affine, 
 .align	5
 ecp_nistz256_point_add_affine:
 	AARCH64_SIGN_LINK_REGISTER
@@ -1137,7 +1137,7 @@ $code.=<<___;
 // void ecp_nistz256_ord_mul_mont(uint64_t res[4], uint64_t a[4],
 //                                uint64_t b[4]);
 .globl	ecp_nistz256_ord_mul_mont
-.type	ecp_nistz256_ord_mul_mont,%function
+.type	ecp_nistz256_ord_mul_mont, 
 .align	4
 ecp_nistz256_ord_mul_mont:
 	AARCH64_VALID_CALL_TARGET
@@ -1281,7 +1281,7 @@ $code.=<<___;
 // void ecp_nistz256_ord_sqr_mont(uint64_t res[4], uint64_t a[4],
 //                                uint64_t rep);
 .globl	ecp_nistz256_ord_sqr_mont
-.type	ecp_nistz256_ord_sqr_mont,%function
+.type	ecp_nistz256_ord_sqr_mont, 
 .align	4
 ecp_nistz256_ord_sqr_mont:
 	AARCH64_VALID_CALL_TARGET
@@ -1446,7 +1446,7 @@ $code.=<<___;
 ////////////////////////////////////////////////////////////////////////
 // void ecp_nistz256_select_w5(uint64_t *val, uint64_t *in_t, int index);
 .globl	ecp_nistz256_select_w5
-.type	ecp_nistz256_select_w5,%function
+.type	ecp_nistz256_select_w5, 
 .align	4
 ecp_nistz256_select_w5:
     AARCH64_VALID_CALL_TARGET
@@ -1509,7 +1509,7 @@ ecp_nistz256_select_w5:
 ////////////////////////////////////////////////////////////////////////
 // void ecp_nistz256_select_w7(uint64_t *val, uint64_t *in_t, int index);
 .globl	ecp_nistz256_select_w7
-.type	ecp_nistz256_select_w7,%function
+.type	ecp_nistz256_select_w7, 
 .align	4
 ecp_nistz256_select_w7:
     AARCH64_VALID_CALL_TARGET

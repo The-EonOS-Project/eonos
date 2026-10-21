@@ -1,5 +1,5 @@
-//! Small path-based VFS. Filesystems are mounted at path prefixes and
-//! implement lookup/listing, with writes currently supported by FAT32 mounts.
+
+
 
 #![allow(dead_code)]
 
@@ -55,7 +55,7 @@ fn normalize(path: &str) -> Result<String, FsError> {
     Ok(out)
 }
 
-/// Resolve `path` against an absolute working directory and normalize it.
+
 pub fn resolve_path(path: &str, cwd: &str) -> Result<String, FsError> {
     if path.starts_with('/') {
         normalize(path)
@@ -91,7 +91,7 @@ fn route<'m, 'p>(mounts: &'m [Mount], path: &'p str) -> Option<(&'m Mount, &'p s
         .max_by_key(|(m, _)| m.prefix.len())
 }
 
-/// Mount the boot archive as the root filesystem.
+
 pub fn init() {
     let mut mounts = MOUNTS.lock();
     mounts.clear();
@@ -102,12 +102,12 @@ pub fn init() {
     });
 }
 
-/// Mount a FAT32 volume at an absolute path, e.g. `/disk`.
+
 pub fn mount_fat32(prefix: &str, device: &'static dyn BlockDevice) -> Result<(), FsError> {
     mount_fat32_inner(prefix, None, device)
 }
 
-/// Mount a registered FAT32 device and retain its block-device name for lsblk.
+
 pub fn mount_fat32_device(
     prefix: &str,
     device_name: &str,
@@ -144,7 +144,7 @@ fn mount_fat32_inner(
     Ok(())
 }
 
-/// Return the mountpoint for a registered block device, if it is mounted.
+
 pub fn mountpoint_for_device(device_name: &str) -> Option<String> {
     MOUNTS
         .lock()
@@ -153,7 +153,7 @@ pub fn mountpoint_for_device(device_name: &str) -> Option<String> {
         .map(|mount| mount.prefix.clone())
 }
 
-/// Return a formatted snapshot of active mounts for user diagnostics.
+
 pub fn mount_listing() -> String {
     use core::fmt::Write;
 
@@ -170,7 +170,7 @@ pub fn mount_listing() -> String {
     output
 }
 
-/// Return whether an exact mountpoint currently has a writable filesystem.
+
 pub fn is_writable_mountpoint(prefix: &str) -> bool {
     let Ok(prefix) = normalize(prefix) else { return false; };
     MOUNTS.lock().iter().any(|mount| {
@@ -178,7 +178,7 @@ pub fn is_writable_mountpoint(prefix: &str) -> bool {
     })
 }
 
-/// Mount a FAT32/vfat partition using partition-relative sector addresses.
+
 pub fn mount_fat32_partition(
     prefix: &str,
     parent: &'static dyn BlockDevice,
@@ -292,9 +292,9 @@ pub fn write_at(path: &str, offset: usize, data: &[u8]) -> Result<usize, FsError
     }
 }
 
-/// Replace `/disk/crashlog.txt` without waiting for the VFS mount lock.
-/// This is used only by the terminal panic path, where blocking on a lock
-/// held by the faulting code would prevent the machine from halting.
+
+
+
 pub fn try_write_crashlog(data: &[u8]) -> Result<(), FsError> {
     let mounts = MOUNTS.try_lock().ok_or(FsError::Io)?;
     let mount = mounts
@@ -341,7 +341,7 @@ pub fn file_size(path: &str) -> Result<usize, FsError> {
     }
 }
 
-/// Ask writable mounted filesystems to make pending writes durable.
+
 pub fn sync() -> Result<(), FsError> {
     let mounts = MOUNTS.lock();
     for mount in mounts.iter() {
@@ -349,8 +349,8 @@ pub fn sync() -> Result<(), FsError> {
             flush_filesystem(fs)?;
         }
     }
-    // A system with only the read-only initramfs has nothing to flush.
-    // Treat that as success so power controls do not require an optional disk.
+    
+    
     Ok(())
 }
 
@@ -400,7 +400,7 @@ pub fn list(path: &str) -> Result<Vec<DirEntry>, FsError> {
             Ok(out)
         }
     }?;
-    // Mounted filesystems appear as directories in their parent mount.
+    
     for child_mount in mounts.iter() {
         if child_mount.prefix == path {
             continue;
@@ -426,7 +426,7 @@ pub fn list(path: &str) -> Result<Vec<DirEntry>, FsError> {
     Ok(out)
 }
 
-/// List all files recursively, returning paths relative to the VFS root.
+
 pub fn list_files() -> Vec<String> {
     fn walk(path: &str, out: &mut Vec<String>, depth: usize) {
         if depth >= 32 || out.len() >= 4096 {

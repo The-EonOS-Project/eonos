@@ -110,7 +110,7 @@
 # impossible in 32-bit mode, because of limited register bank
 # capacity. Otherwise improvement has to be weighed against slower
 # setup, as well as code size and complexity increase. As even
-# optimistic estimate doesn't promise 30% performance improvement,
+# optimistic estimate doesn't promise 30 
 # there are currently no plans to increase Naggr.
 #
 # Special thanks to David Woodhouse for providing access to a
@@ -121,9 +121,9 @@
 # Tweaked to optimize transitions between integer and FP operations
 # on same XMM register, PCLMULQDQ subroutine was measured to process
 # one byte in 2.07 cycles on Sandy Bridge, and in 2.12 - on Westmere.
-# The minor regression on Westmere is outweighed by ~15% improvement
+# The minor regression on Westmere is outweighed by ~15 
 # on Sandy Bridge. Strangely enough attempt to modify 64-bit code in
-# similar manner resulted in almost 20% degradation on Sandy Bridge,
+# similar manner resulted in almost 20 
 # where original 64-bit code processes one byte in 1.95 cycles.
 
 #####################################################################
@@ -197,7 +197,7 @@ if (1) {		# Algorithm 9 with <<1 twist.
 			# temporary registers, which makes it better
 			# candidate for interleaving with 64x64
 			# multiplication. Pre-modulo-scheduled loop
-			# was found to be ~20% faster than Algorithm 5
+			# was found to be ~20 
 			# below. Algorithm 9 was therefore chosen for
 			# further optimization...
 

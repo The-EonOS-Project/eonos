@@ -1,26 +1,26 @@
-// Copyright 2017 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-//! PKCS#8 is specified in [RFC 5958].
-//!
-//! [RFC 5958]: https://tools.ietf.org/html/rfc5958
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use crate::{ec, error, io::der};
 
 pub(crate) struct PublicKeyOptions {
-    /// Should the wrong public key ASN.1 tagging used by early implementations
-    /// of PKCS#8 v2 (including earlier versions of *ring*) be accepted?
+    
+    
     pub accept_legacy_ed25519_public_key_tag: bool,
 }
 
@@ -30,24 +30,24 @@ pub(crate) enum Version {
     V2Only(PublicKeyOptions),
 }
 
-/// A template for constructing PKCS#8 documents.
-///
-/// Note that this only works for ECC.
+
+
+
 pub(crate) struct Template {
     pub bytes: &'static [u8],
 
-    // The range within `bytes` that holds the value (not including the tag and
-    // length) for use in the PKCS#8 document's privateKeyAlgorithm field.
+    
+    
     pub alg_id_range: core::ops::Range<usize>,
 
-    // `bytes[alg_id_range][curve_id_index..]` contains the OID identifying the,
-    // curve, including the tag and length.
+    
+    
     pub curve_id_index: usize,
 
-    // `bytes` will be split into two parts at `private_key_index`, where the
-    // first part is written before the private key and the second part is
-    // written after the private key. The public key is written after the second
-    // part.
+    
+    
+    
+    
     pub private_key_index: usize,
 }
 
@@ -67,12 +67,12 @@ impl Template {
     }
 }
 
-/// Parses an unencrypted PKCS#8 private key, verifies that it is the right type
-/// of key, and returns the key value.
-///
-/// PKCS#8 is specified in [RFC 5958].
-///
-/// [RFC 5958]: https://tools.ietf.org/html/rfc5958
+
+
+
+
+
+
 pub(crate) fn unwrap_key<'a>(
     template: &Template,
     version: Version,
@@ -81,16 +81,16 @@ pub(crate) fn unwrap_key<'a>(
     unwrap_key_(template.alg_id_value(), version, input)
 }
 
-/// Parses an unencrypted PKCS#8 private key, verifies that it is the right type
-/// of key, and returns the key value.
-///
-/// `alg_id` must be the encoded value (not including the outermost `SEQUENCE`
-/// tag and length) of the `AlgorithmIdentifier` that identifies the key type.
-/// The result will be an encoded `RSAPrivateKey` or `ECPrivateKey` or similar.
-///
-/// PKCS#8 is specified in [RFC 5958].
-///
-/// [RFC 5958]: https://tools.ietf.org/html/rfc5958
+
+
+
+
+
+
+
+
+
+
 pub(crate) fn unwrap_key_<'a>(
     alg_id: untrusted::Input,
     version: Version,
@@ -114,10 +114,10 @@ fn unwrap_key__<'a>(
     let actual_version = der::small_nonnegative_integer(input)
         .map_err(|error::Unspecified| error::KeyRejected::invalid_encoding())?;
 
-    // Do things in a specific order to return more useful errors:
-    // 1. Check for completely unsupported version.
-    // 2. Check for algorithm mismatch.
-    // 3. Check for algorithm-specific version mismatch.
+    
+    
+    
+    
 
     if actual_version > 1 {
         return Err(error::KeyRejected::version_not_supported());
@@ -141,7 +141,7 @@ fn unwrap_key__<'a>(
     let private_key = der::expect_tag_and_get_value(input, der::Tag::OctetString)
         .map_err(|error::Unspecified| error::KeyRejected::invalid_encoding())?;
 
-    // Ignore any attributes that are present.
+    
     if input.peek(der::Tag::ContextSpecificConstructed0.into()) {
         let _ = der::expect_tag_and_get_value(input, der::Tag::ContextSpecificConstructed0)
             .map_err(|error::Unspecified| error::KeyRejected::invalid_encoding())?;
@@ -175,7 +175,7 @@ fn unwrap_key__<'a>(
     Ok((private_key, public_key))
 }
 
-/// A generated PKCS#8 document.
+
 pub struct Document {
     bytes: [u8; ec::PKCS8_DOCUMENT_MAX_LEN],
     len: usize,
@@ -202,8 +202,8 @@ pub(crate) fn wrap_key(template: &Template, private_key: &[u8], public_key: &[u8
     result
 }
 
-/// Formats a private key "prefix||private_key||middle||public_key" where
-/// `template` is "prefix||middle" split at position `private_key_index`.
+
+
 fn wrap_key_(template: &Template, private_key: &[u8], public_key: &[u8], bytes: &mut [u8]) {
     let (before_private_key, after_private_key) =
         template.bytes.split_at(template.private_key_index);

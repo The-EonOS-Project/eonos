@@ -58,7 +58,7 @@ open OUT,"| \"$^X\" \"$xlate\" $flavour \"$output\"";
 $code.=<<___;
 .section	.rodata
 
-.type	_vpaes_consts,%object
+.type	_vpaes_consts, 
 .align	7	// totally strategic alignment
 _vpaes_consts:
 .Lk_mc_forward:	// mc_forward
@@ -476,14 +476,14 @@ _vpaes_schedule_core:
 ##
 .align	4
 .Lschedule_256:
-	ld1	{v0.16b}, [$inp]		// vmovdqu	16(%rdi),%xmm0		# load key part 2 (unaligned)
+	ld1	{v0.16b}, [$inp]		// vmovdqu	16( 
 	bl	_vpaes_schedule_transform	// input transform
-	mov	$inp, #7			// mov	\$7, %esi
+	mov	$inp, #7			// mov	\$7, 
 
 .Loop_schedule_256:
-	sub	$inp, $inp, #1			// dec	%esi
+	sub	$inp, $inp, #1			// dec	
 	bl	_vpaes_schedule_mangle		// output low result
-	mov	v6.16b, v0.16b			// vmovdqa	%xmm0,	%xmm6		# save cur_lo in xmm6
+	mov	v6.16b, v0.16b			// vmovdqa	
 
 	// high round
 	bl	_vpaes_schedule_round
@@ -491,12 +491,12 @@ _vpaes_schedule_core:
 	bl	_vpaes_schedule_mangle
 
 	// low round. swap xmm7 and xmm6
-	dup	v0.4s, v0.s[3]			// vpshufd	\$0xFF,	%xmm0,	%xmm0
+	dup	v0.4s, v0.s[3]			// vpshufd	\$0xFF,	
 	movi	v4.16b, #0
-	mov	v5.16b, v7.16b			// vmovdqa	%xmm7,	%xmm5
-	mov	v7.16b, v6.16b			// vmovdqa	%xmm6,	%xmm7
+	mov	v5.16b, v7.16b			// vmovdqa	
+	mov	v7.16b, v6.16b			// vmovdqa	
 	bl	_vpaes_schedule_low_round
-	mov	v7.16b, v5.16b			// vmovdqa	%xmm5,	%xmm7
+	mov	v7.16b, v5.16b			// vmovdqa	
 
 	b	.Loop_schedule_256
 
@@ -504,43 +504,43 @@ _vpaes_schedule_core:
 ##  .aes_schedule_mangle_last
 ##
 ##  Mangler for last round of key schedule
-##  Mangles %xmm0
-##    when encrypting, outputs out(%xmm0) ^ 63
-##    when decrypting, outputs unskew(%xmm0)
+##  Mangles 
+##    when encrypting, outputs out( 
+##    when decrypting, outputs unskew( 
 ##
 ##  Always called right before return... jumps to cleanup and exits
 ##
 .align	4
 .Lschedule_mangle_last:
 	// schedule last round key from xmm0
-	adrp	x11, :pg_hi21:.Lk_deskew	// lea	.Lk_deskew(%rip),%r11	# prepare to deskew
+	adrp	x11, :pg_hi21:.Lk_deskew	// lea	.Lk_deskew( 
 	add	x11, x11, :lo12:.Lk_deskew
 
 	cbnz	$dir, .Lschedule_mangle_last_dec
 
 	// encrypting
-	ld1	{v1.2d}, [x8]			// vmovdqa	(%r8,%r10),%xmm1
-	adrp	x11, :pg_hi21:.Lk_opt		// lea	.Lk_opt(%rip),	%r11		# prepare to output transform
+	ld1	{v1.2d}, [x8]			// vmovdqa	( 
+	adrp	x11, :pg_hi21:.Lk_opt		// lea	.Lk_opt( 
 	add	x11, x11, :lo12:.Lk_opt
-	add	$out, $out, #32			// add	\$32,	%rdx
-	tbl	v0.16b, {v0.16b}, v1.16b	// vpshufb	%xmm1,	%xmm0,	%xmm0		# output permute
+	add	$out, $out, #32			// add	\$32,	
+	tbl	v0.16b, {v0.16b}, v1.16b	// vpshufb	
 
 .Lschedule_mangle_last_dec:
 	ld1	{v20.2d-v21.2d}, [x11]		// reload constants
-	sub	$out, $out, #16			// add	\$-16,	%rdx
-	eor	v0.16b, v0.16b, v16.16b		// vpxor	.Lk_s63(%rip),	%xmm0,	%xmm0
+	sub	$out, $out, #16			// add	\$-16,	
+	eor	v0.16b, v0.16b, v16.16b		// vpxor	.Lk_s63( 
 	bl	_vpaes_schedule_transform	// output transform
-	st1	{v0.2d}, [$out]			// vmovdqu	%xmm0,	(%rdx)		# save last key
+	st1	{v0.2d}, [$out]			// vmovdqu	
 
 	// cleanup
-	eor	v0.16b, v0.16b, v0.16b		// vpxor	%xmm0,	%xmm0,	%xmm0
-	eor	v1.16b, v1.16b, v1.16b		// vpxor	%xmm1,	%xmm1,	%xmm1
-	eor	v2.16b, v2.16b, v2.16b		// vpxor	%xmm2,	%xmm2,	%xmm2
-	eor	v3.16b, v3.16b, v3.16b		// vpxor	%xmm3,	%xmm3,	%xmm3
-	eor	v4.16b, v4.16b, v4.16b		// vpxor	%xmm4,	%xmm4,	%xmm4
-	eor	v5.16b, v5.16b, v5.16b		// vpxor	%xmm5,	%xmm5,	%xmm5
-	eor	v6.16b, v6.16b, v6.16b		// vpxor	%xmm6,	%xmm6,	%xmm6
-	eor	v7.16b, v7.16b, v7.16b		// vpxor	%xmm7,	%xmm7,	%xmm7
+	eor	v0.16b, v0.16b, v0.16b		// vpxor	
+	eor	v1.16b, v1.16b, v1.16b		// vpxor	
+	eor	v2.16b, v2.16b, v2.16b		// vpxor	
+	eor	v3.16b, v3.16b, v3.16b		// vpxor	
+	eor	v4.16b, v4.16b, v4.16b		// vpxor	
+	eor	v5.16b, v5.16b, v5.16b		// vpxor	
+	eor	v6.16b, v6.16b, v6.16b		// vpxor	
+	eor	v7.16b, v7.16b, v7.16b		// vpxor	
 	ldp	x29, x30, [sp],#16
 	AARCH64_VALIDATE_LINK_REGISTER
 	ret
@@ -552,113 +552,113 @@ _vpaes_schedule_core:
 ##  Smear the short, low side in the 192-bit key schedule.
 ##
 ##  Inputs:
-##    %xmm7: high side, b  a  x  y
-##    %xmm6:  low side, d  c  0  0
-##    %xmm13: 0
+##    
+##    
+##    
 ##
 ##  Outputs:
-##    %xmm6: b+c+d  b+c  0  0
-##    %xmm0: b+c+d  b+c  b  a
+##    
+##    
 ##
-.type	_vpaes_schedule_192_smear,%function
+.type	_vpaes_schedule_192_smear, 
 .align	4
 _vpaes_schedule_192_smear:
 	movi	v1.16b, #0
 	dup	v0.4s, v7.s[3]
-	ins	v1.s[3], v6.s[2]	// vpshufd	\$0x80,	%xmm6,	%xmm1	# d c 0 0 -> c 0 0 0
-	ins	v0.s[0], v7.s[2]	// vpshufd	\$0xFE,	%xmm7,	%xmm0	# b a _ _ -> b b b a
-	eor	v6.16b, v6.16b, v1.16b	// vpxor	%xmm1,	%xmm6,	%xmm6	# -> c+d c 0 0
-	eor	v1.16b, v1.16b, v1.16b	// vpxor	%xmm1,	%xmm1,	%xmm1
-	eor	v6.16b, v6.16b, v0.16b	// vpxor	%xmm0,	%xmm6,	%xmm6	# -> b+c+d b+c b a
-	mov	v0.16b, v6.16b		// vmovdqa	%xmm6,	%xmm0
-	ins	v6.d[0], v1.d[0]	// vmovhlps	%xmm1,	%xmm6,	%xmm6	# clobber low side with zeros
+	ins	v1.s[3], v6.s[2]	// vpshufd	\$0x80,	
+	ins	v0.s[0], v7.s[2]	// vpshufd	\$0xFE,	
+	eor	v6.16b, v6.16b, v1.16b	// vpxor	
+	eor	v1.16b, v1.16b, v1.16b	// vpxor	
+	eor	v6.16b, v6.16b, v0.16b	// vpxor	
+	mov	v0.16b, v6.16b		// vmovdqa	
+	ins	v6.d[0], v1.d[0]	// vmovhlps	
 	ret
 .size	_vpaes_schedule_192_smear,.-_vpaes_schedule_192_smear
 
 ##
 ##  .aes_schedule_round
 ##
-##  Runs one main round of the key schedule on %xmm0, %xmm7
+##  Runs one main round of the key schedule on 
 ##
-##  Specifically, runs subbytes on the high dword of %xmm0
+##  Specifically, runs subbytes on the high dword of 
 ##  then rotates it by one byte and xors into the low dword of
-##  %xmm7.
+##  
 ##
-##  Adds rcon from low byte of %xmm8, then rotates %xmm8 for
+##  Adds rcon from low byte of 
 ##  next rcon.
 ##
-##  Smears the dwords of %xmm7 by xoring the low into the
+##  Smears the dwords of 
 ##  second low, result into third, result into highest.
 ##
-##  Returns results in %xmm7 = %xmm0.
-##  Clobbers %xmm1-%xmm4, %r11.
+##  Returns results in 
+##  Clobbers 
 ##
-.type	_vpaes_schedule_round,%function
+.type	_vpaes_schedule_round, 
 .align	4
 _vpaes_schedule_round:
 	// extract rcon from xmm8
-	movi	v4.16b, #0			// vpxor	%xmm4,	%xmm4,	%xmm4
-	ext	v1.16b, $rcon, v4.16b, #15	// vpalignr	\$15,	%xmm8,	%xmm4,	%xmm1
-	ext	$rcon, $rcon, $rcon, #15	// vpalignr	\$15,	%xmm8,	%xmm8,	%xmm8
-	eor	v7.16b, v7.16b, v1.16b		// vpxor	%xmm1,	%xmm7,	%xmm7
+	movi	v4.16b, #0			// vpxor	
+	ext	v1.16b, $rcon, v4.16b, #15	// vpalignr	\$15,	
+	ext	$rcon, $rcon, $rcon, #15	// vpalignr	\$15,	
+	eor	v7.16b, v7.16b, v1.16b		// vpxor	
 
 	// rotate
-	dup	v0.4s, v0.s[3]			// vpshufd	\$0xFF,	%xmm0,	%xmm0
-	ext	v0.16b, v0.16b, v0.16b, #1	// vpalignr	\$1,	%xmm0,	%xmm0,	%xmm0
+	dup	v0.4s, v0.s[3]			// vpshufd	\$0xFF,	
+	ext	v0.16b, v0.16b, v0.16b, #1	// vpalignr	\$1,	
 
 	// fall through...
 
 	// low round: same as high round, but no rotation and no rcon.
 _vpaes_schedule_low_round:
 	// smear xmm7
-	ext	v1.16b, v4.16b, v7.16b, #12	// vpslldq	\$4,	%xmm7,	%xmm1
-	eor	v7.16b, v7.16b, v1.16b		// vpxor	%xmm1,	%xmm7,	%xmm7
-	ext	v4.16b, v4.16b, v7.16b, #8	// vpslldq	\$8,	%xmm7,	%xmm4
+	ext	v1.16b, v4.16b, v7.16b, #12	// vpslldq	\$4,	
+	eor	v7.16b, v7.16b, v1.16b		// vpxor	
+	ext	v4.16b, v4.16b, v7.16b, #8	// vpslldq	\$8,	
 
 	// subbytes
-	and	v1.16b, v0.16b, v17.16b		// vpand	%xmm9,	%xmm0,	%xmm1		# 0 = k
-	ushr	v0.16b, v0.16b, #4		// vpsrlb	\$4,	%xmm0,	%xmm0		# 1 = i
-	 eor	v7.16b, v7.16b, v4.16b		// vpxor	%xmm4,	%xmm7,	%xmm7
-	tbl	v2.16b, {$invhi}, v1.16b	// vpshufb	%xmm1,	%xmm11,	%xmm2		# 2 = a/k
-	eor	v1.16b, v1.16b, v0.16b		// vpxor	%xmm0,	%xmm1,	%xmm1		# 0 = j
-	tbl	v3.16b, {$invlo}, v0.16b	// vpshufb	%xmm0, 	%xmm10,	%xmm3		# 3 = 1/i
-	eor	v3.16b, v3.16b, v2.16b		// vpxor	%xmm2,	%xmm3,	%xmm3		# 3 = iak = 1/i + a/k
-	tbl	v4.16b, {$invlo}, v1.16b	// vpshufb	%xmm1,	%xmm10,	%xmm4		# 4 = 1/j
-	 eor	v7.16b, v7.16b, v16.16b		// vpxor	.Lk_s63(%rip),	%xmm7,	%xmm7
-	tbl	v3.16b, {$invlo}, v3.16b	// vpshufb	%xmm3,	%xmm10,	%xmm3		# 2 = 1/iak
-	eor	v4.16b, v4.16b, v2.16b		// vpxor	%xmm2,	%xmm4,	%xmm4		# 4 = jak = 1/j + a/k
-	tbl	v2.16b, {$invlo}, v4.16b	// vpshufb	%xmm4,	%xmm10,	%xmm2		# 3 = 1/jak
-	eor	v3.16b, v3.16b, v1.16b		// vpxor	%xmm1,	%xmm3,	%xmm3		# 2 = io
-	eor	v2.16b, v2.16b, v0.16b		// vpxor	%xmm0,	%xmm2,	%xmm2		# 3 = jo
-	tbl	v4.16b, {v23.16b}, v3.16b	// vpshufb	%xmm3,	%xmm13,	%xmm4		# 4 = sbou
-	tbl	v1.16b, {v22.16b}, v2.16b	// vpshufb	%xmm2,	%xmm12,	%xmm1		# 0 = sb1t
-	eor	v1.16b, v1.16b, v4.16b		// vpxor	%xmm4,	%xmm1,	%xmm1		# 0 = sbox output
+	and	v1.16b, v0.16b, v17.16b		// vpand	
+	ushr	v0.16b, v0.16b, #4		// vpsrlb	\$4,	
+	 eor	v7.16b, v7.16b, v4.16b		// vpxor	
+	tbl	v2.16b, {$invhi}, v1.16b	// vpshufb	
+	eor	v1.16b, v1.16b, v0.16b		// vpxor	
+	tbl	v3.16b, {$invlo}, v0.16b	// vpshufb	
+	eor	v3.16b, v3.16b, v2.16b		// vpxor	
+	tbl	v4.16b, {$invlo}, v1.16b	// vpshufb	
+	 eor	v7.16b, v7.16b, v16.16b		// vpxor	.Lk_s63( 
+	tbl	v3.16b, {$invlo}, v3.16b	// vpshufb	
+	eor	v4.16b, v4.16b, v2.16b		// vpxor	
+	tbl	v2.16b, {$invlo}, v4.16b	// vpshufb	
+	eor	v3.16b, v3.16b, v1.16b		// vpxor	
+	eor	v2.16b, v2.16b, v0.16b		// vpxor	
+	tbl	v4.16b, {v23.16b}, v3.16b	// vpshufb	
+	tbl	v1.16b, {v22.16b}, v2.16b	// vpshufb	
+	eor	v1.16b, v1.16b, v4.16b		// vpxor	
 
 	// add in smeared stuff
-	eor	v0.16b, v1.16b, v7.16b		// vpxor	%xmm7,	%xmm1,	%xmm0
-	eor	v7.16b, v1.16b, v7.16b		// vmovdqa	%xmm0,	%xmm7
+	eor	v0.16b, v1.16b, v7.16b		// vpxor	
+	eor	v7.16b, v1.16b, v7.16b		// vmovdqa	
 	ret
 .size	_vpaes_schedule_round,.-_vpaes_schedule_round
 
 ##
 ##  .aes_schedule_transform
 ##
-##  Linear-transform %xmm0 according to tables at (%r11)
+##  Linear-transform 
 ##
-##  Requires that %xmm9 = 0x0F0F... as in preheat
-##  Output in %xmm0
-##  Clobbers %xmm1, %xmm2
+##  Requires that 
+##  Output in 
+##  Clobbers 
 ##
-.type	_vpaes_schedule_transform,%function
+.type	_vpaes_schedule_transform, 
 .align	4
 _vpaes_schedule_transform:
-	and	v1.16b, v0.16b, v17.16b		// vpand	%xmm9,	%xmm0,	%xmm1
-	ushr	v0.16b, v0.16b, #4		// vpsrlb	\$4,	%xmm0,	%xmm0
-						// vmovdqa	(%r11),	%xmm2 	# lo
-	tbl	v2.16b, {$iptlo}, v1.16b	// vpshufb	%xmm1,	%xmm2,	%xmm2
-						// vmovdqa	16(%r11),	%xmm1 # hi
-	tbl	v0.16b, {$ipthi}, v0.16b	// vpshufb	%xmm0,	%xmm1,	%xmm0
-	eor	v0.16b, v0.16b, v2.16b		// vpxor	%xmm2,	%xmm0,	%xmm0
+	and	v1.16b, v0.16b, v17.16b		// vpand	
+	ushr	v0.16b, v0.16b, #4		// vpsrlb	\$4,	
+						// vmovdqa	( 
+	tbl	v2.16b, {$iptlo}, v1.16b	// vpshufb	
+						// vmovdqa	16( 
+	tbl	v0.16b, {$ipthi}, v0.16b	// vpshufb	
+	eor	v0.16b, v0.16b, v2.16b		// vpxor	
 	ret
 .size	_vpaes_schedule_transform,.-_vpaes_schedule_transform
 
@@ -680,37 +680,37 @@ _vpaes_schedule_transform:
 ##    apply shiftrows transform
 ##
 ##
-##  Writes out to (%rdx), and increments or decrements it
-##  Keeps track of round number mod 4 in %r8
+##  Writes out to ( 
+##  Keeps track of round number mod 4 in 
 ##  Preserves xmm0
 ##  Clobbers xmm1-xmm5
 ##
-.type	_vpaes_schedule_mangle,%function
+.type	_vpaes_schedule_mangle, 
 .align	4
 _vpaes_schedule_mangle:
-	mov	v4.16b, v0.16b			// vmovdqa	%xmm0,	%xmm4	# save xmm0 for later
-						// vmovdqa	.Lk_mc_forward(%rip),%xmm5
+	mov	v4.16b, v0.16b			// vmovdqa	
+						// vmovdqa	.Lk_mc_forward( 
 
 	// encrypting
-	eor	v4.16b, v0.16b, v16.16b		// vpxor	.Lk_s63(%rip),	%xmm0,	%xmm4
-	add	$out, $out, #16			// add	\$16,	%rdx
-	tbl	v4.16b, {v4.16b}, v9.16b	// vpshufb	%xmm5,	%xmm4,	%xmm4
-	tbl	v1.16b, {v4.16b}, v9.16b	// vpshufb	%xmm5,	%xmm4,	%xmm1
-	tbl	v3.16b, {v1.16b}, v9.16b	// vpshufb	%xmm5,	%xmm1,	%xmm3
-	eor	v4.16b, v4.16b, v1.16b		// vpxor	%xmm1,	%xmm4,	%xmm4
-	ld1	{v1.2d}, [x8]			// vmovdqa	(%r8,%r10),	%xmm1
-	eor	v3.16b, v3.16b, v4.16b		// vpxor	%xmm4,	%xmm3,	%xmm3
+	eor	v4.16b, v0.16b, v16.16b		// vpxor	.Lk_s63( 
+	add	$out, $out, #16			// add	\$16,	
+	tbl	v4.16b, {v4.16b}, v9.16b	// vpshufb	
+	tbl	v1.16b, {v4.16b}, v9.16b	// vpshufb	
+	tbl	v3.16b, {v1.16b}, v9.16b	// vpshufb	
+	eor	v4.16b, v4.16b, v1.16b		// vpxor	
+	ld1	{v1.2d}, [x8]			// vmovdqa	( 
+	eor	v3.16b, v3.16b, v4.16b		// vpxor	
 
 .Lschedule_mangle_both:
-	tbl	v3.16b, {v3.16b}, v1.16b	// vpshufb	%xmm1,	%xmm3,	%xmm3
-	add	x8, x8, #48			// add	\$-16,	%r8
-	and	x8, x8, #~(1<<6)		// and	\$0x30,	%r8
-	st1	{v3.2d}, [$out]			// vmovdqu	%xmm3,	(%rdx)
+	tbl	v3.16b, {v3.16b}, v1.16b	// vpshufb	
+	add	x8, x8, #48			// add	\$-16,	
+	and	x8, x8, #~(1<<6)		// and	\$0x30,	
+	st1	{v3.2d}, [$out]			// vmovdqu	
 	ret
 .size	_vpaes_schedule_mangle,.-_vpaes_schedule_mangle
 
 .globl	vpaes_set_encrypt_key
-.type	vpaes_set_encrypt_key,%function
+.type	vpaes_set_encrypt_key, 
 .align	4
 vpaes_set_encrypt_key:
 	AARCH64_SIGN_LINK_REGISTER
@@ -718,12 +718,12 @@ vpaes_set_encrypt_key:
 	add	x29,sp,#0
 	stp	d8,d9,[sp,#-16]!	// ABI spec says so
 
-	lsr	w9, $bits, #5		// shr	\$5,%eax
-	add	w9, w9, #5		// \$5,%eax
-	str	w9, [$out,#240]		// mov	%eax,240(%rdx)	# AES_KEY->rounds = nbits/32+5;
+	lsr	w9, $bits, #5		// shr	\$5, 
+	add	w9, w9, #5		// \$5, 
+	str	w9, [$out,#240]		// mov	
 
-	mov	$dir, #0		// mov	\$0,%ecx
-	mov	x8, #0x30		// mov	\$0x30,%r8d
+	mov	$dir, #0		// mov	\$0, 
+	mov	x8, #0x30		// mov	\$0x30, 
 	bl	_vpaes_schedule_core
 	eor	x0, x0, x0
 
@@ -742,7 +742,7 @@ my ($ctr, $ctr_tmp) = ("w6", "w7");
 #                                 const AES_KEY *key, const uint8_t ivec[16]);
 $code.=<<___;
 .globl	vpaes_ctr32_encrypt_blocks
-.type	vpaes_ctr32_encrypt_blocks,%function
+.type	vpaes_ctr32_encrypt_blocks, 
 .align	4
 vpaes_ctr32_encrypt_blocks:
 	AARCH64_SIGN_LINK_REGISTER

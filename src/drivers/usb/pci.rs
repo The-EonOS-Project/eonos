@@ -1,11 +1,11 @@
-//! Just enough PCI to find a USB host controller.
-//!
-//! Uses legacy port-I/O configuration space access (CF8/CFC) rather
-//! than memory-mapped configuration (MCFG/ECAM) -- slower, but every
-//! x86 chipset since the 90s supports it and it needs no ACPI table
-//! parsing to locate, which EonOS doesn't have yet. Only brute-force
-//! bus/device/function scanning is done; no recursion through
-//! bridges beyond the flat 256-bus space this gives for free.
+
+
+
+
+
+
+
+
 
 #![allow(dead_code)]
 
@@ -14,8 +14,8 @@ use alloc::vec::Vec;
 const CONFIG_ADDRESS: u16 = 0xCF8;
 const CONFIG_DATA: u16 = 0xCFC;
 
-/// PCI class/subclass/prog-if for "USB host controller" (class 0x0C,
-/// subclass 0x03); prog-if distinguishes which kind.
+
+
 const CLASS_SERIAL_BUS: u8 = 0x0C;
 const SUBCLASS_USB: u8 = 0x03;
 
@@ -63,9 +63,9 @@ pub struct PciLocation {
 pub struct UsbController {
     pub location: PciLocation,
     pub kind: ControllerKind,
-    /// Physical base address from BAR0 (64-bit BARs are common for
-    /// xHCI; the high dword is read and folded in when present).
-    /// Address only -- not yet mapped into virtual memory.
+    
+    
+    
     pub mmio_base: u64,
 }
 
@@ -105,25 +105,25 @@ fn write_config16(loc: PciLocation, offset: u8, value: u16) {
     }
 }
 
-/// Enable memory decode and bus mastering before configuring DMA.
+
 pub fn enable_mmio_bus_master(loc: PciLocation) -> bool {
     let command = (read_config32(loc, 0x04) as u16) | (1 << 1) | (1 << 2);
-    // Do not echo the adjacent PCI status word: its set bits are W1C.
+    
     write_config16(loc, 0x04, command);
     (read_config32(loc, 0x04) as u16 & 0x6) == 0x6
 }
 
-/// Scan every bus/device/function for a USB (class 0x0C, subclass 0x03)
-/// controller. Brute-force: 256 buses x 32 devices x 8 functions is
-/// 65536 config reads worst case, all fast port I/O -- negligible next
-/// to the rest of boot.
+
+
+
+
 pub fn find_usb_controllers() -> Vec<UsbController> {
     let mut found = Vec::new();
 
     for bus in 0u16..256 {
         for device in 0u8..32 {
-            // Function 0 first: if it reports "no multifunction bit",
-            // there's nothing behind functions 1-7 to check.
+            
+            
             let loc0 = PciLocation {
                 bus: bus as u8,
                 device,
@@ -132,7 +132,7 @@ pub fn find_usb_controllers() -> Vec<UsbController> {
             let id = read_config32(loc0, 0x00);
             let vendor_id = (id & 0xFFFF) as u16;
             if vendor_id == 0xFFFF {
-                continue; // no device at this slot
+                continue; 
             }
 
             let header_type = (read_config32(loc0, 0x0C) >> 16) as u8 & 0xFF;
@@ -159,13 +159,13 @@ pub fn find_usb_controllers() -> Vec<UsbController> {
                     continue;
                 }
                 let Some(kind) = ControllerKind::from_prog_if(prog_if) else {
-                    continue; // unrecognized USB controller variant
+                    continue; 
                 };
 
                 let bar0 = read_config32(loc, 0x10);
                 let mmio_base = if bar0 & 0x1 == 0 {
-                    // Memory BAR (bit 0 clear). Bits [2:1] give the
-                    // width: 0b10 means 64-bit, spanning into BAR1.
+                    
+                    
                     let is_64bit = (bar0 >> 1) & 0x3 == 2;
                     let base_low = (bar0 & !0xF) as u64;
                     if is_64bit {
@@ -175,7 +175,7 @@ pub fn find_usb_controllers() -> Vec<UsbController> {
                         base_low
                     }
                 } else {
-                    0 // I/O-space BAR; not handled, no xHCI uses this
+                    0 
                 };
 
                 found.push(UsbController {

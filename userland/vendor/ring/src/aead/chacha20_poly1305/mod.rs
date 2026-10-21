@@ -1,16 +1,16 @@
-// Copyright 2015-2025 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use super::{
     chacha::{self, Counter, Overlapping},
@@ -35,7 +35,7 @@ cfg_if! {
 pub(super) const KEY_LEN: usize = chacha::KEY_LEN;
 
 const MAX_IN_OUT_LEN: usize = super::max_input_len(64, 1);
-// https://tools.ietf.org/html/rfc8439#section-2.8
+
 const _MAX_IN_OUT_LEN_BOUNDED_BY_RFC: () =
     assert!(MAX_IN_OUT_LEN == usize_from_u64_saturated(274_877_906_880u64));
 
@@ -122,16 +122,16 @@ fn check_input_lengths(aad: Aad<&[u8]>, input: &[u8]) -> Result<(), InputTooLong
         return Err(InputTooLongError::new(input.len()));
     }
 
-    // RFC 8439 Section 2.8 says the maximum AAD length is 2**64 - 1, which is
-    // never larger than usize::MAX, so we don't need an explicit length
-    // check.
+    
+    
+    
     const _USIZE_BOUNDED_BY_U64: u64 = u64_from_usize(usize::MAX);
     let _ = aad;
 
     Ok(())
 }
 
-// Also used by chacha20_poly1305_openssh.
+
 pub(super) fn begin(
     key: &chacha::Key,
     nonce: Nonce,

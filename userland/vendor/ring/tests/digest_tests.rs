@@ -1,16 +1,16 @@
-// Copyright 2015-2017 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #![allow(missing_docs)]
 
@@ -24,7 +24,7 @@ use wasm_bindgen_test::{wasm_bindgen_test as test, wasm_bindgen_test_configure};
 #[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
 wasm_bindgen_test_configure!(run_in_browser);
 
-/// Test vectors from BoringSSL, Go, and other sources.
+
 #[test]
 fn digest_misc() {
     test::run(test_file!("digest_tests.txt"), |section, test_case| {
@@ -50,11 +50,11 @@ fn digest_misc() {
     });
 }
 
-/// Test some ways in which `Context::update` and/or `Context::finish`
-/// could go wrong by testing every combination of updating three inputs
-/// that vary from zero bytes to one byte larger than the block length.
-///
-/// These are not run in dev (debug) builds because they are too slow.
+
+
+
+
+
 macro_rules! test_i_u_f {
     ( $test_name:ident, $alg:expr) => {
         #[cfg(not(debug_assertions))]

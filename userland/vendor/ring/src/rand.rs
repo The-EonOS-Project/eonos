@@ -1,27 +1,27 @@
-// Copyright 2015-2016 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-//! Cryptographic pseudo-random number generation.
-//!
-//! *ring* functions that generate random bytes take a `&dyn SecureRandom`
-//! parameter to make it clear which functions are non-deterministic.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use crate::error;
 
-/// A secure random number generator.
+
 pub trait SecureRandom: sealed::SecureRandom {
-    /// Fills `dest` with random bytes.
+    
     fn fill(&self, dest: &mut [u8]) -> Result<(), error::Unspecified>;
 }
 
@@ -35,21 +35,21 @@ where
     }
 }
 
-/// A random value constructed from a `SecureRandom` that hasn't been exposed
-/// through any safe Rust interface.
-///
-/// Intentionally does not implement any traits other than `Sized`.
+
+
+
+
 pub struct Random<T: RandomlyConstructable>(T);
 
 impl<T: RandomlyConstructable> Random<T> {
-    /// Expose the random value.
+    
     #[inline]
     pub fn expose(self) -> T {
         self.0
     }
 }
 
-/// Generate the new random value using `rng`.
+
 #[inline]
 pub fn generate<T: RandomlyConstructable>(
     rng: &dyn SecureRandom,
@@ -63,13 +63,13 @@ pub(crate) mod sealed {
     use crate::error;
 
     pub trait SecureRandom: core::fmt::Debug {
-        /// Fills `dest` with random bytes.
+        
         fn fill_impl(&self, dest: &mut [u8]) -> Result<(), error::Unspecified>;
     }
 
     pub trait RandomlyConstructable: Sized {
-        fn zero() -> Self; // `Default::default()`
-        fn as_mut_bytes(&mut self) -> &mut [u8]; // `AsMut<[u8]>::as_mut`
+        fn zero() -> Self; 
+        fn as_mut_bytes(&mut self) -> &mut [u8]; 
     }
 
     impl<const N: usize> RandomlyConstructable for [u8; N] {
@@ -85,31 +85,31 @@ pub(crate) mod sealed {
     }
 }
 
-/// A type that can be returned by `ring::rand::generate()`.
+
 pub trait RandomlyConstructable: sealed::RandomlyConstructable {}
 impl<T> RandomlyConstructable for T where T: sealed::RandomlyConstructable {}
 
-/// A secure random number generator where the random values come directly
-/// from the operating system.
-///
-/// "Directly from the operating system" here presently means "whatever the
-/// `getrandom` crate does" but that may change in the future. That roughly
-/// means calling libc's `getrandom` function or whatever is analogous to that;
-/// see the `getrandom` crate's documentation for more info.
-///
-/// A single `SystemRandom` may be shared across multiple threads safely.
-///
-/// `new()` is guaranteed to always succeed and to have low latency; it won't
-/// try to open or read from a file or do similar things. The first call to
-/// `fill()` may block a substantial amount of time since any and all
-/// initialization is deferred to it. Therefore, it may be a good idea to call
-/// `fill()` once at a non-latency-sensitive time to minimize latency for
-/// future calls.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #[derive(Clone, Debug)]
 pub struct SystemRandom(());
 
 impl SystemRandom {
-    /// Constructs a new `SystemRandom`.
+    
     #[inline(always)]
     pub fn new() -> Self {
         Self(())
@@ -118,9 +118,9 @@ impl SystemRandom {
 
 impl crate::sealed::Sealed for SystemRandom {}
 
-// Use the `getrandom` crate whenever it is using the environment's (operating
-// system's) CSPRNG. Avoid using it on targets where it uses the `rdrand`
-// implementation.
+
+
+
 #[cfg(any(
     all(feature = "less-safe-getrandom-custom-or-rdrand", target_os = "none"),
     all(feature = "less-safe-getrandom-espidf", target_os = "espidf"),

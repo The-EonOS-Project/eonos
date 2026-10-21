@@ -8,19 +8,19 @@ license = "Apache-2.0 AND ISC"
 name = "ring"
 repository = "https://github.com/briansmith/ring"
 
-# Keep in sync with .github/workflows/ci.yml ("MSRV") and see the MSRV note
-# in cpu/arm.rs.
-# 1.66 is required on x86/x86_64 for https://github.com/rust-lang/rust/pull/101861.
+
+
+
 rust-version = "1.66.0"
 
-# Keep in sync with `links` below.
+
 version = "0.17.14"
 
-# Keep in sync with `version` above.
-#
-# build.rs verifies that this equals "ring_core_{major}_{minor}_{patch}_{pre}"
-# as keeping this in sync with the symbol prefixing is crucial for ensuring
-# the safety of multiple versions of *ring* being used in a program.
+
+
+
+
+
 links = "ring_core_0_17_14_"
 
 include = [
@@ -181,7 +181,7 @@ libc = { version = "0.2.148", default-features = false }
 cc = { version = "1.2.8", default-features = false }
 
 [features]
-# These features are documented in the top-level module's documentation.
+
 default = ["alloc", "dev_urandom_fallback"]
 alloc = []
 dev_urandom_fallback = []
@@ -194,7 +194,7 @@ unstable-testing-arm-no-neon = []
 test_logging = []
 wasm32_unknown_unknown_js = ["getrandom/js"]
 
-# XXX: debug = false because of https://github.com/rust-lang/rust/issues/34122
+
 
 [profile.bench]
 opt-level = 3
@@ -214,8 +214,8 @@ codegen-units = 1
 
 [workspace]
 members = [
-    # intentionally not a default member so that `cargo test` doesn't cause criterion.rs and all its
-    # dependencies to get built.
+    
+    
     "bench",
 
     "cavp",

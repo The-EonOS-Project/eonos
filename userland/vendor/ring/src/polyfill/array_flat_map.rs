@@ -1,13 +1,13 @@
 use core::iter::FlatMap;
 
-/// A specialized version of `core::iter::FlatMap` for mapping over exact-sized
-/// iterators with a function that returns an array.
-///
-/// `ArrayFlatMap` differs from `FlatMap` in that `ArrayFlatMap` implements
-/// `ExactSizeIterator`. Since the result of `F` always has `LEN` elements, if
-/// `I` is an exact-sized iterator of length `inner_len` then we know the
-/// length of the flat-mapped result is `inner_len * LEN`. (The constructor
-/// verifies that this multiplication doesn't overflow `usize`.)
+
+
+
+
+
+
+
+
 #[derive(Clone)]
 pub struct ArrayFlatMap<I, Item, F, const LEN: usize> {
     inner: FlatMap<I, [Item; LEN], F>,
@@ -19,8 +19,8 @@ where
     I: ExactSizeIterator,
     F: FnMut(I::Item) -> [Item; LEN],
 {
-    /// Constructs an `ArrayFlatMap` wrapping the given iterator, using the
-    /// given function
+    
+    
     pub fn new(inner: I, f: F) -> Option<Self> {
         let remaining = inner.len().checked_mul(LEN)?;
         let inner = inner.flat_map(f);
@@ -43,7 +43,7 @@ where
         result
     }
 
-    /// Required for implementing `ExactSizeIterator`.
+    
     fn size_hint(&self) -> (usize, Option<usize>) {
         (self.remaining, Some(self.remaining))
     }
@@ -64,15 +64,15 @@ mod tests {
     #[test]
     fn test_array_flat_map() {
         static TEST_CASES: &[(&[u16], fn(u16) -> [u8; 2], &[u8])] = &[
-            // Empty input
+            
             (&[], u16::to_be_bytes, &[]),
-            // Non-empty input.
+            
             (
                 &[0x0102, 0x0304, 0x0506],
                 u16::to_be_bytes,
                 &[1, 2, 3, 4, 5, 6],
             ),
-            // Test with a different mapping function.
+            
             (
                 &[0x0102, 0x0304, 0x0506],
                 u16::to_le_bytes,
@@ -85,7 +85,7 @@ mod tests {
         });
     }
 
-    // Does ArrayFlatMap::new() handle overflow correctly?
+    
     #[test]
     fn test_array_flat_map_len_overflow() {
         struct DownwardCounter {

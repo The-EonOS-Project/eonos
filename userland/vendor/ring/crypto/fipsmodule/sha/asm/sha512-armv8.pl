@@ -24,13 +24,13 @@
 # over code generated with "default" compiler:
 #
 #		SHA256-hw	SHA256(*)	SHA512
-# Apple A7	1.97		10.5 (+33%)	6.73 (-1%(**))
-# Cortex-A53	2.38		15.5 (+115%)	10.0 (+150%(***))
-# Cortex-A57	2.31		11.6 (+86%)	7.51 (+260%(***))
-# Denver	2.01		10.5 (+26%)	6.70 (+8%)
-# X-Gene			20.0 (+100%)	12.8 (+300%(***))
-# Mongoose	2.36		13.0 (+50%)	8.36 (+33%)
-# Kryo		1.92		17.4 (+30%)	11.2 (+8%)
+# Apple A7	1.97		10.5 (+33 
+# Cortex-A53	2.38		15.5 (+115 
+# Cortex-A57	2.31		11.6 (+86 
+# Denver	2.01		10.5 (+26 
+# X-Gene			20.0 (+100 
+# Mongoose	2.36		13.0 (+50 
+# Kryo		1.92		17.4 (+30 
 #
 # (*)	Software SHA256 results are of lesser relevance, presented
 #	mostly for informational purposes.
@@ -103,13 +103,13 @@ $code.=<<___	if ($i==13);
 	ldp	@X[14],@X[15],[$inp]
 ___
 $code.=<<___	if ($i>=14);
-	ldr	@X[($i-11)&15],[sp,#`$SZ*(($i-11)%4)`]
+	ldr	@X[($i-11)&15],[sp,#`$SZ*(($i-11) 
 ___
 $code.=<<___	if ($i>0 && $i<16);
 	add	$a,$a,$t1			// h+=Sigma0(a)
 ___
 $code.=<<___	if ($i>=11);
-	str	@X[($i-8)&15],[sp,#`$SZ*(($i-8)%4)`]
+	str	@X[($i-8)&15],[sp,#`$SZ*(($i-8) 
 ___
 # While ARMv8 specifies merged rotate-n-logical operation such as
 # 'eor x,y,z,ror#n', it was found to negatively affect performance
@@ -181,7 +181,7 @@ $code.=<<___;
 .text
 
 .globl	$func
-.type	$func,%function
+.type	$func, 
 .align	6
 $func:
 	AARCH64_SIGN_LINK_REGISTER
@@ -253,7 +253,7 @@ $code.=<<___;
 
 .section .rodata
 .align	6
-.type	.LK$BITS,%object
+.type	.LK$BITS, 
 .LK$BITS:
 ___
 $code.=<<___ if ($SZ==8);
@@ -525,13 +525,13 @@ ___
 
 	$arg =~ m/[qv]([0-9]+)[^,]*,\s*[qv]([0-9]+)[^,]*(?:,\s*[qv]([0-9]+))?/o
 	&&
-	sprintf ".inst\t0x%08x\t//%s %s",
+	sprintf ".inst\t0x 
 			$opcode{$mnemonic}|$1|($2<<5)|($3<<16),
 			$mnemonic,$arg;
     }
 }
 
-{   my  %opcode = (
+{   my  
 	"sha512h"	=> 0xce608000,	"sha512h2"	=> 0xce608400,
 	"sha512su0"	=> 0xcec08000,	"sha512su1"	=> 0xce608800	);
 

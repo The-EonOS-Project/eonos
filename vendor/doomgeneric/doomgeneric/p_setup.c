@@ -1,21 +1,21 @@
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 2005-2014 Simon Howard
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// DESCRIPTION:
-//	Do all the WAD I/O, get map description,
-//	set up initial state and misc. LUTs.
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -44,10 +44,10 @@
 void	P_SpawnMapThing (mapthing_t*	mthing);
 
 
-//
-// MAP related Lookup tables.
-// Store VERTEXES, LINEDEFS, SIDEDEFS, etc.
-//
+
+
+
+
 int		numvertexes;
 vertex_t*	vertexes;
 
@@ -71,37 +71,37 @@ side_t*		sides;
 
 static int      totallines;
 
-// BLOCKMAP
-// Created from axis aligned bounding box
-// of the map, a rectangular array of
-// blocks of size ...
-// Used to speed up collision detection
-// by spatial subdivision in 2D.
-//
-// Blockmap size.
+
+
+
+
+
+
+
+
 int		bmapwidth;
-int		bmapheight;	// size in mapblocks
-short*		blockmap;	// int for larger maps
-// offsets in blockmap are from here
+int		bmapheight;	
+short*		blockmap;	
+
 short*		blockmaplump;		
-// origin of block map
+
 fixed_t		bmaporgx;
 fixed_t		bmaporgy;
-// for thing chains
+
 mobj_t**	blocklinks;		
 
 
-// REJECT
-// For fast sight rejection.
-// Speeds up enemy AI by skipping detailed
-//  LineOf Sight calculation.
-// Without special effect, this could be
-//  used as a PVS lookup as well.
-//
+
+
+
+
+
+
+
 byte*		rejectmatrix;
 
 
-// Maintain single and multi player starting spots.
+
 #define MAX_DEATHMATCH_STARTS	10
 
 mapthing_t	deathmatchstarts[MAX_DEATHMATCH_STARTS];
@@ -112,9 +112,9 @@ mapthing_t	playerstarts[MAXPLAYERS];
 
 
 
-//
-// P_LoadVertexes
-//
+
+
+
 void P_LoadVertexes (int lump)
 {
     byte*		data;
@@ -122,34 +122,34 @@ void P_LoadVertexes (int lump)
     mapvertex_t*	ml;
     vertex_t*		li;
 
-    // Determine number of lumps:
-    //  total lump length / vertex record length.
+    
+    
     numvertexes = W_LumpLength (lump) / sizeof(mapvertex_t);
 
-    // Allocate zone memory for buffer.
+    
     vertexes = Z_Malloc (numvertexes*sizeof(vertex_t),PU_LEVEL,0);	
 
-    // Load data into cache.
+    
     data = W_CacheLumpNum (lump, PU_STATIC);
 	
     ml = (mapvertex_t *)data;
     li = vertexes;
 
-    // Copy and convert vertex coordinates,
-    // internal representation as fixed.
+    
+    
     for (i=0 ; i<numvertexes ; i++, li++, ml++)
     {
 	li->x = SHORT(ml->x)<<FRACBITS;
 	li->y = SHORT(ml->y)<<FRACBITS;
     }
 
-    // Free buffer memory.
+    
     W_ReleaseLumpNum(lump);
 }
 
-//
-// GetSectorAtNullAddress
-//
+
+
+
 sector_t* GetSectorAtNullAddress(void)
 {
     static boolean null_sector_is_initialized = false;
@@ -166,9 +166,9 @@ sector_t* GetSectorAtNullAddress(void)
     return &null_sector;
 }
 
-//
-// P_LoadSegs
-//
+
+
+
 void P_LoadSegs (int lump)
 {
     byte*		data;
@@ -205,11 +205,11 @@ void P_LoadSegs (int lump)
         {
             sidenum = ldef->sidenum[side ^ 1];
 
-            // If the sidenum is out of range, this may be a "glass hack"
-            // impassible window.  Point at side #0 (this may not be
-            // the correct Vanilla behavior; however, it seems to work for
-            // OTTAWAU.WAD, which is the one place I've seen this trick
-            // used).
+            
+            
+            
+            
+            
 
             if (sidenum < 0 || sidenum >= numsides)
             {
@@ -230,9 +230,9 @@ void P_LoadSegs (int lump)
 }
 
 
-//
-// P_LoadSubsectors
-//
+
+
+
 void P_LoadSubsectors (int lump)
 {
     byte*		data;
@@ -259,9 +259,9 @@ void P_LoadSubsectors (int lump)
 
 
 
-//
-// P_LoadSectors
-//
+
+
+
 void P_LoadSectors (int lump)
 {
     byte*		data;
@@ -292,9 +292,9 @@ void P_LoadSectors (int lump)
 }
 
 
-//
-// P_LoadNodes
-//
+
+
+
 void P_LoadNodes (int lump)
 {
     byte*	data;
@@ -329,9 +329,9 @@ void P_LoadNodes (int lump)
 }
 
 
-//
-// P_LoadThings
-//
+
+
+
 void P_LoadThings (int lump)
 {
     byte               *data;
@@ -349,21 +349,21 @@ void P_LoadThings (int lump)
     {
 	spawn = true;
 
-	// Do not spawn cool, new monsters if !commercial
+	
 	if (gamemode != commercial)
 	{
 	    switch (SHORT(mt->type))
 	    {
-	      case 68:	// Arachnotron
-	      case 64:	// Archvile
-	      case 88:	// Boss Brain
-	      case 89:	// Boss Shooter
-	      case 69:	// Hell Knight
-	      case 67:	// Mancubus
-	      case 71:	// Pain Elemental
-	      case 65:	// Former Human Commando
-	      case 66:	// Revenant
-	      case 84:	// Wolf SS
+	      case 68:	
+	      case 64:	
+	      case 88:	
+	      case 89:	
+	      case 69:	
+	      case 67:	
+	      case 71:	
+	      case 65:	
+	      case 66:	
+	      case 84:	
 		spawn = false;
 		break;
 	    }
@@ -371,7 +371,7 @@ void P_LoadThings (int lump)
 	if (spawn == false)
 	    break;
 
-	// Do spawn all other stuff. 
+	
 	spawnthing.x = SHORT(mt->x);
 	spawnthing.y = SHORT(mt->y);
 	spawnthing.angle = SHORT(mt->angle);
@@ -385,10 +385,10 @@ void P_LoadThings (int lump)
 }
 
 
-//
-// P_LoadLineDefs
-// Also counts secret lines for intermissions.
-//
+
+
+
+
 void P_LoadLineDefs (int lump)
 {
     byte*		data;
@@ -467,9 +467,9 @@ void P_LoadLineDefs (int lump)
 }
 
 
-//
-// P_LoadSideDefs
-//
+
+
+
 void P_LoadSideDefs (int lump)
 {
     byte*		data;
@@ -498,9 +498,9 @@ void P_LoadSideDefs (int lump)
 }
 
 
-//
-// P_LoadBlockMap
-//
+
+
+
 void P_LoadBlockMap (int lump)
 {
     int i;
@@ -514,21 +514,21 @@ void P_LoadBlockMap (int lump)
     W_ReadLump(lump, blockmaplump);
     blockmap = blockmaplump + 4;
 
-    // Swap all short integers to native byte ordering.
+    
   
     for (i=0; i<count; i++)
     {
 	blockmaplump[i] = SHORT(blockmaplump[i]);
     }
 		
-    // Read the header
+    
 
     bmaporgx = blockmaplump[0]<<FRACBITS;
     bmaporgy = blockmaplump[1]<<FRACBITS;
     bmapwidth = blockmaplump[2];
     bmapheight = blockmaplump[3];
 	
-    // Clear out mobj chains
+    
 
     count = sizeof(*blocklinks) * bmapwidth * bmapheight;
     blocklinks = Z_Malloc(count, PU_LEVEL, 0);
@@ -537,11 +537,11 @@ void P_LoadBlockMap (int lump)
 
 
 
-//
-// P_GroupLines
-// Builds sector line lists and subsector sector numbers.
-// Finds block bounding boxes for sectors.
-//
+
+
+
+
+
 void P_GroupLines (void)
 {
     line_t**		linebuffer;
@@ -554,7 +554,7 @@ void P_GroupLines (void)
     fixed_t		bbox[4];
     int			block;
 	
-    // look up sector number for each subsector
+    
     ss = subsectors;
     for (i=0 ; i<numsubsectors ; i++, ss++)
     {
@@ -562,7 +562,7 @@ void P_GroupLines (void)
 	ss->sector = seg->sidedef->sector;
     }
 
-    // count number of lines in each sector
+    
     li = lines;
     totallines = 0;
     for (i=0 ; i<numlines ; i++, li++)
@@ -577,23 +577,23 @@ void P_GroupLines (void)
 	}
     }
 
-    // build line tables for each sector	
+    
     linebuffer = Z_Malloc (totallines*sizeof(line_t *), PU_LEVEL, 0);
 
     for (i=0; i<numsectors; ++i)
     {
-        // Assign the line buffer for this sector
+        
 
         sectors[i].lines = linebuffer;
         linebuffer += sectors[i].linecount;
 
-        // Reset linecount to zero so in the next stage we can count
-        // lines into the list.
+        
+        
 
         sectors[i].linecount = 0;
     }
 
-    // Assign lines to sectors
+    
 
     for (i=0; i<numlines; ++i)
     { 
@@ -616,7 +616,7 @@ void P_GroupLines (void)
         }
     }
     
-    // Generate bounding boxes for sectors
+    
 	
     sector = sectors;
     for (i=0 ; i<numsectors ; i++, sector++)
@@ -631,11 +631,11 @@ void P_GroupLines (void)
             M_AddToBox (bbox, li->v2->x, li->v2->y);
 	}
 
-	// set the degenmobj_t to the middle of the bounding box
+	
 	sector->soundorg.x = (bbox[BOXRIGHT]+bbox[BOXLEFT])/2;
 	sector->soundorg.y = (bbox[BOXTOP]+bbox[BOXBOTTOM])/2;
 		
-	// adjust bounding box to map blocks
+	
 	block = (bbox[BOXTOP]-bmaporgy+MAXRADIUS)>>MAPBLOCKSHIFT;
 	block = block >= bmapheight ? bmapheight-1 : block;
 	sector->blockbox[BOXTOP]=block;
@@ -655,8 +655,8 @@ void P_GroupLines (void)
 	
 }
 
-// Pad the REJECT lump with extra data when the lump is too small,
-// to simulate a REJECT buffer overflow in Vanilla Doom.
+
+
 
 static void PadRejectArray(byte *array, unsigned int len)
 {
@@ -665,17 +665,17 @@ static void PadRejectArray(byte *array, unsigned int len)
     byte *dest;
     unsigned int padvalue;
 
-    // Values to pad the REJECT array with:
+    
 
     unsigned int rejectpad[4] =
     {
-        ((totallines * 4 + 3) & ~3) + 24,     // Size
-        0,                                    // Part of z_zone block header
-        50,                                   // PU_LEVEL
-        0x1d4a11                              // DOOM_CONST_ZONEID
+        ((totallines * 4 + 3) & ~3) + 24,     
+        0,                                    
+        50,                                   
+        0x1d4a11                              
     };
 
-    // Copy values from rejectpad into the destination array.
+    
 
     dest = array;
 
@@ -686,15 +686,15 @@ static void PadRejectArray(byte *array, unsigned int len)
         ++dest;
     }
 
-    // We only have a limited pad size.  Print a warning if the
-    // REJECT lump is too small.
+    
+    
 
     if (len > sizeof(rejectpad))
     {
         fprintf(stderr, "PadRejectArray: REJECT lump too short to pad! (%i > %i)\n",
                         len, (int) sizeof(rejectpad));
 
-        // Pad remaining space with 0 (or 0xff, if specified on command line).
+        
 
         if (M_CheckParm("-reject_pad_with_ff"))
         {
@@ -714,13 +714,13 @@ static void P_LoadReject(int lumpnum)
     int minlength;
     int lumplen;
 
-    // Calculate the size that the REJECT lump *should* be.
+    
 
     minlength = (numsectors * numsectors + 7) / 8;
 
-    // If the lump meets the minimum length, it can be loaded directly.
-    // Otherwise, we need to allocate a buffer of the correct size
-    // and pad it with appropriate data.
+    
+    
+    
 
     lumplen = W_LumpLength(lumpnum);
 
@@ -737,9 +737,9 @@ static void P_LoadReject(int lumpnum)
     }
 }
 
-//
-// P_SetupLevel
-//
+
+
+
 void
 P_SetupLevel
 ( int		episode,
@@ -759,19 +759,19 @@ P_SetupLevel
 	    = players[i].itemcount = 0;
     }
 
-    // Initial height of PointOfView
-    // will be set by player think.
+    
+    
     players[consoleplayer].viewz = 1; 
 
-    // Make sure all sounds are stopped before Z_FreeTags.
+    
     S_Start ();			
 
     Z_FreeTags (PU_LEVEL, PU_PURGELEVEL-1);
 
-    // UNUSED W_Profile ();
+    
     P_InitThinkers ();
 	   
-    // find map name
+    
     if ( gamemode == commercial)
     {
 	if (map<10)
@@ -792,7 +792,7 @@ P_SetupLevel
 	
     leveltime = 0;
 	
-    // note: most of this ordering is important	
+    
     P_LoadBlockMap (lumpnum+ML_BLOCKMAP);
     P_LoadVertexes (lumpnum+ML_VERTEXES);
     P_LoadSectors (lumpnum+ML_SECTORS);
@@ -810,7 +810,7 @@ P_SetupLevel
     deathmatch_p = deathmatchstarts;
     P_LoadThings (lumpnum+ML_THINGS);
     
-    // if deathmatch, randomly spawn the active players
+    
     if (deathmatch)
     {
 	for (i=0 ; i<MAXPLAYERS ; i++)
@@ -822,28 +822,28 @@ P_SetupLevel
 			
     }
 
-    // clear special respawning que
+    
     iquehead = iquetail = 0;		
 	
-    // set up world state
+    
     P_SpawnSpecials ();
 	
-    // build subsector connect matrix
-    //	UNUSED P_ConnectSubsectors ();
+    
+    
 
-    // preload graphics
+    
     if (precache)
 	R_PrecacheLevel ();
 
-    //printf ("free memory: 0x%x\n", Z_FreeMemory());
+    
 
 }
 
 
 
-//
-// P_Init
-//
+
+
+
 void P_Init (void)
 {
     P_InitSwitchList ();

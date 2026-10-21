@@ -1,5 +1,5 @@
-// This file is generated from a similarly-named Perl script in the BoringSSL
-// source tree. Do not edit by hand.
+
+
 
 #include <ring-core/asm_base.h>
 

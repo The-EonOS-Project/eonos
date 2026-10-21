@@ -1,22 +1,22 @@
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 2005-2014 Simon Howard
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// DESCRIPTION:
-//	Here is a core component: drawing the floors and ceilings,
-//	 while maintaining a per column clipping list only.
-//	Moreover, the sky areas have to be determined.
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #include <stdio.h>
@@ -37,41 +37,41 @@
 planefunction_t		floorfunc;
 planefunction_t		ceilingfunc;
 
-//
-// opening
-//
 
-// Here comes the obnoxious "visplane".
+
+
+
+
 #define MAXVISPLANES	128
 visplane_t		visplanes[MAXVISPLANES];
 visplane_t*		lastvisplane;
 visplane_t*		floorplane;
 visplane_t*		ceilingplane;
 
-// ?
+
 #define MAXOPENINGS	SCREENWIDTH*64
 short			openings[MAXOPENINGS];
 short*			lastopening;
 
 
-//
-// Clip values are the solid pixel bounding the range.
-//  floorclip starts out SCREENHEIGHT
-//  ceilingclip starts out -1
-//
+
+
+
+
+
 short			floorclip[SCREENWIDTH];
 short			ceilingclip[SCREENWIDTH];
 
-//
-// spanstart holds the start of a plane span
-// initialized to 0 at start
-//
+
+
+
+
 int			spanstart[SCREENHEIGHT];
 int			spanstop[SCREENHEIGHT];
 
-//
-// texture mapping
-//
+
+
+
 lighttable_t**		planezlight;
 fixed_t			planeheight;
 
@@ -87,29 +87,29 @@ fixed_t			cachedystep[SCREENHEIGHT];
 
 
 
-//
-// R_InitPlanes
-// Only at game startup.
-//
+
+
+
+
 void R_InitPlanes (void)
 {
-  // Doh!
+  
 }
 
 
-//
-// R_MapPlane
-//
-// Uses global vars:
-//  planeheight
-//  ds_source
-//  basexscale
-//  baseyscale
-//  viewx
-//  viewy
-//
-// BASIC PRIMITIVE
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
 void
 R_MapPlane
 ( int		y,
@@ -166,21 +166,21 @@ R_MapPlane
     ds_x1 = x1;
     ds_x2 = x2;
 
-    // high or low detail
+    
     spanfunc ();	
 }
 
 
-//
-// R_ClearPlanes
-// At begining of frame.
-//
+
+
+
+
 void R_ClearPlanes (void)
 {
     int		i;
     angle_t	angle;
     
-    // opening / clipping determination
+    
     for (i=0 ; i<viewwidth ; i++)
     {
 	floorclip[i] = viewheight;
@@ -190,13 +190,13 @@ void R_ClearPlanes (void)
     lastvisplane = visplanes;
     lastopening = openings;
     
-    // texture calculation
+    
     memset (cachedheight, 0, sizeof(cachedheight));
 
-    // left to right mapping
+    
     angle = (viewangle-ANG90)>>ANGLETOFINESHIFT;
 	
-    // scale will be unit scale at SCREENWIDTH/2 distance
+    
     basexscale = FixedDiv (finecosine[angle],centerxfrac);
     baseyscale = -FixedDiv (finesine[angle],centerxfrac);
 }
@@ -204,9 +204,9 @@ void R_ClearPlanes (void)
 
 
 
-//
-// R_FindPlane
-//
+
+
+
 visplane_t*
 R_FindPlane
 ( fixed_t	height,
@@ -217,7 +217,7 @@ R_FindPlane
 	
     if (picnum == skyflatnum)
     {
-	height = 0;			// all skys map together
+	height = 0;			
 	lightlevel = 0;
     }
 	
@@ -252,9 +252,9 @@ R_FindPlane
 }
 
 
-//
-// R_CheckPlane
-//
+
+
+
 visplane_t*
 R_CheckPlane
 ( visplane_t*	pl,
@@ -298,11 +298,11 @@ R_CheckPlane
 	pl->minx = unionl;
 	pl->maxx = unionh;
 
-	// use the same one
+	
 	return pl;		
     }
 	
-    // make a new visplane
+    
     lastvisplane->height = pl->height;
     lastvisplane->picnum = pl->picnum;
     lastvisplane->lightlevel = pl->lightlevel;
@@ -317,9 +317,9 @@ R_CheckPlane
 }
 
 
-//
-// R_MakeSpans
-//
+
+
+
 void
 R_MakeSpans
 ( int		x,
@@ -353,10 +353,10 @@ R_MakeSpans
 
 
 
-//
-// R_DrawPlanes
-// At the end of each frame.
-//
+
+
+
+
 void R_DrawPlanes (void)
 {
     visplane_t*		pl;
@@ -386,15 +386,15 @@ void R_DrawPlanes (void)
 	    continue;
 
 	
-	// sky flat
+	
 	if (pl->picnum == skyflatnum)
 	{
 	    dc_iscale = pspriteiscale>>detailshift;
 	    
-	    // Sky is allways drawn full bright,
-	    //  i.e. colormaps[0] is used.
-	    // Because of this hack, sky is not affected
-	    //  by INVUL inverse mapping.
+	    
+	    
+	    
+	    
 	    dc_colormap = colormaps;
 	    dc_texturemid = skytexturemid;
 	    for (x=pl->minx ; x <= pl->maxx ; x++)
@@ -413,7 +413,7 @@ void R_DrawPlanes (void)
 	    continue;
 	}
 	
-	// regular flat
+	
         lumpnum = firstflat + flattranslation[pl->picnum];
 	ds_source = W_CacheLumpNum(lumpnum, PU_STATIC);
 	

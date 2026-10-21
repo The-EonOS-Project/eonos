@@ -1,24 +1,24 @@
-// Copyright 2015-2019 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use super::{format_output, sha1, sha2, Output};
 use crate::{cpu, polyfill::slice};
 use core::mem::size_of;
 
-// Invariant: When constructed with `new32` (resp. `new64`), `As32` (resp.
-// `As64`) is the active variant.
-// Invariant: The active variant never changes after initialization.
+
+
+
 #[derive(Clone)]
 pub(super) enum DynState {
     As64(sha2::State64),

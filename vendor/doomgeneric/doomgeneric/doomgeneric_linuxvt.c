@@ -1,17 +1,17 @@
-//doomgeneric for a bare Linux VirtualTerminal
-// Copyright (C) 2025 Techflash
-// Based on doomgeneric_sdl.c
+
+
+
 
 #include "doomkeys.h"
 #include "m_argv.h"
 #include "doomgeneric.h"
 #include "i_system.h"
 
-// XXX: HACK
-// Linux's input-event-codes.h and doomkeys.h have many collisions.
-// Redefine some of doomkeys.h's names here to work around this.
-// I could try to redefine Linux's... but that sounds incredibly
-// fragile, and is very likely not a good idea.
+
+
+
+
+
 #undef KEY_TAB
 #undef KEY_ENTER
 #undef KEY_BACKSPACE
@@ -70,17 +70,17 @@
 #define INPUT_TYPE_MOUSE    2
 #define INPUT_TYPE_TOUCH    3
 
-// timing stuff
+
 static struct timeval startTime;
 
-// framebuffer stuff 
+
 static uint8_t *fbPtr;
 static int fbFd;
 static int ttyFd = -1;
 static int savedTtyMode;
 static unsigned int fbWidth, fbHeight, fbStride, fbBytesPerPixel, fbOffsetX, fbOffsetY;
 
-// input stuff
+
 static int numInputFds = 0;
 static int inputFds[MAX_INPUT_DEVS];
 static bool shiftPressed = false;
@@ -90,10 +90,10 @@ static unsigned short s_KeyQueue[KEYQUEUE_SIZE];
 static unsigned int s_KeyQueueWriteIndex = 0;
 static unsigned int s_KeyQueueReadIndex = 0;
 
-// XXX: HACK
-// Linux's evdev system doesn't make it feasible to just use
-// tolower(key) like the existing conversions did, so we
-// use a few ranges of maps here to avoid an obscenely long switch/case
+
+
+
+
 static char evdevKeysToASCII1[10] = {
 	'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'
 };
@@ -200,10 +200,10 @@ static unsigned char convertToDoomKey(unsigned int key){
 			key = DOOM_KEY_TAB;
 			break;
 
-		// sadly, yes, we need to handle every single alphanumeric
-		// key here, since evdev doesn't spit out keys in anything
-		// remotely resembling ASCII.....
-		// though, we can take many shortcuts
+		
+		
+		
+		
 		case KEY_1:
 		case KEY_2:
 		case KEY_3:
@@ -283,10 +283,10 @@ static void addKeyToQueue(int pressed, unsigned char keyCode) {
 
 		
 	unsigned char key = convertToDoomKey(keyCode);
-	if (key == 0xFF) // unknown, don't process it
+	if (key == 0xFF) 
 		return;
 
-	if (pressed > 1 || pressed < 0) // bogus value
+	if (pressed > 1 || pressed < 0) 
 		return;
 
 	unsigned short keyData = (pressed << 8) | key;
@@ -305,24 +305,24 @@ static void checkKeys() {
 
 	keepGoing = true;
 	while (keepGoing) {
-		keepGoing = false; // exit if we haven't gotten anything
-		ret = poll(pollfds, numInputFds, 0);  // don't wait at all, just give anything we've got
+		keepGoing = false; 
+		ret = poll(pollfds, numInputFds, 0);  
 
 		if (ret < 0) {
-			// borked
+			
 			return;
 		}
 
 		for (i = 0; i < MAX_INPUT_DEVS; i++) {
 			if (pollfds[i].revents & POLLIN) {
 				read(inputFds[i], &ev, sizeof(ev));
-				keepGoing = true; // we read something, so keep trying
+				keepGoing = true; 
 				addKeyToQueue(ev.value, ev.code);
 			}
 		}
 	}
 
-	// we read the entire backlog, get back to doom
+	
 	return;
 }
 
@@ -343,7 +343,7 @@ static int isKeyboard(const char *devPath) {
 		return 0;
 	}
 
-	/* Must support EV_KEY */
+	
 	if (!(evbits & (1 << EV_KEY))) {
 		close(fd);
 		return 0;
@@ -358,7 +358,7 @@ static int isKeyboard(const char *devPath) {
 
 	if (TEST_KEY(KEY_A) && TEST_KEY(KEY_ENTER)) {
 		close(fd);
-		return 1;  /* looks like a keyboard */
+		return 1;  
 	}
 
 	close(fd);
@@ -369,11 +369,11 @@ static void checkInputDevs() {
 	struct dirent *dp;
 	DIR *dir;
 
-	/* check for devices */
+	
 	dir = opendir("/dev/input");
 
 	while ((dp = readdir(dir)) != NULL) {
-		char fullpath[268]; /* d_name is 256 bytes */
+		char fullpath[268]; 
 		int fd;
 
 		if (numInputFds >= MAX_INPUT_DEVS)
@@ -393,7 +393,7 @@ static void checkInputDevs() {
 
 		fd = open(fullpath, O_RDONLY | O_NONBLOCK);
 		if (fd < 0) {
-			// not necessarily fatal
+			
 			perror("Failed to open device");
 			continue;
 		}
@@ -402,7 +402,7 @@ static void checkInputDevs() {
 		pollfds[numInputFds].events = POLLIN;
 		inputFds[numInputFds++] = fd;
 		printf("adding %s keyboard\n", fullpath);
-		ioctl(fd, EVIOCGRAB, 1); // grab exclusive access to the device
+		ioctl(fd, EVIOCGRAB, 1); 
 	}
 	closedir(dir);
 }
@@ -430,19 +430,19 @@ void DG_Init() {
 	struct fb_var_screeninfo info;
 	struct fb_fix_screeninfo finfo;
 
-	//
-	// set up the framebuffer
-	//
+	
+	
+	
 	fbFd = open("/dev/fb0", O_RDWR);
 	if (fbFd < 0)
 		I_Error("Failed to open /dev/fb0: %s", strerror(errno));
 
-	// get info
+	
 	ret = ioctl(fbFd, FBIOGET_VSCREENINFO, &info);
 	if (ret != 0)
 		I_Error("Failed to get framebuffer info: %s", strerror(errno));
 
-	// get other info (this can optionally fail, since we can guess the stride)
+	
 	ret = ioctl(fbFd, FBIOGET_FSCREENINFO, &finfo);
 	if (ret != 0) {
 		printf("Failed to get framebuffer info: %s", strerror(errno));
@@ -456,7 +456,7 @@ void DG_Init() {
 	fbHeight = info.yres;
 	fbBytesPerPixel = info.bits_per_pixel / 8;
 
-	// to center the image on screen
+	
 	fbOffsetX = ((fbWidth - DOOMGENERIC_RESX) / 2) * fbBytesPerPixel;
 	fbOffsetY = ((fbHeight - DOOMGENERIC_RESY) / 2) * fbStride;
 
@@ -474,7 +474,7 @@ void DG_Init() {
 	if (ioctl(ttyFd, KDGETMODE, &savedTtyMode) < 0)
 		I_Error("Failed to get TTY mode: %s", strerror(errno));
 
-	// Register cleanup before switching modes, in case no keyboard is found.
+	
 	if (atexit(RestoreVtMode) != 0)
 		I_Error("Failed to register TTY cleanup");
 	signal(SIGINT, signal_handler);
@@ -485,30 +485,30 @@ void DG_Init() {
 	if (ioctl(ttyFd, KDSETMODE, KD_GRAPHICS) < 0)
 		I_Error("Failed to set TTY graphics mode: %s", strerror(errno));
 
-	// Some drivers blank the display when switching modes.
+	
 	if (ioctl(fbFd, FBIOBLANK, FB_BLANK_UNBLANK) < 0)
 		fprintf(stderr, "Warning: failed to unblank framebuffer: %s\n", strerror(errno));
 
 
-	// clear the screen
+	
 	memset(fbPtr, 0, fbStride * fbHeight);
 
-	//
-	// set up input
-	//
+	
+	
+	
 	checkInputDevs();
 	
 	if (numInputFds == 0)
 		I_Error("Failed to find any compatible input device, see the logs above for potential problems");
 
-	// get the start time
+	
 	gettimeofday(&startTime, NULL);
 }
 
 void DG_DrawFrame() {
-	// we need to do it line-by-line like this to account for the
-	// fact that the system framebuffer resolution is very likely
-	// larger than the doomgeneric render resolution.
+	
+	
+	
 	for (int line = 0; line < DOOMGENERIC_RESY; line++) {
 		memcpy(
 			(void *)((uintptr_t)(fbPtr) + (fbStride * line) + fbOffsetY + fbOffsetX),
@@ -539,7 +539,7 @@ int DG_GetKey(int* pressed, unsigned char* doomKey) {
 	checkKeys();
 
 	if (s_KeyQueueReadIndex == s_KeyQueueWriteIndex) {
-		//key queue is empty
+		
 
 		return 0;
 	}

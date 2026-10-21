@@ -1,16 +1,16 @@
-/* Copyright 2016 Brian Smith.
- *
- * Permission to use, copy, modify, and/or distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
- * SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
- * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
- * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include "./p256_shared.h"
 
@@ -38,11 +38,11 @@ static const BN_ULONG N_N0[] = {
 
 void p256_scalar_mul_mont(ScalarMont r, const ScalarMont a,
                               const ScalarMont b) {
-  /* XXX: Inefficient. TODO: optimize with dedicated multiplication routine. */
+  
   bn_mul_mont_small(r, a, b, N, N_N0, P256_LIMBS);
 }
 
-/* XXX: Inefficient. TODO: optimize with dedicated squaring routine. */
+
 void p256_scalar_sqr_rep_mont(ScalarMont r, const ScalarMont a, Limb rep) {
   dev_assert_secret(rep >= 1);
   p256_scalar_mul_mont(r, a, a);

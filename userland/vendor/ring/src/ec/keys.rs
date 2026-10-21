@@ -93,5 +93,5 @@ impl AsRef<[u8]> for PublicKey {
     }
 }
 
-/// The maximum length, in bytes, of an encoded public key.
+
 pub const PUBLIC_KEY_MAX_LEN: usize = 1 + (2 * ELEM_MAX_BYTES);

@@ -1,4 +1,4 @@
-//doomgeneric for soso os (nano-x version)
+
 
 #include "doomkeys.h"
 #include "m_argv.h"
@@ -168,7 +168,7 @@ void DG_DrawFrame()
             }
             break;
         case GR_EVENT_TYPE_KEY_DOWN:
-            //this event comes continuously while pressed, so checking for changes only!
+            
             kp = (GR_EVENT_KEYSTROKE*)&event;
             key = convert_to_doom_keyx(kp->ch);
             if (key > 0 && key < sizeof(g_key_states))
@@ -204,14 +204,14 @@ uint32_t DG_GetTicksMs()
 
     gettimeofday(&tp, &tzp);
 
-    return (tp.tv_sec * 1000) + (tp.tv_usec / 1000); /* return milliseconds */
+    return (tp.tv_sec * 1000) + (tp.tv_usec / 1000); 
 }
 
 int DG_GetKey(int* pressed, unsigned char* doomKey)
 {
     if (g_key_queue_read_index == g_key_queue_write_index)
     {
-        //key queue is empty
+        
 
         return 0;
     }

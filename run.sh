@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Boot EonOS in QEMU. Serial output goes to your terminal.
+
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -44,9 +44,9 @@ QEMU_VIDEO="${EONOS_QEMU_VIDEO:-auto}"
 QEMU_DEVICE_LIST="$(qemu-system-x86_64 -device help 2>&1 || true)"
 qemu_display_starts() {
     local model="$1"
-    # Device help only reports registered models. Some split QEMU installs
-    # advertise a module that crashes during realization, so probe it without
-    # booting a guest before selecting it for the real run.
+    
+    
+    
     command -v timeout >/dev/null 2>&1 || return 0
     local status=0
     (
@@ -58,8 +58,8 @@ qemu_display_starts() {
     [[ "$status" -eq 124 || "$status" -eq 137 ]]
 }
 if [ "$QEMU_VIDEO" = "auto" ]; then
-    # Prefer the standalone PCI GPU. It avoids the legacy VGA compatibility
-    # wrapper used by virtio-vga, which crashes in some QEMU builds.
+    
+    
     QEMU_VIDEO="std"
     for model in virtio-gpu-pci virtio-vga; do
         if [[ "$QEMU_DEVICE_LIST" == *"name \"$model\""* ]]; then
@@ -92,9 +92,9 @@ case "$QEMU_VIDEO" in
             echo "Use EONOS_QEMU_VIDEO=std to boot, then check the host QEMU packages/core dump." >&2
             exit 2
         fi
-        # The standalone PCI model is not VGA-compatible. Disable QEMU's
-        # implicit VGA adapter so its window follows the device EonOS drives.
-        # Use 85% of the former 1600x900 desktop size; keep GTK at 1:1 scaling.
+        
+        
+        
         VIDEO_ARGS=(-vga none -device "$QEMU_VIDEO,xres=1360,yres=765")
         ;;
     std) VIDEO_ARGS=(-device VGA,xres=1360,yres=765,xmax=1360,ymax=765) ;;
@@ -132,10 +132,10 @@ if [ "$NEEDS_BUILD" = "1" ]; then
 fi
 
 ARGS=(
-    # Disable the emulated i8042 so input must come through USB.
+    
     -M q35,i8042=off
-    # Expose host-supported CPU features such as RDRAND, which verified TLS
-    # requires for cryptographically secure client nonces.
+    
+    
     -cpu max
     "${VIDEO_ARGS[@]}"
     -display gtk,zoom-to-fit=off

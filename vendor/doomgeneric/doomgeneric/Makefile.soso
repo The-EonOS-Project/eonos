@@ -1,9 +1,9 @@
-################################################################
-#
-# $Id:$
-#
-# $Log:$
-#
+
+
+
+
+
+
 
 ifeq ($(V),1)
 	VB=''
@@ -12,13 +12,13 @@ else
 endif
 
 
-CC=musl-clang  # gcc or g++
+CC=musl-clang  
 CFLAGS+=-O3
 LDFLAGS+=-static
-CFLAGS+=-Wall -DNORMALUNIX -DLINUX -DSNDSERV -D_DEFAULT_SOURCE # -DUSEASM
+CFLAGS+=-Wall -DNORMALUNIX -DLINUX -DSNDSERV -D_DEFAULT_SOURCE 
 LIBS+=
 
-# subdirectory for objects
+
 OBJDIR=build
 OUTPUT=fbdoom
 

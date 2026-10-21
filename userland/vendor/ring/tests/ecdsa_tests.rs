@@ -1,16 +1,16 @@
-// Copyright 2015-2016 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #![allow(missing_docs)]
 
@@ -21,7 +21,7 @@ use ring::{
 #[allow(deprecated)]
 use ring::{test, test_file};
 
-// ECDSA *signing* tests are in src/ec/ecdsa/signing.rs.
+
 
 #[test]
 fn ecdsa_from_pkcs8_test() {
@@ -89,7 +89,7 @@ fn ecdsa_from_pkcs8_test() {
     );
 }
 
-// Verify that, at least, we generate PKCS#8 documents that we can read.
+
 #[test]
 fn ecdsa_generate_pkcs8_test() {
     let rng = rand::SystemRandom::new();
@@ -194,17 +194,17 @@ fn ecdsa_test_public_key_coverage() {
     )
     .unwrap();
 
-    // Test `AsRef<[u8]>`
+    
     assert_eq!(key_pair.public_key().as_ref(), PUBLIC_KEY);
 
-    // Test `Clone`.
+    
     #[allow(clippy::clone_on_copy, clippy::redundant_clone)]
     let _: <signature::EcdsaKeyPair as KeyPair>::PublicKey = key_pair.public_key().clone();
 
-    // Test `Copy`.
+    
     let _: <signature::EcdsaKeyPair as KeyPair>::PublicKey = *key_pair.public_key();
 
-    // Test `Debug`.
+    
     assert_eq!(PUBLIC_KEY_DEBUG, format!("{:?}", key_pair.public_key()));
     assert_eq!(
         format!("EcdsaKeyPair {{ public_key: {:?} }}", key_pair.public_key()),
@@ -212,11 +212,11 @@ fn ecdsa_test_public_key_coverage() {
     );
 }
 
-// This test is not a known-answer test, though it re-uses the known-answer
-// test vectors. Because the nonce is randomized, the signature will be
-// different each time. Because of that, here we simply verify that the
-// signature verifies correctly. The known-answer tests themselves are in
-// ecsda/signing.rs.
+
+
+
+
+
 #[test]
 fn signature_ecdsa_sign_fixed_sign_and_verify_test() {
     let rng = rand::SystemRandom::new();
@@ -233,7 +233,7 @@ fn signature_ecdsa_sign_fixed_sign_and_verify_test() {
             let d = test_case.consume_bytes("d");
             let q = test_case.consume_bytes("Q");
 
-            // Ignored since the actual signature will use a randomized nonce.
+            
             let _k = test_case.consume_bytes("k");
             let _expected_result = test_case.consume_bytes("Sig");
 
@@ -266,11 +266,11 @@ fn signature_ecdsa_sign_fixed_sign_and_verify_test() {
     );
 }
 
-// This test is not a known-answer test, though it re-uses the known-answer
-// test vectors. Because the nonce is randomized, the signature will be
-// different each time. Because of that, here we simply verify that the
-// signature verifies correctly. The known-answer tests themselves are in
-// ecsda/signing.rs.
+
+
+
+
+
 #[test]
 fn signature_ecdsa_sign_asn1_test() {
     let rng = rand::SystemRandom::new();
@@ -287,7 +287,7 @@ fn signature_ecdsa_sign_asn1_test() {
             let d = test_case.consume_bytes("d");
             let q = test_case.consume_bytes("Q");
 
-            // Ignored since the actual signature will use a randomized nonce.
+            
             let _k = test_case.consume_bytes("k");
             let _expected_result = test_case.consume_bytes("Sig");
 

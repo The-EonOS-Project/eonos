@@ -34,12 +34,12 @@
 # encryption modes, therefore interval values.
 #
 #	16-byte     64-byte     256-byte    1-KB        8-KB
-#	53-67%      67-84%      91-94%      95-98%      97-99.5%
+#	53-67 
 #
 # Lower ratios for smaller block sizes are perfectly understandable,
 # because function call overhead is higher in 32-bit mode. Largest
 # 8-KB block performance is virtually same: 32-bit code is less than
-# 1% slower for ECB, CBC and CCM, and ~3% slower otherwise.
+# 1 
 
 # January 2011
 #
@@ -278,8 +278,8 @@ sub aesni_generate3
 }
 
 # 4x interleave is implemented to improve small block performance,
-# most notably [and naturally] 4 block by ~30%. One can argue that one
-# should have implemented 5x as well, but improvement  would be <20%,
+# most notably [and naturally] 4 block by ~30 
+# should have implemented 5x as well, but improvement  would be <20 
 # so it's not worth it...
 sub aesni_generate4
 { my $p=shift;
@@ -479,7 +479,7 @@ if ($PREFIX eq $AESNI_PREFIX) {
 	&jmp	(&label("ctr32_loop6"));
 
 &set_label("ctr32_loop6",16);
-	# inlining _aesni_encrypt6's prologue gives ~6% improvement...
+	# inlining _aesni_encrypt6's prologue gives ~6 
 	&pshufd	($inout2,$rndkey0,1<<6);
 	&movdqa	($rndkey0,&QWP(32,"esp"));	# pull counter-less ivec
 	&pshufd	($inout3,$rndkey1,3<<6);

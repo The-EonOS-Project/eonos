@@ -6,22 +6,22 @@
 
 #ifndef DOOMGENERIC_RESX
 #define DOOMGENERIC_RESX 640
-#endif  // DOOMGENERIC_RESX
+#endif  
 
 #ifndef DOOMGENERIC_RESY
 #define DOOMGENERIC_RESY 400
-#endif  // DOOMGENERIC_RESY
+#endif  
 
 
 #ifdef CMAP256
 
 typedef uint8_t pixel_t;
 
-#else  // CMAP256
+#else  
 
 typedef uint32_t pixel_t;
 
-#endif  // CMAP256
+#endif  
 
 
 extern pixel_t* DG_ScreenBuffer;
@@ -34,7 +34,7 @@ void doomgeneric_Create(int argc, char **argv);
 void doomgeneric_Tick();
 
 
-//Implement below functions for your platform
+
 void DG_Init();
 void DG_DrawFrame();
 void DG_SleepMs(uint32_t ms);
@@ -46,4 +46,4 @@ void DG_SetWindowTitle(const char * title);
 }
 #endif
 
-#endif //DOOM_GENERIC
+#endif 

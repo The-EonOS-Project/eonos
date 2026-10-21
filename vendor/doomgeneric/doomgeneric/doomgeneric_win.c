@@ -92,7 +92,7 @@ static LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 
 void DG_Init()
 {
-	// window creation
+	
 	const char windowClassName[] = "DoomWindowClass";
 	const char windowTitle[] = "Doom";
 	WNDCLASSEXA wc;
@@ -171,7 +171,7 @@ int DG_GetKey(int* pressed, unsigned char* doomKey)
 {
 	if (s_KeyQueueReadIndex == s_KeyQueueWriteIndex)
 	{
-		//key queue is empty
+		
 
 		return 0;
 	}

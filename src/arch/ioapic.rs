@@ -1,4 +1,4 @@
-//! ACPI-configured I/O APICs for routing legacy ISA IRQs to this CPU.
+
 
 use crate::acpi::{IsaOverride, MadtInfo};
 use crate::sync::IrqMutex;
@@ -55,15 +55,15 @@ fn redirection_read(io: IoApic, index: u32) -> (u32, u32) {
 
 fn redirection_write(io: IoApic, index: u32, low: u32, high: u32) {
     let reg = REG_REDIRECTION_BASE + index * 2;
-    // Mask before changing the destination/vector; then commit the new
-    // low dword last so a partially updated entry cannot deliver IRQs.
+    
+    
     write_reg(io.base, reg, low | REDIR_MASKED);
     write_reg(io.base, reg + 1, high);
     write_reg(io.base, reg, low);
 }
 
-/// Map and mask all I/O APIC inputs. Actual ISA lines are enabled later,
-/// after drivers register their handlers.
+
+
 pub fn init(madt: &MadtInfo) -> bool {
     if madt.ioapic_count == 0 || madt.ioapic_count > 4 {
         log_fail!("IOAPIC", "Init", "MADT has no usable I/O APIC entries");
@@ -159,8 +159,8 @@ fn polarity_trigger(flags: u16) -> Option<u32> {
     Some(bits)
 }
 
-/// Check that an ISA line maps to a present I/O APIC input and has
-/// valid ACPI polarity/trigger flags before enabling APIC mode.
+
+
 pub fn supports_isa_irq(irq: u8) -> bool {
     let guard = CONFIG.lock();
     guard
@@ -171,8 +171,8 @@ pub fn supports_isa_irq(irq: u8) -> bool {
 }
 
 fn set_isa_irq(irq: u8, masked: bool) {
-    // Keep the lock through the selector/window register pair so two
-    // callers can never interleave I/O APIC register accesses.
+    
+    
     let guard = CONFIG.lock();
     let Some(config) = guard.as_ref() else {
         log_fail!("IOAPIC", "Route", "I/O APIC is not initialized");
@@ -192,9 +192,9 @@ fn set_isa_irq(irq: u8, masked: bool) {
         return;
     };
     let (mut low, _) = redirection_read(io, index);
-    // Fixed delivery to a physical APIC ID is represented by zeroes in
-    // delivery-mode and destination-mode fields. Clear firmware values
-    // there so a stale logical/lowest-priority route cannot survive.
+    
+    
+    
     low &= !(0x0fff | REDIR_ACTIVE_LOW | REDIR_LEVEL_TRIGGERED | REDIR_MASKED);
     low |= idt::IRQ_BASE as u32 + irq as u32;
     low |= mode_bits;

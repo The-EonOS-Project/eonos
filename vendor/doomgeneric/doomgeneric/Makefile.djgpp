@@ -1,9 +1,9 @@
-################################################################
-#
-# $Id:$
-#
-# $Log:$
-#
+
+
+
+
+
+
 
 .PHONY: all clean print
 
@@ -26,18 +26,18 @@ CFLAGS+=-DDOOMGENERIC_RESX=320 -DDOOMGENERIC_RESY=200
 CFLAGS+=-DFEATURE_SOUND=1
 CFLAGS+=-DCMAP256
 
-# link time optimization, no significant effect on performance
-# CFLAGS+=-flto
-# LDFLAGS+=-flto $(OPTFLAGS)
 
-# debug
-# CFLAGS+=-g
-# LDFLAGS+=-g
+
+
+
+
+
+
 
 LIBS+=-lalleg
-#LIBS+=-lalld # debug library
 
-# subdirectory for objects
+
+
 OBJDIR:=djgpp
 OUTPUT:=doomgen.exe
 

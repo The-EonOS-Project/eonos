@@ -64,9 +64,9 @@ impl Font {
             &data[end..end]
         };
 
-        // Resolve ASCII once at font load. PSF2 fonts commonly carry a
-        // Unicode table, and scanning hundreds of glyph records per input
-        // character is otherwise a significant console rendering cost.
+        
+        
+        
         let mut ascii_glyphs = [u16::MAX; 128];
         if has_unicode_table {
             let mut pos = 0;
@@ -243,9 +243,9 @@ impl Console {
         }
     }
 
-    /// Copy a changed rectangle from cached RAM to the write-combining
-    /// framebuffer. Reads and scrolling stay in ordinary RAM; the device
-    /// mapping only sees forward, contiguous writes.
+    
+    
+    
     fn flush_rect(&self, x: usize, y: usize, w: usize, h: usize) {
         let x_end = x.saturating_add(w).min(self.width);
         let y_end = y.saturating_add(h).min(self.height);
@@ -282,8 +282,8 @@ impl Console {
     }
 
     fn flush_pending(&mut self) {
-        // Keep terminal output in its own RAM surface while Era owns the
-        // display. It is restored in one full-screen copy when Era exits.
+        
+        
         if self.graphics_owner.is_some() {
             return;
         }
@@ -306,9 +306,9 @@ impl Console {
         });
     }
 
-    /// Start an exclusive, RAM-backed graphics session for a user process.
-    /// Drawing happens in ordinary memory; present copies only damaged rows
-    /// to the write-combining framebuffer.
+    
+    
+    
     pub fn graphics_enter(&mut self, owner: u64) -> Result<(usize, usize), GraphicsError> {
         if self.graphics_owner.is_some() {
             return Err(GraphicsError::Busy);
@@ -390,7 +390,7 @@ impl Console {
         true
     }
 
-    /// Blit a tightly packed row-major buffer of opaque `0xRRGGBB` pixels.
+    
     pub fn graphics_image(&mut self, owner: u64, x: i64, y: i64, width: usize, pixels: &[u32]) -> bool {
         if self.graphics_owner != Some(owner) || width == 0 || pixels.len() % width != 0 { return false; }
         let height = pixels.len() / width;
@@ -415,8 +415,8 @@ impl Console {
         true
     }
 
-    /// Scale a packed `0xRRGGBB` source into the largest centered rectangle
-    /// that preserves its aspect ratio.
+    
+    
     pub fn graphics_blit_scaled(&mut self, owner: u64, source_width: usize, source_height: usize, pixels: &[u32]) -> bool {
         if self.graphics_owner != Some(owner) || source_width == 0 || source_height == 0
             || source_width.checked_mul(source_height) != Some(pixels.len()) { return false; }
@@ -434,11 +434,11 @@ impl Console {
         let bpp = self.bytes_per_pixel;
         let surface = self.graphics_shadow.as_mut().unwrap();
 
-        // Doom's 320x200 frame normally scales by an exact integer factor
-        // (for example, 4x at 1280x800). Expand each source row once, then
-        // duplicate that row in cached RAM. This avoids a divide and a tiny
-        // byte-slice copy for every destination pixel, while keeping the
-        // existing checked, kernel-owned surface and presentation path.
+        
+        
+        
+        
+        
         if bpp == 4 && dest_w % source_w == 0 && dest_h % source_h == 0
             && dest_w / source_w == dest_h / source_h
         {
@@ -464,12 +464,12 @@ impl Console {
             return true;
         }
 
-        // For the common 16:9 display mode, DOOM's 320x200 image scales to
-        // 1296x810, so it does not meet the integer-scale case above. Avoid a
-        // 64-bit divide for every destination pixel: distribute each source
-        // pixel across the output with quotient/remainder stepping. This
-        // produces the same nearest-neighbour mapping as floor(dst * src /
-        // output), with only additions and comparisons in the inner loop.
+        
+        
+        
+        
+        
+        
         if bpp == 4 {
             let out_w = dest_w as usize;
             let out_h = dest_h as usize;
@@ -532,9 +532,9 @@ impl Console {
         true
     }
 
-    /// Draw foreground-only PSF glyphs, leaving the graphics background
-    /// transparent. Text is bounded by the syscall layer to keep kernel work
-    /// predictable.
+    
+    
+    
     pub fn graphics_text(&mut self, owner: u64, x: i64, y: i64, color: u32, text: &str) -> bool {
         if self.graphics_owner != Some(owner) {
             return false;
@@ -611,9 +611,9 @@ impl Console {
             self.copy_cursor_rect(cursor.0, cursor.1, true);
             self.presented_cursor = Some(cursor);
         } else if dirty.is_some_and(|rect| Self::rect_intersects_cursor(rect, cursor)) {
-            // Drawing into the shadow may have overwritten the cursor in the
-            // visible framebuffer. Restore it only when the damaged area
-            // actually touches the cursor.
+            
+            
+            
             self.copy_cursor_rect(cursor.0, cursor.1, true);
         }
         true
@@ -707,7 +707,7 @@ impl Console {
         }
     }
 
-    /// Restore the terminal surface when its owner exits or is terminated.
+    
     pub fn graphics_exit(&mut self, owner: u64) -> bool {
         if self.graphics_owner != Some(owner) {
             return false;
@@ -721,8 +721,8 @@ impl Console {
         true
     }
 
-    /// Keep formatted log fragments in the shadow buffer and flush once
-    /// after the complete logical log message has been rendered.
+    
+    
     pub fn begin_batch(&mut self) {
         self.batch_depth += 1;
     }
@@ -907,12 +907,12 @@ impl Console {
                         self.esc = EscState::Normal;
                     }
                     'D' => {
-                        // CSI n D -- "cursor back n": standard ANSI,
-                        // and the escape `syscall::redraw_tail` uses to
-                        // reposition after a redraw without disturbing
-                        // the just-drawn cells it passes over (unlike
-                        // `\x08`, which intentionally blanks). Default
-                        // to 1 with no parameter, same as real terminals.
+                        
+                        
+                        
+                        
+                        
+                        
                         self.push_param();
                         let n = if self.nparams > 0 {
                             self.params[0] as usize
@@ -923,16 +923,16 @@ impl Console {
                         self.esc = EscState::Normal;
                     }
                     'J' => {
-                        // CSI 2 J -- "clear entire screen". Real
-                        // terminals distinguish "clear from cursor",
-                        // "clear to cursor", and "clear all" by the
-                        // parameter; this console only ever needs the
-                        // shell's `clear` command, which always wants
-                        // the whole screen, so every parameter value
-                        // clears everything rather than tracking the
-                        // distinction. Home the cursor too, matching
-                        // what `clear` on a real terminal looks like
-                        // (it's normally paired with CSI H).
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
                         self.push_param();
                         self.clear();
                         self.esc = EscState::Normal;
@@ -958,14 +958,14 @@ impl Console {
         }
     }
 
-    /// Move the cursor one cell left and blank whatever glyph is there,
-    /// matching what a real terminal does for `0x08` -- unlike '\n'/'\r'
-    /// this can't be a bare cursor-position update, because leaving the
-    /// old glyph on screen is exactly the bug this exists to fix (a
-    /// deleted character staying visible after the line shrinks). Does
-    /// nothing at column 0: this console has no concept of un-wrapping
-    /// onto the previous row, so a caller backspacing across a line
-    /// boundary would need to track that itself.
+    
+    
+    
+    
+    
+    
+    
+    
     fn backspace(&mut self) {
         if self.cursor_col == 0 {
             return;
@@ -974,20 +974,20 @@ impl Console {
         self.draw_glyph(' ', self.cursor_col, self.cursor_row);
     }
 
-    /// Move the cursor left `n` cells without touching what's drawn
-    /// there -- for repositioning after a redraw, where the cells being
-    /// passed over already hold the correct final content and must not
-    /// be blanked (unlike `backspace`, which exists precisely to blank
-    /// the cell it moves over). Exposed to callers via the `\x1b[<n>D`
-    /// CSI sequence (see `EscState::Csi` handling above).
+    
+    
+    
+    
+    
+    
     pub fn cursor_left(&mut self, n: usize) {
         self.cursor_col = self.cursor_col.saturating_sub(n);
     }
 }
 
-/// Copy a dirty row to the display without using SIMD registers. The kernel
-/// does not save floating-point state during context switches, so the bulk
-/// x86 path uses REP MOVSQ, which is safe across interrupts and user threads.
+
+
+
 unsafe fn copy_framebuffer_row(source: *const u8, destination: *mut u8, len: usize, bpp: usize) {
     #[cfg(target_arch = "x86_64")]
     if bpp == 4 && len >= 64 {

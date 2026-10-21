@@ -1,16 +1,16 @@
-// Copyright 2018 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #![allow(missing_docs)]
 
@@ -70,18 +70,18 @@ fn test_sample_len(alg: &'static quic::Algorithm) {
     let key = quic::HeaderProtectionKey::new(alg, &key_data).unwrap();
 
     let sample_len = alg.sample_len();
-    assert_eq!(sample_len, 16); // For all currently-implemented algorithms
+    assert_eq!(sample_len, 16); 
     let sample_data = vec![0u8; sample_len + 2];
 
-    // Sample is the right size.
+    
     assert!(key.new_mask(&sample_data[..sample_len]).is_ok());
 
-    // Sample is one byte too small.
+    
     assert!(key.new_mask(&sample_data[..(sample_len - 1)]).is_err());
 
-    // Sample is one byte too big.
+    
     assert!(key.new_mask(&sample_data[..(sample_len + 1)]).is_err());
 
-    // Sample is empty.
+    
     assert!(key.new_mask(&[]).is_err());
 }

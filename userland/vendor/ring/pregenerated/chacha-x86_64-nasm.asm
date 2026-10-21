@@ -1,5 +1,5 @@
-; This file is generated from a similarly-named Perl script in the BoringSSL
-; source tree. Do not edit by hand.
+
+
 
 %ifidn __OUTPUT_FORMAT__, win64
 default	rel
@@ -52,7 +52,7 @@ global	ChaCha20_ctr32_nohw
 
 ALIGN	64
 ChaCha20_ctr32_nohw:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_ChaCha20_ctr32_nohw:
@@ -333,7 +333,7 @@ $L$done:
 	lea	rsp,[rsi]
 
 $L$no_data:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -342,7 +342,7 @@ global	ChaCha20_ctr32_ssse3_4x
 
 ALIGN	32
 ChaCha20_ctr32_ssse3_4x:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_ChaCha20_ctr32_ssse3_4x:
@@ -908,7 +908,7 @@ $L$done4x:
 	lea	rsp,[r9]
 
 $L$4x_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -917,7 +917,7 @@ global	ChaCha20_ctr32_avx2
 
 ALIGN	32
 ChaCha20_ctr32_avx2:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_ChaCha20_ctr32_avx2:
@@ -1549,7 +1549,7 @@ $L$done8x:
 	lea	rsp,[r9]
 
 $L$8x_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -1747,6 +1747,6 @@ $L$SEH_info_ChaCha20_ctr32_avx2:
 	DD	full_handler wrt ..imagebase
 	DD	$L$8x_body wrt ..imagebase,$L$8x_epilogue wrt ..imagebase
 %else
-; Work around https://bugzilla.nasm.us/show_bug.cgi?id=3392738
+
 ret
 %endif

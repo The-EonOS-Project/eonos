@@ -1,19 +1,19 @@
-//
-// Copyright(C) 2005-2014 Simon Howard
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// DESCRIPTION:
-//       SDL Joystick code.
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #ifdef ORIGCODE
 #include "SDL.h"
@@ -32,8 +32,8 @@
 #include "m_config.h"
 #include "m_misc.h"
 
-// When an axis is within the dead zone, it is set to zero.
-// This is 5% of the full range:
+
+
 
 #define DEAD_ZONE (32768 / 3)
 
@@ -41,35 +41,35 @@
 static SDL_Joystick *joystick = NULL;
 #endif
 
-// Configuration variables:
 
-// Standard default.cfg Joystick enable/disable
+
+
 
 static int usejoystick = 0;
 
-// Joystick to use, as an SDL joystick index:
+
 
 static int joystick_index = -1;
 
-// Which joystick axis to use for horizontal movement, and whether to
-// invert the direction:
+
+
 
 static int joystick_x_axis = 0;
 static int joystick_x_invert = 0;
 
-// Which joystick axis to use for vertical movement, and whether to
-// invert the direction:
+
+
 
 static int joystick_y_axis = 1;
 static int joystick_y_invert = 0;
 
-// Which joystick axis to use for strafing?
+
 
 static int joystick_strafe_axis = -1;
 static int joystick_strafe_invert = 0;
 
-// Virtual to physical button joystick button mapping. By default this
-// is a straight mapping.
+
+
 static int joystick_physical_buttons[NUM_VIRTUAL_BUTTONS] = {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 };
@@ -132,7 +132,7 @@ void I_InitJoystick(void)
         return;
     }
 
-    // Open the joystick
+    
 
     joystick = SDL_JoystickOpen(joystick_index);
 
@@ -159,7 +159,7 @@ void I_InitJoystick(void)
 
     SDL_JoystickEventState(SDL_ENABLE);
 
-    // Initialized okay!
+    
 
     printf("I_InitJoystick: %s\n", SDL_JoystickName(joystick_index));
 
@@ -198,13 +198,13 @@ static boolean IsAxisButton(int physbutton)
     return false;
 }
 
-// Get the state of the given virtual button.
+
 
 static int ReadButtonState(int vbutton)
 {
     int physbutton;
 
-    // Map from virtual button to physical (SDL) button.
+    
     if (vbutton < NUM_VIRTUAL_BUTTONS)
     {
         physbutton = joystick_physical_buttons[vbutton];
@@ -214,7 +214,7 @@ static int ReadButtonState(int vbutton)
         physbutton = vbutton;
     }
 
-    // Never read axis buttons as buttons.
+    
     if (IsAxisButton(physbutton))
     {
         return 0;
@@ -223,7 +223,7 @@ static int ReadButtonState(int vbutton)
     return SDL_JoystickGetButton(joystick, physbutton);
 }
 
-// Get a bitmask of all currently-pressed buttons
+
 
 static int GetButtonsState(void)
 {
@@ -243,21 +243,21 @@ static int GetButtonsState(void)
     return result;
 }
 
-// Read the state of an axis, inverting if necessary.
+
 
 static int GetAxisState(int axis, int invert)
 {
     int result;
 
-    // Axis -1 means disabled.
+    
 
     if (axis < 0)
     {
         return 0;
     }
 
-    // Is this a button axis, or a hat axis?
-    // If so, we need to handle it specially.
+    
+    
 
     result = 0;
 

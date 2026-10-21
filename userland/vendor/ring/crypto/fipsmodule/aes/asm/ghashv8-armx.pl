@@ -36,7 +36,7 @@
 # November 2017
 #
 # AArch64 register bank to "accommodate" 4x aggregated reduction and
-# improve performance by 20-70% depending on processor.
+# improve performance by 20-70 
 #
 # Current performance in cycles per processed byte:
 #
@@ -95,7 +95,7 @@ ___
 #
 $code.=<<___;
 .global	gcm_init_clmul
-.type	gcm_init_clmul,%function
+.type	gcm_init_clmul, 
 .align	4
 gcm_init_clmul:
 	AARCH64_VALID_CALL_TARGET
@@ -203,7 +203,7 @@ ___
 #
 $code.=<<___;
 .global	gcm_gmult_clmul
-.type	gcm_gmult_clmul,%function
+.type	gcm_gmult_clmul, 
 .align	4
 gcm_gmult_clmul:
 	AARCH64_VALID_CALL_TARGET
@@ -258,7 +258,7 @@ if ($flavour =~ /64/) {			######## 64-bit code
 	my $arg=shift;
 
 	$arg =~ m/q([0-9]+)#(lo|hi),\s*q([0-9]+)#(lo|hi)/o &&
-	sprintf	"ins	v%d.d[%d],v%d.d[%d]",$1<8?$1:$1+8,($2 eq "lo")?0:1,
+	sprintf	"ins	v 
 					     $3<8?$3:$3+8,($4 eq "lo")?0:1;
     }
     foreach(split("\n",$code)) {

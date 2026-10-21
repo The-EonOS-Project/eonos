@@ -1,11 +1,11 @@
-//! Kernel heap.
-//!
-//! A `#[global_allocator]` backed by an address-ordered, coalescing
-//! free-list (first-fit). The heap lives in a fixed slice of virtual
-//! address space reserved below the kernel image; nothing is mapped up
-//! front. Physical frames are pulled from the PMM and wired in through
-//! `vmm::map_page` only as the heap actually needs to grow, the same
-//! lazy-mapping discipline the VMM itself uses for everything else.
+
+
+
+
+
+
+
+
 
 #![allow(dead_code)]
 
@@ -19,21 +19,21 @@ use crate::sync::IrqMutex;
 use crate::vmm;
 use crate::{log_debug, log_fail, log_ok};
 
-/// Virtual base of the kernel heap. Sits well below the kernel image
-/// (`0xffffffff80000000` and up) and below the VMM's self-test page
-/// (`0xffffffffc0000000`), so nothing else living in the top-2GiB slice
-/// of the address space can collide with it.
+
+
+
+
 const HEAP_START: usize = 0xffff_ffff_9000_0000;
 
-/// Upper bound the heap may grow to. This only reserves *virtual*
-/// address space — physical frames are mapped in on demand — so it
-/// costs nothing until the heap actually grows this large.
-const HEAP_MAX_SIZE: usize = 64 * 1024 * 1024; // 64 MiB
 
-/// How much to map in per growth step, rounded up to whole pages. Big
-/// requests still get exactly the space they need (see `grow`); this is
-/// just the default increment for ordinary small allocations.
-const HEAP_GROW_STEP: usize = 64 * 1024; // 64 KiB
+
+
+const HEAP_MAX_SIZE: usize = 64 * 1024 * 1024; 
+
+
+
+
+const HEAP_GROW_STEP: usize = 64 * 1024; 
 
 const PAGE_SIZE: usize = pmm::PAGE_SIZE as usize;
 
@@ -55,9 +55,9 @@ impl fmt::Display for Size {
     }
 }
 
-/// A free block of heap memory. Lives inline at the start of the free
-/// region it describes — freeing memory doesn't cost any bookkeeping
-/// storage of its own.
+
+
+
 struct FreeBlock {
     size: usize,
     next: *mut FreeBlock,
@@ -74,20 +74,20 @@ impl FreeBlock {
 }
 
 struct FreeList {
-    /// First free block in address order, or null if the free list
-    /// (and possibly the whole heap) is empty.
+    
+    
     head: *mut FreeBlock,
-    /// One past the highest heap address currently backed by a mapped
-    /// physical frame. `0` means the heap hasn't grown at all yet.
+    
+    
     mapped_end: usize,
-    /// Bytes currently on loan to callers (i.e. not on the free list).
+    
     allocated: usize,
-    /// Total bytes ever added to the free list via `grow`.
+    
     total: usize,
 }
 
-// `FreeList` is only ever touched from behind a `Mutex`, so handing it
-// across cores is fine even though it's built out of raw pointers.
+
+
 unsafe impl Send for FreeList {}
 
 impl FreeList {
@@ -100,10 +100,10 @@ impl FreeList {
         }
     }
 
-    /// Insert `[addr, addr + size)` into the free list in address order,
-    /// merging it with whichever neighbour(s) it turns out to be
-    /// adjacent to. This is what keeps long alloc/free cycles from
-    /// grinding the heap down into unusable dust.
+    
+    
+    
+    
     unsafe fn insert(&mut self, addr: usize, size: usize) {
         debug_assert_eq!(addr % align_of::<FreeBlock>(), 0);
         debug_assert!(size >= size_of::<FreeBlock>());
@@ -115,15 +115,15 @@ impl FreeList {
             cur = (*cur).next;
         }
 
-        // Merge with the following block first, if adjacent.
+        
         let (size, next) = if !cur.is_null() && addr + size == (*cur).addr() {
             (size + (*cur).size, (*cur).next)
         } else {
             (size, cur)
         };
 
-        // Then merge the (possibly already-grown) new block into its
-        // predecessor, if adjacent, instead of writing a new node at all.
+        
+        
         if !prev.is_null() && (*prev).end() == addr {
             (*prev).size += size;
             (*prev).next = next;
@@ -140,9 +140,9 @@ impl FreeList {
         }
     }
 
-    /// First-fit search: finds a free block with room for `size` bytes
-    /// aligned to `align`, removes it from the list, and returns any
-    /// leftover space (before and/or after the allocation) to the list.
+    
+    
+    
     unsafe fn find_and_remove(&mut self, size: usize, align: usize) -> Option<usize> {
         let mut prev: *mut FreeBlock = ptr::null_mut();
         let mut cur = self.head;
@@ -168,10 +168,10 @@ impl FreeList {
                 if after_size >= size_of::<FreeBlock>() {
                     self.insert(alloc_start + size, after_size);
                 }
-                // Slivers smaller than a `FreeBlock` (on either side) are
-                // too small to ever track and are simply handed out as
-                // internal fragmentation — a few wasted bytes beats a
-                // leaked, unrecoverable region.
+                
+                
+                
+                
 
                 return Some(alloc_start);
             }
@@ -183,9 +183,9 @@ impl FreeList {
         None
     }
 
-    /// Map in more physical memory and add it to the free list. Returns
-    /// `false` if the heap is already at `HEAP_MAX_SIZE` or the PMM is
-    /// out of frames.
+    
+    
+    
     unsafe fn grow(&mut self, min_extra: usize) -> bool {
         if self.mapped_end == 0 {
             self.mapped_end = HEAP_START;
@@ -245,9 +245,9 @@ const fn align_down(v: usize, a: usize) -> usize {
     v & !(a - 1)
 }
 
-/// Bump a `Layout` up to what `FreeBlock` bookkeeping actually needs:
-/// every free (and therefore every allocated-then-freed) region has to
-/// be big enough, and aligned enough, to hold a `FreeBlock` header.
+
+
+
 fn adjust(layout: Layout) -> (usize, usize) {
     let align = layout.align().max(align_of::<FreeBlock>());
     let size = layout.size().max(size_of::<FreeBlock>());
@@ -277,9 +277,9 @@ unsafe impl GlobalAlloc for KernelHeap {
             return addr as *mut u8;
         }
 
-        // No single free block was big enough — grow the heap (mapping
-        // at least enough for this request plus alignment slop) and
-        // try exactly once more.
+        
+        
+        
         if !list.grow(size + align) {
             return ptr::null_mut();
         }
@@ -304,12 +304,12 @@ unsafe impl GlobalAlloc for KernelHeap {
 #[global_allocator]
 static ALLOCATOR: KernelHeap = KernelHeap::new();
 
-/// Bytes currently on loan to callers.
+
 pub fn allocated_bytes() -> usize {
     ALLOCATOR.inner.lock().allocated
 }
 
-/// Total bytes the heap has grown to (allocated + free).
+
 pub fn heap_size() -> usize {
     ALLOCATOR.inner.lock().total
 }
@@ -340,7 +340,7 @@ pub fn self_test() {
 
     let before = allocated_bytes();
 
-    // Basic box round-trip.
+    
     let boxed = Box::new(0x1234_5678_9abc_def0u64);
     if *boxed != 0x1234_5678_9abc_def0 {
         log_fail!("Heap", "SelfTest", "Box value mismatch");
@@ -348,8 +348,8 @@ pub fn self_test() {
     }
     drop(boxed);
 
-    // A growing Vec exercises repeated alloc/realloc/dealloc and forces
-    // several internal reallocations.
+    
+    
     let mut v: Vec<u32> = Vec::new();
     for i in 0..2048u32 {
         v.push(i);
@@ -365,9 +365,9 @@ pub fn self_test() {
     }
     drop(v);
 
-    // Enough small, individually-freed allocations to force at least
-    // one heap growth beyond the initial region, then free them all
-    // again to exercise coalescing.
+    
+    
+    
     let heap_before_stress = heap_size();
     {
         let mut chunks: Vec<Box<[u8; 512]>> = Vec::new();
@@ -380,7 +380,7 @@ pub fn self_test() {
                 return;
             }
         }
-    } // all 300 boxes dropped here
+    } 
 
     let grew = heap_size() > heap_before_stress;
 

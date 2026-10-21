@@ -1,4 +1,4 @@
-//! FAT32 filesystem over a 512-byte block device.
+
 
 #![allow(dead_code)]
 
@@ -113,7 +113,7 @@ impl Fat32 {
         let cluster_count =
             ((total_sectors as u64 - data_start) / sectors_per_cluster as u64) as u32;
         let fat_entries = sectors_per_fat as u64 * SECTOR_SIZE as u64 / 4;
-        // FAT32 reserves cluster IDs 0 and 1, and the root must be in the data range.
+        
         if cluster_count < 1
             || cluster_count > 0x0fff_fff5
             || fat_entries < cluster_count as u64 + 2
@@ -333,7 +333,7 @@ impl Fat32 {
                 if attr & 0x08 != 0 {
                     have_lfn = false;
                     continue;
-                } // volume label
+                } 
                 let hi = u16le(e, 20) as u32;
                 let lo = u16le(e, 26) as u32;
                 let first_cluster = (hi << 16) | lo;
@@ -675,9 +675,9 @@ impl Fat32 {
         let chain = self.collect_chain(directory)?;
         let tail = *chain.last().ok_or(FatError::Corrupt)?;
 
-        // The old end marker makes every later slot in the chain unused.
-        // Convert that ignored tail to deleted entries before extending,
-        // so old garbage cannot become visible when the chain grows.
+        
+        
+        
         let mut after_end = false;
         for &cluster in &chain {
             let data = self.read_cluster(cluster)?;
@@ -691,7 +691,7 @@ impl Fat32 {
             }
         }
 
-        let slots_needed = records.len() + 1; // leave a zero end marker
+        let slots_needed = records.len() + 1; 
         let clusters_needed = (slots_needed * 32).div_ceil(self.cluster_bytes());
         let mut added = Vec::with_capacity(clusters_needed);
         for _ in 0..clusters_needed {
@@ -861,8 +861,8 @@ impl Fat32 {
         Ok(())
     }
 
-    /// Create an empty 8.3 file in an existing directory. Existing files
-    /// are left intact; directories and unsupported names are rejected.
+    
+    
     pub fn create_file(&self, path: &str) -> Result<(), FatError> {
         let (parent, name) = self.parent_and_name(path)?;
         if let Some(existing) = self.find_named_entry(parent, &name)? {
@@ -881,7 +881,7 @@ impl Fat32 {
         self.append_directory_records(parent, &records)
     }
 
-    /// Create a directory with the FAT `.` and `..` entries.
+    
     pub fn create_dir(&self, path: &str) -> Result<(), FatError> {
         let (parent, name) = self.parent_and_name(path)?;
         if self.find_named_entry(parent, &name)?.is_some() {
@@ -917,7 +917,7 @@ impl Fat32 {
         result
     }
 
-    /// Remove a file or an empty directory. Non-empty directories are kept.
+    
     pub fn remove(&self, path: &str) -> Result<(), FatError> {
         let (parent, name) = self.parent_and_name(path)?;
         let location = self
@@ -973,7 +973,7 @@ impl Fat32 {
         self.release_chain(&chain)
     }
 
-    /// Truncate an existing regular file and release its cluster chain.
+    
     pub fn truncate(&self, path: &str) -> Result<(), FatError> {
         let (parent, name) = self.parent_and_name(path)?;
         let location = self
@@ -987,8 +987,8 @@ impl Fat32 {
         self.release_chain(&chain)
     }
 
-    /// Write bytes at an offset, extending the file and zero-filling any
-    /// gap. Files must already exist and use a FAT 8.3 name.
+    
+    
     pub fn write_at(&self, path: &str, offset: usize, data: &[u8]) -> Result<usize, FatError> {
         if data.is_empty() {
             return Ok(0);

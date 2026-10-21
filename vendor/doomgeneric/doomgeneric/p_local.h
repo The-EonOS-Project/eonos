@@ -1,20 +1,20 @@
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 2005-2014 Simon Howard
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// DESCRIPTION:
-//	Play functions, animation, global header.
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #ifndef __P_LOCAL__
@@ -30,8 +30,8 @@
 #define MAXHEALTH		100
 #define VIEWHEIGHT		(41*FRACUNIT)
 
-// mapblocks are used to check movement
-// against lines and things
+
+
 #define MAPBLOCKUNITS	128
 #define MAPBLOCKSIZE	(MAPBLOCKUNITS*FRACUNIT)
 #define MAPBLOCKSHIFT	(FRACBITS+7)
@@ -39,12 +39,12 @@
 #define MAPBTOFRAC		(MAPBLOCKSHIFT-FRACBITS)
 
 
-// player radius for movement checking
+
 #define PLAYERRADIUS	16*FRACUNIT
 
-// MAXRADIUS is for precalculated sector block boxes
-// the spider demon is larger,
-// but we do not have any moving sectors nearby
+
+
+
 #define MAXRADIUS		32*FRACUNIT
 
 #define GRAVITY		FRACUNIT
@@ -54,16 +54,16 @@
 #define MELEERANGE		(64*FRACUNIT)
 #define MISSILERANGE	(32*64*FRACUNIT)
 
-// follow a player exlusively for 3 seconds
+
 #define	BASETHRESHOLD	 	100
 
 
 
-//
-// P_TICK
-//
 
-// both the head and tail of the thinker list
+
+
+
+
 extern	thinker_t	thinkercap;	
 
 
@@ -72,27 +72,27 @@ void P_AddThinker (thinker_t* thinker);
 void P_RemoveThinker (thinker_t* thinker);
 
 
-//
-// P_PSPR
-//
+
+
+
 void P_SetupPsprites (player_t* curplayer);
 void P_MovePsprites (player_t* curplayer);
 void P_DropWeapon (player_t* player);
 
 
-//
-// P_USER
-//
+
+
+
 void	P_PlayerThink (player_t* player);
 
 
-//
-// P_MOBJ
-//
+
+
+
 #define ONFLOORZ		INT_MIN
 #define ONCEILINGZ		INT_MAX
 
-// Time interval for item respawning.
+
 #define ITEMQUESIZE		128
 
 extern mapthing_t	itemrespawnque[ITEMQUESIZE];
@@ -121,15 +121,15 @@ mobj_t* P_SpawnMissile (mobj_t* source, mobj_t* dest, mobjtype_t type);
 void	P_SpawnPlayerMissile (mobj_t* source, mobjtype_t type);
 
 
-//
-// P_ENEMY
-//
+
+
+
 void P_NoiseAlert (mobj_t* target, mobj_t* emmiter);
 
 
-//
-// P_MAPUTL
-//
+
+
+
 typedef struct
 {
     fixed_t	x;
@@ -141,7 +141,7 @@ typedef struct
 
 typedef struct
 {
-    fixed_t	frac;		// along trace line
+    fixed_t	frac;		
     boolean	isaline;
     union {
 	mobj_t*	thing;
@@ -149,7 +149,7 @@ typedef struct
     }			d;
 } intercept_t;
 
-// Extended MAXINTERCEPTS, to allow for intercepts overrun emulation.
+
 
 #define MAXINTERCEPTS_ORIGINAL 128
 #define MAXINTERCEPTS          (MAXINTERCEPTS_ORIGINAL + 61)
@@ -195,12 +195,12 @@ void P_UnsetThingPosition (mobj_t* thing);
 void P_SetThingPosition (mobj_t* thing);
 
 
-//
-// P_MAP
-//
 
-// If "floatok" true, move would be ok
-// if within "tmfloorz - tmceilingz".
+
+
+
+
+
 extern boolean		floatok;
 extern fixed_t		tmfloorz;
 extern fixed_t		tmceilingz;
@@ -208,13 +208,13 @@ extern fixed_t		tmceilingz;
 
 extern	line_t*		ceilingline;
 
-// fraggle: I have increased the size of this buffer.  In the original Doom,
-// overrunning past this limit caused other bits of memory to be overwritten,
-// affecting demo playback.  However, in doing so, the limit was still
-// exceeded.  So we have to support more than 8 specials.
-//
-// We keep the original limit, to detect what variables in memory were
-// overwritten (see SpechitOverrun())
+
+
+
+
+
+
+
 
 #define MAXSPECIALCROSS 		20
 #define MAXSPECIALCROSS_ORIGINAL	8
@@ -231,7 +231,7 @@ void 	P_UseLines (player_t* player);
 
 boolean P_ChangeSector (sector_t* sector, boolean crunch);
 
-extern mobj_t*	linetarget;	// who got hit (or NULL)
+extern mobj_t*	linetarget;	
 
 fixed_t
 P_AimLineAttack
@@ -255,23 +255,23 @@ P_RadiusAttack
 
 
 
-//
-// P_SETUP
-//
-extern byte*		rejectmatrix;	// for fast sight rejection
-extern short*		blockmaplump;	// offsets in blockmap are from here
+
+
+
+extern byte*		rejectmatrix;	
+extern short*		blockmaplump;	
 extern short*		blockmap;
 extern int		bmapwidth;
-extern int		bmapheight;	// in mapblocks
+extern int		bmapheight;	
 extern fixed_t		bmaporgx;
-extern fixed_t		bmaporgy;	// origin of block map
-extern mobj_t**		blocklinks;	// for thing chains
+extern fixed_t		bmaporgy;	
+extern mobj_t**		blocklinks;	
 
 
 
-//
-// P_INTER
-//
+
+
+
 extern int		maxammo[NUMAMMO];
 extern int		clipammo[NUMAMMO];
 
@@ -288,10 +288,10 @@ P_DamageMobj
   int		damage );
 
 
-//
-// P_SPEC
-//
+
+
+
 #include "p_spec.h"
 
 
-#endif	// __P_LOCAL__
+#endif	

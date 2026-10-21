@@ -26,7 +26,7 @@
 #
 # This implementation also uses Karatsuba multiplication instead of schoolbook
 # multiplication for GHASH in its main loop.  This does not help much on Intel,
-# but it improves performance by ~5% on AMD Zen 3 which is the main target for
+# but it improves performance by ~5 
 # this implementation.  Other factors weighing slightly in favor of Karatsuba
 # multiplication in this implementation are the lower maximum vector length
 # (which means there is space left in the Htable array to cache the halves of
@@ -114,9 +114,9 @@ sub _save_xmmregs {
       if @g_cur_func_saved_xmmregs;
     if ( $win64 and $num_xmmregs > 0 ) {
         @g_cur_func_saved_xmmregs = @xmmregs;
-        my $is_misaligned = ( scalar @g_cur_func_saved_gpregs ) % 2 == 0;
+        my $is_misaligned = ( scalar @g_cur_func_saved_gpregs ) 
         my $alloc_size    = 16 * $num_xmmregs + ( $is_misaligned ? 8 : 0 );
-        $code .= "sub \$$alloc_size, %rsp\n";
+        $code .= "sub \$$alloc_size, 
         $code .= ".seh_stackalloc $alloc_size\n";
         for my $i ( 0 .. $num_xmmregs - 1 ) {
             my $reg_num = $xmmregs[$i];
@@ -134,14 +134,14 @@ sub _end_func {
     # Restore any xmm registers that were saved earlier.
     my $num_xmmregs = scalar @g_cur_func_saved_xmmregs;
     if ( $win64 and $num_xmmregs > 0 ) {
-        my $need_alignment = ( scalar @g_cur_func_saved_gpregs ) % 2 == 0;
+        my $need_alignment = ( scalar @g_cur_func_saved_gpregs ) 
         my $alloc_size     = 16 * $num_xmmregs + ( $need_alignment ? 8 : 0 );
         for my $i ( 0 .. $num_xmmregs - 1 ) {
             my $reg_num = $g_cur_func_saved_xmmregs[$i];
             my $pos     = 16 * $i;
             $code .= "movdqa $pos(%rsp), %xmm$reg_num\n";
         }
-        $code .= "add \$$alloc_size, %rsp\n";
+        $code .= "add \$$alloc_size, 
     }
 
     # Restore any general purpose registers that were saved earlier.
@@ -259,10 +259,10 @@ $code .= _begin_func "gcm_init_vpclmulqdq_avx2", 1;
     vpshufd         \$0xd3, $H_CUR_XMM, $TMP0_XMM
     vpsrad          \$31, $TMP0_XMM, $TMP0_XMM
     vpaddq          $H_CUR_XMM, $H_CUR_XMM, $H_CUR_XMM
-    vpand           .Lgfpoly_and_internal_carrybit(%rip), $TMP0_XMM, $TMP0_XMM
+    vpand           .Lgfpoly_and_internal_carrybit( 
     vpxor           $TMP0_XMM, $H_CUR_XMM, $H_CUR_XMM
 
-    vbroadcasti128  .Lgfpoly(%rip), $GFPOLY
+    vbroadcasti128  .Lgfpoly( 
 
     # Square H^1 to get H^2.
     @{[ _ghash_mul  $H_CUR_XMM, $H_CUR_XMM, $H_INC_XMM, $GFPOLY_XMM,
@@ -464,8 +464,8 @@ $code .= _begin_func "gcm_ghash_vpclmulqdq_avx2_1", 1;
     # Load the bswap_mask and gfpoly constants.  Since AADLEN is usually small,
     # usually only 128-bit vectors will be used.  So as an optimization, don't
     # broadcast these constants to both 128-bit lanes quite yet.
-    vmovdqu         .Lbswap_mask(%rip), $BSWAP_MASK_XMM
-    vmovdqu         .Lgfpoly(%rip), $GFPOLY_XMM
+    vmovdqu         .Lbswap_mask( 
+    vmovdqu         .Lgfpoly( 
 
     # Load the GHASH accumulator.
     vmovdqu         ($GHASH_ACC_PTR), $GHASH_ACC_XMM
@@ -509,7 +509,7 @@ sub _ctr_begin_4x {
     return <<___;
     # Increment le_ctr four times to generate four vectors of little-endian
     # counter blocks, swap each to big-endian, and store them in aesdata[0-3].
-    vmovdqu         .Linc_2blocks(%rip), $tmp
+    vmovdqu         .Linc_2blocks( 
     vpshufb         $bswap_mask, $le_ctr, $aesdata0
     vpaddd          $tmp, $le_ctr, $le_ctr
     vpshufb         $bswap_mask, $le_ctr, $aesdata1
@@ -643,9 +643,9 @@ sub _aes_gcm_update {
     if ($win64) {
         $code .= <<___;
         @{[ _save_gpregs $BE_CTR_PTR, $HTABLE, $GHASH_ACC_PTR ]}
-        mov             64(%rsp), $BE_CTR_PTR     # arg5
-        mov             72(%rsp), $HTABLE         # arg6
-        mov             80(%rsp), $GHASH_ACC_PTR  # arg7
+        mov             64( 
+        mov             72( 
+        mov             80( 
         @{[ _save_xmmregs (6 .. 15) ]}
         .seh_endprologue
 ___
@@ -653,7 +653,7 @@ ___
     else {
         $code .= <<___;
         @{[ _save_gpregs $GHASH_ACC_PTR ]}
-        mov             16(%rsp), $GHASH_ACC_PTR  # arg7
+        mov             16( 
 ___
     }
 
@@ -661,12 +661,12 @@ ___
         $code .= <<___;
 #ifdef BORINGSSL_DISPATCH_TEST
         .extern BORINGSSL_function_hit
-        movb \$1,BORINGSSL_function_hit+8(%rip)
+        movb \$1,BORINGSSL_function_hit+8( 
 #endif
 ___
     }
     $code .= <<___;
-    vbroadcasti128  .Lbswap_mask(%rip), $BSWAP_MASK
+    vbroadcasti128  .Lbswap_mask( 
 
     # Load the GHASH accumulator and the starting counter.
     # BoringSSL passes these values in big endian format.
@@ -688,7 +688,7 @@ ___
     vbroadcasti128  ($RNDKEYLAST_PTR), $RNDKEYLAST
 
     # Finish initializing LE_CTR by adding 1 to the second block.
-    vpaddd          .Lctr_pattern(%rip), $LE_CTR, $LE_CTR
+    vpaddd          .Lctr_pattern( 
 
     # If there are at least 128 bytes of data, then continue into the loop that
     # processes 128 bytes of data at a time.  Otherwise skip it.
@@ -705,12 +705,12 @@ ___
         $code .= <<___;
         # Encrypt the first 4 vectors of plaintext blocks.
         @{[ _ctr_begin_4x $LE_CTR, $BSWAP_MASK, $RNDKEY0, @AESDATA, $TMP0 ]}
-        lea             16($AESKEY), %rax
+        lea             16($AESKEY), 
 .Lvaesenc_loop_first_4_vecs$local_label_suffix:
-        vbroadcasti128  (%rax), $TMP0
+        vbroadcasti128  ( 
         @{[ _vaesenc_4x $TMP0, @AESDATA ]}
-        add             \$16, %rax
-        cmp             %rax, $RNDKEYLAST_PTR
+        add             \$16, 
+        cmp             
         jne             .Lvaesenc_loop_first_4_vecs$local_label_suffix
         @{[ _aesenclast_and_xor_4x $SRC, $DST, $RNDKEYLAST, @AESDATA,
                                    $TMP0, $TMP1, $LO, $MI ]}
@@ -807,18 +807,18 @@ ___
 
     # DATALEN is in [64, 80, 96, 112].  Encrypt two vectors of counter blocks.
     vpshufb         $BSWAP_MASK, $LE_CTR, $AESDATA0
-    vpaddd          .Linc_2blocks(%rip), $LE_CTR, $LE_CTR
+    vpaddd          .Linc_2blocks( 
     vpshufb         $BSWAP_MASK, $LE_CTR, $AESDATA1
-    vpaddd          .Linc_2blocks(%rip), $LE_CTR, $LE_CTR
+    vpaddd          .Linc_2blocks( 
     vpxor           $RNDKEY0, $AESDATA0, $AESDATA0
     vpxor           $RNDKEY0, $AESDATA1, $AESDATA1
-    lea             16($AESKEY), %rax
+    lea             16($AESKEY), 
 .Lvaesenc_loop_tail_1$local_label_suffix:
-    vbroadcasti128  (%rax), $TMP0
+    vbroadcasti128  ( 
     vaesenc         $TMP0, $AESDATA0, $AESDATA0
     vaesenc         $TMP0, $AESDATA1, $AESDATA1
-    add             \$16, %rax
-    cmp             %rax, $RNDKEYLAST_PTR
+    add             \$16, 
+    cmp             
     jne             .Lvaesenc_loop_tail_1$local_label_suffix
     vaesenclast     $RNDKEYLAST, $AESDATA0, $AESDATA0
     vaesenclast     $RNDKEYLAST, $AESDATA1, $AESDATA1
@@ -862,17 +862,17 @@ ___
     # DATALEN is in [16, 32, 48].  Encrypt two last vectors of counter blocks.
 .Llessthan64bytes$local_label_suffix:
     vpshufb         $BSWAP_MASK, $LE_CTR, $AESDATA0
-    vpaddd          .Linc_2blocks(%rip), $LE_CTR, $LE_CTR
+    vpaddd          .Linc_2blocks( 
     vpshufb         $BSWAP_MASK, $LE_CTR, $AESDATA1
     vpxor           $RNDKEY0, $AESDATA0, $AESDATA0
     vpxor           $RNDKEY0, $AESDATA1, $AESDATA1
-    lea             16($AESKEY), %rax
+    lea             16($AESKEY), 
 .Lvaesenc_loop_tail_2$local_label_suffix:
-    vbroadcasti128  (%rax), $TMP0
+    vbroadcasti128  ( 
     vaesenc         $TMP0, $AESDATA0, $AESDATA0
     vaesenc         $TMP0, $AESDATA1, $AESDATA1
-    add             \$16, %rax
-    cmp             %rax, $RNDKEYLAST_PTR
+    add             \$16, 
+    cmp             
     jne             .Lvaesenc_loop_tail_2$local_label_suffix
     vaesenclast     $RNDKEYLAST, $AESDATA0, $AESDATA0
     vaesenclast     $RNDKEYLAST, $AESDATA1, $AESDATA1
@@ -936,7 +936,7 @@ ___
 
 .Lreduce$local_label_suffix:
     # Finally, do the GHASH reduction.
-    vbroadcasti128  .Lgfpoly(%rip), $TMP0
+    vbroadcasti128  .Lgfpoly( 
     vpclmulqdq      \$0x01, $LO, $TMP0, $TMP1
     vpshufd         \$0x4e, $LO, $LO
     vpxor           $LO, $MI, $MI
@@ -970,7 +970,7 @@ sub filter_and_print {
     # This function replaces AVX2 assembly instructions with their assembled forms,
     # to allow the code to work on old versions of binutils (older than 2.30) that do
     # not support these instructions.
-    my %asmMap = (
+    my 
         'vaesenc         %ymm2, %ymm12, %ymm12' => '.byte 0xc4,0x62,0x1d,0xdc,0xe2',
         'vaesenc         %ymm2, %ymm13, %ymm13' => '.byte 0xc4,0x62,0x15,0xdc,0xea',
         'vaesenc         %ymm2, %ymm14, %ymm14' => '.byte 0xc4,0x62,0x0d,0xdc,0xf2',
@@ -1023,7 +1023,7 @@ sub filter_and_print {
         if (exists $asmMap{$trimmed}) {
             $line = $asmMap{$trimmed};
         } else {
-            if($trimmed =~ /(vpclmulqdq|vaes).*%[yz]mm/) {
+            if($trimmed =~ /(vpclmulqdq|vaes).* 
                 die ("found instruction not supported under old binutils, please update asmMap with the results of running\n" .
                      'find target -name "*aes-gcm-avx2*.o" -exec python3 crypto/fipsmodule/aes/asm/make-avx-map-for-old-binutils.py \{\} \; | LC_ALL=C sort | uniq');
             }

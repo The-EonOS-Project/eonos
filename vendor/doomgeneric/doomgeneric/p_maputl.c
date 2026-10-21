@@ -1,24 +1,24 @@
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 2005-2014 Simon Howard
-// Copyright(C) 2005, 2006 Andrey Budko
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// DESCRIPTION:
-//	Movement/collision utility functions,
-//	as used by function in p_map.c. 
-//	BLOCKMAP Iterator functions,
-//	and some PIT_* functions to use for iteration.
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -32,13 +32,13 @@
 #include "p_local.h"
 
 
-// State.
+
 #include "r_state.h"
 
-//
-// P_AproxDistance
-// Gives an estimation of distance (not exact)
-//
+
+
+
+
 
 fixed_t
 P_AproxDistance
@@ -53,10 +53,10 @@ P_AproxDistance
 }
 
 
-//
-// P_PointOnLineSide
-// Returns 0 or 1
-//
+
+
+
+
 int
 P_PointOnLineSide
 ( fixed_t	x,
@@ -90,17 +90,17 @@ P_PointOnLineSide
     right = FixedMul ( dy , line->dx>>FRACBITS );
 	
     if (right < left)
-	return 0;		// front side
-    return 1;			// back side
+	return 0;		
+    return 1;			
 }
 
 
 
-//
-// P_BoxOnLineSide
-// Considers the line to be infinite
-// Returns side 0 or 1, -1 if box crosses the line.
-//
+
+
+
+
+
 int
 P_BoxOnLineSide
 ( fixed_t*	tmbox,
@@ -148,10 +148,10 @@ P_BoxOnLineSide
 }
 
 
-//
-// P_PointOnDivlineSide
-// Returns 0 or 1.
-//
+
+
+
+
 int
 P_PointOnDivlineSide
 ( fixed_t	x,
@@ -181,11 +181,11 @@ P_PointOnDivlineSide
     dx = (x - line->x);
     dy = (y - line->y);
 	
-    // try to quickly decide by looking at sign bits
+    
     if ( (line->dy ^ line->dx ^ dx ^ dy)&0x80000000 )
     {
 	if ( (line->dy ^ dx) & 0x80000000 )
-	    return 1;		// (left is negative)
+	    return 1;		
 	return 0;
     }
 	
@@ -193,15 +193,15 @@ P_PointOnDivlineSide
     right = FixedMul ( dy>>8 , line->dx>>8 );
 	
     if (right < left)
-	return 0;		// front side
-    return 1;			// back side
+	return 0;		
+    return 1;			
 }
 
 
 
-//
-// P_MakeDivline
-//
+
+
+
 void
 P_MakeDivline
 ( line_t*	li,
@@ -215,13 +215,13 @@ P_MakeDivline
 
 
 
-//
-// P_InterceptVector
-// Returns the fractional intercept point
-// along the first divline.
-// This is only called by the addthings
-// and addlines traversers.
-//
+
+
+
+
+
+
+
 fixed_t
 P_InterceptVector
 ( divline_t*	v2,
@@ -236,7 +236,7 @@ P_InterceptVector
 
     if (den == 0)
 	return 0;
-    //	I_Error ("P_InterceptVector: parallel");
+    
     
     num =
 	FixedMul ( (v1->x - v2->x)>>8 ,v1->dy )
@@ -245,7 +245,7 @@ P_InterceptVector
     frac = FixedDiv (num , den);
 
     return frac;
-#else	// UNUSED, float debug.
+#else	
     float	frac;
     float	num;
     float	den;
@@ -270,7 +270,7 @@ P_InterceptVector
     den = v1dy*v2dx - v1dx*v2dy;
 
     if (den == 0)
-	return 0;	// parallel
+	return 0;	
     
     num = (v1x - v2x)*v1dy + (v2y - v1y)*v1dx;
     frac = num / den;
@@ -280,12 +280,12 @@ P_InterceptVector
 }
 
 
-//
-// P_LineOpening
-// Sets opentop and openbottom to the window
-// through a two sided line.
-// OPTIMIZE: keep this precalculated
-//
+
+
+
+
+
+
 fixed_t opentop;
 fixed_t openbottom;
 fixed_t openrange;
@@ -299,7 +299,7 @@ void P_LineOpening (line_t* linedef)
 	
     if (linedef->sidenum[1] == -1)
     {
-	// single sided line
+	
 	openrange = 0;
 	return;
     }
@@ -327,18 +327,18 @@ void P_LineOpening (line_t* linedef)
 }
 
 
-//
-// THING POSITION SETTING
-//
 
 
-//
-// P_UnsetThingPosition
-// Unlinks a thing from block map and sectors.
-// On each position change, BLOCKMAP and other
-// lookups maintaining lists ot things inside
-// these structures need to be updated.
-//
+
+
+
+
+
+
+
+
+
+
 void P_UnsetThingPosition (mobj_t* thing)
 {
     int		blockx;
@@ -346,8 +346,8 @@ void P_UnsetThingPosition (mobj_t* thing)
 
     if ( ! (thing->flags & MF_NOSECTOR) )
     {
-	// inert things don't need to be in blockmap?
-	// unlink from subsector
+	
+	
 	if (thing->snext)
 	    thing->snext->sprev = thing->sprev;
 
@@ -359,8 +359,8 @@ void P_UnsetThingPosition (mobj_t* thing)
 	
     if ( ! (thing->flags & MF_NOBLOCKMAP) )
     {
-	// inert things don't need to be in blockmap
-	// unlink from block map
+	
+	
 	if (thing->bnext)
 	    thing->bnext->bprev = thing->bprev;
 	
@@ -381,12 +381,12 @@ void P_UnsetThingPosition (mobj_t* thing)
 }
 
 
-//
-// P_SetThingPosition
-// Links a thing into both a block and a subsector
-// based on it's x y.
-// Sets thing->subsector properly
-//
+
+
+
+
+
+
 void
 P_SetThingPosition (mobj_t* thing)
 {
@@ -397,13 +397,13 @@ P_SetThingPosition (mobj_t* thing)
     mobj_t**		link;
 
     
-    // link into subsector
+    
     ss = R_PointInSubsector (thing->x,thing->y);
     thing->subsector = ss;
     
     if ( ! (thing->flags & MF_NOSECTOR) )
     {
-	// invisible things don't go into the sector links
+	
 	sec = ss->sector;
 	
 	thing->sprev = NULL;
@@ -416,10 +416,10 @@ P_SetThingPosition (mobj_t* thing)
     }
 
     
-    // link into blockmap
+    
     if ( ! (thing->flags & MF_NOBLOCKMAP) )
     {
-	// inert things don't need to be in blockmap		
+	
 	blockx = (thing->x - bmaporgx)>>MAPBLOCKSHIFT;
 	blocky = (thing->y - bmaporgy)>>MAPBLOCKSHIFT;
 
@@ -438,7 +438,7 @@ P_SetThingPosition (mobj_t* thing)
 	}
 	else
 	{
-	    // thing is off the map
+	    
 	    thing->bnext = thing->bprev = NULL;
 	}
     }
@@ -446,23 +446,23 @@ P_SetThingPosition (mobj_t* thing)
 
 
 
-//
-// BLOCK MAP ITERATORS
-// For each line/thing in the given mapblock,
-// call the passed PIT_* function.
-// If the function returns false,
-// exit with false without checking anything else.
-//
 
 
-//
-// P_BlockLinesIterator
-// The validcount flags are used to avoid checking lines
-// that are marked in multiple mapblocks,
-// so increment validcount before the first call
-// to P_BlockLinesIterator, then make one or more calls
-// to it.
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 boolean
 P_BlockLinesIterator
 ( int			x,
@@ -490,20 +490,20 @@ P_BlockLinesIterator
 	ld = &lines[*list];
 
 	if (ld->validcount == validcount)
-	    continue; 	// line has already been checked
+	    continue; 	
 
 	ld->validcount = validcount;
 		
 	if ( !func(ld) )
 	    return false;
     }
-    return true;	// everything was checked
+    return true;	
 }
 
 
-//
-// P_BlockThingsIterator
-//
+
+
+
 boolean
 P_BlockThingsIterator
 ( int			x,
@@ -533,9 +533,9 @@ P_BlockThingsIterator
 
 
 
-//
-// INTERCEPT ROUTINES
-//
+
+
+
 intercept_t	intercepts[MAXINTERCEPTS];
 intercept_t*	intercept_p;
 
@@ -545,16 +545,16 @@ int		ptflags;
 
 static void InterceptsOverrun(int num_intercepts, intercept_t *intercept);
 
-//
-// PIT_AddLineIntercepts.
-// Looks for lines in the given block
-// that intercept the given trace
-// to add to the intercepts list.
-//
-// A line is crossed if its endpoints
-// are on opposite sides of the trace.
-// Returns true if earlyout and a solid line hit.
-//
+
+
+
+
+
+
+
+
+
+
 boolean
 PIT_AddLineIntercepts (line_t* ld)
 {
@@ -563,7 +563,7 @@ PIT_AddLineIntercepts (line_t* ld)
     fixed_t		frac;
     divline_t		dl;
 	
-    // avoid precision problems with two routines
+    
     if ( trace.dx > FRACUNIT*16
 	 || trace.dy > FRACUNIT*16
 	 || trace.dx < -FRACUNIT*16
@@ -579,21 +579,21 @@ PIT_AddLineIntercepts (line_t* ld)
     }
     
     if (s1 == s2)
-	return true;	// line isn't crossed
+	return true;	
     
-    // hit the line
+    
     P_MakeDivline (ld, &dl);
     frac = P_InterceptVector (&trace, &dl);
 
     if (frac < 0)
-	return true;	// behind source
+	return true;	
 	
-    // try to early out the check
+    
     if (earlyout
 	&& frac < FRACUNIT
 	&& !ld->backsector)
     {
-	return false;	// stop checking
+	return false;	
     }
     
 	
@@ -603,14 +603,14 @@ PIT_AddLineIntercepts (line_t* ld)
     InterceptsOverrun(intercept_p - intercepts, intercept_p);
     intercept_p++;
 
-    return true;	// continue
+    return true;	
 }
 
 
 
-//
-// PIT_AddThingIntercepts
-//
+
+
+
 boolean PIT_AddThingIntercepts (mobj_t* thing)
 {
     fixed_t		x1;
@@ -629,7 +629,7 @@ boolean PIT_AddThingIntercepts (mobj_t* thing)
 	
     tracepositive = (trace.dx ^ trace.dy)>0;
 		
-    // check a corner to corner crossection for hit
+    
     if (tracepositive)
     {
 	x1 = thing->x - thing->radius;
@@ -651,7 +651,7 @@ boolean PIT_AddThingIntercepts (mobj_t* thing)
     s2 = P_PointOnDivlineSide (x2, y2, &trace);
 
     if (s1 == s2)
-	return true;		// line isn't crossed
+	return true;		
 	
     dl.x = x1;
     dl.y = y1;
@@ -661,7 +661,7 @@ boolean PIT_AddThingIntercepts (mobj_t* thing)
     frac = P_InterceptVector (&trace, &dl);
 
     if (frac < 0)
-	return true;		// behind source
+	return true;		
 
     intercept_p->frac = frac;
     intercept_p->isaline = false;
@@ -669,15 +669,15 @@ boolean PIT_AddThingIntercepts (mobj_t* thing)
     InterceptsOverrun(intercept_p - intercepts, intercept_p);
     intercept_p++;
 
-    return true;		// keep going
+    return true;		
 }
 
 
-//
-// P_TraverseIntercepts
-// Returns true if the traverser function returns true
-// for all lines.
-// 
+
+
+
+
+
 boolean
 P_TraverseIntercepts
 ( traverser_t	func,
@@ -690,7 +690,7 @@ P_TraverseIntercepts
 	
     count = intercept_p - intercepts;
     
-    in = 0;			// shut up compiler warning
+    in = 0;			
 	
     while (count--)
     {
@@ -705,35 +705,35 @@ P_TraverseIntercepts
 	}
 	
 	if (dist > maxfrac)
-	    return true;	// checked everything in range		
+	    return true;	
 
-#if 0  // UNUSED
-    {
-	// don't check these yet, there may be others inserted
-	in = scan = intercepts;
-	for ( scan = intercepts ; scan<intercept_p ; scan++)
-	    if (scan->frac > maxfrac)
-		*in++ = *scan;
-	intercept_p = in;
-	return false;
-    }
+#if 0 
+
+
+
+
+
+
+
+
+
 #endif
 
         if ( !func (in) )
-	    return false;	// don't bother going farther
+	    return false;	
 
 	in->frac = INT_MAX;
     }
 	
-    return true;		// everything was traversed
+    return true;		
 }
 
 extern fixed_t bulletslope;
 
-// Intercepts Overrun emulation, from PrBoom-plus.
-// Thanks to Andrey Budko (entryway) for researching this and his 
-// implementation of Intercepts Overrun emulation in PrBoom-plus
-// which this is based on.
+
+
+
+
 
 typedef struct
 {
@@ -742,42 +742,42 @@ typedef struct
     boolean int16_array;
 } intercepts_overrun_t;
 
-// Intercepts memory table.  This is where various variables are located
-// in memory in Vanilla Doom.  When the intercepts table overflows, we
-// need to write to them.
-//
-// Almost all of the values to overwrite are 32-bit integers, except for
-// playerstarts, which is effectively an array of 16-bit integers and
-// must be treated differently.
+
+
+
+
+
+
+
 
 static intercepts_overrun_t intercepts_overrun[] =
 {
     {4,   NULL,                          false},
-    {4,   NULL, /* &earlyout, */         false},
-    {4,   NULL, /* &intercept_p, */      false},
+    {4,   NULL,          false},
+    {4,   NULL,       false},
     {4,   &lowfloor,                     false},
     {4,   &openbottom,                   false},
     {4,   &opentop,                      false},
     {4,   &openrange,                    false},
     {4,   NULL,                          false},
-    {120, NULL, /* &activeplats, */      false},
+    {120, NULL,       false},
     {8,   NULL,                          false},
     {4,   &bulletslope,                  false},
-    {4,   NULL, /* &swingx, */           false},
-    {4,   NULL, /* &swingy, */           false},
+    {4,   NULL,            false},
+    {4,   NULL,            false},
     {4,   NULL,                          false},
     {40,  &playerstarts,                 true},
-    {4,   NULL, /* &blocklinks, */       false},
+    {4,   NULL,        false},
     {4,   &bmapwidth,                    false},
-    {4,   NULL, /* &blockmap, */         false},
+    {4,   NULL,          false},
     {4,   &bmaporgx,                     false},
     {4,   &bmaporgy,                     false},
-    {4,   NULL, /* &blockmaplump, */     false},
+    {4,   NULL,      false},
     {4,   &bmapheight,                   false},
     {0,   NULL,                          false},
 };
 
-// Overwrite a specific memory location with a value.
+
 
 static void InterceptsMemoryOverrun(int location, int value)
 {
@@ -788,7 +788,7 @@ static void InterceptsMemoryOverrun(int location, int value)
     i = 0;
     offset = 0;
 
-    // Search down the array until we find the right entry
+    
 
     while (intercepts_overrun[i].len != 0)
     {
@@ -796,8 +796,8 @@ static void InterceptsMemoryOverrun(int location, int value)
         {
             addr = intercepts_overrun[i].addr;
 
-            // Write the value to the memory location.
-            // 16-bit and 32-bit values are written differently.
+            
+            
 
             if (addr != NULL)
             {
@@ -822,7 +822,7 @@ static void InterceptsMemoryOverrun(int location, int value)
     }
 }
 
-// Emulate overruns of the intercepts[] array.
+
 
 static void InterceptsOverrun(int num_intercepts, intercept_t *intercept)
 {
@@ -830,19 +830,19 @@ static void InterceptsOverrun(int num_intercepts, intercept_t *intercept)
 
     if (num_intercepts <= MAXINTERCEPTS_ORIGINAL)
     {
-        // No overrun
+        
 
         return;
     }
 
     location = (num_intercepts - MAXINTERCEPTS_ORIGINAL - 1) * 12;
 
-    // Overwrite memory that is overwritten in Vanilla Doom, using
-    // the values from the intercept structure.
-    //
-    // Note: the ->d.{thing,line} member should really have its
-    // address translated into the correct address value for 
-    // Vanilla Doom.
+    
+    
+    
+    
+    
+    
 
     InterceptsMemoryOverrun(location, intercept->frac);
     InterceptsMemoryOverrun(location + 4, intercept->isaline);
@@ -850,13 +850,13 @@ static void InterceptsOverrun(int num_intercepts, intercept_t *intercept)
 }
 
 
-//
-// P_PathTraverse
-// Traces a line from x1,y1 to x2,y2,
-// calling the traverser function for each.
-// Returns true if the traverser function returns true
-// for all lines.
-//
+
+
+
+
+
+
+
 boolean
 P_PathTraverse
 ( fixed_t		x1,
@@ -893,10 +893,10 @@ P_PathTraverse
     intercept_p = intercepts;
 	
     if ( ((x1-bmaporgx)&(MAPBLOCKSIZE-1)) == 0)
-	x1 += FRACUNIT;	// don't side exactly on a line
+	x1 += FRACUNIT;	
     
     if ( ((y1-bmaporgy)&(MAPBLOCKSIZE-1)) == 0)
-	y1 += FRACUNIT;	// don't side exactly on a line
+	y1 += FRACUNIT;	
 
     trace.x = x1;
     trace.y = y1;
@@ -955,9 +955,9 @@ P_PathTraverse
     }	
     xintercept = (x1>>MAPBTOFRAC) + FixedMul (partial, xstep);
     
-    // Step through map blocks.
-    // Count is present to prevent a round off error
-    // from skipping the break.
+    
+    
+    
     mapx = xt1;
     mapy = yt1;
 	
@@ -966,13 +966,13 @@ P_PathTraverse
 	if (flags & PT_ADDLINES)
 	{
 	    if (!P_BlockLinesIterator (mapx, mapy,PIT_AddLineIntercepts))
-		return false;	// early out
+		return false;	
 	}
 	
 	if (flags & PT_ADDTHINGS)
 	{
 	    if (!P_BlockThingsIterator (mapx, mapy,PIT_AddThingIntercepts))
-		return false;	// early out
+		return false;	
 	}
 		
 	if (mapx == xt2
@@ -993,7 +993,7 @@ P_PathTraverse
 	}
 		
     }
-    // go through the sorted list
+    
     return P_TraverseIntercepts ( trav, FRACUNIT );
 }
 

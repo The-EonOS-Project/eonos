@@ -1,18 +1,18 @@
-//! Just enough ACPI to find the MADT (Multiple APIC Description Table)
-//! and pull out of it what `lapic::init` and `ioapic::init` need: the Local APIC's MMIO
-//! base, every I/O APIC's MMIO base and GSI (Global System Interrupt)
-//! base, and every legacy ISA IRQ that's been remapped to a different
-//! GSI than its own number.
-//!
-//! That last part matters more than it sounds like it should: on real
-//! hardware, IRQ0 (the PIT) is very often wired to GSI 2, not GSI 0 --
-//! programming the I/O APIC's redirection entry for GSI 0 when the
-//! timer is actually sitting on GSI 2 looks identical to "the timer
-//! doesn't work" (no crash, no error, just silence), which is exactly
-//! the failure this module exists to avoid repeating in a new form.
-//!
-//! AML support is intentionally limited to reading the static `_S5_`
-//! package needed for soft-off; this is not a general AML interpreter.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #![allow(dead_code)]
 
@@ -20,18 +20,18 @@ use crate::vmm;
 use crate::{log_debug, log_fail, log_ok};
 use limine::request::RsdpRequest;
 
-/// Every ACPI structure this module reads is accessed through this,
-/// not `pmm::phys_to_virt` directly: firmware commonly reports the
-/// RSDP's own memory (the EBDA, or the top of the BIOS ROM area below
-/// 1 MiB) as plain `Reserved`, which `pmm::hhdm_ranges` deliberately
-/// excludes from the direct map (see its doc comment) -- the same gap
-/// that made the xHCI driver's first draft read unmapped memory for
-/// its BAR. `map_mmio` is technically for device registers, but its
-/// actual job here -- "make sure this physical range has a valid,
-/// present mapping before touching it" -- is exactly what ACPI tables
-/// in reserved memory also need; the cacheability difference doesn't
-/// matter for data that's only ever read once at boot and never
-/// written by hardware afterward.
+
+
+
+
+
+
+
+
+
+
+
+
 fn map_table(phys: u64, len: u64) -> *const u8 {
     vmm::map_mmio(phys, len) as *const u8
 }
@@ -40,14 +40,14 @@ fn map_table(phys: u64, len: u64) -> *const u8 {
 #[link_section = ".requests"]
 static RSDP_REQUEST: RsdpRequest = RsdpRequest::new();
 
-/// Root System Description Pointer (ACPI 5.2.5). The v1 (ACPI 1.0)
-/// layout is the first 20 bytes; v2+ extends it with the fields below
-/// `length`. Only read as v2 when `revision >= 2` says the extra fields
-/// are actually present -- reading past a v1 RSDP would just be
-/// whatever memory happens to follow it.
+
+
+
+
+
 #[repr(C, packed)]
 struct RsdpV1 {
-    signature: [u8; 8], // "RSD PTR "
+    signature: [u8; 8], 
     checksum: u8,
     oem_id: [u8; 6],
     revision: u8,
@@ -63,8 +63,8 @@ struct RsdpV2 {
     _reserved: [u8; 3],
 }
 
-/// Common header every ACPI table (RSDT, XSDT, MADT, ...) starts with
-/// (ACPI 5.2.6).
+
+
 #[repr(C, packed)]
 struct SdtHeader {
     signature: [u8; 4],
@@ -82,11 +82,11 @@ fn checksum_ok(bytes: &[u8]) -> bool {
     bytes.iter().fold(0u8, |acc, &b| acc.wrapping_add(b)) == 0
 }
 
-/// What `apic::init` needs out of the MADT. `ioapics` and `overrides`
-/// are fixed-size arrays rather than a heap `Vec` -- this runs before
-/// the heap is guaranteed to be a good idea to lean on for something
-/// this early and this small (real machines have one, occasionally
-/// two, I/O APICs, and a handful of overrides at most).
+
+
+
+
+
 pub struct MadtInfo {
     pub local_apic_addr: u64,
     pub ioapics: [IoApicInfo; MAX_IOAPICS],
@@ -109,19 +109,19 @@ pub struct IoApicInfo {
 pub struct IsaOverride {
     pub isa_irq: u8,
     pub gsi: u32,
-    /// Raw MPS INTI flags (ACPI 5.2.12.5, bits 0:1 polarity, bits 2:3
-    /// trigger mode). `ioapic::redirect` needs these to program the
-    /// I/O APIC entry correctly -- an override that changes the GSI
-    /// number but not the polarity/trigger mode is common, but the
-    /// flags can legitimately differ from the ISA default too (0 means
-    /// "use the bus default", which for ISA is active-high edge-
-    /// triggered).
+    
+    
+    
+    
+    
+    
+    
     pub flags: u16,
 }
 
 impl MadtInfo {
-    /// Look up whether ISA IRQ `irq` has been remapped to a different
-    /// GSI, returning the GSI and override flags if so.
+    
+    
     pub fn override_for(&self, irq: u8) -> Option<(u32, u16)> {
         self.overrides[..self.override_count]
             .iter()
@@ -130,11 +130,11 @@ impl MadtInfo {
     }
 }
 
-/// Find and parse the MADT. Returns `None` (logging why) if Limine
-/// didn't hand us an RSDP, any checksum fails, or the MADT is simply
-/// absent -- all of which mean the caller should fall back to the
-/// legacy PIC rather than proceeding with IOAPIC/LAPIC setup on data
-/// that can't be trusted.
+
+
+
+
+
 pub fn find_madt() -> Option<MadtInfo> {
     let Some(madt_addr) = find_table_address(b"APIC") else {
         log_fail!("ACPI", "Init", "No MADT (APIC table) found");
@@ -154,8 +154,8 @@ fn find_table_address(signature: &[u8; 4]) -> Option<u64> {
         return None;
     }
 
-    // RSDP is at most 36 bytes (v2); 4 KiB is a trivially generous
-    // single-page mapping for it.
+    
+    
     let rsdp_base = map_table(rsdp_addr, 4096);
     let v1 = unsafe { &*(rsdp_base as *const RsdpV1) };
     if &v1.signature != b"RSD PTR " {
@@ -163,11 +163,11 @@ fn find_table_address(signature: &[u8; 4]) -> Option<u64> {
         return None;
     }
 
-    // Table address: XSDT (64-bit pointers) on ACPI 2.0+, RSDT
-    // (32-bit) otherwise. Prefer XSDT when the revision says it's
-    // present and its own checksum is valid; fall back to RSDT
-    // otherwise rather than failing outright, since plenty of real
-    // firmware is ACPI 2.0+ but still ships a valid RSDT alongside.
+    
+    
+    
+    
+    
     let mut sdt_addr = v1.rsdt_address as u64;
     let mut sdt_is_xsdt = false;
     if v1.revision >= 2 {
@@ -201,9 +201,9 @@ fn find_table_address(signature: &[u8; 4]) -> Option<u64> {
         return None;
     }
 
-    // 64 KiB is comfortably larger than any real RSDT/XSDT (a table of
-    // pure 8-byte pointers to other tables -- even a machine with a
-    // hundred ACPI tables fits in a small fraction of this).
+    
+    
+    
     let sdt_base = map_table(sdt_addr, 0x10000);
     let sdt_header = unsafe { &*(sdt_base as *const SdtHeader) };
     let sdt_len = sdt_header.length as usize;
@@ -231,8 +231,8 @@ fn find_table_address(signature: &[u8; 4]) -> Option<u64> {
     let entry_size = if sdt_is_xsdt { 8 } else { 4 };
     let mut offset = entries_start;
     while offset < sdt_len {
-        // The XSDT payload begins immediately after its 36-byte header,
-        // so its u64 entries are not necessarily naturally aligned.
+        
+        
         let addr = unsafe {
             if sdt_is_xsdt {
                 core::ptr::read_unaligned(sdt_base.add(offset) as *const u64)
@@ -247,9 +247,9 @@ fn find_table_address(signature: &[u8; 4]) -> Option<u64> {
         offset += entry_size;
     }
 
-    // Some firmware exposes an XSDT that passes its checksum but omits
-    // tables still listed by its legacy RSDT. Retry that standards-defined
-    // compatibility table before declaring ACPI power management absent.
+    
+    
+    
     if sdt_is_xsdt {
         let rsdt_addr = unsafe {
             core::ptr::read_unaligned(rsdp_base.add(16) as *const u32) as u64
@@ -283,8 +283,8 @@ fn find_table_address(signature: &[u8; 4]) -> Option<u64> {
     None
 }
 
-/// Enter ACPI soft-off (S5). Returns false when the firmware tables do
-/// not provide the legacy PM1 control interface needed by this small OS.
+
+
 pub fn shutdown() -> bool {
     let Some(fadt_addr) = find_table_address(b"FACP") else {
         log_fail!("ACPI", "PowerOff", "FADT (FACP) table not found");
@@ -345,7 +345,7 @@ pub fn shutdown() -> bool {
         return false;
     };
 
-    // Ask firmware to switch from legacy SMI mode to ACPI mode if needed.
+    
     let sci_enabled = unsafe { inw(pm1a) & 1 != 0 };
     if !sci_enabled && fadt_len > 53 {
         let smi_command = unsafe { core::ptr::read_unaligned(fadt.add(48) as *const u32) };
@@ -376,8 +376,8 @@ pub fn shutdown() -> bool {
     true
 }
 
-/// Try the firmware-provided ACPI reset register before the legacy reset
-/// fallbacks in the power controller.
+
+
 pub fn reset() -> bool {
     let Some(fadt_addr) = find_table_address(b"FACP") else {
         return false;
@@ -423,11 +423,11 @@ fn fadt_io_port(fadt: *const u8, length: usize, extended: usize, legacy: usize) 
 
 fn find_s5_sleep_types(aml: &[u8]) -> Option<(u16, u16)> {
     for start in 0..aml.len().saturating_sub(6) {
-        if aml[start] != 0x08 { // NameOp
+        if aml[start] != 0x08 { 
             continue;
         }
         let mut name = start + 1;
-        if aml.get(name) == Some(&0x5c) { // RootChar
+        if aml.get(name) == Some(&0x5c) { 
             name += 1;
         }
         if aml.get(name..name + 4) != Some(b"_S5_") || aml.get(name + 4) != Some(&0x12) {
@@ -471,9 +471,9 @@ fn aml_package_bounds(aml: &[u8], length_at: usize) -> Option<(usize, usize)> {
 fn aml_integer(aml: &[u8], at: usize, end: usize) -> Option<(u64, usize)> {
     let opcode = *aml.get(at)?;
     let (bytes, value) = match opcode {
-        0x00 => return Some((0, at + 1)), // ZeroOp
-        0x01 => return Some((1, at + 1)), // OneOp
-        0xff => return Some((u64::MAX, at + 1)), // OnesOp
+        0x00 => return Some((0, at + 1)), 
+        0x01 => return Some((1, at + 1)), 
+        0xff => return Some((u64::MAX, at + 1)), 
         0x0a => (1, at + 1),
         0x0b => (2, at + 1),
         0x0c => (4, at + 1),
@@ -515,24 +515,24 @@ fn table_signature_is(phys_addr: u64, sig: &[u8; 4]) -> bool {
     if phys_addr == 0 {
         return false;
     }
-    // Only the header (36 bytes) is needed to check the signature; a
-    // full page is mapped anyway since map_mmio works in page
-    // granularity, so there's no reason to ask for less.
+    
+    
+    
     let base = map_table(phys_addr, 4096);
     let header = unsafe { &*(base as *const SdtHeader) };
     &header.signature == sig
 }
 
-/// MADT-specific header fields that follow the common `SdtHeader`
-/// (ACPI 5.2.12): the Local APIC's own MMIO address, plus flags this
-/// driver doesn't need.
+
+
+
 #[repr(C, packed)]
 struct MadtHeader {
     sdt: SdtHeader,
     local_apic_addr: u32,
     flags: u32,
-    // Variable-length list of entries follows, each starting with a
-    // (entry_type: u8, entry_length: u8) pair.
+    
+    
 }
 
 const MADT_ENTRY_IOAPIC: u8 = 1;
@@ -540,9 +540,9 @@ const MADT_ENTRY_ISA_OVERRIDE: u8 = 2;
 const MADT_ENTRY_LOCAL_APIC_OVERRIDE: u8 = 5;
 
 fn parse_madt(madt_addr: u64) -> Option<MadtInfo> {
-    // 64 KiB is comfortably larger than any real MADT (a few hundred
-    // bytes per CPU/IOAPIC/override entry; even a large multi-socket
-    // server's MADT is a few KiB at most).
+    
+    
+    
     let base = map_table(madt_addr, 0x10000);
     let header = unsafe { &*(base as *const MadtHeader) };
     let total_len = header.sdt.length as usize;
@@ -621,10 +621,10 @@ fn parse_madt(madt_addr: u64) -> Option<MadtInfo> {
                 }
             }
             MADT_ENTRY_LOCAL_APIC_OVERRIDE if entry_len >= 12 => {
-                // 64-bit Local APIC address override -- some machines
-                // need this instead of (or in addition to) the 32-bit
-                // one in the MADT header, though it's rare outside
-                // exotic/large-memory configurations.
+                
+                
+                
+                
                 let addr64 =
                     unsafe { core::ptr::read_unaligned(base.add(offset + 4) as *const u64) };
                 if addr64 != 0 {

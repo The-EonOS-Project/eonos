@@ -1,20 +1,20 @@
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 2005-2014 Simon Howard
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// DESCRIPTION:
-//	System interface for music.
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #include <stdio.h>
@@ -57,43 +57,43 @@ static boolean musicpaused = false;
 static int current_music_volume;
 
 
-// Currently playing music track.
+
 MIDI *current_track_music = NULL;
 
-// If true, the currently playing track is being played on loop.
+
 static boolean current_track_loop;
 
 
 
-// Shutdown music
+
 static void I_Allegro_ShutdownMusic(void)
 {
-	// nothing here
-	// TODO: stop song?
+	
+	
 }
 
 
-// Initialize music subsystem
+
 static boolean I_Allegro_InitMusic(void)
 {
-	// nothing here, it's all done by I_Allegro_InitSound
+	
 	music_initialized = true;
 
 	return true;
 }
 
 
-// Set music volume (0 - 127)
+
 static void I_Allegro_SetMusicVolume(int volume)
 {
 	int digivol = -1;
 	get_volume(&digivol, NULL);
-	// allegro range 0 - 255
+	
 	set_volume(digivol, volume * 2);
 }
 
 
-// Start playing a mid
+
 static void I_Allegro_PlaySong(void *handle, boolean looping)
 {
 	int retval;
@@ -175,7 +175,7 @@ static void I_Allegro_UnRegisterSong(void *handle)
 }
 
 
-// Determine whether memory block is a .mid file
+
 static boolean IsMid(byte *mem, int len)
 {
     return len > 4 && !memcmp(mem, "MThd", 4);
@@ -227,22 +227,22 @@ static void *I_Allegro_RegisterSong(void *data, int len)
 	}
 	else
 	{
-		// Assume a MUS file and try to convert
+		
 		ConvertMus(data, len, filename);
 	}
 
-	// Load the MIDI. In an ideal world we'd load it directly from memory but Allegro
-	// doesn't support that so we have to generate a temporary file.
+	
+	
 
 	music = load_midi(filename);
 
 	if (music == NULL)
 	{
-		// Failed to load
+		
 		fprintf(stderr, "Error loading midi: %s\n", allegro_error);
 	}
 
-	// Remove the temporary MIDI file;
+	
 	remove(filename);
 
 	free(filename);
@@ -251,7 +251,7 @@ static void *I_Allegro_RegisterSong(void *data, int len)
 }
 
 
-// Is the song playing?
+
 static boolean I_Allegro_MusicIsPlaying(void)
 {
 	if (!music_initialized)
@@ -263,18 +263,18 @@ static boolean I_Allegro_MusicIsPlaying(void)
 }
 
 
-// Get position in substitute music track, in seconds since start of track.
+
 static double GetMusicPosition(void)
 {
 	return midi_time;
 }
 
 
-// Poll music position; if we have passed the loop point end position
-// then we need to go back.
+
+
 static void I_Allegro_PollMusic(void)
 {
-	// nothing here, allegro takes care of it
+	
 }
 
 

@@ -1,6 +1,6 @@
-/* Minimal freestanding C runtime for upstream doomgeneric on EonOS.
- * File and process services cross into the Rust runtime through eonos_*.
- */
+
+
+
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>

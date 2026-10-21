@@ -1,21 +1,21 @@
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 2005-2014 Simon Howard
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// DESCRIPTION:
-//	DOOM Network game communication and protocol,
-//	all OS independend parts.
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include <stdlib.h>
 
@@ -40,7 +40,7 @@
 
 ticcmd_t *netcmds;
 
-// Called when a player leaves the game
+
 
 static void PlayerQuitGame(player_t *player)
 {
@@ -49,8 +49,8 @@ static void PlayerQuitGame(player_t *player)
 
     player_num = player - players;
 
-    // Do this the same way as Vanilla Doom does, to allow dehacked
-    // replacements of this message
+    
+    
 
     M_StringCopy(exitmsg, DEH_String("Player 1 left the game"),
                  sizeof(exitmsg));
@@ -60,7 +60,7 @@ static void PlayerQuitGame(player_t *player)
     playeringame[player_num] = false;
     players[consoleplayer].message = exitmsg;
 
-    // TODO: check if it is sensible to do this:
+    
 
     if (demorecording) 
     {
@@ -73,7 +73,7 @@ static void RunTic(ticcmd_t *cmds, boolean *ingame)
     extern boolean advancedemo;
     unsigned int i;
 
-    // Check for player quits.
+    
 
     for (i = 0; i < MAXPLAYERS; ++i)
     {
@@ -85,8 +85,8 @@ static void RunTic(ticcmd_t *cmds, boolean *ingame)
 
     netcmds = cmds;
 
-    // check that there are players in the game.  if not, we cannot
-    // run a tic.
+    
+    
 
     if (advancedemo)
         D_DoAdvanceDemo ();
@@ -102,8 +102,8 @@ static loop_interface_t doom_loop_interface = {
 };
 
 
-// Load game settings from the specified structure and
-// set global variables.
+
+
 
 static void LoadGameSettings(net_gamesettings_t *settings)
 {
@@ -133,13 +133,13 @@ static void LoadGameSettings(net_gamesettings_t *settings)
     }
 }
 
-// Save the game settings from global variables to the specified
-// game settings structure.
+
+
 
 static void SaveGameSettings(net_gamesettings_t *settings)
 {
-    // Fill in game settings structure with appropriate parameters
-    // for the new game
+    
+    
 
     settings->deathmatch = deathmatch;
     settings->episode = startepisode;
@@ -161,11 +161,11 @@ static void InitConnectData(net_connect_data_t *connect_data)
     connect_data->max_players = MAXPLAYERS;
     connect_data->drone = false;
 
-    //!
-    // @category net
-    //
-    // Run as the left screen in three screen mode.
-    //
+    
+    
+    
+    
+    
 
     if (M_CheckParm("-left") > 0)
     {
@@ -173,11 +173,11 @@ static void InitConnectData(net_connect_data_t *connect_data)
         connect_data->drone = true;
     }
 
-    //! 
-    // @category net
-    //
-    // Run as the right screen in three screen mode.
-    //
+    
+    
+    
+    
+    
 
     if (M_CheckParm("-right") > 0)
     {
@@ -185,21 +185,21 @@ static void InitConnectData(net_connect_data_t *connect_data)
         connect_data->drone = true;
     }
 
-    //
-    // Connect data
-    //
+    
+    
+    
 
-    // Game type fields:
+    
 
     connect_data->gamemode = gamemode;
     connect_data->gamemission = gamemission;
 
-    // Are we recording a demo? Possibly set lowres turn mode
+    
 
     connect_data->lowres_turn = M_CheckParm("-record") > 0
                              && M_CheckParm("-longtics") == 0;
 
-    // Read checksums of our WAD directory and dehacked information
+    
 
     W_Checksum(connect_data->wad_sha1sum);
 
@@ -207,7 +207,7 @@ static void InitConnectData(net_connect_data_t *connect_data)
     DEH_Checksum(connect_data->deh_sha1sum);
 #endif
 
-    // Are we playing with the Freedoom IWAD?
+    
 
     connect_data->is_freedoom = W_CheckNumForName("FREEDOOM") >= 0;
 }
@@ -219,13 +219,13 @@ void D_ConnectNetGame(void)
     InitConnectData(&connect_data);
     netgame = D_InitNetGame(&connect_data);
 
-    //!
-    // @category net
-    //
-    // Start the game playing as though in a netgame with a single
-    // player.  This can also be used to play back single player netgame
-    // demos.
-    //
+    
+    
+    
+    
+    
+    
+    
 
     if (M_CheckParm("-solo-net") > 0)
     {
@@ -233,10 +233,10 @@ void D_ConnectNetGame(void)
     }
 }
 
-//
-// D_CheckNetGame
-// Works out player numbers among the net participants
-//
+
+
+
+
 void D_CheckNetGame (void)
 {
     net_gamesettings_t settings;
@@ -258,11 +258,11 @@ void D_CheckNetGame (void)
     DEH_printf("player %i of %i (%i nodes)\n",
                consoleplayer+1, settings.num_players, settings.num_players);
 
-    // Show players here; the server might have specified a time limit
+    
 
     if (timelimit > 0 && deathmatch)
     {
-        // Gross hack to work like Vanilla:
+        
 
         if (timelimit == 20 && M_CheckParm("-avg"))
         {

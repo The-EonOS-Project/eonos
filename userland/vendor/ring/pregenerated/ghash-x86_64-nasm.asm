@@ -1,5 +1,5 @@
-; This file is generated from a similarly-named Perl script in the BoringSSL
-; source tree. Do not edit by hand.
+
+
 
 %ifidn __OUTPUT_FORMAT__, win64
 default	rel
@@ -1272,6 +1272,6 @@ $L$SEH_info_gcm_ghash_avx_0:
 	DB	1
 	DW	21
 %else
-; Work around https://bugzilla.nasm.us/show_bug.cgi?id=3392738
+
 ret
 %endif

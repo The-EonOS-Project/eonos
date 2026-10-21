@@ -1,19 +1,19 @@
-// Copyright 2015-2017 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-//! Elliptic curve operations on the birationally equivalent curves Curve25519
-//! and Edwards25519.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 pub use super::scalar::{MaskedScalar, Scalar, SCALAR_LEN};
 use crate::{
@@ -22,12 +22,12 @@ use crate::{
 };
 use core::{ffi::c_int, marker::PhantomData};
 
-// Elem<T>` is `fe` in curve25519/internal.h.
-// Elem<L> is `fe_loose` in curve25519/internal.h.
-// Keep this in sync with curve25519/internal.h.
+
+
+
 #[repr(C)]
 pub struct Elem<E: Encoding> {
-    limbs: [Limb; ELEM_LIMBS], // This is called `v` in the C code.
+    limbs: [Limb; ELEM_LIMBS], 
     encoding: PhantomData<E>,
 }
 
@@ -54,16 +54,16 @@ impl Elem<T> {
     }
 }
 
-// An encoding of a curve point. If on Curve25519, it should be encoded as
-// described in Section 5 of [RFC 7748]. If on Edwards25519, it should be
-// encoded as described in section 5.1.2 of [RFC 8032].
-//
-// [RFC 7748] https://tools.ietf.org/html/rfc7748#section-5
-// [RFC 8032] https://tools.ietf.org/html/rfc8032#section-5.1.2
+
+
+
+
+
+
 pub type EncodedPoint = [u8; ELEM_LEN];
 pub const ELEM_LEN: usize = 32;
 
-// Keep this in sync with `ge_p3` in curve25519/internal.h.
+
 #[repr(C)]
 pub struct ExtPoint {
     x: Elem<T>,
@@ -73,7 +73,7 @@ pub struct ExtPoint {
 }
 
 impl ExtPoint {
-    // Returns the result of multiplying the base point by the scalar in constant time.
+    
     pub(super) fn from_scalarmult_base(scalar: &Scalar, cpu: cpu::Features) -> Self {
         let mut r = Self {
             x: Elem::zero(),
@@ -111,7 +111,7 @@ impl ExtPoint {
     }
 }
 
-// Keep this in sync with `ge_p2` in curve25519/internal.h.
+
 #[repr(C)]
 pub struct Point {
     x: Elem<T>,
@@ -150,8 +150,8 @@ fn encode_point(x: Elem<T>, y: Elem<T>, z: Elem<T>, _cpu_features: cpu::Features
         x25519_fe_isnegative(&x_over_z)
     };
 
-    // The preceding computations must execute in constant time, but this
-    // doesn't need to.
+    
+    
     bytes[ELEM_LEN - 1] ^= sign_bit << 7;
 
     bytes

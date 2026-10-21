@@ -1,20 +1,20 @@
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 2005-2014 Simon Howard
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// Emulates the IO functions in C stdio.h reading and writing to 
-// memory.
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,7 +37,7 @@ struct _MEMFILE {
 	memfile_mode_t mode;
 };
 
-// Open a memory area for reading
+
 
 MEMFILE *mem_fopen_read(void *buf, size_t buflen)
 {
@@ -53,7 +53,7 @@ MEMFILE *mem_fopen_read(void *buf, size_t buflen)
 	return file;
 }
 
-// Read bytes
+
 
 size_t mem_fread(void *buf, size_t size, size_t nmemb, MEMFILE *stream)
 {
@@ -65,7 +65,7 @@ size_t mem_fread(void *buf, size_t size, size_t nmemb, MEMFILE *stream)
 		return -1;
 	}
 
-	// Trying to read more bytes than we have left?
+	
 	
 	items = nmemb;
 
@@ -74,18 +74,18 @@ size_t mem_fread(void *buf, size_t size, size_t nmemb, MEMFILE *stream)
 		items = (stream->buflen - stream->position) / size;
 	}
 	
-	// Copy bytes to buffer
+	
 	
 	memcpy(buf, stream->buf + stream->position, items * size);
 
-	// Update position
+	
 
 	stream->position += items * size;
 	
 	return items;
 }
 
-// Open a memory area for writing
+
 
 MEMFILE *mem_fopen_write(void)
 {
@@ -102,7 +102,7 @@ MEMFILE *mem_fopen_write(void)
 	return file;
 }
 
-// Write bytes to stream
+
 
 size_t mem_fwrite(const void *ptr, size_t size, size_t nmemb, MEMFILE *stream)
 {
@@ -113,8 +113,8 @@ size_t mem_fwrite(const void *ptr, size_t size, size_t nmemb, MEMFILE *stream)
 		return -1;
 	}
 	
-	// More bytes than can fit in the buffer?
-	// If so, reallocate bigger.
+	
+	
 
 	bytes = size * nmemb;
 	
@@ -129,7 +129,7 @@ size_t mem_fwrite(const void *ptr, size_t size, size_t nmemb, MEMFILE *stream)
 		stream->alloced *= 2;
 	}
 
-	// Copy into buffer
+	
 	
 	memcpy(stream->buf + stream->position, ptr, bytes);
 	stream->position += bytes;

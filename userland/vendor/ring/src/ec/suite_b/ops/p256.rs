@@ -1,16 +1,16 @@
-// Copyright 2016-2023 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use super::{
     elem::{binary_op, binary_op_assign},
@@ -50,11 +50,11 @@ pub static PRIVATE_KEY_OPS: PrivateKeyOps = PrivateKeyOps {
 };
 
 fn p256_elem_inv_squared(q: &Modulus<Q>, a: &Elem<R>) -> Elem<R> {
-    // Calculate a**-2 (mod q) == a**(q - 3) (mod q)
-    //
-    // The exponent (q - 3) is:
-    //
-    //    0xffffffff00000001000000000000000000000000fffffffffffffffffffffffc
+    
+    
+    
+    
+    
 
     #[inline]
     fn sqr_mul(q: &Modulus<Q>, a: &Elem<R>, squarings: LeakyWord, b: &Elem<R>) -> Elem<R> {
@@ -75,19 +75,19 @@ fn p256_elem_inv_squared(q: &Modulus<Q>, a: &Elem<R>) -> Elem<R> {
     let fffffff_11 = sqr_mul(q, &fff_111, 15, &fff_111);
     let ffffffff = sqr_mul(q, &fffffff_11, 2, &b_11);
 
-    // ffffffff00000001
+    
     let mut acc = sqr_mul(q, &ffffffff, 31 + 1, b_1);
 
-    // ffffffff00000001000000000000000000000000ffffffff
+    
     sqr_mul_acc(q, &mut acc, 96 + 32, &ffffffff);
 
-    // ffffffff00000001000000000000000000000000ffffffffffffffff
+    
     sqr_mul_acc(q, &mut acc, 32, &ffffffff);
 
-    // ffffffff00000001000000000000000000000000fffffffffffffffffffffff_11
+    
     sqr_mul_acc(q, &mut acc, 30, &fffffff_11);
 
-    // ffffffff00000001000000000000000000000000fffffffffffffffffffffffc
+    
     q.elem_square(&mut acc);
     q.elem_square(&mut acc);
 
@@ -97,8 +97,8 @@ fn p256_elem_inv_squared(q: &Modulus<Q>, a: &Elem<R>) -> Elem<R> {
 fn p256_point_mul_base_impl(g_scalar: &Scalar, _cpu: cpu::Features) -> Point {
     prefixed_extern! {
         fn p256_point_mul_base(
-            r: *mut Limb,          // [3][COMMON_OPS.num_limbs]
-            g_scalar: *const Limb, // [COMMON_OPS.num_limbs]
+            r: *mut Limb,          
+            g_scalar: *const Limb, 
         );
     }
 
@@ -138,7 +138,7 @@ pub static PUBLIC_SCALAR_OPS: PublicScalarOps = PublicScalarOps {
 
     q_minus_n: PublicElem::from_hex("4319055358e8617b0c46353d039cdaae"),
 
-    // TODO: Use an optimized variable-time implementation.
+    
     scalar_inv_to_mont_vartime: |s, cpu| PRIVATE_SCALAR_OPS.scalar_inv_to_mont(s, cpu),
 };
 
@@ -163,8 +163,8 @@ fn twin_mul_nistz256(
 ))]
 fn point_mul_base_vartime(g_scalar: &Scalar, _cpu: cpu::Features) -> Point {
     prefixed_extern! {
-        fn p256_point_mul_base_vartime(r: *mut Limb,          // [3][COMMON_OPS.num_limbs]
-                                       g_scalar: *const Limb, // [COMMON_OPS.num_limbs]
+        fn p256_point_mul_base_vartime(r: *mut Limb,          
+                                       g_scalar: *const Limb, 
         );
     }
     let mut scaled_g = Point::new_at_infinity();
@@ -185,14 +185,14 @@ pub static PRIVATE_SCALAR_OPS: PrivateScalarOps = PrivateScalarOps {
 
 #[allow(clippy::just_underscores_and_digits)]
 fn p256_scalar_inv_to_mont(a: Scalar<R>, _cpu: cpu::Features) -> Scalar<R> {
-    // Calculate the modular inverse of scalar |a| using Fermat's Little
-    // Theorem:
-    //
-    //    a**-1 (mod n) == a**(n - 2) (mod n)
-    //
-    // The exponent (n - 2) is:
-    //
-    //    0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc63254f
+    
+    
+    
+    
+    
+    
+    
+    
 
     #[inline]
     fn mul(a: &Scalar<R>, b: &Scalar<R>) -> Scalar<R> {
@@ -206,7 +206,7 @@ fn p256_scalar_inv_to_mont(a: Scalar<R>, _cpu: cpu::Features) -> Scalar<R> {
         tmp
     }
 
-    // Returns (`a` squared `squarings` times) * `b`.
+    
     fn sqr_mul(a: &Scalar<R>, squarings: LeakyWord, b: &Scalar<R>) -> Scalar<R> {
         debug_assert!(squarings >= 1);
         let mut tmp = Scalar::zero();
@@ -214,7 +214,7 @@ fn p256_scalar_inv_to_mont(a: Scalar<R>, _cpu: cpu::Features) -> Scalar<R> {
         mul(&tmp, b)
     }
 
-    // Sets `acc` = (`acc` squared `squarings` times) * `b`.
+    
     fn sqr_mul_acc(acc: &mut Scalar<R>, squarings: LeakyWord, b: &Scalar<R>) {
         debug_assert!(squarings >= 1);
         unsafe { p256_scalar_sqr_rep_mont(acc.limbs.as_mut_ptr(), acc.limbs.as_ptr(), squarings) }
@@ -223,40 +223,40 @@ fn p256_scalar_inv_to_mont(a: Scalar<R>, _cpu: cpu::Features) -> Scalar<R> {
 
     let _1 = &a;
 
-    let _10 = sqr(_1); // 2
-    let _100 = sqr(&_10); // 4
-    let _101 = mul(&_100, _1); // 5
-    let _111 = mul(&_101, &_10); // 7
+    let _10 = sqr(_1); 
+    let _100 = sqr(&_10); 
+    let _101 = mul(&_100, _1); 
+    let _111 = mul(&_101, &_10); 
 
-    let _1000 = sqr(&_100); // 8
-    let _10000 = sqr(&_1000); // 16
-    let _100000 = sqr(&_10000); // 32
+    let _1000 = sqr(&_100); 
+    let _10000 = sqr(&_1000); 
+    let _100000 = sqr(&_10000); 
 
-    let _100111 = mul(&_111, &_100000); // 39 = 7 + 32
-    let _101011 = mul(&_100, &_100111); // 43 = 4 + 39
-    let _101111 = mul(&_100, &_101011); // 47 = 4 + 39
-    let _1001111 = mul(&_100000, &_101111); // 79 = 32 + 47
-    let _86 = sqr(&_101011); // 86 = 43 * 2
-    let _1011011 = mul(&_101, &_86); // 91 = 5 + 86
-    let _92 = mul(_1, &_1011011); // 92 = 1 + 91
-    let _1100011 = mul(&_111, &_92); // 99 = 7 + 92
-    let _10111111 = mul(&_92, &_1100011); // 191 = 92 + 99
-    let _11011111 = mul(&_100000, &_10111111); // 223 = 32 + 191
+    let _100111 = mul(&_111, &_100000); 
+    let _101011 = mul(&_100, &_100111); 
+    let _101111 = mul(&_100, &_101011); 
+    let _1001111 = mul(&_100000, &_101111); 
+    let _86 = sqr(&_101011); 
+    let _1011011 = mul(&_101, &_86); 
+    let _92 = mul(_1, &_1011011); 
+    let _1100011 = mul(&_111, &_92); 
+    let _10111111 = mul(&_92, &_1100011); 
+    let _11011111 = mul(&_100000, &_10111111); 
 
-    let ff = mul(&_100000, &_11011111); // 255 = 32 + 223
+    let ff = mul(&_100000, &_11011111); 
     let ffff = sqr_mul(&ff, 0 + 8, &ff);
     let ffffffff = sqr_mul(&ffff, 0 + 16, &ffff);
 
-    // ffffffff00000000ffffffff
+    
     let mut acc = sqr_mul(&ffffffff, 32 + 32, &ffffffff);
 
-    // ffffffff00000000ffffffffffffffff
+    
     sqr_mul_acc(&mut acc, 0 + 32, &ffffffff);
 
-    // The rest of the exponent, in binary, is:
-    //
-    //    1011110011100110111110101010110110100111000101111001111010000100
-    //    1111001110111001110010101100001011111100011000110010010101001111
+    
+    
+    
+    
 
     sqr_mul_acc(&mut acc, 6, &_101111);
     sqr_mul_acc(&mut acc, 2 + 3, &_111);
@@ -283,35 +283,35 @@ fn p256_scalar_inv_to_mont(a: Scalar<R>, _cpu: cpu::Features) -> Scalar<R> {
 
 prefixed_extern! {
     pub(super) fn p256_mul_mont(
-        r: *mut Limb,   // [COMMON_OPS.num_limbs]
-        a: *const Limb, // [COMMON_OPS.num_limbs]
-        b: *const Limb, // [COMMON_OPS.num_limbs]
+        r: *mut Limb,   
+        a: *const Limb, 
+        b: *const Limb, 
     );
     pub(super) fn p256_sqr_mont(
-        r: *mut Limb,   // [COMMON_OPS.num_limbs]
-        a: *const Limb, // [COMMON_OPS.num_limbs]
+        r: *mut Limb,   
+        a: *const Limb, 
     );
 
     fn p256_point_add(
-        r: *mut Limb,   // [3][COMMON_OPS.num_limbs]
-        a: *const Limb, // [3][COMMON_OPS.num_limbs]
-        b: *const Limb, // [3][COMMON_OPS.num_limbs]
+        r: *mut Limb,   
+        a: *const Limb, 
+        b: *const Limb, 
     );
     fn p256_point_mul(
-        r: *mut Limb,          // [3][COMMON_OPS.num_limbs]
-        p_scalar: *const Limb, // [COMMON_OPS.num_limbs]
-        p_x: *const Limb,      // [COMMON_OPS.num_limbs]
-        p_y: *const Limb,      // [COMMON_OPS.num_limbs]
+        r: *mut Limb,          
+        p_scalar: *const Limb, 
+        p_x: *const Limb,      
+        p_y: *const Limb,      
     );
 
     fn p256_scalar_mul_mont(
-        r: *mut Limb,   // [COMMON_OPS.num_limbs]
-        a: *const Limb, // [COMMON_OPS.num_limbs]
-        b: *const Limb, // [COMMON_OPS.num_limbs]
+        r: *mut Limb,   
+        a: *const Limb, 
+        b: *const Limb, 
     );
     fn p256_scalar_sqr_rep_mont(
-        r: *mut Limb,   // [COMMON_OPS.num_limbs]
-        a: *const Limb, // [COMMON_OPS.num_limbs]
+        r: *mut Limb,   
+        a: *const Limb, 
         rep: LeakyWord,
     );
 }

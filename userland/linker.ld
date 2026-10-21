@@ -1,15 +1,15 @@
-/* Linker script for EonOS user programs: a static, non-PIE executable
-   at 0x400000 with page-aligned, separately-protected segments (code is
-   R+X, read-only data is R, data/bss is R+W), which is what the kernel's
-   ELF loader expects. */
+
+
+
+
 
 ENTRY(_start)
 
 PHDRS
 {
-    text   PT_LOAD FLAGS(5);   /* R + X */
-    rodata PT_LOAD FLAGS(4);   /* R     */
-    data   PT_LOAD FLAGS(6);   /* R + W */
+    text   PT_LOAD FLAGS(5);   
+    rodata PT_LOAD FLAGS(4);   
+    data   PT_LOAD FLAGS(6);   
 }
 
 SECTIONS

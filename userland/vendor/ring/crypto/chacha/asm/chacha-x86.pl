@@ -26,18 +26,18 @@
 # Performance in cycles per byte out of large buffer.
 #
 #		1xIALU/gcc	4xSSSE3
-# Pentium	17.5/+80%
-# PIII		14.2/+60%
-# P4		18.6/+84%
-# Core2		9.56/+89%	4.83
-# Westmere	9.50/+45%	3.35
-# Sandy Bridge	10.5/+47%	3.20
-# Haswell	8.15/+50%	2.83
-# Skylake	7.53/+22%	2.75
-# Silvermont	17.4/+36%	8.35
-# Goldmont	13.4/+40%	4.36
-# Sledgehammer	10.2/+54%
-# Bulldozer	13.4/+50%	4.38(*)
+# Pentium	17.5/+80 
+# PIII		14.2/+60 
+# P4		18.6/+84 
+# Core2		9.56/+89 
+# Westmere	9.50/+45 
+# Sandy Bridge	10.5/+47 
+# Haswell	8.15/+50 
+# Skylake	7.53/+22 
+# Silvermont	17.4/+36 
+# Goldmont	13.4/+40 
+# Sledgehammer	10.2/+54 
+# Bulldozer	13.4/+50 
 #
 # (*)	Bulldozer actually executes 4xXOP code path that delivers 3.55;
 #

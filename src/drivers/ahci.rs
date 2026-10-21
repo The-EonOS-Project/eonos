@@ -1,4 +1,4 @@
-//! Read-only synchronous AHCI/SATA block driver.
+
 
 use crate::block::{BlockDevice, BlockError};
 use crate::fat32::SECTOR_SIZE;
@@ -154,7 +154,7 @@ impl AhciDisk {
         {
             return None;
         }
-        // Stop the command engine before replacing its DMA pointers.
+        
         let cmd = rd(port, 0x18 / 4);
         wr(port, 0x18 / 4, cmd & !1);
         let now = crate::pit::uptime_ms();
@@ -171,7 +171,7 @@ impl AhciDisk {
         wr(port, 0x04 / 4, (cl.phys >> 32) as u32);
         wr(port, 0x08 / 4, fis.phys as u32);
         wr(port, 0x0c / 4, (fis.phys >> 32) as u32);
-        // One PRDT entry, command FIS length 5 dwords, read direction.
+        
         let h = unsafe { &mut (&mut (*cl.ptr).0)[..32] };
         h[0..2].copy_from_slice(&5u16.to_le_bytes());
         h[2..4].copy_from_slice(&1u16.to_le_bytes());

@@ -74,7 +74,7 @@
 # Curves are practically saturated at 1-KB buffer size. In most cases
 # "256-byte" performance is >95%, and "64-byte" is ~90% of "8-KB" one.
 # CTR curve doesn't follow this pattern and is "slowest" changing one
-# with "256-byte" result being 87% of "8-KB." This is because overhead
+# with "256-byte" result being 87 
 # in CTR mode is most computationally intensive. Small-block CCM
 # decrypt is slower than encrypt, because first CTR and last CBC-MAC
 # iterations can't be interleaved.
@@ -158,8 +158,8 @@
 # utilizes 6x interleave because of limited register bank capacity.
 #
 # Higher interleave factors do have negative impact on Westmere
-# performance. While for ECB mode it's negligible ~1.5%, other
-# parallelizables perform ~5% worse, which is outweighed by ~25%
+# performance. While for ECB mode it's negligible ~1.5 
+# parallelizables perform ~5 
 # improvement on Sandy Bridge. To balance regression on Westmere
 # CTR mode was implemented with 6x aesenc interleave factor.
 
@@ -185,7 +185,7 @@
 # Ryzen		2.71/0.35	0.35	0.44	0.38	0.49
 #
 # (*)	Atom Silvermont ECB result is suboptimal because of penalties
-#	incurred by operations on %xmm8-15. As ECB is not considered
+#	incurred by operations on 
 #	critical, nothing was done to mitigate the problem.
 
 $PREFIX="aes_hw";	# if $PREFIX is set to "AES", the script
@@ -223,7 +223,7 @@ $ivp="%r8";	# cbc, ctr, ...
 $rnds_="%r10d";	# backup copy for $rounds
 $key_="%r11";	# backup copy for $key
 
-# %xmm register layout
+# 
 $rndkey0="%xmm0";	$rndkey1="%xmm1";
 $inout0="%xmm2";	$inout1="%xmm3";
 $inout2="%xmm4";	$inout3="%xmm5";
@@ -381,22 +381,22 @@ _aesni_${dir}rypt4:
 	xorps	$rndkey0,$inout3
 	$movkey	32($key),$rndkey0
 	lea	32($key,$rounds),$key
-	neg	%rax				# $rounds
+	neg	
 	.byte	0x0f,0x1f,0x00
-	add	\$16,%rax
+	add	\$16, 
 
 .L${dir}_loop4:
 	aes${dir}	$rndkey1,$inout0
 	aes${dir}	$rndkey1,$inout1
 	aes${dir}	$rndkey1,$inout2
 	aes${dir}	$rndkey1,$inout3
-	$movkey		($key,%rax),$rndkey1
-	add		\$32,%rax
+	$movkey		($key, 
+	add		\$32, 
 	aes${dir}	$rndkey0,$inout0
 	aes${dir}	$rndkey0,$inout1
 	aes${dir}	$rndkey0,$inout2
 	aes${dir}	$rndkey0,$inout3
-	$movkey		-16($key,%rax),$rndkey0
+	$movkey		-16($key, 
 	jnz		.L${dir}_loop4
 
 	aes${dir}	$rndkey1,$inout0
@@ -429,14 +429,14 @@ _aesni_${dir}rypt6:
 	pxor		$rndkey0,$inout2
 	aes${dir}	$rndkey1,$inout0
 	lea		32($key,$rounds),$key
-	neg		%rax			# $rounds
+	neg		
 	aes${dir}	$rndkey1,$inout1
 	pxor		$rndkey0,$inout3
 	pxor		$rndkey0,$inout4
 	aes${dir}	$rndkey1,$inout2
 	pxor		$rndkey0,$inout5
-	$movkey		($key,%rax),$rndkey0
-	add		\$16,%rax
+	$movkey		($key, 
+	add		\$16, 
 	jmp		.L${dir}_loop6_enter
 .align	16
 .L${dir}_loop6:
@@ -447,15 +447,15 @@ _aesni_${dir}rypt6:
 	aes${dir}	$rndkey1,$inout3
 	aes${dir}	$rndkey1,$inout4
 	aes${dir}	$rndkey1,$inout5
-	$movkey		($key,%rax),$rndkey1
-	add		\$32,%rax
+	$movkey		($key, 
+	add		\$32, 
 	aes${dir}	$rndkey0,$inout0
 	aes${dir}	$rndkey0,$inout1
 	aes${dir}	$rndkey0,$inout2
 	aes${dir}	$rndkey0,$inout3
 	aes${dir}	$rndkey0,$inout4
 	aes${dir}	$rndkey0,$inout5
-	$movkey		-16($key,%rax),$rndkey0
+	$movkey		-16($key, 
 	jnz		.L${dir}_loop6
 
 	aes${dir}	$rndkey1,$inout0
@@ -493,14 +493,14 @@ _aesni_${dir}rypt8:
 	pxor		$rndkey0,$inout3
 	pxor		$rndkey0,$inout4
 	lea		32($key,$rounds),$key
-	neg		%rax			# $rounds
+	neg		
 	aes${dir}	$rndkey1,$inout0
 	pxor		$rndkey0,$inout5
 	pxor		$rndkey0,$inout6
 	aes${dir}	$rndkey1,$inout1
 	pxor		$rndkey0,$inout7
-	$movkey		($key,%rax),$rndkey0
-	add		\$16,%rax
+	$movkey		($key, 
+	add		\$16, 
 	jmp		.L${dir}_loop8_inner
 .align	16
 .L${dir}_loop8:
@@ -514,8 +514,8 @@ _aesni_${dir}rypt8:
 	aes${dir}	$rndkey1,$inout6
 	aes${dir}	$rndkey1,$inout7
 .L${dir}_loop8_enter:
-	$movkey		($key,%rax),$rndkey1
-	add		\$32,%rax
+	$movkey		($key, 
+	add		\$32, 
 	aes${dir}	$rndkey0,$inout0
 	aes${dir}	$rndkey0,$inout1
 	aes${dir}	$rndkey0,$inout2
@@ -524,7 +524,7 @@ _aesni_${dir}rypt8:
 	aes${dir}	$rndkey0,$inout5
 	aes${dir}	$rndkey0,$inout6
 	aes${dir}	$rndkey0,$inout7
-	$movkey		-16($key,%rax),$rndkey0
+	$movkey		-16($key, 
 	jnz		.L${dir}_loop8
 
 	aes${dir}	$rndkey1,$inout0
@@ -581,7 +581,7 @@ ${PREFIX}_ctr32_encrypt_blocks:
 .cfi_startproc
 	_CET_ENDBR
 #ifdef BORINGSSL_DISPATCH_TEST
-	movb \$1,BORINGSSL_function_hit(%rip)
+	movb \$1,BORINGSSL_function_hit( 
 #endif
 	cmp	\$1,$len
 	jne	.Lctr32_bulk
@@ -590,7 +590,7 @@ ${PREFIX}_ctr32_encrypt_blocks:
 	# useful when handling edges
 	movups	($ivp),$inout0
 	movups	($inp),$inout1
-	mov	240($key),%edx			# key->rounds
+	mov	240($key), 
 ___
 	&aesni_generate1("enc",$key,"%edx");
 $code.=<<___;
@@ -604,24 +604,24 @@ $code.=<<___;
 
 .align	16
 .Lctr32_bulk:
-	lea	(%rsp),$key_			# use $key_ as frame pointer
+	lea	( 
 .cfi_def_cfa_register	$key_
-	push	%rbp
-.cfi_push	%rbp
-	sub	\$$frame_size,%rsp
-	and	\$-16,%rsp	# Linux kernel stack can be incorrectly seeded
+	push	
+.cfi_push	
+	sub	\$$frame_size, 
+	and	\$-16, 
 ___
 $code.=<<___ if ($win64);
-	movaps	%xmm6,-0xa8($key_)		# offload everything
-	movaps	%xmm7,-0x98($key_)
-	movaps	%xmm8,-0x88($key_)
-	movaps	%xmm9,-0x78($key_)
-	movaps	%xmm10,-0x68($key_)
-	movaps	%xmm11,-0x58($key_)
-	movaps	%xmm12,-0x48($key_)
-	movaps	%xmm13,-0x38($key_)
-	movaps	%xmm14,-0x28($key_)
-	movaps	%xmm15,-0x18($key_)
+	movaps	
+	movaps	
+	movaps	
+	movaps	
+	movaps	
+	movaps	
+	movaps	
+	movaps	
+	movaps	
+	movaps	
 .Lctr32_body:
 ___
 $code.=<<___;
@@ -634,55 +634,55 @@ $code.=<<___;
 	mov	12($ivp),$ctr			# counter LSB
 	pxor	$rndkey0,$inout0
 	mov	12($key),$key0			# 0-round key LSB
-	movdqa	$inout0,0x00(%rsp)		# populate counter block
+	movdqa	$inout0,0x00( 
 	bswap	$ctr
 	movdqa	$inout0,$inout1
 	movdqa	$inout0,$inout2
 	movdqa	$inout0,$inout3
-	movdqa	$inout0,0x40(%rsp)
-	movdqa	$inout0,0x50(%rsp)
-	movdqa	$inout0,0x60(%rsp)
-	mov	%rdx,%r10			# about to borrow %rdx
-	movdqa	$inout0,0x70(%rsp)
+	movdqa	$inout0,0x40( 
+	movdqa	$inout0,0x50( 
+	movdqa	$inout0,0x60( 
+	mov	
+	movdqa	$inout0,0x70( 
 
-	lea	1($ctr),%rax
-	 lea	2($ctr),%rdx
-	bswap	%eax
-	 bswap	%edx
-	xor	$key0,%eax
-	 xor	$key0,%edx
-	pinsrd	\$3,%eax,$inout1
-	lea	3($ctr),%rax
-	movdqa	$inout1,0x10(%rsp)
-	 pinsrd	\$3,%edx,$inout2
-	bswap	%eax
-	 mov	%r10,%rdx			# restore %rdx
-	 lea	4($ctr),%r10
-	 movdqa	$inout2,0x20(%rsp)
-	xor	$key0,%eax
-	 bswap	%r10d
-	pinsrd	\$3,%eax,$inout3
-	 xor	$key0,%r10d
-	movdqa	$inout3,0x30(%rsp)
-	lea	5($ctr),%r9
-	 mov	%r10d,0x40+12(%rsp)
-	bswap	%r9d
-	 lea	6($ctr),%r10
+	lea	1($ctr), 
+	 lea	2($ctr), 
+	bswap	
+	 bswap	
+	xor	$key0, 
+	 xor	$key0, 
+	pinsrd	\$3, 
+	lea	3($ctr), 
+	movdqa	$inout1,0x10( 
+	 pinsrd	\$3, 
+	bswap	
+	 mov	
+	 lea	4($ctr), 
+	 movdqa	$inout2,0x20( 
+	xor	$key0, 
+	 bswap	
+	pinsrd	\$3, 
+	 xor	$key0, 
+	movdqa	$inout3,0x30( 
+	lea	5($ctr), 
+	 mov	
+	bswap	
+	 lea	6($ctr), 
 	mov	240($key),$rounds		# key->rounds
-	xor	$key0,%r9d
-	 bswap	%r10d
-	mov	%r9d,0x50+12(%rsp)
-	 xor	$key0,%r10d
-	lea	7($ctr),%r9
-	 mov	%r10d,0x60+12(%rsp)
-	bswap	%r9d
-	xor	$key0,%r9d
-	mov	%r9d,0x70+12(%rsp)
+	xor	$key0, 
+	 bswap	
+	mov	
+	 xor	$key0, 
+	lea	7($ctr), 
+	 mov	
+	bswap	
+	xor	$key0, 
+	mov	
 
 	$movkey	0x10($key),$rndkey1
 
-	movdqa	0x40(%rsp),$inout4
-	movdqa	0x50(%rsp),$inout5
+	movdqa	0x40( 
+	movdqa	0x50( 
 
 	cmp	\$8,$len		# $len is in blocks
 	jb	.Lctr32_tail		# short input if ($len<8)
@@ -694,19 +694,19 @@ $code.=<<___;
 .align	32
 .Lctr32_loop8:
 	 add		\$8,$ctr		# next counter value
-	movdqa		0x60(%rsp),$inout6
+	movdqa		0x60( 
 	aesenc		$rndkey1,$inout0
-	 mov		$ctr,%r9d
-	movdqa		0x70(%rsp),$inout7
+	 mov		$ctr, 
+	movdqa		0x70( 
 	aesenc		$rndkey1,$inout1
-	 bswap		%r9d
+	 bswap		
 	$movkey		0x20-0x80($key),$rndkey0
 	aesenc		$rndkey1,$inout2
-	 xor		$key0,%r9d
+	 xor		$key0, 
 	 nop
 	aesenc		$rndkey1,$inout3
-	 mov		%r9d,0x00+12(%rsp)	# store next counter value
-	 lea		1($ctr),%r9
+	 mov		
+	 lea		1($ctr), 
 	aesenc		$rndkey1,$inout4
 	aesenc		$rndkey1,$inout5
 	aesenc		$rndkey1,$inout6
@@ -716,15 +716,15 @@ ___
 for($i=2;$i<8;$i++) {
 my $rndkeyx = ($i&1)?$rndkey1:$rndkey0;
 $code.=<<___;
-	 bswap		%r9d
+	 bswap		
 	aesenc		$rndkeyx,$inout0
 	aesenc		$rndkeyx,$inout1
-	 xor		$key0,%r9d
+	 xor		$key0, 
 	 .byte		0x66,0x90
 	aesenc		$rndkeyx,$inout2
 	aesenc		$rndkeyx,$inout3
-	 mov		%r9d,`0x10*($i-1)`+12(%rsp)
-	 lea		$i($ctr),%r9
+	 mov		
+	 lea		$i($ctr), 
 	aesenc		$rndkeyx,$inout4
 	aesenc		$rndkeyx,$inout5
 	aesenc		$rndkeyx,$inout6
@@ -733,14 +733,14 @@ $code.=<<___;
 ___
 }
 $code.=<<___;
-	 bswap		%r9d
+	 bswap		
 	aesenc		$rndkey0,$inout0
 	aesenc		$rndkey0,$inout1
 	aesenc		$rndkey0,$inout2
-	 xor		$key0,%r9d
+	 xor		$key0, 
 	 movdqu		0x00($inp),$in0		# start loading input
 	aesenc		$rndkey0,$inout3
-	 mov		%r9d,0x70+12(%rsp)
+	 mov		
 	 cmp		\$11,$rounds
 	aesenc		$rndkey0,$inout4
 	aesenc		$rndkey0,$inout5
@@ -823,17 +823,17 @@ $code.=<<___;
 	movdqu		0x70-0x80($inp),$in0
 	aesenclast	$in1,$inout1
 	pxor		$rndkey0,$in0
-	movdqa		0x00(%rsp),$in1		# load next counter block
+	movdqa		0x00( 
 	aesenclast	$in2,$inout2
 	aesenclast	$in3,$inout3
-	movdqa		0x10(%rsp),$in2
-	movdqa		0x20(%rsp),$in3
+	movdqa		0x10( 
+	movdqa		0x20( 
 	aesenclast	$in4,$inout4
 	aesenclast	$in5,$inout5
-	movdqa		0x30(%rsp),$in4
-	movdqa		0x40(%rsp),$in5
+	movdqa		0x30( 
+	movdqa		0x40( 
 	aesenclast	$rndkey1,$inout6
-	movdqa		0x50(%rsp),$rndkey0
+	movdqa		0x50( 
 	$movkey		0x10-0x80($key),$rndkey1#real 1st-round key
 	aesenclast	$in0,$inout7
 
@@ -1051,7 +1051,7 @@ ___
 #	Kahraman Akdemir
 #
 # Aggressively optimized in respect to aeskeygenassist's critical path
-# and is contained in %xmm0-5 to meet Win64 ABI requirement.
+# and is contained in 
 #
 # int ${PREFIX}_set_encrypt_key(const unsigned char *inp,
 #				int bits, AES_KEY * const key);
@@ -1059,7 +1059,7 @@ ___
 # input:	$inp	user-supplied key
 #		$bits	$inp length in bits
 #		$key	pointer to key schedule
-# output:	%eax	0 denoting success, -1 or -2 - failure (see C)
+# output:	
 #		$bits	rounds-1 (used in aesni_set_decrypt_key)
 #		*$key	key schedule
 #		$key	pointer to key schedule (used in
@@ -1591,9 +1591,9 @@ sub movbe {
 }
 
 $code =~ s/\`([^\`]*)\`/eval($1)/gem;
-$code =~ s/\b(aes.*%xmm[0-9]+).*$/aesni($1)/gem;
-#$code =~ s/\bmovbe\s+%eax/bswap %eax; mov %eax/gm;	# debugging artefact
-$code =~ s/\bmovbe\s+%eax,\s*([0-9]+)\(%rsp\)/movbe($1)/gem;
+$code =~ s/\b(aes.* 
+#$code =~ s/\bmovbe\s+ 
+$code =~ s/\bmovbe\s+ 
 
 print $code;
 

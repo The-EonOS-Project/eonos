@@ -1,16 +1,16 @@
-// Copyright 2018-2024 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use self::ffi::{Block, BLOCK_LEN, ZERO_BLOCK};
 use super::{aes_gcm, Aad};
@@ -63,9 +63,9 @@ impl<'key, K: UpdateBlock> Context<'key, K> {
         let aad_len = BitLength::from_byte_len(aad.as_ref().len())
             .map_err(error::erase::<InputTooLongError>)?;
 
-        // NIST SP800-38D Section 5.2.1.1 says that the maximum AAD length is
-        // 2**64 - 1 bits, i.e. BitLength<u64>::MAX, so we don't need to do an
-        // explicit check here.
+        
+        
+        
 
         let mut ctx = Self {
             Xi: Xi(ZERO_BLOCK),
@@ -102,7 +102,7 @@ impl<K> Context<'_, K> {
 }
 
 #[cfg(all(target_arch = "aarch64", target_endian = "little"))]
-/// Access to `inner` for the integrated AES-GCM implementations only.
+
 impl Context<'_, clmul::Key> {
     #[inline]
     pub(super) fn inner(&mut self) -> (&HTable, &mut Xi) {
@@ -112,7 +112,7 @@ impl Context<'_, clmul::Key> {
 
 #[cfg(target_arch = "x86_64")]
 impl Context<'_, clmulavxmovbe::Key> {
-    /// Access to `inner` for the integrated AES-GCM implementations only.
+    
     #[inline]
     pub(super) fn inner(&mut self) -> (&HTable, &mut Xi) {
         (self.key.inner(), &mut self.Xi)
@@ -121,7 +121,7 @@ impl Context<'_, clmulavxmovbe::Key> {
 
 #[cfg(target_arch = "x86_64")]
 impl Context<'_, vclmulavx2::Key> {
-    /// Access to `inner` for the integrated AES-GCM implementations only.
+    
     #[inline]
     pub(super) fn inner(&mut self) -> (&HTable, &mut Xi) {
         (self.key.inner(), &mut self.Xi)

@@ -1,25 +1,25 @@
-// Copyright 2014-2016 The OpenSSL Project Authors. All Rights Reserved.
-// Copyright (c) 2014, Intel Corporation. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// Originally written by Shay Gueron (1, 2), and Vlad Krasnov (1)
-// (1) Intel Corporation, Israel Development Center, Haifa, Israel
-// (2) University of Haifa, Israel
-//
-// Reference:
-// S.Gueron and V.Krasnov, "Fast Prime Field Elliptic Curve Cryptography with
-//                          256 Bit Primes"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include <ring-core/base.h>
 
@@ -33,7 +33,7 @@
 
 typedef P256_POINT_AFFINE PRECOMP256_ROW[64];
 
-// One converted into the Montgomery domain
+
 static const BN_ULONG ONE_MONT[P256_LIMBS] = {
     TOBN(0x00000000, 0x00000001),
     TOBN(0xffffffff, 0x00000000),
@@ -41,11 +41,11 @@ static const BN_ULONG ONE_MONT[P256_LIMBS] = {
     TOBN(0x00000000, 0xfffffffe),
 };
 
-// Precomputed tables for the default generator
+
 #include "p256-nistz-table.h"
 
-// Recode window to a signed digit, see |ec_GFp_nistp_recode_scalar_bits| in
-// util.c for details
+
+
 static crypto_word_t booth_recode_w5(crypto_word_t in) {
   crypto_word_t s, d;
 
@@ -68,17 +68,17 @@ static crypto_word_t booth_recode_w7(crypto_word_t in) {
   return (d << 1) + (s & 1);
 }
 
-// The `(P256_LIMBS == 8)` case is unreachable for 64-bit targets.
+
 #if defined(OPENSSL_64_BIT) && defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunreachable-code"
 #endif
 
-// copy_conditional copies |src| to |dst| if |move| is one and leaves it as-is
-// if |move| is zero.
-//
-// WARNING: this breaks the usual convention of constant-time functions
-// returning masks.
+
+
+
+
+
 static void copy_conditional(BN_ULONG dst[P256_LIMBS],
                              const BN_ULONG src[P256_LIMBS], BN_ULONG move) {
   BN_ULONG mask1 = ((BN_ULONG)0) - move;
@@ -100,23 +100,23 @@ static void copy_conditional(BN_ULONG dst[P256_LIMBS],
 #pragma GCC diagnostic pop
 #endif
 
-// is_not_zero returns one iff in != 0 and zero otherwise.
-//
-// WARNING: this breaks the usual convention of constant-time functions
-// returning masks.
-//
-// (define-fun is_not_zero ((in (_ BitVec 64))) (_ BitVec 64)
-//   (bvlshr (bvor in (bvsub #x0000000000000000 in)) #x000000000000003f)
-// )
-//
-// (declare-fun x () (_ BitVec 64))
-//
-// (assert (and (= x #x0000000000000000) (= (is_not_zero x)
-// #x0000000000000001))) (check-sat)
-//
-// (assert (and (not (= x #x0000000000000000)) (= (is_not_zero x)
-// #x0000000000000000))) (check-sat)
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 static BN_ULONG is_not_zero(BN_ULONG in) {
   in |= (0 - in);
   in >>= BN_BITS2 - 1;
@@ -124,9 +124,9 @@ static BN_ULONG is_not_zero(BN_ULONG in) {
 }
 
 #if defined(OPENSSL_X86_64)
-// Dispatch between CPU variations. The "_adx" suffixed functions use MULX in
-// addition to ADCX/ADOX. MULX is part of BMI2, not ADX, so we must check both
-// capabilities.
+
+
+
        void ecp_nistz256_mul_mont(BN_ULONG res[P256_LIMBS],
                                   const BN_ULONG a[P256_LIMBS],
                                   const BN_ULONG b[P256_LIMBS]) {
@@ -210,9 +210,9 @@ static void ecp_nistz256_select_w7(P256_POINT_AFFINE *val,
     ecp_nistz256_point_add_affine_nohw(r, a, b);
   }
 }
-#endif  // OPENSSL_X86_64
+#endif  
 
-// r = p * p_scalar
+
 static void ecp_nistz256_windowed_mul(P256_POINT *r,
                                       const BN_ULONG p_scalar[P256_LIMBS],
                                       const BN_ULONG p_x[P256_LIMBS],
@@ -223,18 +223,18 @@ static void ecp_nistz256_windowed_mul(P256_POINT *r,
   debug_assert_nonsecret(p_y != NULL);
 
   static const size_t kWindowSize = 5;
-  static const crypto_word_t kMask = (1 << (5 /* kWindowSize */ + 1)) - 1;
+  static const crypto_word_t kMask = (1 << (5  + 1)) - 1;
 
-  // A |P256_POINT| is (3 * 32) = 96 bytes, and the 64-byte alignment should
-  // add no more than 63 bytes of overhead. Thus, |table| should require
-  // ~1599 ((96 * 16) + 63) bytes of stack space.
+  
+  
+  
   alignas(64) P256_POINT table[16];
   P256_SCALAR_BYTES p_str;
   p256_scalar_bytes_from_limbs(p_str, p_scalar);
 
-  // table[0] is implicitly (0,0,0) (the point at infinity), therefore it is
-  // not stored. All other values are actually stored with an offset of -1 in
-  // table.
+  
+  
+  
   P256_POINT *row = table;
 
   limbs_copy(row[1 - 1].X, p_x, P256_LIMBS);
@@ -291,7 +291,7 @@ static void ecp_nistz256_windowed_mul(P256_POINT *r,
     ecp_nistz256_point_double(r, r);
   }
 
-  // Final window
+  
   wvalue = p_str[0];
   wvalue = (wvalue << 1) & kMask;
 
@@ -307,7 +307,7 @@ static void ecp_nistz256_windowed_mul(P256_POINT *r,
 
 static crypto_word_t calc_first_wvalue(size_t *index, const uint8_t p_str[33]) {
   static const size_t kWindowSize = 7;
-  static const crypto_word_t kMask = (1 << (7 /* kWindowSize */ + 1)) - 1;
+  static const crypto_word_t kMask = (1 << (7  + 1)) - 1;
   *index = kWindowSize;
 
   crypto_word_t wvalue = ((crypto_word_t)p_str[0] << 1) & kMask;
@@ -316,7 +316,7 @@ static crypto_word_t calc_first_wvalue(size_t *index, const uint8_t p_str[33]) {
 
 static crypto_word_t calc_wvalue(size_t *index, const uint8_t p_str[33]) {
   static const size_t kWindowSize = 7;
-  static const crypto_word_t kMask = (1 << (7 /* kWindowSize */ + 1)) - 1;
+  static const crypto_word_t kMask = (1 << (7  + 1)) - 1;
 
   const size_t off = (*index - 1) / 8;
   crypto_word_t wvalue =
@@ -342,7 +342,7 @@ void p256_point_mul_base(Limb r[3][P256_LIMBS], const Limb scalar[P256_LIMBS]) {
   P256_SCALAR_BYTES p_str;
   p256_scalar_bytes_from_limbs(p_str, scalar);
 
-  // First window
+  
   size_t index = 0;
   crypto_word_t wvalue = calc_first_wvalue(&index, p_str);
 
@@ -352,9 +352,9 @@ void p256_point_mul_base(Limb r[3][P256_LIMBS], const Limb scalar[P256_LIMBS]) {
   ecp_nistz256_neg(p.Z, t.Y);
   copy_conditional(t.Y, p.Z, wvalue & 1);
 
-  // Convert |t| from affine to Jacobian coordinates. We set Z to zero if |t|
-  // is infinity and |ONE| otherwise. |t| was computed from the table, so it
-  // is infinity iff |wvalue >> 1| is zero.
+  
+  
+  
   limbs_copy(p.X, t.X, P256_LIMBS);
   limbs_copy(p.Y, t.Y, P256_LIMBS);
   limbs_zero(p.Z, P256_LIMBS);
@@ -369,8 +369,8 @@ void p256_point_mul_base(Limb r[3][P256_LIMBS], const Limb scalar[P256_LIMBS]) {
     ecp_nistz256_neg(neg_Y, t.Y);
     copy_conditional(t.Y, neg_Y, wvalue & 1);
 
-    // Note |ecp_nistz256_point_add_affine| does not work if |p| and |t| are the
-    // same non-infinity point.
+    
+    
     ecp_nistz256_point_add_affine(&p, &p, &t);
   }
 
@@ -386,13 +386,13 @@ void p256_point_mul_base_vartime(Limb r[3][P256_LIMBS],
   OPENSSL_memcpy(p_str, g_scalar, 32);
   p_str[32] = 0;
 
-  // First window
+  
   size_t index = 0;
   size_t wvalue = calc_first_wvalue(&index, p_str);
 
-  // Convert |p| from affine to Jacobian coordinates. We set Z to zero if |p|
-  // is infinity and |ONE_MONT| otherwise. |p| was computed from the table, so
-  // it is infinity iff |wvalue >> 1| is zero.
+  
+  
+  
   if ((wvalue >> 1) != 0) {
     OPENSSL_memcpy(p.X, &ecp_nistz256_precomputed[0][(wvalue >> 1) - 1].X,
                    sizeof(p.X));
@@ -422,9 +422,9 @@ void p256_point_mul_base_vartime(Limb r[3][P256_LIMBS],
       ecp_nistz256_neg(t.Y, t.Y);
     }
 
-    // Note |ecp_nistz256_point_add_affine| does not work if |p| and |t| are
-    // the same non-infinity point, so it is important that we compute the
-    // |g_scalar| term before the |p_scalar| term.
+    
+    
+    
     ecp_nistz256_point_add_affine(&p, &p, &t);
   }
 
@@ -434,4 +434,4 @@ void p256_point_mul_base_vartime(Limb r[3][P256_LIMBS],
   limbs_copy(r[2], p.Z, P256_LIMBS);
 }
 
-#endif /* defined(OPENSSL_USE_NISTZ256) */
+#endif 

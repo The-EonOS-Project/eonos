@@ -1,45 +1,45 @@
-//! Safe app-window API. The window contents are sent to the Era compositor
-//! using a bounded drawing-command protocol over standard input and output.
-//! Widgets use immediate-mode drawing and pointer clicks collected by
-//! [`Window::poll_event`]: poll events, redraw the controls, then call
-//! [`Window::present`]. For example:
-//!
-//! ```ignore
-//! let mut name = String::new();
-//! let mut choice = 0;
-//! let mut updates = false;
-//! loop {
-//!     while let Some(event) = window.poll_event()? {
-//!         if event == Event::Close { return Ok(()); }
-//!     }
-//!     window.fill_rect(0, 0, 480, 300, 0x202A44)?;
-//!     window.text_input(24, 24, 240, 32, &mut name, "Your name")?;
-//!     window.dropdown(24, 72, 180, 28, &["Red", "Green", "Blue"], &mut choice)?;
-//!     window.checkbox(24, 190, "Send updates", &mut updates)?;
-//!     if window.button(24, 220, 140, 36, "Save")? { /* handle submit */ }
-//!     window.present()?;
-//! }
-//! ```
-//!
-//! Modal dialogs can return a user's decision or acknowledge an error:
-//!
-//! ```ignore
-//! if window.confirm_dialog("Overwrite file?", "This replaces the existing file.")? {
-//!     if save_file(path, contents).is_err() {
-//!         window.error_dialog("Could not save the file in this directory.")?;
-//!     }
-//! }
-//! let name = window.text_input_dialog("Rename", "New name:", "notes.txt")?;
-//! if let Some(path) = window.save_file_dialog("/disk", "notes.txt")? {
-//!     eonos_app::system::write_file(&path, b"Hello")?;
-//!     window.toast("Saved")?;
-//! }
-//! let mut progress = window.begin_progress("Copy", "Preparing")?;
-//! for percent in 0..=100 {
-//!     if progress.update(percent, "Copying files")? { break; }
-//! }
-//! progress.finish()?;
-//! ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use alloc::string::String;
 use alloc::vec::Vec;
@@ -69,7 +69,7 @@ pub enum Event {
     Close,
 }
 
-/// A window whose drawing is validated and composited by Era.
+
 pub struct Window {
     title: String,
     width: u32,
@@ -99,8 +99,8 @@ pub struct Window {
 }
 
 impl Window {
-    /// Request a window. Era clamps its size to the available work area and
-    /// replies with the actual client dimensions before this returns.
+    
+    
     pub fn open(title: &str, width: u32, height: u32) -> Result<Self> {
         if title.is_empty() || title.len() > 80 || width == 0 || height == 0 || width > 1920 || height > 1080 {
             return Err(Error(22));
@@ -147,7 +147,7 @@ impl Window {
     pub fn title(&self) -> &str { &self.title }
     pub fn dimensions(&self) -> (u32, u32) { (self.width, self.height) }
 
-    /// Add a clipped rectangle to the next frame.
+    
     pub fn fill_rect(&mut self, x: i32, y: i32, width: u32, height: u32, color: u32) -> Result<()> {
         if self.command_count >= MAX_COMMANDS || self.frame.len() + 21 > MAX_FRAME_BYTES { return Err(Error(7)); }
         self.frame.push(1);
@@ -160,7 +160,7 @@ impl Window {
         Ok(())
     }
 
-    /// Add foreground-only text using the system PSF font.
+    
     pub fn text(&mut self, x: i32, y: i32, color: u32, value: &str) -> Result<()> {
         if value.len() > MAX_TEXT_BYTES || self.command_count >= MAX_COMMANDS
             || self.frame.len().saturating_add(11 + value.len()) > MAX_FRAME_BYTES {
@@ -176,10 +176,10 @@ impl Window {
         Ok(())
     }
 
-    /// Draw a standard raised button and report whether it was clicked since
-    /// the previous `present()`, or activated with Enter/Space while focused.
-    /// Call this again each frame to redraw it. Tab and Shift+Tab move focus
-    /// between widgets in the order they are drawn.
+    
+    
+    
+    
     pub fn button(&mut self, x: i32, y: i32, width: u32, height: u32, label: &str) -> Result<bool> {
         if width < 12 || height < 18 { return Err(Error(22)); }
         let index = self.register_widget();
@@ -198,9 +198,9 @@ impl Window {
         Ok(clicked)
     }
 
-    /// Draw a dropdown and update `selected` when an option is clicked.
-    /// Returns true when the selected option changes. The menu opens below
-    /// the control and shows at most 16 options at once.
+    
+    
+    
     pub fn dropdown(&mut self, x: i32, y: i32, width: u32, height: u32, options: &[&str], selected: &mut usize) -> Result<bool> {
         if width < 24 || height < 18 || options.is_empty() || options.len() > 16 { return Err(Error(22)); }
         if *selected >= options.len() { *selected = 0; }
@@ -264,8 +264,8 @@ impl Window {
         Ok(changed)
     }
 
-    /// Draw a checkbox and toggle `checked` on a pointer click or focused
-    /// Enter/Space. Returns true when its value changes.
+    
+    
     pub fn checkbox(&mut self, x: i32, y: i32, label: &str, checked: &mut bool) -> Result<bool> {
         if label.len() > MAX_TEXT_BYTES { return Err(Error(7)); }
         let index = self.register_widget();
@@ -289,31 +289,31 @@ impl Window {
         Ok(activated)
     }
 
-    /// Show a modal Yes/No dialog and return the user's choice. Returns `true`
-    /// for Yes and `false` for No, Escape, or a close event. Era continues
-    /// servicing other windows while the app waits. The No button is focused
-    /// by default so Enter without an explicit choice is safe.
+    
+    
+    
+    
     pub fn confirm_dialog(&mut self, title: &str, message: &str) -> Result<bool> {
         self.run_dialog(title, message, true)
     }
 
-    /// Show a modal message with an OK button and wait until it is dismissed.
+    
     pub fn message_dialog(&mut self, title: &str, message: &str) -> Result<()> {
         self.run_dialog(title, message, false).map(|_| ())
     }
 
-    /// Show a standard error dialog with an OK button.
+    
     pub fn error_dialog(&mut self, message: &str) -> Result<()> {
         self.message_dialog("Error", message)
     }
 
-    /// Ask for a line of text. Returns `None` if cancelled.
+    
     pub fn text_input_dialog(&mut self, title: &str, prompt: &str, initial: &str) -> Result<Option<String>> {
         self.run_input_dialog(title, prompt, initial)
     }
 
-    /// Ask for a signed whole number. Invalid input displays an error and
-    /// lets the user try again; cancellation returns `None`.
+    
+    
     pub fn number_input_dialog(&mut self, title: &str, prompt: &str, initial: i64) -> Result<Option<i64>> {
         let mut value = alloc::format!("{}", initial);
         loop {
@@ -328,9 +328,9 @@ impl Window {
         }
     }
 
-    /// Show a Save dialog rooted at `directory`. The user can navigate folders,
-    /// enter a filename, and confirm replacement of an existing file. Returns
-    /// the selected absolute path or `None` when cancelled.
+    
+    
+    
     pub fn save_file_dialog(&mut self, directory: &str, suggested_name: &str) -> Result<Option<String>> {
         if self.width < 320 || self.height < 250 || suggested_name.len() > MAX_INPUT_BYTES {
             return Err(Error(22));
@@ -495,13 +495,13 @@ impl Window {
         Ok(selected_path.map(|(path, _)| path))
     }
 
-    /// Show a brief toast notification on subsequent frames for 2.5 seconds.
+    
     pub fn toast(&mut self, message: &str) -> Result<()> {
         self.toast_for(message, 2500)
     }
 
-    /// Show a toast for the requested duration, clamped to 250 ms–15 seconds.
-    /// The app must continue calling `present()` for the toast to be drawn.
+    
+    
     pub fn toast_for(&mut self, message: &str, duration_ms: u64) -> Result<()> {
         if message.is_empty() || message.len() > 256 { return Err(Error(22)); }
         let deadline = crate::system::uptime_ms().saturating_add(duration_ms.clamp(250, 15_000));
@@ -509,9 +509,9 @@ impl Window {
         Ok(())
     }
 
-    /// Begin a cancellable progress dialog. Call `update` as work advances;
-    /// it returns true when the user presses Cancel or Escape. Drop the
-    /// returned value to restore the app's previous frame, or call `finish`.
+    
+    
+    
     pub fn begin_progress<'a>(&'a mut self, title: &str, message: &str) -> Result<ProgressDialog<'a>> {
         if title.is_empty() || title.len() > 80 || message.len() > 256 {
             return Err(Error(22));
@@ -585,8 +585,8 @@ impl Window {
             }
         })();
 
-        // Restore the caller's frame so the modal controls do not remain on
-        // screen after the dialog returns.
+        
+        
         self.frame.clear();
         self.frame.extend_from_slice(&background);
         self.command_count = background_commands;
@@ -740,9 +740,9 @@ impl Window {
         self.text(x + 8, y + 9, 0x101010, &text)
     }
 
-    /// Draw a single-line text field. The value is edited with printable
-    /// keyboard input, Backspace/Delete, Left/Right, and Home/End. Returns
-    /// true if the value changes. Text is limited to 256 UTF-8 bytes.
+    
+    
+    
     pub fn text_input(&mut self, x: i32, y: i32, width: u32, height: u32, value: &mut String, placeholder: &str) -> Result<bool> {
         if width < 40 || height < 24 || value.len() > MAX_INPUT_BYTES { return Err(Error(22)); }
         let index = self.register_widget();
@@ -839,7 +839,7 @@ impl Window {
         Ok(changed)
     }
 
-    /// Replace the current window contents with the queued commands.
+    
     pub fn present(&mut self) -> Result<()> {
         self.draw_active_toast()?;
         let mut payload = Vec::with_capacity(self.frame.len() + 2);
@@ -865,7 +865,7 @@ impl Window {
         Ok(())
     }
 
-    /// Poll one input event without blocking.
+    
     pub fn poll_event(&mut self) -> Result<Option<Event>> {
         let mut chunk = [0u8; 256];
         let amount = eonos_rt::pipe_read_available(0, &mut chunk)?;
@@ -907,7 +907,7 @@ impl Window {
         Ok(event)
     }
 
-    /// Close the Era window and terminate the application loop.
+    
     pub fn close(self) -> Result<()> { send_packet(PACKET_CLOSE, &[]) }
 
     fn take_click(&mut self, x: i32, y: i32, width: u32, height: u32) -> bool {
@@ -951,8 +951,8 @@ impl Window {
     }
 }
 
-/// Stateful cancellable progress UI. Update it between units of work; each
-/// update polls input and returns `true` if the user cancelled.
+
+
 pub struct ProgressDialog<'a> {
     window: &'a mut Window,
     title: String,
@@ -963,8 +963,8 @@ pub struct ProgressDialog<'a> {
 }
 
 impl ProgressDialog<'_> {
-    /// Update the progress bar and status text. Percentages are clamped to
-    /// 100. Returns whether cancellation was requested.
+    
+    
     pub fn update(&mut self, percent: u8, message: &str) -> Result<bool> {
         if self.cancelled { return Ok(true); }
         if message.len() > 256 { return Err(Error(22)); }
@@ -998,7 +998,7 @@ impl ProgressDialog<'_> {
         Ok(self.cancelled)
     }
 
-    /// Restore the app's previous frame and finish the progress operation.
+    
     pub fn finish(mut self) -> Result<()> {
         let result = self.restore();
         self.finished = true;

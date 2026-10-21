@@ -165,7 +165,7 @@ $code .= <<___;
 .text
 
 .global	gcm_init_neon
-.type	gcm_init_neon,%function
+.type	gcm_init_neon, 
 .align	4
 gcm_init_neon:
 	AARCH64_VALID_CALL_TARGET
@@ -190,7 +190,7 @@ gcm_init_neon:
 .size	gcm_init_neon,.-gcm_init_neon
 
 .global	gcm_gmult_neon
-.type	gcm_gmult_neon,%function
+.type	gcm_gmult_neon, 
 .align	4
 gcm_gmult_neon:
 	AARCH64_VALID_CALL_TARGET
@@ -209,7 +209,7 @@ gcm_gmult_neon:
 .size	gcm_gmult_neon,.-gcm_gmult_neon
 
 .global	gcm_ghash_neon
-.type	gcm_ghash_neon,%function
+.type	gcm_ghash_neon, 
 .align	4
 gcm_ghash_neon:
 	AARCH64_VALID_CALL_TARGET

@@ -1,8 +1,8 @@
-//! Small polling Ethernet/ARP/IPv4/TCP/UDP stack with a synchronous DHCP client.
-//!
-//! This is intentionally a minimal IPv4 stack: it supports Ethernet II,
-//! ARP, TCP, UDP with optional checksums, and DHCP. It does not fragment IP
-//! packets and currently permits one active TCP stream.
+
+
+
+
+
 
 use alloc::vec;
 use core::sync::atomic::{AtomicU32, Ordering};
@@ -89,8 +89,8 @@ fn checksum(bytes: &[u8]) -> u16 {
 
 fn ethernet(payload_type: u16, destination: [u8; 6], payload: &[u8]) -> Result<(), crate::drivers::e1000::Error> {
     let info = crate::drivers::e1000::info()?;
-    // Pad short Ethernet frames in software as well as enabling E1000 PSP;
-    // this keeps ARP's 42-byte payload from depending on NIC-specific padding.
+    
+    
     let mut frame = vec![0u8; (14 + payload.len()).max(60)];
     frame[..6].copy_from_slice(&destination);
     frame[6..12].copy_from_slice(&info.mac);
@@ -123,7 +123,7 @@ fn send_udp(source_ip: [u8; 4], destination_ip: [u8; 4], destination_mac: [u8; 6
     let ip_sum = checksum(&packet[..20]); packet[10..12].copy_from_slice(&ip_sum.to_be_bytes());
     packet[20..22].copy_from_slice(&source_port.to_be_bytes()); packet[22..24].copy_from_slice(&destination_port.to_be_bytes());
     packet[24..26].copy_from_slice(&((8 + payload.len()) as u16).to_be_bytes()); packet[28..].copy_from_slice(payload);
-    // UDP checksum zero is valid for IPv4.
+    
     ethernet(0x0800, destination_mac, &packet)
 }
 
@@ -164,7 +164,7 @@ fn resolve_mac(address: [u8; 4]) -> Result<[u8; 6], crate::drivers::e1000::Error
     }
 }
 
-/// Send one IPv4 UDP datagram through the configured interface.
+
 pub fn udp_send(destination: [u8; 4], destination_port: u16, source_port: u16, payload: &[u8]) -> Result<usize, crate::drivers::e1000::Error> {
     let cfg = config();
     if cfg.configured == 0 { return Err(crate::drivers::e1000::Error::NoDevice); }
@@ -176,8 +176,8 @@ pub fn udp_send(destination: [u8; 4], destination_port: u16, source_port: u16, p
     Ok(payload.len())
 }
 
-/// Poll and copy one IPv4 UDP payload. Unmatched/non-UDP Ethernet frames are
-/// discarded; callers can use the raw E1000 interface when they need them.
+
+
 pub fn udp_receive(output: &mut [u8]) -> Result<Option<([u8; 4], u16, usize)>, crate::drivers::e1000::Error> {
     let mut frame = [0u8; 1518];
     let Some(length) = crate::drivers::e1000::receive(&mut frame)? else { return Ok(None); };
@@ -365,7 +365,7 @@ fn tcp_poll_frame() -> Result<bool, crate::drivers::e1000::Error> {
     Ok(true)
 }
 
-/// Open the single polling TCP connection used by current userland tools.
+
 pub fn tcp_connect(destination: [u8; 4], destination_port: u16) -> Result<(), crate::drivers::e1000::Error> {
     let cfg = config();
     if cfg.configured == 0 { return Err(crate::drivers::e1000::Error::NoDevice); }
@@ -421,8 +421,8 @@ pub fn tcp_connect(destination: [u8; 4], destination_port: u16) -> Result<(), cr
     }
 }
 
-/// Send all bytes on the active TCP connection, retransmitting each segment
-/// until cumulatively acknowledged. The peer's advertised MSS defaults to 536.
+
+
 pub fn tcp_send(mut bytes: &[u8]) -> Result<usize, crate::drivers::e1000::Error> {
     if TCP_CONNECTION.lock().state != TCP_ESTABLISHED {
         return Err(crate::drivers::e1000::Error::TcpNotConnected);
@@ -463,7 +463,7 @@ pub fn tcp_send(mut bytes: &[u8]) -> Result<usize, crate::drivers::e1000::Error>
     Ok(total)
 }
 
-/// Receive available TCP bytes, waiting at most `timeout_ms`; zero is EOF.
+
 pub fn tcp_receive(output: &mut [u8], timeout_ms: u64) -> Result<usize, crate::drivers::e1000::Error> {
     if output.is_empty() { return Ok(0); }
     let started = crate::pit::uptime_ms();
@@ -482,7 +482,7 @@ pub fn tcp_receive(output: &mut [u8], timeout_ms: u64) -> Result<usize, crate::d
                 let sequence = connection.send_next;
                 let acknowledgement = connection.receive_next;
                 drop(connection);
-                // Advertise the space just freed by the application read.
+                
                 tcp_emit_current(TCP_ACK, sequence, acknowledgement, &[])?;
                 return Ok(count);
             }
@@ -495,7 +495,7 @@ pub fn tcp_receive(output: &mut [u8], timeout_ms: u64) -> Result<usize, crate::d
     }
 }
 
-/// Send FIN and wait briefly for the peer's close acknowledgment.
+
 pub fn tcp_close() -> Result<(), crate::drivers::e1000::Error> {
     let (sequence, acknowledgement) = {
         let mut connection = TCP_CONNECTION.lock();
@@ -539,7 +539,7 @@ fn parse_dns_a(packet: &[u8], id: u16) -> Option<(Option<[u8; 4]>, u32)> {
     if flags & 0x8000 == 0 || flags & 0x0200 != 0 { return None; }
     match flags & 0x000f {
         0 => {}
-        3 => return Some((None, 30)), // NXDOMAIN
+        3 => return Some((None, 30)), 
         _ => return None,
     }
     let questions = u16::from_be_bytes([packet[4], packet[5]]) as usize;
@@ -591,8 +591,8 @@ fn cache_dns(name: &str, address: Option<[u8; 4]>, ttl: u32, now: u64) {
     cache[slot] = Some(entry);
 }
 
-/// Resolve a hostname with a bounded DNS A-record query to the DHCP-provided
-/// resolver. Returns `Ok(None)` for NXDOMAIN or a response without an A record.
+
+
 pub fn resolve_ipv4(hostname: &str) -> Result<Option<[u8; 4]>, crate::drivers::e1000::Error> {
     let cfg = config();
     if cfg.configured == 0 { return Err(crate::drivers::e1000::Error::NoDevice); }
@@ -607,7 +607,7 @@ pub fn resolve_ipv4(hostname: &str) -> Result<Option<[u8; 4]>, crate::drivers::e
     let mut query = vec![0u8; 12];
     let id = NEXT_XID.fetch_add(1, Ordering::Relaxed) as u16;
     query[0..2].copy_from_slice(&id.to_be_bytes());
-    query[2..4].copy_from_slice(&0x0100u16.to_be_bytes()); // recursion desired
+    query[2..4].copy_from_slice(&0x0100u16.to_be_bytes()); 
     query[4..6].copy_from_slice(&1u16.to_be_bytes());
     for label in name.split('.') {
         if label.is_empty() || label.len() > 63 || label.starts_with('-') || label.ends_with('-')
@@ -617,7 +617,7 @@ pub fn resolve_ipv4(hostname: &str) -> Result<Option<[u8; 4]>, crate::drivers::e
         query.push(label.len() as u8);
         query.extend_from_slice(label.as_bytes());
     }
-    query.extend_from_slice(&[0, 0, 1, 0, 1]); // root, A, IN
+    query.extend_from_slice(&[0, 0, 1, 0, 1]); 
     if query.len() > 512 { return Err(crate::drivers::e1000::Error::InvalidFrame); }
     udp_send(cfg.dns_server, 53, 53000, &query)?;
 
@@ -640,7 +640,7 @@ pub fn resolve_ipv4(hostname: &str) -> Result<Option<[u8; 4]>, crate::drivers::e
     }
 }
 
-/// Send an ICMP echo request and wait up to `timeout_ms` for its matching reply.
+
 pub fn ping(destination: [u8; 4], timeout_ms: u64) -> Result<Option<u64>, crate::drivers::e1000::Error> {
     let cfg = config();
     if cfg.configured == 0 { return Err(crate::drivers::e1000::Error::NoDevice); }
@@ -651,7 +651,7 @@ pub fn ping(destination: [u8; 4], timeout_ms: u64) -> Result<Option<u64>, crate:
     let sequence = NEXT_XID.fetch_add(1, Ordering::Relaxed) as u16;
     let identifier = 0xe050u16;
     let mut icmp = [0u8; 16];
-    icmp[0] = 8; // echo request
+    icmp[0] = 8; 
     icmp[4..6].copy_from_slice(&identifier.to_be_bytes());
     icmp[6..8].copy_from_slice(&sequence.to_be_bytes());
     icmp[8..].copy_from_slice(&crate::pit::uptime_ms().to_be_bytes());
@@ -734,8 +734,8 @@ fn parse_dhcp(payload: &[u8], xid: u32, mac: &[u8; 6]) -> Option<(u8, [u8; 4], C
     Some((message, offered, cfg))
 }
 
-/// Run DHCP discover/request with bounded polling. ARP requests for our
-/// configured address are answered whenever packets are processed.
+
+
 pub fn dhcp() -> Result<Config, crate::drivers::e1000::Error> {
     let info = crate::drivers::e1000::info()?;
     let xid = NEXT_XID.fetch_add(1, Ordering::Relaxed);

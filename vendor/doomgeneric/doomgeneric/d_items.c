@@ -1,43 +1,43 @@
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 2005-2014 Simon Howard
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// DESCRIPTION:
-//
 
 
-// We are referring to sprite numbers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #include "info.h"
 
 #include "d_items.h"
 
 
-//
-// PSPRITE ACTIONS for waepons.
-// This struct controls the weapon animations.
-//
-// Each entry is:
-//   ammo/amunition type
-//  upstate
-//  downstate
-// readystate
-// atkstate, i.e. attack/fire/hit frame
-// flashstate, muzzle flash
-//
+
+
+
+
+
+
+
+
+
+
+
+
 weaponinfo_t	weaponinfo[NUMWEAPONS] =
 {
     {
-	// fist
+	
 	am_noammo,
 	S_PUNCHUP,
 	S_PUNCHDOWN,
@@ -46,7 +46,7 @@ weaponinfo_t	weaponinfo[NUMWEAPONS] =
 	S_NULL
     },	
     {
-	// pistol
+	
 	am_clip,
 	S_PISTOLUP,
 	S_PISTOLDOWN,
@@ -55,7 +55,7 @@ weaponinfo_t	weaponinfo[NUMWEAPONS] =
 	S_PISTOLFLASH
     },	
     {
-	// shotgun
+	
 	am_shell,
 	S_SGUNUP,
 	S_SGUNDOWN,
@@ -64,7 +64,7 @@ weaponinfo_t	weaponinfo[NUMWEAPONS] =
 	S_SGUNFLASH1
     },
     {
-	// chaingun
+	
 	am_clip,
 	S_CHAINUP,
 	S_CHAINDOWN,
@@ -73,7 +73,7 @@ weaponinfo_t	weaponinfo[NUMWEAPONS] =
 	S_CHAINFLASH1
     },
     {
-	// missile launcher
+	
 	am_misl,
 	S_MISSILEUP,
 	S_MISSILEDOWN,
@@ -82,7 +82,7 @@ weaponinfo_t	weaponinfo[NUMWEAPONS] =
 	S_MISSILEFLASH1
     },
     {
-	// plasma rifle
+	
 	am_cell,
 	S_PLASMAUP,
 	S_PLASMADOWN,
@@ -91,7 +91,7 @@ weaponinfo_t	weaponinfo[NUMWEAPONS] =
 	S_PLASMAFLASH1
     },
     {
-	// bfg 9000
+	
 	am_cell,
 	S_BFGUP,
 	S_BFGDOWN,
@@ -100,7 +100,7 @@ weaponinfo_t	weaponinfo[NUMWEAPONS] =
 	S_BFGFLASH1
     },
     {
-	// chainsaw
+	
 	am_noammo,
 	S_SAWUP,
 	S_SAWDOWN,
@@ -109,7 +109,7 @@ weaponinfo_t	weaponinfo[NUMWEAPONS] =
 	S_NULL
     },
     {
-	// super shotgun
+	
 	am_shell,
 	S_DSGUNUP,
 	S_DSGUNDOWN,

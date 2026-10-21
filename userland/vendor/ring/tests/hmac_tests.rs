@@ -1,16 +1,16 @@
-// Copyright 2015-2016 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #![allow(missing_docs)]
 
@@ -38,7 +38,7 @@ fn hmac_tests() {
                 Some(digest_alg) => digest_alg,
                 None => {
                     return Ok(());
-                } // Unsupported digest algorithm
+                } 
             };
             if digest_alg == &digest::SHA1_FOR_LEGACY_USE_ONLY {
                 hmac::HMAC_SHA1_FOR_LEGACY_USE_ONLY
@@ -55,7 +55,7 @@ fn hmac_tests() {
 
         hmac_test_case_inner(algorithm, &key_value[..], &input[..], &output[..], true);
 
-        // Tamper with the input and check that verification fails.
+        
         if input.is_empty() {
             input.push(0);
         } else {
@@ -77,14 +77,14 @@ fn hmac_test_case_inner(
 ) {
     let key = hmac::Key::new(algorithm, key_value);
 
-    // One-shot API.
+    
     {
         let signature = hmac::sign(&key, input);
         assert_eq!(is_ok, signature.as_ref() == output);
         assert_eq!(is_ok, hmac::verify(&key, input, output).is_ok());
     }
 
-    // Multi-part API, one single part.
+    
     {
         let mut s_ctx = hmac::Context::with_key(&key);
         s_ctx.update(input);
@@ -92,7 +92,7 @@ fn hmac_test_case_inner(
         assert_eq!(is_ok, signature.as_ref() == output);
     }
 
-    // Multi-part API, byte by byte.
+    
     {
         let mut ctx = hmac::Context::with_key(&key);
         for b in input {

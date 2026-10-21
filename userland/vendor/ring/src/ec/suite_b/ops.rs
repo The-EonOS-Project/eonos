@@ -1,16 +1,16 @@
-// Copyright 2016 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use crate::{
     arithmetic::limbs_from_hex,
@@ -24,26 +24,26 @@ use core::marker::PhantomData;
 
 use elem::{mul_mont, unary_op, unary_op_assign, unary_op_from_binary_op_assign};
 
-/// A field element, i.e. an element of ℤ/qℤ for the curve's field modulus
-/// *q*.
+
+
 pub type Elem<E> = elem::Elem<Q, E>;
 type PublicElem<E> = elem::PublicElem<Q, E>;
 
-/// Represents the (prime) order *q* of the curve's prime field.
+
 #[derive(Clone, Copy)]
 pub enum Q {}
 
-/// A scalar. Its value is in [0, n). Zero-valued scalars are forbidden in most
-/// contexts.
+
+
 pub type Scalar<E = Unencoded> = elem::Elem<N, E>;
 type PublicScalar<E> = elem::PublicElem<N, E>;
 
-/// Represents the prime order *n* of the curve's group.
+
 #[derive(Clone, Copy)]
 pub enum N {}
 
 pub(super) struct Modulus<M> {
-    // TODO: [Limb; elem::NumLimbs::MAX]
+    
     limbs: &'static [Limb; elem::NumLimbs::MAX],
     num_limbs: elem::NumLimbs,
     cops: &'static CommonOps,
@@ -52,11 +52,11 @@ pub(super) struct Modulus<M> {
 }
 
 pub struct Point {
-    // The coordinates are stored in a contiguous array, where the first
-    // `ops.num_limbs` elements are the X coordinate, the next
-    // `ops.num_limbs` elements are the Y coordinate, and the next
-    // `ops.num_limbs` elements are the Z coordinate. This layout is dictated
-    // by the requirements of the nistz256 code.
+    
+    
+    
+    
+    
     xyz: [Limb; 3 * elem::NumLimbs::MAX],
 }
 
@@ -68,16 +68,16 @@ impl Point {
     }
 }
 
-/// Operations and values needed by all curve operations.
+
 pub struct CommonOps {
     num_limbs: elem::NumLimbs,
     q: PublicModulus,
     n: PublicElem<Unencoded>,
 
-    pub a: PublicElem<R>, // Must be -3 mod q
+    pub a: PublicElem<R>, 
     pub b: PublicElem<R>,
 
-    // In all cases, `r`, `a`, and `b` may all alias each other.
+    
     elem_mul_mont: unsafe extern "C" fn(r: *mut Limb, a: *const Limb, b: *const Limb),
     elem_sqr_mont: unsafe extern "C" fn(r: *mut Limb, a: *const Limb),
 }
@@ -85,7 +85,7 @@ pub struct CommonOps {
 impl CommonOps {
     pub(super) fn elem_modulus(&'static self, cpu_features: cpu::Features) -> Modulus<Q> {
         Modulus {
-            // TODO: limbs: self.q.p.map(Limb::from),
+            
             limbs: &self.q.p,
             num_limbs: self.num_limbs,
             cops: self,
@@ -96,7 +96,7 @@ impl CommonOps {
 
     pub(super) fn scalar_modulus(&'static self, cpu_features: cpu::Features) -> Modulus<N> {
         Modulus {
-            // TODO: limbs: self.n.limbs.map(Limb::from),
+            
             limbs: &self.n.limbs,
             num_limbs: self.num_limbs,
             cops: self,
@@ -105,10 +105,10 @@ impl CommonOps {
         }
     }
 
-    // The length of a field element, which is the same as the length of a
-    // scalar, in bytes.
+    
+    
     pub fn len(&self) -> usize {
-        // Keep in sync with `Modulus<M>::len()`
+        
         self.num_limbs.into() * LIMB_BYTES
     }
 
@@ -123,7 +123,7 @@ impl<M> Modulus<M> {
         self.cpu
     }
 
-    // Keep in sync with `CommonOps::len()`.
+    
     pub fn bytes_len(&self) -> usize {
         self.num_limbs.into() * LIMB_BYTES
     }
@@ -283,16 +283,16 @@ struct PublicModulus {
     rr: PublicElem<RR>,
 }
 
-/// Operations on private keys, for ECDH and ECDSA signing.
+
 pub struct PrivateKeyOps {
     pub common: &'static CommonOps,
     elem_inv_squared: fn(q: &Modulus<Q>, a: &Elem<R>) -> Elem<R>,
     point_mul_base_impl: fn(a: &Scalar, cpu: cpu::Features) -> Point,
     point_mul_impl: unsafe extern "C" fn(
-        r: *mut Limb,          // [3][num_limbs]
-        p_scalar: *const Limb, // [num_limbs]
-        p_x: *const Limb,      // [num_limbs]
-        p_y: *const Limb,      // [num_limbs]
+        r: *mut Limb,          
+        p_scalar: *const Limb, 
+        p_x: *const Limb,      
+        p_y: *const Limb,      
     ),
     point_add_jacobian_impl: unsafe extern "C" fn(r: *mut Limb, a: *const Limb, b: *const Limb),
 }
@@ -332,18 +332,18 @@ impl PrivateKeyOps {
     }
 }
 
-/// Operations and values needed by all operations on public keys (ECDH
-/// agreement and ECDSA verification).
+
+
 pub struct PublicKeyOps {
     pub common: &'static CommonOps,
 }
 
 impl PublicKeyOps {
-    // The serialized bytes are in big-endian order, zero-padded. The limbs
-    // of `Elem` are in the native endianness, least significant limb to
-    // most significant limb. Besides the parsing, conversion, this also
-    // implements NIST SP 800-56A Step 2: "Verify that xQ and yQ are integers
-    // in the interval [0, p-1] in the case that q is an odd prime p[.]"
+    
+    
+    
+    
+    
     pub(super) fn elem_parse(
         &self,
         q: &Modulus<Q>,
@@ -354,8 +354,8 @@ impl PublicKeyOps {
         let parsed = elem_parse_big_endian_fixed_consttime(q, encoded_value)?;
         let mut r = Elem::zero();
         let rr = Elem::from(&self.common.q.rr);
-        // Montgomery encode (elem_to_mont).
-        // TODO: do something about this.
+        
+        
         unsafe {
             (self.common.elem_mul_mont)(
                 r.limbs.as_mut_ptr(),
@@ -367,8 +367,8 @@ impl PublicKeyOps {
     }
 }
 
-// Operations used by both ECDSA signing and ECDSA verification. In general
-// these must be side-channel resistant.
+
+
 pub struct ScalarOps {
     pub common: &'static CommonOps,
 
@@ -380,7 +380,7 @@ impl ScalarOps {
         self.common.scalar_modulus(cpu_features)
     }
 
-    // The (maximum) length of a scalar, not including any padding.
+    
     pub fn scalar_bytes_len(&self) -> usize {
         self.common.len()
     }
@@ -405,7 +405,7 @@ impl ScalarOps {
     }
 }
 
-/// Operations on public scalars needed by ECDSA signature verification.
+
 pub struct PublicScalarOps {
     pub scalar_ops: &'static ScalarOps,
     pub public_key_ops: &'static PublicKeyOps,
@@ -457,7 +457,7 @@ impl PublicScalarOps {
 pub struct PrivateScalarOps {
     pub scalar_ops: &'static ScalarOps,
 
-    oneRR_mod_n: PublicScalar<RR>, // 1 * R**2 (mod n). TOOD: Use One<RR>.
+    oneRR_mod_n: PublicScalar<RR>, 
     scalar_inv_to_mont: fn(a: Scalar<R>, cpu: cpu::Features) -> Scalar<R>,
 }
 
@@ -467,7 +467,7 @@ impl PrivateScalarOps {
             .scalar_product(s, &Scalar::from(&self.oneRR_mod_n), cpu)
     }
 
-    /// Returns the modular inverse of `a` (mod `n`). Panics if `a` is zero.
+    
     pub(super) fn scalar_inv_to_mont(&self, a: &Scalar, cpu: cpu::Features) -> Scalar<R> {
         assert!(!self.scalar_ops.common.is_zero(a));
         let a = self.to_mont(a, cpu);
@@ -475,8 +475,8 @@ impl PrivateScalarOps {
     }
 }
 
-// XXX: Inefficient and unnecessarily depends on `PrivateKeyOps`. TODO: implement interleaved wNAF
-// multiplication.
+
+
 fn twin_mul_inefficient(
     ops: &PrivateKeyOps,
     g_scalar: &Scalar,
@@ -489,7 +489,7 @@ fn twin_mul_inefficient(
     ops.point_sum(&scaled_g, &scaled_p, cpu)
 }
 
-// This assumes n < q < 2*n.
+
 impl Modulus<N> {
     pub fn elem_reduced_to_scalar(&self, elem: &Elem<Unencoded>) -> Scalar<Unencoded> {
         let num_limbs = self.num_limbs.into();
@@ -504,7 +504,7 @@ impl Modulus<N> {
     }
 }
 
-// Returns (`a` squared `squarings` times) * `b`.
+
 fn elem_sqr_mul(
     ops: &CommonOps,
     a: &Elem<R>,
@@ -520,7 +520,7 @@ fn elem_sqr_mul(
     ops.elem_product(&tmp, b, cpu)
 }
 
-// Sets `acc` = (`acc` squared `squarings` times) * `b`.
+
 fn elem_sqr_mul_acc(
     ops: &CommonOps,
     acc: &mut Elem<R>,
@@ -694,8 +694,8 @@ mod tests {
         })
     }
 
-    // XXX: There's no `p256_sub` in *ring*; it's logic is inlined into
-    // the point arithmetic functions. Thus, we can't test it.
+    
+    
 
     #[test]
     fn p384_elem_sub_test() {
@@ -746,8 +746,8 @@ mod tests {
         })
     }
 
-    // XXX: There's no `p256_div_by_2` in *ring*; it's logic is inlined
-    // into the point arithmetic functions. Thus, we can't test it.
+    
+    
 
     #[test]
     fn p384_elem_div_by_2_test() {
@@ -783,7 +783,7 @@ mod tests {
         })
     }
 
-    // There is no `ecp_nistz256_neg` on other targets.
+    
     #[cfg(target_arch = "x86_64")]
     #[test]
     fn p256_elem_neg_test() {
@@ -821,7 +821,7 @@ mod tests {
             let a = consume_elem(q, test_case, "a");
             let b = consume_elem(q, test_case, "b");
 
-            // Verify -a == b.
+            
             {
                 let mut actual_result = Elem::<R>::zero();
                 unsafe {
@@ -830,7 +830,7 @@ mod tests {
                 assert_limbs_are_equal(ops, &actual_result.limbs, &b.limbs);
             }
 
-            // Verify -b == a.
+            
             {
                 let mut actual_result = Elem::<R>::zero();
                 unsafe {
@@ -918,8 +918,8 @@ mod tests {
         );
     }
 
-    // XXX: There's no `p384_scalar_square_test()` because there's no dedicated
-    // `p384_scalar_sqr_rep_mont()`.
+    
+    
 
     fn scalar_square_test(
         ops: &ScalarOps,
@@ -1005,9 +1005,9 @@ mod tests {
     fn p256_point_sum_mixed_test() {
         prefixed_extern! {
             fn p256_point_add_affine(
-                r: *mut Limb,   // [p256::COMMON_OPS.num_limbs*3]
-                a: *const Limb, // [p256::COMMON_OPS.num_limbs*3]
-                b: *const Limb, // [p256::COMMON_OPS.num_limbs*2]
+                r: *mut Limb,   
+                a: *const Limb, 
+                b: *const Limb, 
             );
         }
         point_sum_mixed_test(
@@ -1017,14 +1017,14 @@ mod tests {
         );
     }
 
-    // XXX: There is no `nistz384_point_add_affine()`.
+    
 
     fn point_sum_mixed_test(
         ops: &PrivateKeyOps,
         point_add_affine: unsafe extern "C" fn(
-            r: *mut Limb,   // [ops.num_limbs*3]
-            a: *const Limb, // [ops.num_limbs*3]
-            b: *const Limb, // [ops.num_limbs*2]
+            r: *mut Limb,   
+            a: *const Limb, 
+            b: *const Limb, 
         ),
         test_file: test::File,
     ) {
@@ -1050,8 +1050,8 @@ mod tests {
     fn p256_point_double_test() {
         prefixed_extern! {
             fn p256_point_double(
-                r: *mut Limb,   // [p256::COMMON_OPS.num_limbs*3]
-                a: *const Limb, // [p256::COMMON_OPS.num_limbs*3]
+                r: *mut Limb,   
+                a: *const Limb, 
             );
         }
         point_double_test(
@@ -1065,8 +1065,8 @@ mod tests {
     fn p384_point_double_test() {
         prefixed_extern! {
             fn p384_point_double(
-                r: *mut Limb,   // [p384::COMMON_OPS.num_limbs*3]
-                a: *const Limb, // [p384::COMMON_OPS.num_limbs*3]
+                r: *mut Limb,   
+                a: *const Limb, 
             );
         }
         point_double_test(
@@ -1079,8 +1079,8 @@ mod tests {
     fn point_double_test(
         ops: &PrivateKeyOps,
         point_double: unsafe extern "C" fn(
-            r: *mut Limb,   // [ops.num_limbs*3]
-            a: *const Limb, // [ops.num_limbs*3]
+            r: *mut Limb,   
+            a: *const Limb, 
         ),
         test_file: test::File,
     ) {
@@ -1101,7 +1101,7 @@ mod tests {
         });
     }
 
-    /// TODO: We should be testing `point_mul` with points other than the generator.
+    
     #[test]
     fn p256_point_mul_test() {
         let generator = (
@@ -1115,7 +1115,7 @@ mod tests {
         );
     }
 
-    /// TODO: We should be testing `point_mul` with points other than the generator.
+    
     #[test]
     fn p384_point_mul_test() {
         let generator = (
@@ -1297,7 +1297,7 @@ mod tests {
         let bytes = test::from_hex(elems[i]).unwrap();
         let bytes = untrusted::Input::from(&bytes);
         let r: Elem<Unencoded> = elem_parse_big_endian_fixed_consttime(q, bytes).unwrap();
-        // XXX: “Transmute” this to `Elem<R>` limbs.
+        
         limbs_out[(i * num_limbs)..((i + 1) * num_limbs)].copy_from_slice(&r.limbs[..num_limbs]);
     }
 
@@ -1317,7 +1317,7 @@ mod tests {
             let bytes = untrusted::Input::from(&bytes);
             let unencoded: Elem<Unencoded> =
                 elem_parse_big_endian_fixed_consttime(q, bytes).unwrap();
-            // XXX: “Transmute” this to `Elem<R>` limbs.
+            
             Elem {
                 limbs: unencoded.limbs,
                 m: PhantomData,
@@ -1370,7 +1370,7 @@ mod tests {
 
         let bytes = untrusted::Input::from(&bytes);
         let r: Elem<Unencoded> = elem_parse_big_endian_fixed_consttime(q, bytes).unwrap();
-        // XXX: “Transmute” this to an `Elem<R>`.
+        
         Elem {
             limbs: r.limbs,
             m: PhantomData,
@@ -1392,7 +1392,7 @@ mod tests {
         let bytes = test_case.consume_bytes(name);
         let bytes = untrusted::Input::from(&bytes);
         let s = scalar_parse_big_endian_variable(n, AllowZero::Yes, bytes).unwrap();
-        // “Transmute” it to a `Scalar<R>`.
+        
         Scalar {
             limbs: s.limbs,
             m: PhantomData,

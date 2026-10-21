@@ -22,9 +22,9 @@
 # March 2015
 #
 # "Teaser" Montgomery multiplication module for ARMv8. Needs more
-# work. While it does improve RSA sign performance by 20-30% (less for
+# work. While it does improve RSA sign performance by 20-30 
 # longer keys) on most processors, for some reason RSA2048 is not
-# faster and RSA4096 goes 15-20% slower on Cortex-A57. Multiplication
+# faster and RSA4096 goes 15-20 
 # instruction issue rate is limited on processor in question, meaning
 # that dedicated squaring procedure is a must. Well, actually all
 # contemporary AArch64 processors seem to have limited multiplication
@@ -38,12 +38,12 @@
 # April 2015
 #
 # Squaring procedure that handles lengths divisible by 8 improves
-# RSA/DSA performance by 25-40-60% depending on processor and key
+# RSA/DSA performance by 25-40-60 
 # length. Overall improvement coefficients are always positive in
 # comparison to compiler-generated code. On Cortex-A57 improvement
 # is still modest on longest key lengths, while others exhibit e.g.
-# 50-70% improvement for RSA4096 sign. RSA2048 sign is ~25% faster
-# on Cortex-A57 and ~60-100% faster on others.
+# 50-70 
+# on Cortex-A57 and ~60-100 
 
 $flavour = shift;
 $output  = shift;
@@ -72,7 +72,7 @@ $code.=<<___;
 .text
 
 .globl	bn_mul_mont_nohw
-.type	bn_mul_mont_nohw,%function
+.type	bn_mul_mont_nohw, 
 .align	5
 bn_mul_mont_nohw:
 	AARCH64_SIGN_LINK_REGISTER
@@ -1064,7 +1064,7 @@ my  ($carry,$topmost) = ($rp,"x30");
 
 $code.=<<___;
 .globl	bn_mul4x_mont
-.type	bn_mul4x_mont,%function
+.type	bn_mul4x_mont, 
 .align	5
 bn_mul4x_mont:
 	AARCH64_SIGN_LINK_REGISTER

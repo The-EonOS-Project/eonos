@@ -27,22 +27,22 @@
 #
 # July 2010.
 #
-# Rescheduling for dual-issue pipeline resulted in 6% improvement on
+# Rescheduling for dual-issue pipeline resulted in 6 
 # Cortex A8 core and ~40 cycles per processed byte.
 
 # February 2011.
 #
-# Profiler-assisted and platform-specific optimization resulted in 7%
+# Profiler-assisted and platform-specific optimization resulted in 7 
 # improvement on Coxtex A8 core and ~38 cycles per byte.
 
 # March 2011.
 #
 # Add NEON implementation. On Cortex A8 it was measured to process
-# one byte in 23.3 cycles or ~60% faster than integer-only code.
+# one byte in 23.3 cycles or ~60 
 
 # August 2012.
 #
-# Improve NEON performance by 12% on Snapdragon S4. In absolute
+# Improve NEON performance by 12 
 # terms it's 22.6 cycles per byte, which is disappointing result.
 # Technical writers asserted that 3-way S4 pipeline can sustain
 # multiple NEON instructions per cycle, but dual NEON issue could
@@ -234,7 +234,7 @@ $code=<<___;
 .code	32
 #endif
 
-.type	K512,%object
+.type	K512, 
 .align	5
 K512:
 WORD64(0x428a2f98,0xd728ae22, 0x71374491,0x23ef65cd)
@@ -280,7 +280,7 @@ WORD64(0x5fcb6fab,0x3ad6faec, 0x6c44198c,0x4a475817)
 .size	K512,.-K512
 
 .global	sha512_block_data_order_nohw
-.type	sha512_block_data_order_nohw,%function
+.type	sha512_block_data_order_nohw, 
 sha512_block_data_order_nohw:
 	add	$len,$inp,$len,lsl#7	@ len to point at the end of inp
 	stmdb	sp!,{r4-r12,lr}
@@ -506,7 +506,7 @@ my ($t0,$t1,$t2,$T1,$K,$Ch,$Maj)=map("d$_",(24..31));	# temps
 $code.=<<___ if ($i<16 || $i&1);
 	vshr.u64	$t0,$e,#@Sigma1[0]	@ $i
 #if $i<16
-	vld1.64		{@X[$i%16]},[$inp]!	@ handles unaligned
+	vld1.64		{@X[$i 
 #endif
 	vshr.u64	$t1,$e,#@Sigma1[1]
 #if $i>0
@@ -532,7 +532,7 @@ $code.=<<___;
 	vsli.64		$t0,$a,#`64-@Sigma0[0]`
 	vadd.i64	$T1,$t2
 	vshr.u64	$t2,$a,#@Sigma0[2]
-	vadd.i64	$K,@X[$i%16]
+	vadd.i64	$K,@X[$i 
 	vsli.64		$t1,$a,#`64-@Sigma0[1]`
 	veor		$Maj,$a,$b
 	vsli.64		$t2,$a,#`64-@Sigma0[2]`
@@ -558,29 +558,29 @@ my ($d0,$d1,$d2) = map("d$_",(24..26));		# temps from NEON_00_15
 my $e=@_[4];					# $e from NEON_00_15
 $i /= 2;
 $code.=<<___;
-	vshr.u64	$t0,@X[($i+7)%8],#@sigma1[0]
-	vshr.u64	$t1,@X[($i+7)%8],#@sigma1[1]
+	vshr.u64	$t0,@X[($i+7) 
+	vshr.u64	$t1,@X[($i+7) 
 	 vadd.i64	@_[0],d30			@ h+=Maj from the past
-	vshr.u64	$s1,@X[($i+7)%8],#@sigma1[2]
-	vsli.64		$t0,@X[($i+7)%8],#`64-@sigma1[0]`
-	vext.8		$s0,@X[$i%8],@X[($i+1)%8],#8	@ X[i+1]
-	vsli.64		$t1,@X[($i+7)%8],#`64-@sigma1[1]`
+	vshr.u64	$s1,@X[($i+7) 
+	vsli.64		$t0,@X[($i+7) 
+	vext.8		$s0,@X[$i 
+	vsli.64		$t1,@X[($i+7) 
 	veor		$s1,$t0
 	vshr.u64	$t0,$s0,#@sigma0[0]
 	veor		$s1,$t1				@ sigma1(X[i+14])
 	vshr.u64	$t1,$s0,#@sigma0[1]
-	vadd.i64	@X[$i%8],$s1
+	vadd.i64	@X[$i 
 	vshr.u64	$s1,$s0,#@sigma0[2]
 	vsli.64		$t0,$s0,#`64-@sigma0[0]`
 	vsli.64		$t1,$s0,#`64-@sigma0[1]`
-	vext.8		$s0,@X[($i+4)%8],@X[($i+5)%8],#8	@ X[i+9]
+	vext.8		$s0,@X[($i+4) 
 	veor		$s1,$t0
 	vshr.u64	$d0,$e,#@Sigma1[0]		@ from NEON_00_15
-	vadd.i64	@X[$i%8],$s0
+	vadd.i64	@X[$i 
 	vshr.u64	$d1,$e,#@Sigma1[1]		@ from NEON_00_15
 	veor		$s1,$t1				@ sigma0(X[i+1])
 	vshr.u64	$d2,$e,#@Sigma1[2]		@ from NEON_00_15
-	vadd.i64	@X[$i%8],$s1
+	vadd.i64	@X[$i 
 ___
 	&NEON_00_15(2*$i,@_);
 }
@@ -591,7 +591,7 @@ $code.=<<___;
 .fpu	neon
 
 .global	sha512_block_data_order_neon
-.type	sha512_block_data_order_neon,%function
+.type	sha512_block_data_order_neon, 
 .align	4
 sha512_block_data_order_neon:
 	dmb				@ errata #451034 on early Cortex A8

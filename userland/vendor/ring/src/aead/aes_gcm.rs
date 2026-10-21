@@ -1,16 +1,16 @@
-// Copyright 2015-2025 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use super::{
     aes::{self, Counter, Overlapping, OverlappingPartialBlock, BLOCK_LEN, ZERO_BLOCK},
@@ -82,7 +82,7 @@ impl DynKey {
 
         #[cfg(target_arch = "x86_64")]
         if let Some((aes, gcm)) = cpu.get_feature() {
-            // 14.3.1 Detection of VEX-Encoded AES and VPCLMULQDQ
+            
             let aes_key = aes::hw::Key::new(key, aes, cpu.get_feature())?;
             let gcm_key_value = derive_gcm_key_value(&aes_key);
             let combo = if let Some(cpu) = cpu.get_feature() {
@@ -98,7 +98,7 @@ impl DynKey {
             return Ok(combo);
         }
 
-        // x86_64 is handled above.
+        
         #[cfg(any(
             all(target_arch = "aarch64", target_endian = "little"),
             target_arch = "x86"
@@ -482,19 +482,19 @@ fn finish<A: aes::EncryptBlock, G: gcm::UpdateBlock>(
     gcm_ctx: gcm::Context<G>,
     tag_iv: aes::Iv,
 ) -> Tag {
-    // Finalize the tag and return it.
+    
     gcm_ctx.pre_finish(|pre_tag| Tag(aes_key.encrypt_iv_xor_block(tag_iv, pre_tag)))
 }
 
 pub(super) const MAX_IN_OUT_LEN: usize = super::max_input_len(BLOCK_LEN, 2);
 
-// [NIST SP800-38D] Section 5.2.1.1. Note that [RFC 5116 Section 5.1] and
-// [RFC 5116 Section 5.2] have an off-by-one error in `P_MAX`.
-//
-// [NIST SP800-38D]:
-//    http://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38d.pdf
-// [RFC 5116 Section 5.1]: https://tools.ietf.org/html/rfc5116#section-5.1
-// [RFC 5116 Section 5.2]: https://tools.ietf.org/html/rfc5116#section-5.2
+
+
+
+
+
+
+
 const _MAX_INPUT_LEN_BOUNDED_BY_NIST: () =
     assert!(MAX_IN_OUT_LEN == usize_from_u64_saturated(((1u64 << 39) - 256) / 8));
 

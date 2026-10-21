@@ -1,4 +1,4 @@
-//! MBR and GPT partition table discovery over a block device.
+
 
 use alloc::vec::Vec;
 
@@ -16,7 +16,7 @@ pub struct Partition {
     pub index: u32,
     pub start_lba: u64,
     pub sectors: u64,
-    /// MBR type byte, or the low 32 bits of a GPT type GUID.
+    
     pub type_tag: u32,
     pub table: TableKind,
 }
@@ -45,8 +45,8 @@ fn u64le(b: &[u8], at: usize) -> u64 {
     ])
 }
 
-/// Scan the standard MBR entries or a protective MBR followed by GPT.
-/// Extended MBR partitions are currently skipped.
+
+
 pub fn scan(device: &dyn BlockDevice) -> Result<Vec<Partition>, PartitionError> {
     if device.sector_count() < 2 {
         return Err(PartitionError::InvalidTable);

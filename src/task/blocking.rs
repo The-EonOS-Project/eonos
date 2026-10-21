@@ -1,15 +1,15 @@
-//! Blocking synchronization primitives.
-//!
-//! `sync::IrqMutex` is a spinlock: a thread that can't get it burns CPU
-//! (with interrupts off, no less) until it can. That's the right choice
-//! for the short, non-preemptible critical sections inside the
-//! scheduler itself, but wrong for anything a thread might hold for a
-//! while -- the waiter should give up the CPU instead of spinning.
-//!
-//! `Mutex` and `Semaphore` here do that: a thread that can't proceed
-//! parks itself on a `scheduler::WaitQueue` and is woken explicitly by
-//! whoever releases the resource, rather than being polled by the timer
-//! (as `sleep_ms` is) or spinning (as `IrqMutex` does).
+
+
+
+
+
+
+
+
+
+
+
+
 
 #![allow(dead_code)]
 
@@ -20,7 +20,7 @@ use core::sync::atomic::{AtomicBool, AtomicI64, Ordering};
 use crate::scheduler::WaitQueue;
 use crate::sync::IrqMutex;
 
-/// A mutex that blocks (rather than spins) when contended.
+
 pub struct Mutex<T> {
     locked: AtomicBool,
     queue: WaitQueue,
@@ -43,19 +43,19 @@ impl<T> Mutex<T> {
         }
     }
 
-    /// Block until the lock is held.
+    
     pub fn lock(&self) -> MutexGuard<'_, T> {
-        // The swap is the actual acquire attempt; `wait_until` runs it
-        // with interrupts off and, if it fails, parks us on `queue`
-        // before interrupts come back -- so a concurrent `unlock` can
-        // never wake the queue in the gap between "we failed to take
-        // the lock" and "we're on the queue".
+        
+        
+        
+        
+        
         self.queue
             .wait_until(|| !self.locked.swap(true, Ordering::Acquire));
         MutexGuard { mutex: self }
     }
 
-    /// Take the lock only if it's free right now.
+    
     pub fn try_lock(&self) -> Option<MutexGuard<'_, T>> {
         if !self.locked.swap(true, Ordering::Acquire) {
             Some(MutexGuard { mutex: self })
@@ -81,15 +81,15 @@ impl<T> DerefMut for MutexGuard<'_, T> {
 impl<T> Drop for MutexGuard<'_, T> {
     fn drop(&mut self) {
         self.mutex.locked.store(false, Ordering::Release);
-        // At most one waiter can actually take the lock next, so waking
-        // one is enough; the rest stay parked and get re-checked (via
-        // `wait_until`'s predicate) whenever they're next woken.
+        
+        
+        
         self.mutex.queue.wake_one();
     }
 }
 
-/// A counting semaphore. `acquire` blocks while the count is zero;
-/// `release` increments it and wakes one waiter.
+
+
 pub struct Semaphore {
     count: AtomicI64,
     queue: WaitQueue,
@@ -105,9 +105,9 @@ impl Semaphore {
 
     pub fn acquire(&self) {
         self.queue.wait_until(|| {
-            // Fetch-then-restore-if-we-shouldn't-have-taken-it would
-            // race, so use a CAS loop against the current value instead
-            // of a blind fetch_sub.
+            
+            
+            
             let mut cur = self.count.load(Ordering::Relaxed);
             loop {
                 if cur <= 0 {
@@ -126,7 +126,7 @@ impl Semaphore {
         });
     }
 
-    /// Try to acquire without blocking.
+    
     pub fn try_acquire(&self) -> bool {
         let mut cur = self.count.load(Ordering::Relaxed);
         while cur > 0 {
@@ -153,9 +153,9 @@ impl Semaphore {
     }
 }
 
-// ---------------------------------------------------------------------
-// Self-test
-// ---------------------------------------------------------------------
+
+
+
 
 use core::sync::atomic::AtomicU64;
 
@@ -172,10 +172,10 @@ const MUTEX_ITERS: u64 = 200;
 fn mutex_worker() {
     for _ in 0..MUTEX_ITERS {
         let mut guard = TEST_MUTEX.lock();
-        // If locking weren't exclusive, two threads could both observe
-        // the same value here and the total below would come up short.
+        
+        
         let before = *guard;
-        scheduler::yield_now(); // widen the window for a real race
+        scheduler::yield_now(); 
         *guard = before + 1;
         drop(guard);
     }
@@ -213,7 +213,7 @@ fn sem_worker() {
 }
 
 pub fn self_test() {
-    // --- Mutex: mutual exclusion under contention ---------------------
+    
     *MUTEX_DONE.lock() = 0;
     for _ in 0..MUTEX_WORKERS {
         if scheduler::spawn("mutex-worker", mutex_worker).is_none() {
@@ -246,7 +246,7 @@ pub fn self_test() {
         return;
     }
 
-    // --- Semaphore: bounds concurrency, never over-admits --------------
+    
     *SEM_DONE.lock() = 0;
     SEM_INSIDE.store(0, Ordering::SeqCst);
     SEM_MAX_INSIDE.store(0, Ordering::SeqCst);

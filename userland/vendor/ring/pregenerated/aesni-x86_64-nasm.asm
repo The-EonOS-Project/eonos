@@ -1,5 +1,5 @@
-; This file is generated from a similarly-named Perl script in the BoringSSL
-; source tree. Do not edit by hand.
+
+
 
 %ifidn __OUTPUT_FORMAT__, win64
 default	rel
@@ -246,7 +246,7 @@ global	aes_hw_ctr32_encrypt_blocks
 
 ALIGN	16
 aes_hw_ctr32_encrypt_blocks:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_aes_hw_ctr32_encrypt_blocks:
@@ -759,7 +759,7 @@ $L$ctr32_done:
 	lea	rsp,[r11]
 
 $L$ctr32_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -1237,6 +1237,6 @@ $L$SEH_info_aes_hw_set_encrypt_key_alt_0:
 
 	DW	0
 %else
-; Work around https://bugzilla.nasm.us/show_bug.cgi?id=3392738
+
 ret
 %endif

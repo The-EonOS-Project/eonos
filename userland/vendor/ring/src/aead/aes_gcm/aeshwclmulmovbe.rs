@@ -1,16 +1,16 @@
-// Copyright 2015-2025 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #![cfg(target_arch = "x86_64")]
 
@@ -36,8 +36,8 @@ pub(super) fn seal(
     in_out: &mut [u8],
 ) -> Result<Tag, error::Unspecified> {
     prefixed_extern! {
-        // `HTable` and `Xi` should be 128-bit aligned. TODO: Can we shrink `HTable`? The
-        // assembly says it needs just nine values in that array.
+        
+        
         fn aesni_gcm_encrypt(
             input: *const u8,
             output: *mut u8,
@@ -66,8 +66,8 @@ pub(super) fn seal(
     let ramaining = match in_out.get_mut(processed..) {
         Some(remaining) => remaining,
         None => {
-            // This can't happen. If it did, then the assembly already
-            // caused a buffer overflow.
+            
+            
             unreachable!()
         }
     };
@@ -91,8 +91,8 @@ pub(super) fn open(
     src: RangeFrom<usize>,
 ) -> Result<Tag, error::Unspecified> {
     prefixed_extern! {
-        // `HTable` and `Xi` should be 128-bit aligned. TODO: Can we shrink `HTable`? The
-        // assembly says it needs just nine values in that array.
+        
+        
         fn aesni_gcm_decrypt(
             input: *const u8,
             output: *mut u8,
@@ -120,15 +120,15 @@ pub(super) fn open(
         }
     });
     let in_out_slice = in_out_slice.get_mut(processed..).unwrap_or_else(|| {
-        // This can't happen. If it did, then the assembly already
-        // caused a buffer overflow.
+        
+        
         unreachable!()
     });
-    // Authenticate any remaining whole blocks.
+    
     let in_out =
         Overlapping::new(in_out_slice, src.clone()).unwrap_or_else(|IndexError { .. }| {
-            // This can't happen. If it did, then the assembly already
-            // overwrote part of the remaining input.
+            
+            
             unreachable!()
         });
     let (whole, _) = slice::as_chunks(in_out.input());
@@ -136,7 +136,7 @@ pub(super) fn open(
 
     let whole_len = whole.as_flattened().len();
 
-    // Decrypt any remaining whole blocks.
+    
     let whole = Overlapping::new(&mut in_out_slice[..(src.start + whole_len)], src.clone())
         .map_err(error::erase::<IndexError>)?;
     aes_key.ctr32_encrypt_within(whole, &mut ctr);

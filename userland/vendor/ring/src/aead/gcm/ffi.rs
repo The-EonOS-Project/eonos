@@ -1,16 +1,16 @@
-// Copyright 2018 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use crate::{
     bb,
@@ -37,9 +37,9 @@ macro_rules! htable_new {
     }};
 }
 
-/// SAFETY:
-///  * The function `$name` must meet the contract of the `f` paramweter of
-///    `ghash()`.
+
+
+
 #[cfg(any(
     all(target_arch = "aarch64", target_endian = "little"),
     all(target_arch = "arm", target_endian = "little"),
@@ -73,10 +73,10 @@ impl KeyValue {
     }
 }
 
-/// SAFETY:
-///   * `f` must read `len` bytes from `inp`; it may assume
-///     that `len` is a (non-zero) multiple of `BLOCK_LEN`.
-///   * `f` may inspect CPU features.
+
+
+
+
 #[cfg(any(
     all(target_arch = "aarch64", target_endian = "little"),
     all(target_arch = "arm", target_endian = "little"),
@@ -129,16 +129,16 @@ impl HTable {
             }
         };
 
-        // SAFETY:
-        //  * There are `input_len: NonZeroUsize` bytes available at `input` for
-        //    `f` to read.
+        
+        
+        
         unsafe {
             f(xi, self, input.as_ptr(), input_len);
         }
     }
 }
 
-// The alignment is required by some assembly code, such as `ghash-ssse3-*`.
+
 #[derive(Clone)]
 #[repr(C, align(16))]
 pub(in super::super) struct HTable {

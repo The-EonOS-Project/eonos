@@ -740,7 +740,7 @@ $code.=<<___;
 # undef __thumb2__
 #endif
 
-.type	_bsaes_const,%object
+.type	_bsaes_const, 
 .align	6
 _bsaes_const:
 .LM0ISR:	@ InvShiftRows constants
@@ -940,7 +940,7 @@ my $keysched = "sp";
 
 $code.=<<___;
 .global	bsaes_ctr32_encrypt_blocks
-.type	bsaes_ctr32_encrypt_blocks,%function
+.type	bsaes_ctr32_encrypt_blocks, 
 .align	5
 bsaes_ctr32_encrypt_blocks:
 	@ In OpenSSL, short inputs fall back to aes_nohw_* here. We patch this

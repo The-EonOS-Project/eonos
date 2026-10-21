@@ -1,26 +1,26 @@
-// Emacs style mode select   -*- C++ -*- 
-//-----------------------------------------------------------------------------
-//
-// $Id:$
-//
-// Copyright (C) 1993-1996 by id Software, Inc.
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// $Log:$
-//
-// DESCRIPTION:
-//	DOOM graphics stuff for X11, UNIX.
-//
-//-----------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 static const char
 rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
@@ -48,28 +48,28 @@ rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
 
 #include <sys/types.h>
 
-//#define CMAP256
+
 
 struct FB_BitField
 {
-	uint32_t offset;			/* beginning of bitfield	*/
-	uint32_t length;			/* length of bitfield		*/
+	uint32_t offset;			
+	uint32_t length;			
 };
 
 struct FB_ScreenInfo
 {
-	uint32_t xres;			/* visible resolution		*/
+	uint32_t xres;			
 	uint32_t yres;
-	uint32_t xres_virtual;		/* virtual resolution		*/
+	uint32_t xres_virtual;		
 	uint32_t yres_virtual;
 
-	uint32_t bits_per_pixel;		/* guess what			*/
+	uint32_t bits_per_pixel;		
 	
-							/* >1 = FOURCC			*/
-	struct FB_BitField red;		/* bitfield in s_Fb mem if true color, */
-	struct FB_BitField green;	/* else only length is significant */
+							
+	struct FB_BitField red;		
+	struct FB_BitField green;	
 	struct FB_BitField blue;
-	struct FB_BitField transp;	/* transparency			*/
+	struct FB_BitField transp;	
 };
 
 static struct FB_ScreenInfo s_Fb;
@@ -82,42 +82,42 @@ int usemouse = 0;
 boolean palette_changed;
 struct color colors[256];
 
-#else  // CMAP256
+#else  
 
 static struct color colors[256];
 
 
-#endif  // CMAP256
+#endif  
 
 
 void I_GetEvent(void);
 
-// The screen buffer; this is modified to draw things to the screen
+
 
 byte *I_VideoBuffer = NULL;
 
-// If true, game is running as a screensaver
+
 
 boolean screensaver_mode = false;
 
-// Flag indicating whether the screen is currently visible:
-// when the screen isnt visible, don't render the screen
+
+
 
 boolean screenvisible;
 
-// Mouse acceleration
-//
-// This emulates some of the behavior of DOS mouse drivers by increasing
-// the speed when the mouse is moved fast.
-//
-// The mouse input values are input directly to the game, but when
-// the values exceed the value of mouse_threshold, they are multiplied
-// by mouse_acceleration to increase the speed.
+
+
+
+
+
+
+
+
 
 float mouse_acceleration = 2.0;
 int mouse_threshold = 10;
 
-// Gamma correction level to use
+
 
 int usegamma = 0;
 
@@ -128,7 +128,7 @@ typedef struct
 	byte b;
 } col_t;
 
-// Palette converted to RGB565
+
 
 static uint16_t rgb565_palette[256];
 
@@ -161,17 +161,17 @@ void cmap_to_fb(uint8_t *out, uint8_t *in, int in_pixels)
 
     for (i = 0; i < in_pixels; i++)
     {
-        c = colors[*in];  // R:8 G:8 B:8
+        c = colors[*in];  
 
         if (s_Fb.bits_per_pixel == 16)
         {
-            // RGB565 packing
+            
             uint16_t p = ((c.r & 0xF8) << 8) |
                          ((c.g & 0xFC) << 3) |
                          (c.b >> 3);
 
 #ifdef SYS_BIG_ENDIAN
-            p = swapeLE16(p); // can't use SHORT() because this needs to stay unsigned
+            p = swapeLE16(p); 
 #endif
             for (k = 0; k < fb_scaling; k++) {
                 *(uint16_t *)out = p;
@@ -180,7 +180,7 @@ void cmap_to_fb(uint8_t *out, uint8_t *in, int in_pixels)
         }
         else if (s_Fb.bits_per_pixel == 32)
         {
-            // Assuming RGBA8888
+            
             pix = (c.r << s_Fb.red.offset) |
                   (c.g << s_Fb.green.offset) |
                   (c.b << s_Fb.blue.offset);
@@ -194,7 +194,7 @@ void cmap_to_fb(uint8_t *out, uint8_t *in, int in_pixels)
             }
         }
         else {
-            // no clue how to convert this
+            
             I_Error("No idea how to convert %d bpp pixels", s_Fb.bits_per_pixel);
         }
 
@@ -217,7 +217,7 @@ void I_InitGraphics (void)
 
 	s_Fb.bits_per_pixel = 8;
 
-#else  // CMAP256
+#else  
 
 	gfxmodeparm = M_CheckParmWithArgs("-gfxmode", 1);
 
@@ -225,13 +225,13 @@ void I_InitGraphics (void)
 		mode = myargv[gfxmodeparm + 1];
 	}
 	else {
-		// default to rgba8888 like the old behavior, for compatibility
-		// maybe could warn here?
+		
+		
 		mode = "rgba8888";
 	}
 
 	if (strcmp(mode, "rgba8888") == 0) {
-		// default mode
+		
 		s_Fb.bits_per_pixel = 32;
 
 		s_Fb.blue.length = 8;
@@ -262,7 +262,7 @@ void I_InitGraphics (void)
 		I_Error("Unknown gfxmode value: %s\n", mode);
 
 
-#endif  // CMAP256
+#endif  
 
     printf("I_InitGraphics: framebuffer: x_res: %d, y_res: %d, x_virtual: %d, y_virtual: %d, bpp: %d\n",
             s_Fb.xres, s_Fb.yres, s_Fb.xres_virtual, s_Fb.yres_virtual, s_Fb.bits_per_pixel);
@@ -286,8 +286,8 @@ void I_InitGraphics (void)
     }
 
 
-    /* Allocate screen to draw to */
-	I_VideoBuffer = (byte*)Z_Malloc (SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);  // For DOOM to draw on
+    
+	I_VideoBuffer = (byte*)Z_Malloc (SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);  
 
 	screenvisible = true;
 
@@ -314,9 +314,9 @@ void I_UpdateNoBlit (void)
 {
 }
 
-//
-// I_FinishUpdate
-//
+
+
+
 
 void I_FinishUpdate (void)
 {
@@ -324,16 +324,16 @@ void I_FinishUpdate (void)
     int x_offset, y_offset, x_offset_end;
     unsigned char *line_in, *line_out;
 
-    /* Offsets in case FB is bigger than DOOM */
-    /* 600 = s_Fb heigt, 200 screenheight */
-    /* 600 = s_Fb heigt, 200 screenheight */
-    /* 2048 =s_Fb width, 320 screenwidth */
+    
+    
+    
+    
     y_offset     = (((s_Fb.yres - (SCREENHEIGHT * fb_scaling)) * s_Fb.bits_per_pixel/8)) / 2;
-    x_offset     = (((s_Fb.xres - (SCREENWIDTH  * fb_scaling)) * s_Fb.bits_per_pixel/8)) / 2; // XXX: siglent FB hack: /4 instead of /2, since it seems to handle the resolution in a funny way
-    //x_offset     = 0;
+    x_offset     = (((s_Fb.xres - (SCREENWIDTH  * fb_scaling)) * s_Fb.bits_per_pixel/8)) / 2; 
+    
     x_offset_end = ((s_Fb.xres - (SCREENWIDTH  * fb_scaling)) * s_Fb.bits_per_pixel/8) - x_offset;
 
-    /* DRAW SCREEN */
+    
     line_in  = (unsigned char *) I_VideoBuffer;
     line_out = (unsigned char *) DG_ScreenBuffer;
 
@@ -346,7 +346,7 @@ void I_FinishUpdate (void)
             line_out += x_offset;
 #ifdef CMAP256
             if (fb_scaling == 1) {
-                memcpy(line_out, line_in, SCREENWIDTH); /* fb_width is bigger than Doom SCREENWIDTH... */
+                memcpy(line_out, line_in, SCREENWIDTH); 
             } else {
                 int j;
 
@@ -358,7 +358,7 @@ void I_FinishUpdate (void)
                 }
             }
 #else
-            //cmap_to_rgb565((void*)line_out, (void*)line_in, SCREENWIDTH);
+            
             cmap_to_fb((void*)line_out, (void*)line_in, SCREENWIDTH);
 #endif
             line_out += (SCREENWIDTH * fb_scaling * (s_Fb.bits_per_pixel/8)) + x_offset_end;
@@ -369,17 +369,17 @@ void I_FinishUpdate (void)
 	DG_DrawFrame();
 }
 
-//
-// I_ReadScreen
-//
+
+
+
 void I_ReadScreen (byte* scr)
 {
     memcpy (scr, I_VideoBuffer, SCREENWIDTH * SCREENHEIGHT);
 }
 
-//
-// I_SetPalette
-//
+
+
+
 #define GFX_RGB565(r, g, b)			((((r & 0xF8) >> 3) << 11) | (((g & 0xFC) >> 2) << 5) | ((b & 0xF8) >> 3))
 #define GFX_RGB565_R(color)			((0xF800 & color) >> 11)
 #define GFX_RGB565_G(color)			((0x07E0 & color) >> 5)
@@ -388,22 +388,22 @@ void I_ReadScreen (byte* scr)
 void I_SetPalette (byte* palette)
 {
 	int i;
-	//col_t* c;
+	
 
-	//for (i = 0; i < 256; i++)
-	//{
-	//	c = (col_t*)palette;
+	
+	
+	
 
-	//	rgb565_palette[i] = GFX_RGB565(gammatable[usegamma][c->r],
-	//								   gammatable[usegamma][c->g],
-	//								   gammatable[usegamma][c->b]);
+	
+	
+	
 
-	//	palette += 3;
-	//}
+	
+	
     
 
-    /* performance boost:
-     * map to the right pixel format over here! */
+    
+
 
     for (i=0; i<256; ++i ) {
         colors[i].a = 0;
@@ -416,10 +416,10 @@ void I_SetPalette (byte* palette)
 
     palette_changed = true;
 
-#endif  // CMAP256
+#endif  
 }
 
-// Given an RGB value, find the closest matching palette index.
+
 
 int I_GetPaletteIndex (int r, int g, int b)
 {

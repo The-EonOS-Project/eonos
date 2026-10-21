@@ -1,5 +1,5 @@
-; This file is generated from a similarly-named Perl script in the BoringSSL
-; source tree. Do not edit by hand.
+
+
 
 %include "ring_core_generated/prefix_symbols_nasm.inc"
 %ifidn __OUTPUT_FORMAT__, win32
@@ -403,6 +403,6 @@ L$015pic_point:
 	pop	ebp
 	ret
 %else
-; Work around https://bugzilla.nasm.us/show_bug.cgi?id=3392738
+
 ret
 %endif

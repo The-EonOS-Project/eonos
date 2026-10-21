@@ -1,9 +1,9 @@
-################################################################
-#
-# $Id:$
-#
-# $Log:$
-#
+
+
+
+
+
+
 
 ifeq ($(V),1)
 	VB=''
@@ -12,13 +12,13 @@ else
 endif
 
 
-CC=/opt/musl-i386-clang-debug/bin/musl-clang-debug  # gcc or g++
+CC=/opt/musl-i386-clang-debug/bin/musl-clang-debug  
 CFLAGS+=-g
 LDFLAGS+=-static
-CFLAGS+=-I../../microwindows/src/include -Wall -DNORMALUNIX -DLINUX -DSNDSERV -D_DEFAULT_SOURCE # -DUSEASM
+CFLAGS+=-I../../microwindows/src/include -Wall -DNORMALUNIX -DLINUX -DSNDSERV -D_DEFAULT_SOURCE 
 LIBS+=-L../../microwindows/src/lib -lnano-X
 
-# subdirectory for objects
+
 OBJDIR=build
 OUTPUT=doom
 

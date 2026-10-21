@@ -1,16 +1,16 @@
-// Copyright 2024 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 pub use self::index_error::IndexError;
 use super::Array;
@@ -18,7 +18,7 @@ use crate::error::LenMismatchError;
 use core::{mem, ops::RangeFrom};
 
 pub struct Overlapping<'o, T> {
-    // Invariant: self.src.start <= in_out.len().
+    
     in_out: &'o mut [T],
     src: RangeFrom<usize>,
 }
@@ -65,7 +65,7 @@ impl<'o, T> Overlapping<'o, T> {
     pub fn into_unwritten_output(self) -> &'o mut [T] {
         let len = self.len();
         self.in_out.get_mut(..len).unwrap_or_else(|| {
-            // The invariant ensures this succeeds.
+            
             unreachable!()
         })
     }
@@ -78,7 +78,7 @@ impl<T> Overlapping<'_, T> {
 
     pub fn input(&self) -> &[T] {
         self.in_out.get(self.src.clone()).unwrap_or_else(|| {
-            // Ensured by invariant.
+            
             unreachable!()
         })
     }
@@ -86,14 +86,14 @@ impl<T> Overlapping<'_, T> {
     pub fn with_input_output_len<R>(self, f: impl FnOnce(*const T, *mut T, usize) -> R) -> R {
         let len = self.len();
         let output = self.in_out.as_mut_ptr();
-        // TODO: MSRV(1.65): use `output.cast_const()`
+        
         let output_const: *const T = output;
-        // SAFETY: The constructor ensures that `src` is a valid range.
-        // Equivalent to `self.in_out[src.clone()].as_ptr()` but without
-        // worries about compatibility with the stacked borrows model.
-        // TODO(MSRV-1.80, probably): Avoid special casing 0; see
-        // https://github.com/rust-lang/rust/pull/117329
-        // https://github.com/rust-lang/rustc_codegen_gcc/issues/516
+        
+        
+        
+        
+        
+        
         let input = if self.src.start == 0 {
             output_const
         } else {
@@ -102,12 +102,12 @@ impl<T> Overlapping<'_, T> {
         f(input, output, len)
     }
 
-    // Perhaps unlike `slice::split_first_chunk_mut`, this is biased,
-    // performance-wise, against the case where `N > self.len()`, so callers
-    // should be structured to avoid that.
-    //
-    // If the result is `Err` then nothing was written to `self`; if anything
-    // was written then the result will not be `Err`.
+    
+    
+    
+    
+    
+    
     #[cfg_attr(not(test), allow(dead_code))]
     pub fn split_first_chunk<const N: usize>(
         mut self,
@@ -124,23 +124,23 @@ impl<T> Overlapping<'_, T> {
             .get_mut(..end)
             .ok_or_else(|| IndexError::new(N))?;
         let first = Overlapping::new(first, src).unwrap_or_else(|IndexError { .. }| {
-            // Since `end == src.start + N`.
+            
             unreachable!()
         });
         let first = Array::new(first).unwrap_or_else(|LenMismatchError { .. }| {
-            // Since `end == src.start + N`.
+            
             unreachable!()
         });
-        // Once we call `f`, we must return `Ok` because `f` may have written
-        // over (part of) the input.
+        
+        
         Ok({
             f(first);
             let tail = mem::take(&mut self.in_out).get_mut(N..).unwrap_or_else(|| {
-                // There are at least `N` elements since `end == src.start + N`.
+                
                 unreachable!()
             });
             Self::new(tail, self.src).unwrap_or_else(|IndexError { .. }| {
-                // Follows from `end == src.start + N`.
+                
                 unreachable!()
             })
         })

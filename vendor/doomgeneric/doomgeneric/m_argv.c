@@ -1,19 +1,19 @@
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 2005-2014 Simon Howard
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// DESCRIPTION:
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #include <ctype.h>
@@ -24,7 +24,7 @@
 #include "doomtype.h"
 #include "i_system.h"
 #include "m_misc.h"
-#include "m_argv.h"  // haleyjd 20110212: warning fix
+#include "m_argv.h"  
 
 int		myargc;
 char**		myargv;
@@ -32,13 +32,13 @@ char**		myargv;
 
 
 
-//
-// M_CheckParm
-// Checks for the given parameter
-// in the program's command line arguments.
-// Returns the argument number (1 to argc-1)
-// or 0 if not present
-//
+
+
+
+
+
+
+
 
 int M_CheckParmWithArgs(char *check, int num_args)
 {
@@ -53,12 +53,12 @@ int M_CheckParmWithArgs(char *check, int num_args)
     return 0;
 }
 
-//
-// M_ParmExists
-//
-// Returns true if the given parameter exists in the program's command
-// line arguments, false if not.
-//
+
+
+
+
+
+
 
 boolean M_ParmExists(char *check)
 {
@@ -86,7 +86,7 @@ static void LoadResponseFile(int argv_index)
 
     response_filename = myargv[argv_index] + 1;
 
-    // Read the response file into memory
+    
     handle = fopen(response_filename, "rb");
 
     if (handle == NULL)
@@ -101,10 +101,10 @@ static void LoadResponseFile(int argv_index)
 
     size = M_FileLength(handle);
 
-    // Read in the entire file
-    // Allocate one byte extra - this is in case there is an argument
-    // at the end of the response file, in which case a '\0' will be
-    // needed.
+    
+    
+    
+    
 
     file = malloc(size + 1);
 
@@ -124,13 +124,13 @@ static void LoadResponseFile(int argv_index)
 
     fclose(handle);
 
-    // Create new arguments list array
+    
 
     newargv = malloc(sizeof(char *) * MAXARGVS);
     newargc = 0;
     memset(newargv, 0, sizeof(char *) * MAXARGVS);
 
-    // Copy all the arguments in the list up to the response file
+    
 
     for (i=0; i<argv_index; ++i)
     {
@@ -143,7 +143,7 @@ static void LoadResponseFile(int argv_index)
 
     while(k < size)
     {
-        // Skip past space characters to the next argument
+        
 
         while(k < size && isspace((int)infile[k]))
         {
@@ -155,18 +155,18 @@ static void LoadResponseFile(int argv_index)
             break;
         }
 
-        // If the next argument is enclosed in quote marks, treat
-        // the contents as a single argument.  This allows long filenames
-        // to be specified.
+        
+        
+        
 
         if (infile[k] == '\"')
         {
-            // Skip the first character(")
+            
             ++k;
 
             newargv[newargc++] = &infile[k];
 
-            // Read all characters between quotes
+            
 
             while (k < size && infile[k] != '\"' && infile[k] != '\n')
             {
@@ -179,14 +179,14 @@ static void LoadResponseFile(int argv_index)
                         response_filename);
             }
 
-            // Cut off the string at the closing quote
+            
 
             infile[k] = '\0';
             ++k;
         }
         else
         {
-            // Read in the next argument until a space is reached
+            
 
             newargv[newargc++] = &infile[k];
 
@@ -195,7 +195,7 @@ static void LoadResponseFile(int argv_index)
                 ++k;
             }
 
-            // Cut off the end of the argument at the first space
+            
 
             infile[k] = '\0';
 
@@ -203,7 +203,7 @@ static void LoadResponseFile(int argv_index)
         }
     }
 
-    // Add arguments following the response file argument
+    
 
     for (i=argv_index + 1; i<myargc; ++i)
     {
@@ -214,23 +214,23 @@ static void LoadResponseFile(int argv_index)
     myargv = newargv;
     myargc = newargc;
 
-#if 0
-    // Disabled - Vanilla Doom does not do this.
-    // Display arguments
+#if 0 
 
-    printf("%d command-line args:\n", myargc);
 
-    for (k=1; k<myargc; k++)
-    {
-        printf("'%s'\n", myargv[k]);
-    }
+
+
+
+
+
+
+
 #endif
 #endif
 }
 
-//
-// Find a Response File
-//
+
+
+
 
 void M_FindResponseFile(void)
 {
@@ -245,7 +245,7 @@ void M_FindResponseFile(void)
     }
 }
 
-// Return the name of the executable used to start the program:
+
 
 char *M_GetExecutableName(void)
 {

@@ -1,33 +1,33 @@
-/* sha1.c - SHA1 hash function
- *	Copyright (C) 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
- *
- * Please see below for more legal information!
- *
- * This file is part of GnuPG.
- *
- * GnuPG is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * GnuPG is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, see <http://www.gnu.org/licenses/>.
- */
 
 
-/*  Test vectors:
- *
- *  "abc"
- *  A999 3E36 4706 816A BA3E  2571 7850 C26C 9CD0 D89D
- *
- *  "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"
- *  8498 3E44 1C3B D26E BAAE  4AA1 F951 29E5 E546 70F1
- */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,15 +49,15 @@ void SHA1_Init(sha1_context_t *hd)
 }
 
 
-/****************
- * Transform the message X which consists of 16 32-bit-words
- */
+
+
+
 static void Transform(sha1_context_t *hd, byte *data)
 {
     uint32_t a,b,c,d,e,tm;
     uint32_t x[16];
 
-    /* get values from the chaining vars */
+    
     a = hd->h0;
     b = hd->h1;
     c = hd->h2;
@@ -183,7 +183,7 @@ static void Transform(sha1_context_t *hd, byte *data)
     R( c, d, e, a, b, F4, K4, M(78) );
     R( b, c, d, e, a, F4, K4, M(79) );
 
-    /* update chainig vars */
+    
     hd->h0 += a;
     hd->h1 += b;
     hd->h2 += c;
@@ -192,14 +192,14 @@ static void Transform(sha1_context_t *hd, byte *data)
 }
 
 
-/* Update the message digest with the contents
- * of INBUF with length INLEN.
- */
+
+
+
 void SHA1_Update(sha1_context_t *hd, byte *inbuf, size_t inlen)
 {
     if (hd->count == 64)
     {
-        /* flush the buffer */
+        
 	Transform(hd, hd->buf);
 	hd->count = 0;
 	hd->nblocks++;
@@ -228,29 +228,29 @@ void SHA1_Update(sha1_context_t *hd, byte *inbuf, size_t inlen)
 }
 
 
-/* The routine final terminates the computation and
- * returns the digest.
- * The handle is prepared for a new cycle, but adding bytes to the
- * handle will the destroy the returned buffer.
- * Returns: 20 bytes representing the digest.
- */
+
+
+
+
+
+
 
 void SHA1_Final(sha1_digest_t digest, sha1_context_t *hd)
 {
     uint32_t t, msb, lsb;
     byte *p;
 
-    SHA1_Update(hd, NULL, 0); /* flush */;
+    SHA1_Update(hd, NULL, 0); ;
 
     t = hd->nblocks;
-    /* multiply by 64 to make a byte count */
+    
     lsb = t << 6;
     msb = t >> 26;
-    /* add the count */
+    
     t = lsb;
     if ((lsb += hd->count) < t)
 	msb++;
-    /* multiply by 8 to make a bit count */
+    
     t = lsb;
     lsb <<= 3;
     msb <<= 3;
@@ -258,21 +258,21 @@ void SHA1_Final(sha1_digest_t digest, sha1_context_t *hd)
 
     if (hd->count < 56)
     {
-        /* enough room */
-	hd->buf[hd->count++] = 0x80; /* pad */
+        
+	hd->buf[hd->count++] = 0x80; 
 	while (hd->count < 56)
-	    hd->buf[hd->count++] = 0;  /* pad */
+	    hd->buf[hd->count++] = 0;  
     }
     else
     {
-        /* need one extra block */
-	hd->buf[hd->count++] = 0x80; /* pad character */
+        
+	hd->buf[hd->count++] = 0x80; 
 	while (hd->count < 64)
 	    hd->buf[hd->count++] = 0;
-	SHA1_Update(hd, NULL, 0);  /* flush */;
-	memset(hd->buf, 0, 56 ); /* fill next block with zeroes */
+	SHA1_Update(hd, NULL, 0);  ;
+	memset(hd->buf, 0, 56 ); 
     }
-    /* append the 64 bit count */
+    
     hd->buf[56] = msb >> 24;
     hd->buf[57] = msb >> 16;
     hd->buf[58] = msb >>  8;
@@ -286,7 +286,7 @@ void SHA1_Final(sha1_digest_t digest, sha1_context_t *hd)
     p = hd->buf;
 #ifdef SYS_BIG_ENDIAN
 #define X(a) do { *(uint32_t*)p = hd->h##a ; p += 4; } while(0)
-#else /* little endian */
+#else 
 #define X(a) do { *p++ = hd->h##a >> 24; *p++ = hd->h##a >> 16;	 \
 		      *p++ = hd->h##a >> 8; *p++ = hd->h##a; } while(0)
 #endif

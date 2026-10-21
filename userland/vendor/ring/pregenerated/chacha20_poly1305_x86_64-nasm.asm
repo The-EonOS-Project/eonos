@@ -1,5 +1,5 @@
-; This file is generated from a similarly-named Perl script in the BoringSSL
-; source tree. Do not edit by hand.
+
+
 
 %ifidn __OUTPUT_FORMAT__, win64
 default	rel
@@ -222,7 +222,7 @@ global	chacha20_poly1305_open_sse41
 
 ALIGN	64
 chacha20_poly1305_open_sse41:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_chacha20_poly1305_open_sse41:
@@ -1877,7 +1877,7 @@ $L$open_sse_finalize:
 
 	pop	rbp
 
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -2124,7 +2124,7 @@ global	chacha20_poly1305_seal_sse41
 
 ALIGN	64
 chacha20_poly1305_seal_sse41:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_chacha20_poly1305_seal_sse41:
@@ -3959,7 +3959,7 @@ $L$do_length_block:
 
 	pop	rbp
 
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -4141,7 +4141,7 @@ global	chacha20_poly1305_open_avx2
 
 ALIGN	64
 chacha20_poly1305_open_avx2:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_chacha20_poly1305_open_avx2:
@@ -6329,7 +6329,7 @@ global	chacha20_poly1305_seal_avx2
 
 ALIGN	64
 chacha20_poly1305_seal_avx2:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_chacha20_poly1305_seal_avx2:
@@ -9016,6 +9016,6 @@ $L$seal_avx2_exit:
 
 $L$SEH_end_chacha20_poly1305_seal_avx2:
 %else
-; Work around https://bugzilla.nasm.us/show_bug.cgi?id=3392738
+
 ret
 %endif

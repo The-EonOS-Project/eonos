@@ -1,8 +1,8 @@
 use core::iter::Peekable;
 
-/// An iterator that skips all leading zeros.
-///
-/// When the wrapped iterator is all zeros, then the last item is retained.
+
+
+
 pub struct LeadingZerosStripped<I>
 where
     I: Iterator,
@@ -29,8 +29,8 @@ where
     pub fn new(inner: I) -> Self {
         let mut len = inner.len();
         let mut inner = inner.peekable();
-        // Strip all leading zeroes, but don't strip the last byte if all bytes
-        // were zero.
+        
+        
         while len > 1 && inner.next_if_eq(&0).is_some() {
             len -= 1;
         }

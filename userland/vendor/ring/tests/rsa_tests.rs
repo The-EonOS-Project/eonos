@@ -1,16 +1,16 @@
-// Copyright 2017 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #![allow(missing_docs)]
 #![cfg(feature = "alloc")]
@@ -81,8 +81,8 @@ fn test_signature_rsa_pkcs1_sign() {
             }
             let key_pair = key_pair.unwrap();
 
-            // XXX: This test is too slow on Android ARM Travis CI builds.
-            // TODO: re-enable these tests on Android ARM.
+            
+            
             let mut actual = vec![0u8; key_pair.public().modulus_len()];
             key_pair
                 .sign(alg, &rng, &msg, actual.as_mut_slice())
@@ -131,12 +131,12 @@ fn test_signature_rsa_pss_sign() {
     );
 }
 
-// `KeyPair::sign` requires that the output buffer is the same length as
-// the public key modulus. Test what happens when it isn't the same length.
+
+
 #[test]
 fn test_signature_rsa_pkcs1_sign_output_buffer_len() {
-    // Sign the message "hello, world", using PKCS#1 v1.5 padding and the
-    // SHA256 digest algorithm.
+    
+    
     const MESSAGE: &[u8] = b"hello, world";
     let rng = rand::SystemRandom::new();
 
@@ -144,10 +144,10 @@ fn test_signature_rsa_pkcs1_sign_output_buffer_len() {
         include_bytes!("../src/rsa/signature_rsa_example_private_key.der");
     let key_pair = rsa::KeyPair::from_der(PRIVATE_KEY_DER).unwrap();
 
-    // When the output buffer is not exactly the right length, `sign()` returns
-    // an error (and does not panic or invoke UB). if `sign` doesn't check that
-    // the length is correct at the beginning then there are various possible
-    // failure points when the output buffer is too small.
+    
+    
+    
+    
     for len in 0..key_pair.public().modulus_len() + 1 {
         let mut signature = vec![0; len];
         assert_eq!(
@@ -206,9 +206,9 @@ fn test_signature_rsa_pkcs1_verify() {
 
             let public_key = test_case.consume_bytes("Key");
 
-            // Sanity check that we correctly DER-encoded the originally-
-            // provided separate (n, e) components. When we add test vectors
-            // for improperly-encoded signatures, we'll have to revisit this.
+            
+            
+            
             let key_bits = untrusted::Input::from(&public_key)
                 .read_all(error::Unspecified, |input| {
                     der::nested(input, der::Tag::Sequence, error::Unspecified, |input| {
@@ -216,8 +216,8 @@ fn test_signature_rsa_pkcs1_verify() {
                             der::positive_integer(input)?.big_endian_without_leading_zero();
                         let _e = der::positive_integer(input)?;
 
-                        // Because `n_bytes` has the leading zeros stripped and is big-endian, there
-                        // must be less than 8 leading zero bits.
+                        
+                        
                         let n_leading_zeros = usize::try_from(n_bytes[0].leading_zeros()).unwrap();
                         assert!(n_leading_zeros < 8);
                         Ok((n_bytes.len() * 8) - n_leading_zeros)
@@ -258,9 +258,9 @@ fn test_signature_rsa_pss_verify() {
 
             let public_key = test_case.consume_bytes("Key");
 
-            // Sanity check that we correctly DER-encoded the originally-
-            // provided separate (n, e) components. When we add test vectors
-            // for improperly-encoded signatures, we'll have to revisit this.
+            
+            
+            
             assert!(untrusted::Input::from(&public_key)
                 .read_all(error::Unspecified, |input| der::nested(
                     input,
@@ -287,8 +287,8 @@ fn test_signature_rsa_pss_verify() {
     );
 }
 
-// Test for `primitive::verify()`. Read public key parts from a file
-// and use them to verify a signature.
+
+
 #[cfg(feature = "alloc")]
 #[test]
 fn test_signature_rsa_primitive_verification() {
@@ -316,15 +316,15 @@ fn rsa_test_keypair_coverage() {
 
     let key_pair = rsa::KeyPair::from_pkcs8(PRIVATE_KEY).unwrap();
 
-    // Test that `signature::KeyPair::PublicKey` is `rsa::PublicKey`; if it
-    // were a separate type then it would need to be tested separately.
+    
+    
     let _: &rsa::PublicKey = key_pair.public_key();
 
     test_public_key_coverage(key_pair.public());
-    // Test clones.
+    
     test_public_key_coverage(&key_pair.public().clone());
 
-    // Test `Debug`
+    
     assert_eq!(
         format!("RsaKeyPair {{ public: {:?} }}", key_pair.public_key()),
         format!("{:?}", key_pair)
@@ -332,11 +332,11 @@ fn rsa_test_keypair_coverage() {
 }
 
 fn test_public_key_coverage(key: &rsa::PublicKey) {
-    // Test `AsRef<[u8]>`
+    
     const PUBLIC_KEY: &[u8] = include_bytes!("rsa_test_public_key_2048.der");
     assert_eq!(key.as_ref(), PUBLIC_KEY);
 
-    // Test `Debug`.
+    
     const PUBLIC_KEY_DEBUG: &str = include_str!("rsa_test_public_key_2048_debug.txt");
     assert_eq!(PUBLIC_KEY_DEBUG, format!("{:?}", key));
 

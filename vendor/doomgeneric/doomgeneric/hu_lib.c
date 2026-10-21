@@ -1,19 +1,19 @@
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 2005-2014 Simon Howard
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// DESCRIPTION:  heads-up text and input code
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #include <ctype.h>
@@ -28,10 +28,10 @@
 #include "r_local.h"
 #include "r_draw.h"
 
-// boolean : whether the screen is always erased
+
 #define noterased viewwindowx
 
-extern boolean	automapactive;	// in AM_map.c
+extern boolean	automapactive;	
 
 void HUlib_init(void)
 {
@@ -101,7 +101,7 @@ HUlib_drawTextLine
     int			x;
     unsigned char	c;
 
-    // draw the new stuff
+    
     x = l->x;
     for (i=0;i<l->len;i++)
     {
@@ -124,7 +124,7 @@ HUlib_drawTextLine
 	}
     }
 
-    // draw the cursor if requested
+    
     if (drawcursor
 	&& x + SHORT(l->f['_' - l->sc]->width) <= SCREENWIDTH)
     {
@@ -133,16 +133,16 @@ HUlib_drawTextLine
 }
 
 
-// sorta called by HU_Erase and just better darn get things straight
+
 void HUlib_eraseTextLine(hu_textline_t* l)
 {
     int			lh;
     int			y;
     int			yoffset;
 
-    // Only erases when NOT in automap and the screen is reduced,
-    // and the text must either need updating or refreshing
-    // (because of a recent change back from the automap)
+    
+    
+    
 
     if (!automapactive &&
 	viewwindowx && l->needsupdate)
@@ -151,12 +151,12 @@ void HUlib_eraseTextLine(hu_textline_t* l)
 	for (y=l->y,yoffset=y*SCREENWIDTH ; y<l->y+lh ; y++,yoffset+=SCREENWIDTH)
 	{
 	    if (y < viewwindowy || y >= viewwindowy + viewheight)
-		R_VideoErase(yoffset, SCREENWIDTH); // erase entire line
+		R_VideoErase(yoffset, SCREENWIDTH); 
 	    else
 	    {
-		R_VideoErase(yoffset, viewwindowx); // erase left border
+		R_VideoErase(yoffset, viewwindowx); 
 		R_VideoErase(yoffset + viewwindowx + viewwidth, viewwindowx);
-		// erase right border
+		
 	    }
 	}
     }
@@ -194,12 +194,12 @@ void HUlib_addLineToSText(hu_stext_t* s)
 
     int i;
 
-    // add a clear line
+    
     if (++s->cl == s->h)
 	s->cl = 0;
     HUlib_clearTextLine(&s->l[s->cl]);
 
-    // everything needs updating
+    
     for (i=0 ; i<s->h ; i++)
 	s->l[i].needsupdate = 4;
 
@@ -226,19 +226,19 @@ void HUlib_drawSText(hu_stext_t* s)
     hu_textline_t *l;
 
     if (!*s->on)
-	return; // if not on, don't draw
+	return; 
 
-    // draw everything
+    
     for (i=0 ; i<s->h ; i++)
     {
 	idx = s->cl - i;
 	if (idx < 0)
-	    idx += s->h; // handle queue of lines
+	    idx += s->h; 
 	
 	l = &s->l[idx];
 
-	// need a decision made here on whether to skip the draw
-	HUlib_drawTextLine(l, false); // no cursor, please
+	
+	HUlib_drawTextLine(l, false); 
     }
 
 }
@@ -267,14 +267,14 @@ HUlib_initIText
   int		startchar,
   boolean*	on )
 {
-    it->lm = 0; // default left margin is start of text
+    it->lm = 0; 
     it->on = on;
     it->laston = true;
     HUlib_initTextLine(&it->l, x, y, font, startchar);
 }
 
 
-// The following deletion routines adhere to the left margin restriction
+
 void HUlib_delCharFromIText(hu_itext_t* it)
 {
     if (it->l.len != it->lm)
@@ -287,7 +287,7 @@ void HUlib_eraseLineFromIText(hu_itext_t* it)
 	HUlib_delCharFromTextLine(&it->l);
 }
 
-// Resets left margin as well
+
 void HUlib_resetIText(hu_itext_t* it)
 {
     it->lm = 0;
@@ -304,8 +304,8 @@ HUlib_addPrefixToIText
     it->lm = it->l.len;
 }
 
-// wrapper function for handling general keyed input.
-// returns true if it ate the key
+
+
 boolean
 HUlib_keyInIText
 ( hu_itext_t*	it,
@@ -320,9 +320,9 @@ HUlib_keyInIText
 	    HUlib_delCharFromIText(it);
 	else 
 	    if (ch != KEY_ENTER) 
-		return false; // did not eat key
+		return false; 
 
-    return true; // ate the key
+    return true; 
 
 }
 
@@ -333,7 +333,7 @@ void HUlib_drawIText(hu_itext_t* it)
 
     if (!*it->on)
 	return;
-    HUlib_drawTextLine(l, true); // draw the line w/ cursor
+    HUlib_drawTextLine(l, true); 
 
 }
 

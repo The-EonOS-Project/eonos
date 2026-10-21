@@ -29,9 +29,9 @@ $com_start="#" if ($::aout or $::coff);
 
 sub opsize()
 { my $reg=shift;
-    if    ($reg =~ m/^%e/o)		{ "l"; }
-    elsif ($reg =~ m/^%[a-d][hl]$/o)	{ "b"; }
-    elsif ($reg =~ m/^%[yxm]/o)		{ undef; }
+    if    ($reg =~ m/^ 
+    elsif ($reg =~ m/^ 
+    elsif ($reg =~ m/^ 
     else				{ "w"; }
 }
 
@@ -45,18 +45,18 @@ sub ::generic
     @arg=reverse(@arg);
 
     for (@arg)
-    {	s/^(\*?)(e?[a-dsixphl]{2})$/$1%$2/o;	# gp registers
-	s/^([xy]?mm[0-7])$/%$1/o;		# xmm/mmx registers
+    {	s/^(\*?)(e?[a-dsixphl]{2})$/$1 
+	s/^([xy]?mm[0-7])$/ 
 	s/^(\-?[0-9]+)$/\$$1/o;			# constants
 	s/^(\-?0x[0-9a-f]+)$/\$$1/o;		# constants
     }
 
     $dst = $arg[$#arg]		if ($#arg>=0);
     $src = $arg[$#arg-1]	if ($#arg>=1);
-    if    ($dst =~ m/^%/o)	{ $suffix=&opsize($dst); }
-    elsif ($src =~ m/^%/o)	{ $suffix=&opsize($src); }
+    if    ($dst =~ m/^ 
+    elsif ($src =~ m/^ 
     else			{ $suffix="l";           }
-    undef $suffix if ($dst =~ m/^%[xm]/o || $src =~ m/^%[xm]/o);
+    undef $suffix if ($dst =~ m/^ 
 
     if ($#_==0)				{ &::emit($opcode);		}
     elsif ($#_==1 && $opcode =~ m/^(call|clflush|j|loop|set)/o)

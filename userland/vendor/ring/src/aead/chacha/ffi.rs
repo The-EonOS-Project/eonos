@@ -1,23 +1,23 @@
-// Copyright 2016-2025 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use super::{super::overlapping::Overlapping, Counter, Key};
 
-// `unsafe { (N, C, InOut) => f }` means that the function `f` is safe to call
-// iff the in/out length is at least `N`, the CPU features `C` are available,
-// and the input type is `InOut`. If `f` supports overlapping input/output then
-// `InOut` should be `Overlapping<'_, u8>`; otherwise it should be `&mut [u8]`.
+
+
+
+
 macro_rules! chacha20_ctr32_ffi {
     ( unsafe { ($MIN_LEN:expr, $Cpu:ty, $InOut:ty) => $f:ident },
       $key:expr, $counter:expr, $in_out:expr, $cpu:expr ) => {{
@@ -30,9 +30,9 @@ macro_rules! chacha20_ctr32_ffi {
                 counter: &crate::aead::chacha::Counter,
             );
         }
-        // SAFETY: The user asserts that $f has the signature above and is safe
-        // to call if additionally we have a value of type `$Cpu` and an in/out
-        // value of the indicated type, which we do.
+        
+        
+        
         unsafe {
             crate::aead::chacha::ffi::chacha20_ctr32_ffi::<$InOut, $Cpu, $MIN_LEN>(
                 $key, $counter, $in_out, $cpu, $f,
@@ -41,8 +41,8 @@ macro_rules! chacha20_ctr32_ffi {
     }};
 }
 
-// Panics if `in_out.len() < MIN_LEN`. The caller should have guarded against
-// that so that the assertion gets optimized away.
+
+
 pub(super) unsafe fn chacha20_ctr32_ffi<
     'o,
     InOut: 'o + Into<Overlapping<'o, u8>>,

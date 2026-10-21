@@ -1,4 +1,4 @@
-//! Small synchronous block-device interface used by filesystems.
+
 
 #![allow(dead_code)]
 
@@ -15,7 +15,7 @@ pub struct RegisteredDevice {
 
 static DEVICES: IrqMutex<Vec<RegisteredDevice>> = IrqMutex::new(Vec::new());
 
-/// Publish a block device to kernel tools such as `lsblk`.
+
 pub fn register_device(name: &'static str, device: &'static dyn BlockDevice) {
     let mut devices = DEVICES.lock();
     if devices.iter().any(|entry| entry.name == name) {
@@ -28,7 +28,7 @@ pub fn devices() -> Vec<RegisteredDevice> {
     DEVICES.lock().clone()
 }
 
-/// Look up a registered block device by its kernel-visible name.
+
 pub fn find_device(name: &str) -> Option<&'static dyn BlockDevice> {
     DEVICES
         .lock()
@@ -50,14 +50,14 @@ pub trait BlockDevice: Send + Sync {
     fn write_sector(&self, _lba: u64, _data: &[u8; SECTOR_SIZE]) -> Result<(), BlockError> {
         Err(BlockError::ReadOnly)
     }
-    /// Make completed writes durable when the backing device supports it.
+    
     fn flush(&self) -> Result<(), BlockError> {
         Err(BlockError::ReadOnly)
     }
 }
 
-/// A bounded view of a partition on a parent block device.
-/// All filesystem LBAs are relative to the partition start.
+
+
 pub struct PartitionDevice {
     parent: &'static dyn BlockDevice,
     start_lba: u64,
@@ -102,8 +102,8 @@ impl BlockDevice for PartitionDevice {
     }
 }
 
-/// A block device backed by a Limine-loaded image. Writes are kept in a
-/// sparse RAM overlay, leaving the bootloader's original module intact.
+
+
 pub struct MemoryBlockDevice {
     bytes: &'static [u8],
     overlay: IrqMutex<BTreeMap<u64, [u8; SECTOR_SIZE]>>,

@@ -1,11 +1,11 @@
 #![no_std]
 
-//! Small `no_std` runtime for static EonOS user programs.
-//!
-//! This crate supplies the ELF entry point, initial arguments, basic syscall
-//! wrappers, formatted output, a small-block global allocator, and a panic
-//! handler. It deliberately does not provide `std` or a libc compatibility
-//! layer.
+
+
+
+
+
+
 
 extern crate alloc;
 
@@ -32,12 +32,12 @@ core::arch::global_asm!(
     "ud2",
 );
 
-/// Result of a failed EonOS system call. `0` is not a valid error code.
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Error(pub i32);
 
-/// Current USB mouse pointer position, buttons, and accumulated wheel delta.
-/// Button bits 0, 1, and 2 are left, right, and middle.
+
+
 #[derive(Clone, Copy, Debug, Default)]
 #[repr(C)]
 pub struct MouseState {
@@ -48,7 +48,7 @@ pub struct MouseState {
     pub wheel: i32,
 }
 
-/// Kernel physical-memory and heap allocator counters.
+
 #[derive(Clone, Copy, Debug, Default)]
 #[repr(C)]
 pub struct MemoryInfo {
@@ -58,7 +58,7 @@ pub struct MemoryInfo {
     pub total_physical: u64,
 }
 
-/// Ethernet adapter status and packet counters.
+
 #[derive(Clone, Copy, Debug, Default)]
 #[repr(C)]
 pub struct NetworkInfo {
@@ -69,7 +69,7 @@ pub struct NetworkInfo {
     pub transmitted: u64,
 }
 
-/// IPv4 configuration obtained through DHCP.
+
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 #[repr(C)]
 pub struct Ipv4Config {
@@ -82,7 +82,7 @@ pub struct Ipv4Config {
     pub configured: u32,
 }
 
-/// Sender information for the most recently received UDP datagram.
+
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 #[repr(C)]
 pub struct UdpDatagramInfo {
@@ -91,7 +91,7 @@ pub struct UdpDatagramInfo {
     pub length: u16,
 }
 
-/// Focus-routed keyboard edge event using the USB HID usage set.
+
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 #[repr(C)]
 pub struct KeyEvent {
@@ -101,7 +101,7 @@ pub struct KeyEvent {
     pub _reserved: u8,
 }
 
-/// Result type used by the syscall wrappers.
+
 pub type Result<T> = core::result::Result<T, Error>;
 
 const SYS_READ: usize = 0;
@@ -163,20 +163,20 @@ const ALLOCATION_MAGIC: usize = 0xE0A5_A110_CAFE_BEEF;
 const SIZE_CLASSES: [usize; 6] = [64, 128, 256, 512, 1024, 2048];
 const SMALL_ALLOCATION_LIMIT: usize = 2048;
 
-/// Open a file for reading.
+
 pub const O_RDONLY: usize = 0;
-/// Open a file for writing.
+
 pub const O_WRONLY: usize = 1;
-/// Open a file for reading and writing.
+
 pub const O_RDWR: usize = 2;
-/// Create a missing file.
+
 pub const O_CREAT: usize = 0x40;
-/// Truncate a file when opening it.
+
 pub const O_TRUNC: usize = 0x200;
-/// Write new data at the end of a file.
+
 pub const O_APPEND: usize = 0x400;
 
-/// List paths visible in the VFS into a caller-provided byte buffer.
+
 pub fn list_files(buffer: &mut [u8]) -> Result<usize> {
     checked(unsafe {
         syscall3(
@@ -188,7 +188,7 @@ pub fn list_files(buffer: &mut [u8]) -> Result<usize> {
     })
 }
 
-/// List processes into a caller-provided byte buffer.
+
 pub fn list_processes(buffer: &mut [u8]) -> Result<usize> {
     checked(unsafe {
         syscall3(
@@ -200,7 +200,7 @@ pub fn list_processes(buffer: &mut [u8]) -> Result<usize> {
     })
 }
 
-/// List block devices and mount points into a caller-provided byte buffer.
+
 pub fn list_block_devices(buffer: &mut [u8]) -> Result<usize> {
     checked(unsafe {
         syscall3(
@@ -212,7 +212,7 @@ pub fn list_block_devices(buffer: &mut [u8]) -> Result<usize> {
     })
 }
 
-/// List active filesystem mounts into a caller-provided byte buffer.
+
 pub fn list_mounts(buffer: &mut [u8]) -> Result<usize> {
     checked(unsafe {
         syscall3(
@@ -224,17 +224,17 @@ pub fn list_mounts(buffer: &mut [u8]) -> Result<usize> {
     })
 }
 
-/// Create a directory.
+
 pub fn mkdir(path: &str) -> Result<()> {
     checked(unsafe { syscall3(SYS_MKDIR, path.as_ptr() as usize, path.len(), 0) }).map(|_| ())
 }
 
-/// Remove a file or empty directory.
+
 pub fn remove(path: &str) -> Result<()> {
     checked(unsafe { syscall3(SYS_REMOVE, path.as_ptr() as usize, path.len(), 0) }).map(|_| ())
 }
 
-/// Mount a block device path at a VFS mount point.
+
 pub fn mount(device: &CStr, mountpoint: &CStr) -> Result<()> {
     checked(unsafe {
         syscall3(
@@ -247,7 +247,7 @@ pub fn mount(device: &CStr, mountpoint: &CStr) -> Result<()> {
     .map(|_| ())
 }
 
-/// Enter the kernel panic handler. This function never returns.
+
 pub fn panic_kernel() -> ! {
     unsafe { syscall3(SYS_PANIC, 0, 0, 0) };
     loop {
@@ -323,34 +323,34 @@ fn checked(raw: isize) -> Result<usize> {
     }
 }
 
-/// Read from a descriptor. Descriptor zero reads a line from the console.
+
 pub fn read(fd: usize, buffer: &mut [u8]) -> Result<usize> {
     checked(unsafe { syscall3(SYS_READ, fd, buffer.as_mut_ptr() as usize, buffer.len()) })
 }
 
-/// Write to a descriptor. Descriptors one and two write to the console.
+
 pub fn write(fd: usize, buffer: &[u8]) -> Result<usize> {
     checked(unsafe { syscall3(SYS_WRITE, fd, buffer.as_ptr() as usize, buffer.len()) })
 }
 
-/// Write an entire buffer, retrying after short writes.
+
 pub fn write_all(fd: usize, mut buffer: &[u8]) -> Result<()> {
     while !buffer.is_empty() {
         let written = write(fd, buffer)?;
         if written == 0 {
-            return Err(Error(5)); // EIO
+            return Err(Error(5)); 
         }
         buffer = &buffer[written..];
     }
     Ok(())
 }
 
-/// Open a path using EonOS's length-delimited path syscall.
+
 pub fn open(path: &str, flags: usize) -> Result<usize> {
     checked(unsafe { syscall3(SYS_OPEN, path.as_ptr() as usize, path.len(), flags) })
 }
 
-/// Create a byte pipe and return its read and write descriptors.
+
 pub fn pipe() -> Result<(usize, usize)> {
     let mut descriptors = [0usize; 2];
     checked(unsafe {
@@ -364,8 +364,8 @@ pub fn pipe() -> Result<(usize, usize)> {
     Ok((descriptors[0], descriptors[1]))
 }
 
-/// Read available bytes from a pipe without waiting. Returns zero when the
-/// pipe is currently empty; call again after yielding or sleeping briefly.
+
+
 pub fn pipe_read_available(fd: usize, buffer: &mut [u8]) -> Result<usize> {
     checked(unsafe {
         syscall3(
@@ -377,7 +377,7 @@ pub fn pipe_read_available(fd: usize, buffer: &mut [u8]) -> Result<usize> {
     })
 }
 
-/// Write to a pipe without waiting for buffer space. Returns zero if full.
+
 pub fn pipe_write_available(fd: usize, buffer: &[u8]) -> Result<usize> {
     checked(unsafe {
         syscall3(
@@ -389,7 +389,7 @@ pub fn pipe_write_available(fd: usize, buffer: &[u8]) -> Result<usize> {
     })
 }
 
-/// Read the latest USB mouse state. Coordinates are clamped to the framebuffer.
+
 pub fn mouse_state() -> Result<MouseState> {
     let mut state = MouseState::default();
     checked(unsafe {
@@ -403,7 +403,7 @@ pub fn mouse_state() -> Result<MouseState> {
     Ok(state)
 }
 
-/// Query free physical memory and kernel heap usage.
+
 pub fn memory_info() -> Result<MemoryInfo> {
     let mut info = MemoryInfo::default();
     checked(unsafe {
@@ -412,44 +412,44 @@ pub fn memory_info() -> Result<MemoryInfo> {
     Ok(info)
 }
 
-/// Change the calling process's working directory.
+
 pub fn chdir(path: &str) -> Result<()> {
     checked(unsafe { syscall3(SYS_CHDIR, path.as_ptr() as usize, path.len(), 0) }).map(|_| ())
 }
 
-/// Copy the calling process's working directory into `buffer` and return its length.
+
 pub fn getcwd(buffer: &mut [u8]) -> Result<usize> {
     checked(unsafe { syscall3(SYS_GETCWD, buffer.as_mut_ptr() as usize, buffer.len(), 0) })
 }
 
-/// List the entries in a directory into a caller-provided buffer.
+
 pub fn list_directory(path: &str, buffer: &mut [u8]) -> Result<usize> {
     checked(unsafe {
         syscall4(SYS_LIST_DIRECTORY, path.as_ptr() as usize, path.len(), buffer.as_mut_ptr() as usize, buffer.len())
     })
 }
 
-/// Close an open descriptor.
+
 pub fn close(fd: usize) -> Result<()> {
     checked(unsafe { syscall3(SYS_CLOSE, fd, 0, 0) }).map(|_| ())
 }
 
-/// Seek an open file descriptor, returning its new nonnegative byte offset.
+
 pub fn seek(fd: usize, offset: i64, whence: usize) -> Result<usize> {
     checked(unsafe { syscall3(SYS_SEEK, fd, offset as usize, whence) })
 }
 
-/// Claim the foreground keyboard event stream for this process.
+
 pub fn keyboard_claim() -> Result<()> {
     checked(unsafe { syscall3(SYS_KEYBOARD_FOCUS, 1, 0, 0) }).map(|_| ())
 }
 
-/// Release the foreground keyboard event stream.
+
 pub fn keyboard_release() -> Result<()> {
     checked(unsafe { syscall3(SYS_KEYBOARD_FOCUS, 0, 0, 0) }).map(|_| ())
 }
 
-/// Poll one key press/release edge without blocking.
+
 pub fn keyboard_event() -> Result<Option<KeyEvent>> {
     let mut event = KeyEvent::default();
     let count = checked(unsafe {
@@ -458,74 +458,74 @@ pub fn keyboard_event() -> Result<Option<KeyEvent>> {
     Ok((count != 0).then_some(event))
 }
 
-/// Return the current process ID.
+
 pub fn getpid() -> usize {
     unsafe { syscall3(SYS_GETPID, 0, 0, 0) as usize }
 }
 
-/// Return milliseconds since boot.
+
 pub fn uptime_ms() -> usize {
     unsafe { syscall3(SYS_UPTIME_MS, 0, 0, 0) as usize }
 }
 
-/// Current Unix time in seconds, using the CMOS RTC initialized at boot.
-/// Returns None when the RTC was missing or contained an invalid date.
+
+
 pub fn wall_time_secs() -> Option<u64> {
     let seconds = unsafe { syscall3(SYS_WALL_TIME, 0, 0, 0) };
     (seconds > 0).then_some(seconds as u64)
 }
 
-/// Sleep for at least the requested number of milliseconds.
+
 pub fn sleep_ms(milliseconds: usize) -> Result<()> {
     checked(unsafe { syscall3(SYS_SLEEP_MS, milliseconds, 0, 0) }).map(|_| ())
 }
 
-/// Yield this process's current scheduler slice.
+
 pub fn yield_now() {
     let _ = unsafe { syscall3(SYS_SCHED_YIELD, 0, 0, 0) };
 }
 
-/// Flush mounted writable storage.
+
 pub fn sync() -> Result<()> {
     checked(unsafe { syscall3(SYS_SYNC, 0, 0, 0) }).map(|_| ())
 }
 
-/// Flush mounted storage and restart the machine. Normally this call does not return.
+
 pub fn reboot() -> Result<()> {
     checked(unsafe { syscall3(SYS_POWER_CONTROL, 0, 0, 0) }).map(|_| ())
 }
 
-/// Flush mounted storage and request ACPI soft-off. Normally this call does not return.
+
 pub fn shutdown() -> Result<()> {
     checked(unsafe { syscall3(SYS_POWER_CONTROL, 1, 0, 0) }).map(|_| ())
 }
 
-/// Check whether `path` is an exact writable filesystem mountpoint.
+
 pub fn is_mountpoint(path: &CStr) -> Result<bool> {
     checked(unsafe { syscall3(SYS_IS_MOUNTPOINT, path.as_ptr() as usize, 0, 0) })
         .map(|mounted| mounted != 0)
 }
 
-/// Read the initialized network interface's link, address, and counters.
+
 pub fn network_info() -> Result<NetworkInfo> {
     let mut info = NetworkInfo::default();
     checked(unsafe { syscall3(SYS_NET_INFO, (&mut info as *mut NetworkInfo) as usize, 0, 0) })?;
     Ok(info)
 }
 
-/// Read the active IPv4 configuration (all zeroes until DHCP succeeds).
+
 pub fn ipv4_config() -> Result<Ipv4Config> {
     let mut config = Ipv4Config::default();
     checked(unsafe { syscall3(SYS_NET_CONFIG, (&mut config as *mut Ipv4Config) as usize, 0, 0) })?;
     Ok(config)
 }
 
-/// Acquire an IPv4 lease using DHCP. This polls for up to ten seconds.
+
 pub fn dhcp() -> Result<()> {
     checked(unsafe { syscall3(SYS_NET_DHCP, 0, 0, 0) }).map(|_| ())
 }
 
-/// Send an IPv4 UDP payload. Returns the number of payload bytes sent.
+
 pub fn udp_send(destination: [u8; 4], destination_port: u16, source_port: u16, payload: &[u8]) -> Result<usize> {
     checked(unsafe {
         syscall6(
@@ -540,8 +540,8 @@ pub fn udp_send(destination: [u8; 4], destination_port: u16, source_port: u16, p
     })
 }
 
-/// Poll one IPv4 UDP datagram into `buffer`; returns its payload length.
-/// EAGAIN means no matching datagram is currently queued.
+
+
 pub fn udp_receive(info: &mut UdpDatagramInfo, buffer: &mut [u8]) -> Result<usize> {
     checked(unsafe {
         syscall4(
@@ -554,8 +554,8 @@ pub fn udp_receive(info: &mut UdpDatagramInfo, buffer: &mut [u8]) -> Result<usiz
     })
 }
 
-/// Send an ICMP echo request and wait up to `timeout_ms` for its reply.
-/// Returns the round-trip time in milliseconds, or `None` on timeout.
+
+
 pub fn ping(destination: [u8; 4], timeout_ms: u64) -> Result<Option<u64>> {
     let result = checked(unsafe {
         syscall3(SYS_NET_PING, destination.as_ptr() as usize, timeout_ms as usize, 0)
@@ -563,39 +563,39 @@ pub fn ping(destination: [u8; 4], timeout_ms: u64) -> Result<Option<u64>> {
     Ok(if result == 0 { None } else { Some((result - 1) as u64) })
 }
 
-/// Connect the single kernel-managed TCP stream to an IPv4 address and port.
+
 pub fn tcp_connect(destination: [u8; 4], port: u16) -> Result<()> {
     checked(unsafe {
         syscall3(SYS_TCP_CONNECT, destination.as_ptr() as usize, port as usize, 0)
     }).map(|_| ())
 }
 
-/// Send all bytes over the active TCP stream; returns the accepted byte count.
+
 pub fn tcp_send(bytes: &[u8]) -> Result<usize> {
     checked(unsafe { syscall3(SYS_TCP_SEND, bytes.as_ptr() as usize, bytes.len(), 0) })
 }
 
-/// Receive TCP bytes, waiting up to `timeout_ms`. Returns zero after peer EOF.
+
 pub fn tcp_receive(buffer: &mut [u8], timeout_ms: u64) -> Result<usize> {
     checked(unsafe {
         syscall4(SYS_TCP_RECEIVE, buffer.as_mut_ptr() as usize, buffer.len(), timeout_ms as usize, 0)
     })
 }
 
-/// Close the active TCP stream.
+
 pub fn tcp_close() -> Result<()> {
     checked(unsafe { syscall3(SYS_TCP_CLOSE, 0, 0, 0) }).map(|_| ())
 }
 
-/// Fill bytes using the kernel's hardware-backed RDRAND source. Fails on
-/// CPUs without RDRAND or if the instruction cannot produce a value; no
-/// timing-based fallback is used.
+
+
+
 pub fn secure_random(buffer: &mut [u8]) -> Result<()> {
     checked(unsafe { syscall3(SYS_SECURE_RANDOM, buffer.as_mut_ptr() as usize, buffer.len(), 0) })
         .map(|_| ())
 }
 
-/// Resolve a DNS hostname to its first IPv4 A record.
+
 pub fn resolve_ipv4(hostname: &str) -> Result<[u8; 4]> {
     let mut address = [0u8; 4];
     checked(unsafe {
@@ -610,17 +610,17 @@ pub fn resolve_ipv4(hostname: &str) -> Result<[u8; 4]> {
     Ok(address)
 }
 
-/// Transmit one complete Ethernet frame (14 to 1518 bytes).
+
 pub fn send_ethernet_frame(frame: &[u8]) -> Result<usize> {
     checked(unsafe { syscall3(SYS_NET_SEND, frame.as_ptr() as usize, frame.len(), 0) })
 }
 
-/// Poll for one complete Ethernet frame. Returns EAGAIN when no frame is ready.
+
 pub fn receive_ethernet_frame(buffer: &mut [u8]) -> Result<usize> {
     checked(unsafe { syscall3(SYS_NET_RECEIVE, buffer.as_mut_ptr() as usize, buffer.len(), 0) })
 }
 
-/// Wait for a child process and collect its status.
+
 pub fn wait4(pid: isize, status: &mut i32, options: usize) -> Result<usize> {
     checked(unsafe {
         syscall3(
@@ -632,18 +632,18 @@ pub fn wait4(pid: isize, status: &mut i32, options: usize) -> Result<usize> {
     })
 }
 
-/// Send a signal to a process. EonOS currently supports signal 0, 9, and 15.
+
 pub fn kill(pid: usize, signal: usize) -> Result<()> {
     checked(unsafe { syscall3(SYS_KILL, pid, signal, 0) }).map(|_| ())
 }
 
-/// Spawn a child process. Argument and environment strings are passed as
-/// null-terminated vectors; `argv[0]` is supplied by the caller.
+
+
 pub fn exec(path: &str, argv: &[&CStr], env: &[&CStr]) -> Result<usize> {
     exec_with_stdio(path, argv, env, None, None)
 }
 
-/// Spawn with selected parent descriptors mapped to child stdin and stdout.
+
 pub fn exec_with_stdio(
     path: &str,
     argv: &[&CStr],
@@ -688,7 +688,7 @@ pub fn exec_with_stdio(
     })
 }
 
-/// Spawn a capability-restricted application with optional standard pipes.
+
 pub fn exec_sandboxed_with_stdio(
     path: &str,
     argv: &[&CStr],
@@ -751,10 +751,10 @@ impl AllocatorState {
     }
 }
 
-/// Page-backed allocator for Rust's `alloc` crate.
-///
-/// Allocations up to 2 KiB are served from per-process 4 KiB slabs. Larger or
-/// unusually aligned allocations still receive whole pages from the kernel.
+
+
+
+
 pub struct UserAllocator {
     locked: AtomicBool,
     state: UnsafeCell<AllocatorState>,
@@ -763,7 +763,7 @@ pub struct UserAllocator {
 unsafe impl Sync for UserAllocator {}
 
 impl UserAllocator {
-    /// Create an allocator for use with `#[global_allocator]`.
+    
     pub const fn new() -> Self {
         Self {
             locked: AtomicBool::new(false),
@@ -888,7 +888,7 @@ unsafe impl GlobalAlloc for UserAllocator {
     }
 }
 
-/// Terminate the current process. This function never returns.
+
 pub fn exit(status: i32) -> ! {
     unsafe {
         syscall3(SYS_EXIT, status as usize, 0, 0);
@@ -898,7 +898,7 @@ pub fn exit(status: i32) -> ! {
     }
 }
 
-/// Iterator over the process's null-terminated C arguments.
+
 pub struct Args<'a> {
     argv: *const *const c_char,
     len: usize,
@@ -908,8 +908,8 @@ pub struct Args<'a> {
 }
 
 impl<'a> Args<'a> {
-    /// Construct arguments from the ABI stack. Pointers must reference
-    /// `len` valid, null-terminated strings for the lifetime of the result.
+    
+    
     #[doc(hidden)]
     pub unsafe fn from_raw(
         len: usize,
@@ -925,7 +925,7 @@ impl<'a> Args<'a> {
         }
     }
 
-    /// Iterate over the process environment as `NAME=value` strings.
+    
     pub fn envs(&self) -> EnvVars<'_> {
         EnvVars {
             envp: self.envp,
@@ -955,7 +955,7 @@ impl<'a> Iterator for Args<'a> {
 
 impl ExactSizeIterator for Args<'_> {}
 
-/// Iterator over the process's null-terminated environment vector.
+
 pub struct EnvVars<'a> {
     envp: *const *const c_char,
     index: usize,
@@ -1012,7 +1012,7 @@ impl fmt::Write for BufferedConsoleWriter {
     }
 }
 
-/// Format text to standard output.
+
 pub fn write_fmt(arguments: fmt::Arguments<'_>) -> fmt::Result {
     let mut writer = BufferedConsoleWriter {
         fd: 1,
@@ -1023,7 +1023,7 @@ pub fn write_fmt(arguments: fmt::Arguments<'_>) -> fmt::Result {
     writer.flush()
 }
 
-/// Format text to standard error.
+
 pub fn write_err_fmt(arguments: fmt::Arguments<'_>) -> fmt::Result {
     let mut writer = BufferedConsoleWriter {
         fd: 2,
@@ -1034,7 +1034,7 @@ pub fn write_err_fmt(arguments: fmt::Arguments<'_>) -> fmt::Result {
     writer.flush()
 }
 
-/// Print formatted text to standard output.
+
 #[macro_export]
 macro_rules! print {
     ($($arg:tt)*) => {{
@@ -1042,7 +1042,7 @@ macro_rules! print {
     }};
 }
 
-/// Print a formatted line to standard output.
+
 #[macro_export]
 macro_rules! println {
     () => { $crate::print!("\n") };
@@ -1051,7 +1051,7 @@ macro_rules! println {
     }};
 }
 
-/// Print formatted text to standard error.
+
 #[macro_export]
 macro_rules! eprint {
     ($($arg:tt)*) => {{
@@ -1059,7 +1059,7 @@ macro_rules! eprint {
     }};
 }
 
-/// Print a formatted line to standard error.
+
 #[macro_export]
 macro_rules! eprintln {
     () => { $crate::eprint!("\n") };
@@ -1068,7 +1068,7 @@ macro_rules! eprintln {
     }};
 }
 
-/// Declare a Rust `main(Args) -> i32` function as the program entry point.
+
 #[macro_export]
 macro_rules! entry {
     ($main:path) => {
@@ -1101,7 +1101,7 @@ extern "C" {
     ) -> i32;
 }
 
-/// Runtime startup called by the ELF entry stub.
+
 #[no_mangle]
 pub extern "C" fn eonos_runtime_start(initial_stack: *const usize) -> ! {
     let argc = unsafe { *initial_stack };

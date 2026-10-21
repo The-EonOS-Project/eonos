@@ -1,17 +1,17 @@
-// Copyright 2016 Brian Smith.
-// Portions Copyright (c) 2016, Google Inc.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use super::{overlapping, quic::Sample, Nonce};
 use crate::cpu;
@@ -51,8 +51,8 @@ impl Key {
 }
 
 impl Key {
-    // Encrypts `in_out` with the counter 0 and returns counter 1,
-    // where the counter is derived from the nonce `nonce`.
+    
+    
     #[inline]
     pub(super) fn encrypt_single_block_with_ctr_0<const N: usize>(
         &self,
@@ -68,7 +68,7 @@ impl Key {
 
     #[inline]
     pub fn new_mask(&self, sample: Sample) -> [u8; 5] {
-        let cpu = cpu::features(); // TODO: Remove this.
+        let cpu = cpu::features(); 
         let (ctr, nonce) = sample.split_at(4);
         let ctr = u32::from_le_bytes(ctr.try_into().unwrap());
         let nonce = Nonce::assume_unique_for_key(nonce.try_into().unwrap());
@@ -126,7 +126,7 @@ impl Key {
                 }
             } else if #[cfg(target_arch = "x86_64")] {
                 use cpu::{GetFeature, intel::{Avx2, Ssse3}};
-                const SSE_MIN_LEN: usize = 128 + 1; // Also AVX2, SSSE3_4X, SSSE3
+                const SSE_MIN_LEN: usize = 128 + 1; 
                 if in_out.len() >= SSE_MIN_LEN {
                     let values = cpu.values();
                     if let Some(cpu) = values.get_feature() {
@@ -159,13 +159,13 @@ impl Key {
     }
 }
 
-/// Counter || Nonce, all native endian.
+
 #[repr(transparent)]
 pub struct Counter([u32; 4]);
 
 impl Counter {
-    // Nonce-reuse: the caller must only use the first counter (0) for at most
-    // a single block.
+    
+    
     fn zero_one_less_safe(nonce: Nonce) -> (Self, Self) {
         let ctr0 @ Self([_, n0, n1, n2]) = Self::from_nonce_and_ctr(nonce, 0);
         let ctr1 = Self([1, n0, n1, n2]);
@@ -177,8 +177,8 @@ impl Counter {
         Self([ctr, n0, n1, n2])
     }
 
-    /// This is "less safe" because it hands off management of the counter to
-    /// the caller.
+    
+    
     #[cfg(any(
         test,
         not(any(
@@ -215,7 +215,7 @@ mod tests {
 
     #[test]
     fn chacha20_test_default() {
-        // Always use `MAX_OFFSET` if we hav assembly code.
+        
         let max_offset = if cfg!(any(
             all(target_arch = "aarch64", target_endian = "little"),
             all(target_arch = "arm", target_endian = "little"),
@@ -229,7 +229,7 @@ mod tests {
         chacha20_test(max_offset, Key::encrypt);
     }
 
-    // Smoketest the fallback implementation.
+    
     #[test]
     fn chacha20_test_fallback() {
         chacha20_test(MAX_ALIGNMENT_AND_OFFSET_SUBSET, |key, ctr, in_out, _cpu| {
@@ -237,20 +237,20 @@ mod tests {
         });
     }
 
-    // Verifies the encryption is successful when done on overlapping buffers.
-    //
-    // On some branches of the 32-bit x86 and ARM assembly code the in-place
-    // operation fails in some situations where the input/output buffers are
-    // not exactly overlapping. Such failures are dependent not only on the
-    // degree of overlapping but also the length of the data. `encrypt_within`
-    // works around that.
+    
+    
+    
+    
+    
+    
+    
     fn chacha20_test(
         max_alignment_and_offset: (usize, usize),
         f: impl for<'k, 'o> Fn(&'k Key, Counter, Overlapping<'o>, cpu::Features),
     ) {
         let cpu = cpu::features();
 
-        // Reuse a buffer to avoid slowing down the tests with allocations.
+        
         let mut buf = vec![0u8; 1300];
 
         test::run(
@@ -267,9 +267,9 @@ mod tests {
                 let input = test_case.consume_bytes("Input");
                 let output = test_case.consume_bytes("Output");
 
-                // Run the test case over all prefixes of the input because the
-                // behavior of ChaCha20 implementation changes dependent on the
-                // length of the input.
+                
+                
+                
                 for len in 0..=input.len() {
                     #[allow(clippy::cast_possible_truncation)]
                     chacha20_test_case_inner(

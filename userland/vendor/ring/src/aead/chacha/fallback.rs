@@ -1,19 +1,19 @@
-// Copyright 2021 Brian Smith.
-// Portions Copyright (c) 2014, Google Inc.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
-// Adapted from the public domain, estream code by D. Bernstein.
-// Adapted from the BoringSSL crypto/chacha/chacha.c.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use super::{super::overlapping::IndexError, Counter, Key, Overlapping, BLOCK_LEN};
 use crate::{bb, polyfill::sliceutil};
@@ -44,8 +44,8 @@ pub(super) fn ChaCha20_ctr32(key: &Key, counter: Counter, mut in_out: Overlappin
 
         debug_assert_eq!(in_out_len, in_out.len());
 
-        // Both branches do the same thing, but the duplication helps the
-        // compiler optimize (vectorize) the `BLOCK_LEN` case.
+        
+        
         if in_out_len >= BLOCK_LEN {
             in_out = in_out
                 .split_first_chunk::<BLOCK_LEN>(|in_out| {
@@ -53,7 +53,7 @@ pub(super) fn ChaCha20_ctr32(key: &Key, counter: Counter, mut in_out: Overlappin
                     sliceutil::overwrite_at_start(in_out.into_unwritten_output(), &buf);
                 })
                 .unwrap_or_else(|IndexError { .. }| {
-                    // Since `in_out_len == in_out.len() && in_out_len >= BLOCK_LEN`.
+                    
                     unreachable!()
                 });
         } else {
@@ -66,7 +66,7 @@ pub(super) fn ChaCha20_ctr32(key: &Key, counter: Counter, mut in_out: Overlappin
     }
 }
 
-// Performs 20 rounds of ChaCha on `input`, storing the result in `output`.
+
 #[inline(always)]
 fn chacha_core(output: &mut [u8; BLOCK_LEN], input: &State) {
     let mut x = *input;

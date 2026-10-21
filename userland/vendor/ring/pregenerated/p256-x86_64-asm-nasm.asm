@@ -1,5 +1,5 @@
-; This file is generated from a similarly-named Perl script in the BoringSSL
-; source tree. Do not edit by hand.
+
+
 
 %ifidn __OUTPUT_FORMAT__, win64
 default	rel
@@ -41,7 +41,7 @@ global	ecp_nistz256_neg
 
 ALIGN	32
 ecp_nistz256_neg:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_ecp_nistz256_neg:
@@ -96,7 +96,7 @@ $L$neg_body:
 	lea	rsp,[16+rsp]
 
 $L$neg_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -111,7 +111,7 @@ global	ecp_nistz256_ord_mul_mont_nohw
 
 ALIGN	32
 ecp_nistz256_ord_mul_mont_nohw:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_ecp_nistz256_ord_mul_mont_nohw:
@@ -429,7 +429,7 @@ $L$ord_mul_body:
 	lea	rsp,[48+rsp]
 
 $L$ord_mul_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -445,7 +445,7 @@ global	ecp_nistz256_ord_sqr_mont_nohw
 
 ALIGN	32
 ecp_nistz256_ord_sqr_mont_nohw:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_ecp_nistz256_ord_sqr_mont_nohw:
@@ -733,7 +733,7 @@ DB	102,72,15,126,216
 	lea	rsp,[48+rsp]
 
 $L$ord_sqr_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -743,7 +743,7 @@ global	ecp_nistz256_ord_mul_mont_adx
 
 ALIGN	32
 ecp_nistz256_ord_mul_mont_adx:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_ecp_nistz256_ord_mul_mont_adx:
@@ -982,7 +982,7 @@ $L$ord_mulx_body:
 	lea	rsp,[48+rsp]
 
 $L$ord_mulx_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -992,7 +992,7 @@ global	ecp_nistz256_ord_sqr_mont_adx
 
 ALIGN	32
 ecp_nistz256_ord_sqr_mont_adx:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_ecp_nistz256_ord_sqr_mont_adx:
@@ -1203,7 +1203,7 @@ DB	102,72,15,126,218
 	lea	rsp,[48+rsp]
 
 $L$ord_sqrx_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -1218,7 +1218,7 @@ global	ecp_nistz256_mul_mont_nohw
 
 ALIGN	32
 ecp_nistz256_mul_mont_nohw:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_ecp_nistz256_mul_mont_nohw:
@@ -1266,7 +1266,7 @@ $L$mul_body:
 	lea	rsp,[48+rsp]
 
 $L$mul_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -1501,7 +1501,7 @@ global	ecp_nistz256_sqr_mont_nohw
 
 ALIGN	32
 ecp_nistz256_sqr_mont_nohw:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_ecp_nistz256_sqr_mont_nohw:
@@ -1546,7 +1546,7 @@ $L$sqr_body:
 	lea	rsp,[48+rsp]
 
 $L$sqr_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -1719,7 +1719,7 @@ global	ecp_nistz256_mul_mont_adx
 
 ALIGN	32
 ecp_nistz256_mul_mont_adx:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_ecp_nistz256_mul_mont_adx:
@@ -1768,7 +1768,7 @@ $L$mulx_body:
 	lea	rsp,[48+rsp]
 
 $L$mulx_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -1947,7 +1947,7 @@ global	ecp_nistz256_sqr_mont_adx
 
 ALIGN	32
 ecp_nistz256_sqr_mont_adx:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_ecp_nistz256_sqr_mont_adx:
@@ -1993,7 +1993,7 @@ $L$sqrx_body:
 	lea	rsp,[48+rsp]
 
 $L$sqrx_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -2617,7 +2617,7 @@ global	ecp_nistz256_point_double_nohw
 
 ALIGN	32
 ecp_nistz256_point_double_nohw:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_ecp_nistz256_point_double_nohw:
@@ -2841,7 +2841,7 @@ DB	102,72,15,126,207
 	lea	rsp,[rsi]
 
 $L$point_doubleq_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -2850,7 +2850,7 @@ global	ecp_nistz256_point_add_nohw
 
 ALIGN	32
 ecp_nistz256_point_add_nohw:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_ecp_nistz256_point_add_nohw:
@@ -3278,7 +3278,7 @@ $L$add_doneq:
 	lea	rsp,[rsi]
 
 $L$point_addq_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -3287,7 +3287,7 @@ global	ecp_nistz256_point_add_affine_nohw
 
 ALIGN	32
 ecp_nistz256_point_add_affine_nohw:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_ecp_nistz256_point_add_affine_nohw:
@@ -3612,7 +3612,7 @@ DB	102,72,15,126,199
 	lea	rsp,[rsi]
 
 $L$add_affineq_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -3756,7 +3756,7 @@ global	ecp_nistz256_point_double_adx
 
 ALIGN	32
 ecp_nistz256_point_double_adx:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_ecp_nistz256_point_double_adx:
@@ -3980,7 +3980,7 @@ DB	102,72,15,126,207
 	lea	rsp,[rsi]
 
 $L$point_doublex_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -3989,7 +3989,7 @@ global	ecp_nistz256_point_add_adx
 
 ALIGN	32
 ecp_nistz256_point_add_adx:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_ecp_nistz256_point_add_adx:
@@ -4417,7 +4417,7 @@ $L$add_donex:
 	lea	rsp,[rsi]
 
 $L$point_addx_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -4426,7 +4426,7 @@ global	ecp_nistz256_point_add_affine_adx
 
 ALIGN	32
 ecp_nistz256_point_add_affine_adx:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_ecp_nistz256_point_add_affine_adx:
@@ -4751,7 +4751,7 @@ DB	102,72,15,126,199
 	lea	rsp,[rsi]
 
 $L$add_affinex_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -5066,6 +5066,6 @@ $L$SEH_info_ecp_nistz256_point_add_affine_adx:
 	DD	$L$add_affinex_body wrt ..imagebase,$L$add_affinex_epilogue wrt ..imagebase
 	DD	32*15+56,0
 %else
-; Work around https://bugzilla.nasm.us/show_bug.cgi?id=3392738
+
 ret
 %endif

@@ -309,12 +309,12 @@ pub fn free_frames(phys: u64, count: usize) {
     }
 }
 
-/// Physical ranges (page-aligned, `[start, end)`) that belong in the
-/// higher-half direct map: RAM, the kernel image/modules, and ACPI
-/// tables. Holes, MMIO, reserved and bad memory are deliberately left
-/// out, and so is the framebuffer (the VMM maps it separately as
-/// write-combining). Returned by value so the caller can map pages
-/// (which takes the PMM lock) without holding it.
+
+
+
+
+
+
 pub fn hhdm_ranges() -> ([(u64, u64); MAX_REGIONS], usize) {
     let mut out = [(0u64, 0u64); MAX_REGIONS];
     let mut n = 0usize;

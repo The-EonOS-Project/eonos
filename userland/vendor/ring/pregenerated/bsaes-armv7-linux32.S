@@ -1,65 +1,14 @@
-// This file is generated from a similarly-named Perl script in the BoringSSL
-// source tree. Do not edit by hand.
+
+
 
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_ARM) && defined(__ELF__)
-@ Copyright 2012-2016 The OpenSSL Project Authors. All Rights Reserved.
-@
-@ Licensed under the Apache License, Version 2.0 (the "License");
-@ you may not use this file except in compliance with the License.
-@ You may obtain a copy of the License at
-@
-@     https://www.apache.org/licenses/LICENSE-2.0
-@
-@ Unless required by applicable law or agreed to in writing, software
-@ distributed under the License is distributed on an "AS IS" BASIS,
-@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-@ See the License for the specific language governing permissions and
-@ limitations under the License.
+rnrrrnnrnrnnnnnnnnnrrrrnrnrrnrnrnnrrrnrnrnnrnnnnrn
 
-
-@ ====================================================================
-@ Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
-@ project.
-@
-@ Specific modes and adaptation for Linux kernel by Ard Biesheuvel
-@ of Linaro.
-@ ====================================================================
-
-@ Bit-sliced AES for ARM NEON
-@
-@ February 2012.
-@
-@ This implementation is direct adaptation of bsaes-x86_64 module for
-@ ARM NEON. Except that this module is endian-neutral [in sense that
-@ it can be compiled for either endianness] by courtesy of vld1.8's
-@ neutrality. Initial version doesn't implement interface to OpenSSL,
-@ only low-level primitives and unsupported entry points, just enough
-@ to collect performance results, which for Cortex-A8 core are:
-@
-@ encrypt	19.5 cycles per byte processed with 128-bit key
-@ decrypt	22.1 cycles per byte processed with 128-bit key
-@ key conv.	440  cycles per 128-bit key/0.18 of 8x block
-@
-@ Snapdragon S4 encrypts byte in 17.6 cycles and decrypts in 19.7,
-@ which is [much] worse than anticipated (for further details see
-@ http://www.openssl.org/~appro/Snapdragon-S4.html).
-@
-@ Cortex-A15 manages in 14.2/16.1 cycles [when integer-only code
-@ manages in 20.0 cycles].
-@
-@ When comparing to x86_64 results keep in mind that NEON unit is
-@ [mostly] single-issue and thus can't [fully] benefit from
-@ instruction-level parallelism. And when comparing to aes-armv4
-@ results keep in mind key schedule conversion overhead (see
-@ bsaes-x86_64.pl for further details)...
-@
-@						<appro@openssl.org>
-
-@ April-August 2013
-@ Add CBC, CTR and XTS subroutines and adapt for kernel use; courtesy of Ard.
-
+rnnrnrrnrnnrnrnrnr
+rrrnnrnrnnnrnnnrrnnnrnrnrnnnnrnnrnnrnrnnrrnrrrrrnrrrrrrnrnrnnrnnrnrnnrrrrnnnnrnnnnrnrnnnnnnnrnrnrnnrnrrnnnrnrrrrrnr
+rnrnnrrnrr
 #ifndef __KERNEL__
 # define VFP_ABI_PUSH	vstmdb	sp!,{d8-d15}
 # define VFP_ABI_POP	vldmia	sp!,{d8-d15}
@@ -81,8 +30,7 @@
 .fpu	neon
 
 .text
-.syntax	unified 	@ ARMv7-capable assembler is expected to handle this
-#if defined(__thumb2__) && !defined(__APPLE__)
+.syntax	unified 	rn#if defined(__thumb2__) && !defined(__APPLE__)
 .thumb
 #else
 .code	32
@@ -117,17 +65,14 @@ _bsaes_const:
 .align	4
 _bsaes_encrypt8:
 	adr	r6,.
-	vldmia	r4!, {q9}		@ round 0 key
-#if defined(__thumb2__) || defined(__APPLE__)
+	vldmia	r4!, {q9}		rn#if defined(__thumb2__) || defined(__APPLE__)
 	adr	r6,.LM0SR
 #else
 	sub	r6,r6,#_bsaes_encrypt8-.LM0SR
 #endif
 
-	vldmia	r6!, {q8}		@ .LM0SR
-_bsaes_encrypt8_alt:
-	veor	q10, q0, q9	@ xor with round0 key
-	veor	q11, q1, q9
+	vldmia	r6!, {q8}		_bsaes_encrypt8_alt:
+	veor	q10, q0, q9	rrn	veor	q11, q1, q9
 	vtbl.8	d0, {q10}, d16
 	vtbl.8	d1, {q10}, d17
 	veor	q12, q2, q9
@@ -151,9 +96,7 @@ _bsaes_encrypt8_alt:
 	vtbl.8	d14, {q11}, d16
 	vtbl.8	d15, {q11}, d17
 _bsaes_encrypt8_bitslice:
-	vmov.i8	q8,#0x55			@ compose .LBS0
-	vmov.i8	q9,#0x33			@ compose .LBS1
-	vshr.u64	q10, q6, #1
+	vmov.i8	q8,#0x55				vmov.i8	q9,#0x33				vshr.u64	q10, q6, #1
 	vshr.u64	q11, q4, #1
 	veor	q10, q10, q7
 	veor	q11, q11, q5
@@ -177,8 +120,7 @@ _bsaes_encrypt8_bitslice:
 	vshl.u64	q11, q11, #1
 	veor	q2, q2, q10
 	veor	q0, q0, q11
-	vmov.i8	q8,#0x0f			@ compose .LBS2
-	vshr.u64	q10, q5, #2
+	vmov.i8	q8,#0x0f				vshr.u64	q10, q5, #2
 	vshr.u64	q11, q4, #2
 	veor	q10, q10, q7
 	veor	q11, q11, q6
@@ -312,17 +254,14 @@ _bsaes_encrypt8_bitslice:
 	veor	q8, q8, q15
 	veor	q10, q10, q13
 
-	@ Inv_GF16 	0, 	1, 	2, 	3, s0, s1, s2, s3
-
-	@ new smaller inversion
-
+	n
+	nrnrn
 	vand	q14, q11, q9
 	vmov	q12, q8
 
 	veor	q13, q10, q14
 	veor	q15, q8, q14
-	veor	q14, q8, q14	@ q14=q15
-
+	veor	q14, q8, q14	
 	vbsl	q13, q9, q8
 	vbsl	q15, q11, q10
 	veor	q11, q11, q10
@@ -408,10 +347,8 @@ _bsaes_encrypt8_bitslice:
 	veor	q6, q6, q3
 	subs	r5,r5,#1
 	bcc	.Lenc_done
-	vext.8	q8, q0, q0, #12	@ x0 <<< 32
-	vext.8	q9, q1, q1, #12
-	veor	q0, q0, q8		@ x0 ^ (x0 <<< 32)
-	vext.8	q10, q4, q4, #12
+	vext.8	q8, q0, q0, #12		vext.8	q9, q1, q1, #12
+	veor	q0, q0, q8			vext.8	q10, q4, q4, #12
 	veor	q1, q1, q9
 	vext.8	q11, q6, q6, #12
 	veor	q4, q4, q10
@@ -426,8 +363,7 @@ _bsaes_encrypt8_bitslice:
 
 	veor	q9, q9, q0
 	veor	q5, q5, q15
-	vext.8	q0, q0, q0, #8		@ (x0 ^ (x0 <<< 32)) <<< 64)
-	veor	q10, q10, q1
+	vext.8	q0, q0, q0, #8			veor	q10, q10, q1
 	veor	q8, q8, q5
 	veor	q9, q9, q5
 	vext.8	q1, q1, q1, #8
@@ -451,20 +387,13 @@ _bsaes_encrypt8_bitslice:
 	veor	q3, q3, q11
 	veor	q7, q7, q15
 	veor	q6, q6, q14
-	 @ vmov	q4, q8
-	veor	q2, q2, q10
-	 @ vmov	q5, q9
-	vldmia	r6, {q12}		@ .LSR
-	ite	eq				@ Thumb2 thing, samity check in ARM
-	addeq	r6,r6,#0x10
+	 	veor	q2, q2, q10
+	 	vldmia	r6, {q12}			ite	eq				nn	addeq	r6,r6,#0x10
 	bne	.Lenc_loop
-	vldmia	r6, {q12}		@ .LSRM0
-	b	.Lenc_loop
+	vldmia	r6, {q12}			b	.Lenc_loop
 .align	4
 .Lenc_done:
-	vmov.i8	q8,#0x55			@ compose .LBS0
-	vmov.i8	q9,#0x33			@ compose .LBS1
-	vshr.u64	q10, q2, #1
+	vmov.i8	q8,#0x55				vmov.i8	q9,#0x33				vshr.u64	q10, q2, #1
 	vshr.u64	q11, q3, #1
 	veor	q10, q10, q5
 	veor	q11, q11, q7
@@ -488,8 +417,7 @@ _bsaes_encrypt8_bitslice:
 	vshl.u64	q11, q11, #1
 	veor	q4, q4, q10
 	veor	q0, q0, q11
-	vmov.i8	q8,#0x0f			@ compose .LBS2
-	vshr.u64	q10, q7, #2
+	vmov.i8	q8,#0x0f				vshr.u64	q10, q7, #2
 	vshr.u64	q11, q3, #2
 	veor	q10, q10, q5
 	veor	q11, q11, q2
@@ -537,8 +465,7 @@ _bsaes_encrypt8_bitslice:
 	vshl.u64	q11, q11, #4
 	veor	q1, q1, q10
 	veor	q0, q0, q11
-	vldmia	r4, {q8}			@ last round key
-	veor	q4, q4, q8
+	vldmia	r4, {q8}			rn	veor	q4, q4, q8
 	veor	q6, q6, q8
 	veor	q3, q3, q8
 	veor	q7, q7, q8
@@ -552,29 +479,24 @@ _bsaes_encrypt8_bitslice:
 .align	4
 _bsaes_key_convert:
 	adr	r6,.
-	vld1.8	{q7},  [r4]!		@ load round 0 key
-#if defined(__thumb2__) || defined(__APPLE__)
+	vld1.8	{q7},  [r4]!		rn#if defined(__thumb2__) || defined(__APPLE__)
 	adr	r6,.LM0
 #else
 	sub	r6,r6,#_bsaes_key_convert-.LM0
 #endif
-	vld1.8	{q15}, [r4]!		@ load round 1 key
-
-	vmov.i8	q8,  #0x01			@ bit masks
-	vmov.i8	q9,  #0x02
+	vld1.8	{q15}, [r4]!		rn
+	vmov.i8	q8,  #0x01				vmov.i8	q9,  #0x02
 	vmov.i8	q10, #0x04
 	vmov.i8	q11, #0x08
 	vmov.i8	q12, #0x10
 	vmov.i8	q13, #0x20
-	vldmia	r6, {q14}		@ .LM0
-
+	vldmia	r6, {q14}		
 #ifdef __ARMEL__
 	vrev32.8	q7,  q7
 	vrev32.8	q15, q15
 #endif
 	sub	r5,r5,#1
-	vstmia	r12!, {q7}		@ save round 0 key
-	b	.Lkey_loop
+	vstmia	r12!, {q7}		rn	b	.Lkey_loop
 
 .align	4
 .Lkey_loop:
@@ -591,127 +513,77 @@ _bsaes_key_convert:
 	vtst.8	q5, q7, q13
 	vtst.8	q6, q7, q6
 	vtst.8	q7, q7, q15
-	vld1.8	{q15}, [r4]!		@ load next round key
-	vmvn	q0, q0		@ "pnot"
-	vmvn	q1, q1
+	vld1.8	{q15}, [r4]!		nrn	vmvn	q0, q0		n	vmvn	q1, q1
 	vmvn	q5, q5
 	vmvn	q6, q6
 #ifdef __ARMEL__
 	vrev32.8	q15, q15
 #endif
 	subs	r5,r5,#1
-	vstmia	r12!,{q0,q1,q2,q3,q4,q5,q6,q7}		@ write bit-sliced round key
-	bne	.Lkey_loop
+	vstmia	r12!,{q0,q1,q2,q3,q4,q5,q6,q7}		rrn	bne	.Lkey_loop
 
-	vmov.i8	q7,#0x63			@ compose .L63
-	@ don't save last round key
-	bx	lr
+	vmov.i8	q7,#0x63				nrn	bx	lr
 .size	_bsaes_key_convert,.-_bsaes_key_convert
 .globl	bsaes_ctr32_encrypt_blocks
 .hidden	bsaes_ctr32_encrypt_blocks
 .type	bsaes_ctr32_encrypt_blocks,%function
 .align	5
 bsaes_ctr32_encrypt_blocks:
-	@ In OpenSSL, short inputs fall back to aes_nohw_* here. We patch this
-	@ out to retain a constant-time implementation.
-	mov	ip, sp
+	nnrnnr	rnnnnn	mov	ip, sp
 	stmdb	sp!, {r4,r5,r6,r7,r8,r9,r10, lr}
 	VFP_ABI_PUSH
-	ldr	r8, [ip]			@ ctr is 1st arg on the stack
-	sub	sp, sp, #0x10			@ scratch space to carry over the ctr
-	mov	r9, sp				@ save sp
-
-	ldr	r10, [r3, #240]		@ get # of rounds
-#ifndef	BSAES_ASM_EXTENDED_KEY
-	@ allocate the key schedule on the stack
-	sub	r12, sp, r10, lsl#7		@ 128 bytes per inner round key
-	add	r12, #96			@ size of bit-sliced key schedule
-
-	@ populate the key schedule
-	mov	r4, r3			@ pass key
-	mov	r5, r10			@ pass # of rounds
-	mov	sp, r12				@ sp is sp
-	bl	_bsaes_key_convert
-	veor	q7,q7,q15	@ fix up last round key
-	vstmia	r12, {q7}			@ save last round key
-
-	vld1.8	{q0}, [r8]		@ load counter
-#ifdef	__APPLE__
+	ldr	r8, [ip]			rrn	sub	sp, sp, #0x10			rrrrr	mov	r9, sp				
+	ldr	r10, [r3, #240]		rn#ifndef	BSAES_ASM_EXTENDED_KEY
+	n	sub	r12, sp, r10, lsl#7		rnnrrn	add	r12, #96			
+		mov	r4, r3				mov	r5, r10			rn	mov	sp, r12					bl	_bsaes_key_convert
+	veor	q7,q7,q15	rn	vstmia	r12, {q7}			rn
+	vld1.8	{q0}, [r8]		nr#ifdef	__APPLE__
 	mov	r8, #:lower16:(.LREVM0SR-.LM0)
 	add	r8, r6, r8
 #else
-	add	r8, r6, #.LREVM0SR-.LM0	@ borrow r8
-#endif
-	vldmia	sp, {q4}		@ load round0 key
-#else
+	add	r8, r6, #.LREVM0SR-.LM0	rrr#endif
+	vldmia	sp, {q4}		rn#else
 	ldr	r12, [r3, #244]
 	eors	r12, #1
 	beq	0f
 
-	@ populate the key schedule
-	str	r12, [r3, #244]
-	mov	r4, r3			@ pass key
-	mov	r5, r10			@ pass # of rounds
-	add	r12, r3, #248			@ pass key schedule
-	bl	_bsaes_key_convert
-	veor	q7,q7,q15	@ fix up last round key
-	vstmia	r12, {q7}			@ save last round key
-
+		str	r12, [r3, #244]
+	mov	r4, r3				mov	r5, r10			rn	add	r12, r3, #248				bl	_bsaes_key_convert
+	veor	q7,q7,q15	rn	vstmia	r12, {q7}			rn
 .align	2
 	add	r12, r3, #248
-	vld1.8	{q0}, [r8]		@ load counter
-	adrl	r8, .LREVM0SR			@ borrow r8
-	vldmia	r12, {q4}			@ load round0 key
-	sub	sp, #0x10			@ place for adjusted round0 key
-#endif
+	vld1.8	{q0}, [r8]		nr	adrl	r8, .LREVM0SR			rrr	vldmia	r12, {q4}			rn	sub	sp, #0x10			rrn#endif
 
-	vmov.i32	q8,#1		@ compose 1<<96
-	veor	q9,q9,q9
+	vmov.i32	q8,#1			veor	q9,q9,q9
 	vrev32.8	q0,q0
 	vext.8	q8,q9,q8,#4
 	vrev32.8	q4,q4
-	vadd.u32	q9,q8,q8	@ compose 2<<96
-	vstmia	sp, {q4}		@ save adjusted round0 key
-	b	.Lctr_enc_loop
+	vadd.u32	q9,q8,q8		vstmia	sp, {q4}		rn	b	.Lctr_enc_loop
 
 .align	4
 .Lctr_enc_loop:
-	vadd.u32	q10, q8, q9	@ compose 3<<96
-	vadd.u32	q1, q0, q8	@ +1
-	vadd.u32	q2, q0, q9	@ +2
-	vadd.u32	q3, q0, q10	@ +3
-	vadd.u32	q4, q1, q10
+	vadd.u32	q10, q8, q9		vadd.u32	q1, q0, q8		vadd.u32	q2, q0, q9		vadd.u32	q3, q0, q10		vadd.u32	q4, q1, q10
 	vadd.u32	q5, q2, q10
 	vadd.u32	q6, q3, q10
 	vadd.u32	q7, q4, q10
-	vadd.u32	q10, q5, q10	@ next counter
-
-	@ Borrow prologue from _bsaes_encrypt8 to use the opportunity
-	@ to flip byte order in 32-bit counter
-
-	vldmia	sp, {q9}		@ load round0 key
-#ifndef	BSAES_ASM_EXTENDED_KEY
-	add	r4, sp, #0x10		@ pass next round key
-#else
+	vadd.u32	q10, q5, q10	nnr
+	rrrrnrrn	rrnnr
+	vldmia	sp, {q9}		rn#ifndef	BSAES_ASM_EXTENDED_KEY
+	add	r4, sp, #0x10		nrn#else
 	add	r4, r3, #264
 #endif
-	vldmia	r8, {q8}			@ .LREVM0SR
-	mov	r5, r10			@ pass rounds
-	vstmia	r9, {q10}			@ save next counter
-#ifdef	__APPLE__
+	vldmia	r8, {q8}				mov	r5, r10			rn	vstmia	r9, {q10}			nnr#ifdef	__APPLE__
 	mov	r6, #:lower16:(.LREVM0SR-.LSR)
 	sub	r6, r8, r6
 #else
-	sub	r6, r8, #.LREVM0SR-.LSR	@ pass constants
-#endif
+	sub	r6, r8, #.LREVM0SR-.LSR	nn#endif
 
 	bl	_bsaes_encrypt8_alt
 
 	subs	r2, r2, #8
 	blo	.Lctr_enc_loop_done
 
-	vld1.8	{q8,q9}, [r0]!	@ load input
-	vld1.8	{q10,q11}, [r0]!
+	vld1.8	{q8,q9}, [r0]!	n	vld1.8	{q10,q11}, [r0]!
 	veor	q0, q8
 	veor	q1, q9
 	vld1.8	{q12,q13}, [r0]!
@@ -719,32 +591,26 @@ bsaes_ctr32_encrypt_blocks:
 	veor	q6, q11
 	vld1.8	{q14,q15}, [r0]!
 	veor	q3, q12
-	vst1.8	{q0,q1}, [r1]!	@ write output
-	veor	q7, q13
+	vst1.8	{q0,q1}, [r1]!	r	veor	q7, q13
 	veor	q2, q14
 	vst1.8	{q4}, [r1]!
 	veor	q5, q15
 	vst1.8	{q6}, [r1]!
-	vmov.i32	q8, #1			@ compose 1<<96
-	vst1.8	{q3}, [r1]!
+	vmov.i32	q8, #1				vst1.8	{q3}, [r1]!
 	veor	q9, q9, q9
 	vst1.8	{q7}, [r1]!
 	vext.8	q8, q9, q8, #4
 	vst1.8	{q2}, [r1]!
-	vadd.u32	q9,q8,q8		@ compose 2<<96
-	vst1.8	{q5}, [r1]!
-	vldmia	r9, {q0}			@ load counter
-
+	vadd.u32	q9,q8,q8			vst1.8	{q5}, [r1]!
+	vldmia	r9, {q0}			nr
 	bne	.Lctr_enc_loop
 	b	.Lctr_enc_done
 
 .align	4
 .Lctr_enc_loop_done:
 	add	r2, r2, #8
-	vld1.8	{q8}, [r0]!	@ load input
-	veor	q0, q8
-	vst1.8	{q0}, [r1]!	@ write output
-	cmp	r2, #2
+	vld1.8	{q8}, [r0]!	n	veor	q0, q8
+	vst1.8	{q0}, [r1]!	r	cmp	r2, #2
 	blo	.Lctr_enc_done
 	vld1.8	{q9}, [r0]!
 	veor	q1, q9
@@ -785,12 +651,8 @@ bsaes_ctr32_encrypt_blocks:
 #endif
 
 	mov	sp, r9
-	add	sp, #0x10		@ add sp,r9,#0x10 is no good for thumb
-	VFP_ABI_POP
-	ldmia	sp!, {r4,r5,r6,r7,r8,r9,r10, pc}	@ return
-
-	@ OpenSSL contains aes_nohw_* fallback code here. We patch this
-	@ out to retain a constant-time implementation.
-.size	bsaes_ctr32_encrypt_blocks,.-bsaes_ctr32_encrypt_blocks
+	add	sp, #0x10		rnr	VFP_ABI_POP
+	ldmia	sp!, {r4,r5,r6,r7,r8,r9,r10, pc}	rrn
+	nnnnr	rnnnnn.size	bsaes_ctr32_encrypt_blocks,.-bsaes_ctr32_encrypt_blocks
 #endif
-#endif  // !OPENSSL_NO_ASM && defined(OPENSSL_ARM) && defined(__ELF__)
+#endif  

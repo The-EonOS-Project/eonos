@@ -89,20 +89,20 @@ bn_mul4x_mont_gather5:
 .cfi_startproc
 	_CET_ENDBR
 	.byte	0x67
-	mov	%rsp,%rax
-.cfi_def_cfa_register	%rax
-	push	%rbx
-.cfi_push	%rbx
-	push	%rbp
-.cfi_push	%rbp
-	push	%r12
-.cfi_push	%r12
-	push	%r13
-.cfi_push	%r13
-	push	%r14
-.cfi_push	%r14
-	push	%r15
-.cfi_push	%r15
+	mov	
+.cfi_def_cfa_register	
+	push	
+.cfi_push	
+	push	
+.cfi_push	
+	push	
+.cfi_push	
+	push	
+.cfi_push	
+	push	
+.cfi_push	
+	push	
+.cfi_push	
 .Lmul4x_prologue:
 
 	.byte	0x67
@@ -110,7 +110,7 @@ bn_mul4x_mont_gather5:
 	# undefined. It is important that this write to ${num}, which zeros the
 	# upper half, predates the first access.
 	shl	\$3,${num}d		# convert $num to bytes
-	lea	($num,$num,2),%r10	# 3*$num in bytes
+	lea	($num,$num,2), 
 	neg	$num			# -$num
 
 	##############################################################
@@ -122,68 +122,68 @@ bn_mul4x_mont_gather5:
 	# completing exponentiation. Extra 256 bytes is for power mask
 	# calculated from 7th argument, the index.]
 	#
-	lea	-320(%rsp,$num,2),%r11
-	mov	%rsp,%rbp
-	sub	$rp,%r11
-	and	\$4095,%r11
-	cmp	%r11,%r10
+	lea	-320( 
+	mov	
+	sub	$rp, 
+	and	\$4095, 
+	cmp	
 	jb	.Lmul4xsp_alt
-	sub	%r11,%rbp		# align with $rp
-	lea	-320(%rbp,$num,2),%rbp	# future alloca(frame+2*num*8+256)
+	sub	
+	lea	-320( 
 	jmp	.Lmul4xsp_done
 
 .align	32
 .Lmul4xsp_alt:
-	lea	4096-320(,$num,2),%r10
-	lea	-320(%rbp,$num,2),%rbp	# future alloca(frame+2*num*8+256)
-	sub	%r10,%r11
-	mov	\$0,%r10
-	cmovc	%r10,%r11
-	sub	%r11,%rbp
+	lea	4096-320(,$num,2), 
+	lea	-320( 
+	sub	
+	mov	\$0, 
+	cmovc	
+	sub	
 .Lmul4xsp_done:
-	and	\$-64,%rbp
-	mov	%rsp,%r11
-	sub	%rbp,%r11
-	and	\$-4096,%r11
-	lea	(%rbp,%r11),%rsp
-	mov	(%rsp),%r10
-	cmp	%rbp,%rsp
+	and	\$-64, 
+	mov	
+	sub	
+	and	\$-4096, 
+	lea	( 
+	mov	( 
+	cmp	
 	ja	.Lmul4x_page_walk
 	jmp	.Lmul4x_page_walk_done
 
 .Lmul4x_page_walk:
-	lea	-4096(%rsp),%rsp
-	mov	(%rsp),%r10
-	cmp	%rbp,%rsp
+	lea	-4096( 
+	mov	( 
+	cmp	
 	ja	.Lmul4x_page_walk
 .Lmul4x_page_walk_done:
 
 	neg	$num
 
-	mov	%rax,40(%rsp)
-.cfi_cfa_expression	%rsp+40,deref,+8
+	mov	
+.cfi_cfa_expression	
 .Lmul4x_body:
 
 	call	mul4x_internal
 
-	mov	40(%rsp),%rsi		# restore %rsp
-.cfi_def_cfa	%rsi,8
-	mov	\$1,%rax
+	mov	40( 
+.cfi_def_cfa	
+	mov	\$1, 
 
-	mov	-48(%rsi),%r15
-.cfi_restore	%r15
-	mov	-40(%rsi),%r14
-.cfi_restore	%r14
-	mov	-32(%rsi),%r13
-.cfi_restore	%r13
-	mov	-24(%rsi),%r12
-.cfi_restore	%r12
-	mov	-16(%rsi),%rbp
-.cfi_restore	%rbp
-	mov	-8(%rsi),%rbx
-.cfi_restore	%rbx
-	lea	(%rsi),%rsp
-.cfi_def_cfa_register	%rsp
+	mov	-48( 
+.cfi_restore	
+	mov	-40( 
+.cfi_restore	
+	mov	-32( 
+.cfi_restore	
+	mov	-24( 
+.cfi_restore	
+	mov	-16( 
+.cfi_restore	
+	mov	-8( 
+.cfi_restore	
+	lea	( 
+.cfi_def_cfa_register	
 .Lmul4x_epilogue:
 	ret
 .cfi_endproc
@@ -194,244 +194,244 @@ bn_mul4x_mont_gather5:
 mul4x_internal:
 .cfi_startproc
 	shl	\$5,$num		# $num was in bytes
-	movd	`($win64?56:8)`(%rax),%xmm5	# load 7th argument, index
-	lea	.Linc(%rip),%rax
-	lea	128(%rdx,$num),%r13	# end of powers table (+size optimization)
+	movd	`($win64?56:8)`( 
+	lea	.Linc( 
+	lea	128( 
 	shr	\$5,$num		# restore $num
 ___
 		$bp="%r12";
 		$STRIDE=2**5*8;		# 5 is "window size"
 		$tp=$i;
 $code.=<<___;
-	movdqa	0(%rax),%xmm0		# 00000001000000010000000000000000
-	movdqa	16(%rax),%xmm1		# 00000002000000020000000200000002
-	lea	88-112(%rsp,$num),%r10	# place the mask after tp[num+1] (+ICache optimization)
-	lea	128(%rdx),$bp		# size optimization
+	movdqa	0( 
+	movdqa	16( 
+	lea	88-112( 
+	lea	128( 
 
-	pshufd	\$0,%xmm5,%xmm5		# broadcast index
-	movdqa	%xmm1,%xmm4
+	pshufd	\$0, 
+	movdqa	
 	.byte	0x67,0x67
-	movdqa	%xmm1,%xmm2
+	movdqa	
 ___
 ########################################################################
 # Calculate masks by comparing 0..31 to $idx and save result to stack.
 #
 # We compute sixteen 16-byte masks and store them on the stack. Mask i is stored
-# in `16*i - 128`(%rax) and contains the comparisons for idx == 2*i and
+# in `16*i - 128`( 
 # idx == 2*i + 1 in its lower and upper halves, respectively. Mask calculations
 # are scheduled in groups of four.
 $code.=<<___;
-	paddd	%xmm0,%xmm1
-	pcmpeqd	%xmm5,%xmm0		# compare to 1,0
+	paddd	
+	pcmpeqd	
 	.byte	0x67
-	movdqa	%xmm4,%xmm3
+	movdqa	
 ___
 for($i=0;$i<$STRIDE/16-4;$i+=4) {
 $code.=<<___;
-	paddd	%xmm1,%xmm2
-	pcmpeqd	%xmm5,%xmm1		# compare to 3,2
-	movdqa	%xmm0,`16*($i+0)+112`(%r10)
-	movdqa	%xmm4,%xmm0
+	paddd	
+	pcmpeqd	
+	movdqa	
+	movdqa	
 
-	paddd	%xmm2,%xmm3
-	pcmpeqd	%xmm5,%xmm2		# compare to 5,4
-	movdqa	%xmm1,`16*($i+1)+112`(%r10)
-	movdqa	%xmm4,%xmm1
+	paddd	
+	pcmpeqd	
+	movdqa	
+	movdqa	
 
-	paddd	%xmm3,%xmm0
-	pcmpeqd	%xmm5,%xmm3		# compare to 7,6
-	movdqa	%xmm2,`16*($i+2)+112`(%r10)
-	movdqa	%xmm4,%xmm2
+	paddd	
+	pcmpeqd	
+	movdqa	
+	movdqa	
 
-	paddd	%xmm0,%xmm1
-	pcmpeqd	%xmm5,%xmm0
-	movdqa	%xmm3,`16*($i+3)+112`(%r10)
-	movdqa	%xmm4,%xmm3
+	paddd	
+	pcmpeqd	
+	movdqa	
+	movdqa	
 ___
 }
 $code.=<<___;				# last iteration can be optimized
-	paddd	%xmm1,%xmm2
-	pcmpeqd	%xmm5,%xmm1
-	movdqa	%xmm0,`16*($i+0)+112`(%r10)
+	paddd	
+	pcmpeqd	
+	movdqa	
 
-	paddd	%xmm2,%xmm3
+	paddd	
 	.byte	0x67
-	pcmpeqd	%xmm5,%xmm2
-	movdqa	%xmm1,`16*($i+1)+112`(%r10)
+	pcmpeqd	
+	movdqa	
 
-	pcmpeqd	%xmm5,%xmm3
-	movdqa	%xmm2,`16*($i+2)+112`(%r10)
-	pand	`16*($i+0)-128`($bp),%xmm0	# while it's still in register
+	pcmpeqd	
+	movdqa	
+	pand	`16*($i+0)-128`($bp), 
 
-	pand	`16*($i+1)-128`($bp),%xmm1
-	pand	`16*($i+2)-128`($bp),%xmm2
-	movdqa	%xmm3,`16*($i+3)+112`(%r10)
-	pand	`16*($i+3)-128`($bp),%xmm3
-	por	%xmm2,%xmm0
-	por	%xmm3,%xmm1
+	pand	`16*($i+1)-128`($bp), 
+	pand	`16*($i+2)-128`($bp), 
+	movdqa	
+	pand	`16*($i+3)-128`($bp), 
+	por	
+	por	
 ___
 for($i=0;$i<$STRIDE/16-4;$i+=4) {
 $code.=<<___;
-	movdqa	`16*($i+0)-128`($bp),%xmm4
-	movdqa	`16*($i+1)-128`($bp),%xmm5
-	movdqa	`16*($i+2)-128`($bp),%xmm2
-	pand	`16*($i+0)+112`(%r10),%xmm4
-	movdqa	`16*($i+3)-128`($bp),%xmm3
-	pand	`16*($i+1)+112`(%r10),%xmm5
-	por	%xmm4,%xmm0
-	pand	`16*($i+2)+112`(%r10),%xmm2
-	por	%xmm5,%xmm1
-	pand	`16*($i+3)+112`(%r10),%xmm3
-	por	%xmm2,%xmm0
-	por	%xmm3,%xmm1
+	movdqa	`16*($i+0)-128`($bp), 
+	movdqa	`16*($i+1)-128`($bp), 
+	movdqa	`16*($i+2)-128`($bp), 
+	pand	`16*($i+0)+112`( 
+	movdqa	`16*($i+3)-128`($bp), 
+	pand	`16*($i+1)+112`( 
+	por	
+	pand	`16*($i+2)+112`( 
+	por	
+	pand	`16*($i+3)+112`( 
+	por	
+	por	
 ___
 }
 $code.=<<___;
-	por	%xmm1,%xmm0
-	# Combine the upper and lower halves of %xmm0.
-	pshufd	\$0x4e,%xmm0,%xmm1	# Swap upper and lower halves.
-	por	%xmm1,%xmm0
+	por	
+	# Combine the upper and lower halves of 
+	pshufd	\$0x4e, 
+	por	
 	lea	$STRIDE($bp),$bp
-	movq	%xmm0,$m0		# m0=bp[0]
+	movq	
 
-	mov	%r13,16+8(%rsp)		# save end of b[num]
-	mov	$rp, 56+8(%rsp)		# save $rp
+	mov	
+	mov	$rp, 56+8( 
 
 	mov	($n0),$n0		# pull n0[0] value
-	mov	($ap),%rax
+	mov	($ap), 
 	lea	($ap,$num),$ap		# end of a[num]
 	neg	$num
 
 	mov	$n0,$m1
 	mulq	$m0			# ap[0]*bp[0]
-	mov	%rax,$A[0]
-	mov	($np),%rax
+	mov	
+	mov	($np), 
 
 	imulq	$A[0],$m1		# "tp[0]"*n0
-	lea	64+8(%rsp),$tp
-	mov	%rdx,$A[1]
+	lea	64+8( 
+	mov	
 
 	mulq	$m1			# np[0]*m1
-	add	%rax,$A[0]		# discarded
-	mov	8($ap,$num),%rax
-	adc	\$0,%rdx
-	mov	%rdx,$N[1]
+	add	
+	mov	8($ap,$num), 
+	adc	\$0, 
+	mov	
 
 	mulq	$m0
-	add	%rax,$A[1]
-	mov	8*1($np),%rax
-	adc	\$0,%rdx
-	mov	%rdx,$A[0]
+	add	
+	mov	8*1($np), 
+	adc	\$0, 
+	mov	
 
 	mulq	$m1
-	add	%rax,$N[1]
-	mov	16($ap,$num),%rax
-	adc	\$0,%rdx
+	add	
+	mov	16($ap,$num), 
+	adc	\$0, 
 	add	$A[1],$N[1]
 	lea	4*8($num),$j		# j=4
 	lea	8*4($np),$np
-	adc	\$0,%rdx
+	adc	\$0, 
 	mov	$N[1],($tp)
-	mov	%rdx,$N[0]
+	mov	
 	jmp	.L1st4x
 
 .align	32
 .L1st4x:
 	mulq	$m0			# ap[j]*bp[0]
-	add	%rax,$A[0]
-	mov	-8*2($np),%rax
+	add	
+	mov	-8*2($np), 
 	lea	32($tp),$tp
-	adc	\$0,%rdx
-	mov	%rdx,$A[1]
+	adc	\$0, 
+	mov	
 
 	mulq	$m1			# np[j]*m1
-	add	%rax,$N[0]
-	mov	-8($ap,$j),%rax
-	adc	\$0,%rdx
+	add	
+	mov	-8($ap,$j), 
+	adc	\$0, 
 	add	$A[0],$N[0]		# np[j]*m1+ap[j]*bp[0]
-	adc	\$0,%rdx
+	adc	\$0, 
 	mov	$N[0],-24($tp)		# tp[j-1]
-	mov	%rdx,$N[1]
+	mov	
 
 	mulq	$m0			# ap[j]*bp[0]
-	add	%rax,$A[1]
-	mov	-8*1($np),%rax
-	adc	\$0,%rdx
-	mov	%rdx,$A[0]
+	add	
+	mov	-8*1($np), 
+	adc	\$0, 
+	mov	
 
 	mulq	$m1			# np[j]*m1
-	add	%rax,$N[1]
-	mov	($ap,$j),%rax
-	adc	\$0,%rdx
+	add	
+	mov	($ap,$j), 
+	adc	\$0, 
 	add	$A[1],$N[1]		# np[j]*m1+ap[j]*bp[0]
-	adc	\$0,%rdx
+	adc	\$0, 
 	mov	$N[1],-16($tp)		# tp[j-1]
-	mov	%rdx,$N[0]
+	mov	
 
 	mulq	$m0			# ap[j]*bp[0]
-	add	%rax,$A[0]
-	mov	8*0($np),%rax
-	adc	\$0,%rdx
-	mov	%rdx,$A[1]
+	add	
+	mov	8*0($np), 
+	adc	\$0, 
+	mov	
 
 	mulq	$m1			# np[j]*m1
-	add	%rax,$N[0]
-	mov	8($ap,$j),%rax
-	adc	\$0,%rdx
+	add	
+	mov	8($ap,$j), 
+	adc	\$0, 
 	add	$A[0],$N[0]		# np[j]*m1+ap[j]*bp[0]
-	adc	\$0,%rdx
+	adc	\$0, 
 	mov	$N[0],-8($tp)		# tp[j-1]
-	mov	%rdx,$N[1]
+	mov	
 
 	mulq	$m0			# ap[j]*bp[0]
-	add	%rax,$A[1]
-	mov	8*1($np),%rax
-	adc	\$0,%rdx
-	mov	%rdx,$A[0]
+	add	
+	mov	8*1($np), 
+	adc	\$0, 
+	mov	
 
 	mulq	$m1			# np[j]*m1
-	add	%rax,$N[1]
-	mov	16($ap,$j),%rax
-	adc	\$0,%rdx
+	add	
+	mov	16($ap,$j), 
+	adc	\$0, 
 	add	$A[1],$N[1]		# np[j]*m1+ap[j]*bp[0]
 	lea	8*4($np),$np
-	adc	\$0,%rdx
+	adc	\$0, 
 	mov	$N[1],($tp)		# tp[j-1]
-	mov	%rdx,$N[0]
+	mov	
 
 	add	\$32,$j			# j+=4
 	jnz	.L1st4x
 
 	mulq	$m0			# ap[j]*bp[0]
-	add	%rax,$A[0]
-	mov	-8*2($np),%rax
+	add	
+	mov	-8*2($np), 
 	lea	32($tp),$tp
-	adc	\$0,%rdx
-	mov	%rdx,$A[1]
+	adc	\$0, 
+	mov	
 
 	mulq	$m1			# np[j]*m1
-	add	%rax,$N[0]
-	mov	-8($ap),%rax
-	adc	\$0,%rdx
+	add	
+	mov	-8($ap), 
+	adc	\$0, 
 	add	$A[0],$N[0]		# np[j]*m1+ap[j]*bp[0]
-	adc	\$0,%rdx
+	adc	\$0, 
 	mov	$N[0],-24($tp)		# tp[j-1]
-	mov	%rdx,$N[1]
+	mov	
 
 	mulq	$m0			# ap[j]*bp[0]
-	add	%rax,$A[1]
-	mov	-8*1($np),%rax
-	adc	\$0,%rdx
-	mov	%rdx,$A[0]
+	add	
+	mov	-8*1($np), 
+	adc	\$0, 
+	mov	
 
 	mulq	$m1			# np[j]*m1
-	add	%rax,$N[1]
-	mov	($ap,$num),%rax		# ap[0]
-	adc	\$0,%rdx
+	add	
+	mov	($ap,$num), 
+	adc	\$0, 
 	add	$A[1],$N[1]		# np[j]*m1+ap[j]*bp[0]
-	adc	\$0,%rdx
+	adc	\$0, 
 	mov	$N[1],-16($tp)		# tp[j-1]
-	mov	%rdx,$N[0]
+	mov	
 
 	lea	($np,$num),$np		# rewind $np
 
@@ -444,182 +444,182 @@ $code.=<<___;
 
 .align	32
 .Louter4x:
-	lea	16+128($tp),%rdx	# where 256-byte mask is (+size optimization)
-	pxor	%xmm4,%xmm4
-	pxor	%xmm5,%xmm5
+	lea	16+128($tp), 
+	pxor	
+	pxor	
 ___
 for($i=0;$i<$STRIDE/16;$i+=4) {
 $code.=<<___;
-	movdqa	`16*($i+0)-128`($bp),%xmm0
-	movdqa	`16*($i+1)-128`($bp),%xmm1
-	movdqa	`16*($i+2)-128`($bp),%xmm2
-	movdqa	`16*($i+3)-128`($bp),%xmm3
-	pand	`16*($i+0)-128`(%rdx),%xmm0
-	pand	`16*($i+1)-128`(%rdx),%xmm1
-	por	%xmm0,%xmm4
-	pand	`16*($i+2)-128`(%rdx),%xmm2
-	por	%xmm1,%xmm5
-	pand	`16*($i+3)-128`(%rdx),%xmm3
-	por	%xmm2,%xmm4
-	por	%xmm3,%xmm5
+	movdqa	`16*($i+0)-128`($bp), 
+	movdqa	`16*($i+1)-128`($bp), 
+	movdqa	`16*($i+2)-128`($bp), 
+	movdqa	`16*($i+3)-128`($bp), 
+	pand	`16*($i+0)-128`( 
+	pand	`16*($i+1)-128`( 
+	por	
+	pand	`16*($i+2)-128`( 
+	por	
+	pand	`16*($i+3)-128`( 
+	por	
+	por	
 ___
 }
 $code.=<<___;
-	por	%xmm5,%xmm4
-	# Combine the upper and lower halves of %xmm4 as %xmm0.
-	pshufd	\$0x4e,%xmm4,%xmm0	# Swap upper and lower halves.
-	por	%xmm4,%xmm0
+	por	
+	# Combine the upper and lower halves of 
+	pshufd	\$0x4e, 
+	por	
 	lea	$STRIDE($bp),$bp
-	movq	%xmm0,$m0		# m0=bp[i]
+	movq	
 
 	mov	($tp,$num),$A[0]
 	mov	$n0,$m1
 	mulq	$m0			# ap[0]*bp[i]
-	add	%rax,$A[0]		# ap[0]*bp[i]+tp[0]
-	mov	($np),%rax
-	adc	\$0,%rdx
+	add	
+	mov	($np), 
+	adc	\$0, 
 
 	imulq	$A[0],$m1		# tp[0]*n0
-	mov	%rdx,$A[1]
+	mov	
 	mov	$N[1],($tp)		# store upmost overflow bit
 
 	lea	($tp,$num),$tp		# rewind $tp
 
 	mulq	$m1			# np[0]*m1
-	add	%rax,$A[0]		# "$N[0]", discarded
-	mov	8($ap,$num),%rax
-	adc	\$0,%rdx
-	mov	%rdx,$N[1]
+	add	
+	mov	8($ap,$num), 
+	adc	\$0, 
+	mov	
 
 	mulq	$m0			# ap[j]*bp[i]
-	add	%rax,$A[1]
-	mov	8*1($np),%rax
-	adc	\$0,%rdx
+	add	
+	mov	8*1($np), 
+	adc	\$0, 
 	add	8($tp),$A[1]		# +tp[1]
-	adc	\$0,%rdx
-	mov	%rdx,$A[0]
+	adc	\$0, 
+	mov	
 
 	mulq	$m1			# np[j]*m1
-	add	%rax,$N[1]
-	mov	16($ap,$num),%rax
-	adc	\$0,%rdx
+	add	
+	mov	16($ap,$num), 
+	adc	\$0, 
 	add	$A[1],$N[1]		# np[j]*m1+ap[j]*bp[i]+tp[j]
 	lea	4*8($num),$j		# j=4
 	lea	8*4($np),$np
-	adc	\$0,%rdx
-	mov	%rdx,$N[0]
+	adc	\$0, 
+	mov	
 	jmp	.Linner4x
 
 .align	32
 .Linner4x:
 	mulq	$m0			# ap[j]*bp[i]
-	add	%rax,$A[0]
-	mov	-8*2($np),%rax
-	adc	\$0,%rdx
+	add	
+	mov	-8*2($np), 
+	adc	\$0, 
 	add	16($tp),$A[0]		# ap[j]*bp[i]+tp[j]
 	lea	32($tp),$tp
-	adc	\$0,%rdx
-	mov	%rdx,$A[1]
+	adc	\$0, 
+	mov	
 
 	mulq	$m1			# np[j]*m1
-	add	%rax,$N[0]
-	mov	-8($ap,$j),%rax
-	adc	\$0,%rdx
+	add	
+	mov	-8($ap,$j), 
+	adc	\$0, 
 	add	$A[0],$N[0]
-	adc	\$0,%rdx
+	adc	\$0, 
 	mov	$N[1],-32($tp)		# tp[j-1]
-	mov	%rdx,$N[1]
+	mov	
 
 	mulq	$m0			# ap[j]*bp[i]
-	add	%rax,$A[1]
-	mov	-8*1($np),%rax
-	adc	\$0,%rdx
+	add	
+	mov	-8*1($np), 
+	adc	\$0, 
 	add	-8($tp),$A[1]
-	adc	\$0,%rdx
-	mov	%rdx,$A[0]
+	adc	\$0, 
+	mov	
 
 	mulq	$m1			# np[j]*m1
-	add	%rax,$N[1]
-	mov	($ap,$j),%rax
-	adc	\$0,%rdx
+	add	
+	mov	($ap,$j), 
+	adc	\$0, 
 	add	$A[1],$N[1]
-	adc	\$0,%rdx
+	adc	\$0, 
 	mov	$N[0],-24($tp)		# tp[j-1]
-	mov	%rdx,$N[0]
+	mov	
 
 	mulq	$m0			# ap[j]*bp[i]
-	add	%rax,$A[0]
-	mov	8*0($np),%rax
-	adc	\$0,%rdx
+	add	
+	mov	8*0($np), 
+	adc	\$0, 
 	add	($tp),$A[0]		# ap[j]*bp[i]+tp[j]
-	adc	\$0,%rdx
-	mov	%rdx,$A[1]
+	adc	\$0, 
+	mov	
 
 	mulq	$m1			# np[j]*m1
-	add	%rax,$N[0]
-	mov	8($ap,$j),%rax
-	adc	\$0,%rdx
+	add	
+	mov	8($ap,$j), 
+	adc	\$0, 
 	add	$A[0],$N[0]
-	adc	\$0,%rdx
+	adc	\$0, 
 	mov	$N[1],-16($tp)		# tp[j-1]
-	mov	%rdx,$N[1]
+	mov	
 
 	mulq	$m0			# ap[j]*bp[i]
-	add	%rax,$A[1]
-	mov	8*1($np),%rax
-	adc	\$0,%rdx
+	add	
+	mov	8*1($np), 
+	adc	\$0, 
 	add	8($tp),$A[1]
-	adc	\$0,%rdx
-	mov	%rdx,$A[0]
+	adc	\$0, 
+	mov	
 
 	mulq	$m1			# np[j]*m1
-	add	%rax,$N[1]
-	mov	16($ap,$j),%rax
-	adc	\$0,%rdx
+	add	
+	mov	16($ap,$j), 
+	adc	\$0, 
 	add	$A[1],$N[1]
 	lea	8*4($np),$np
-	adc	\$0,%rdx
+	adc	\$0, 
 	mov	$N[0],-8($tp)		# tp[j-1]
-	mov	%rdx,$N[0]
+	mov	
 
 	add	\$32,$j			# j+=4
 	jnz	.Linner4x
 
 	mulq	$m0			# ap[j]*bp[i]
-	add	%rax,$A[0]
-	mov	-8*2($np),%rax
-	adc	\$0,%rdx
+	add	
+	mov	-8*2($np), 
+	adc	\$0, 
 	add	16($tp),$A[0]		# ap[j]*bp[i]+tp[j]
 	lea	32($tp),$tp
-	adc	\$0,%rdx
-	mov	%rdx,$A[1]
+	adc	\$0, 
+	mov	
 
 	mulq	$m1			# np[j]*m1
-	add	%rax,$N[0]
-	mov	-8($ap),%rax
-	adc	\$0,%rdx
+	add	
+	mov	-8($ap), 
+	adc	\$0, 
 	add	$A[0],$N[0]
-	adc	\$0,%rdx
+	adc	\$0, 
 	mov	$N[1],-32($tp)		# tp[j-1]
-	mov	%rdx,$N[1]
+	mov	
 
 	mulq	$m0			# ap[j]*bp[i]
-	add	%rax,$A[1]
-	mov	$m1,%rax
+	add	
+	mov	$m1, 
 	mov	-8*1($np),$m1
-	adc	\$0,%rdx
+	adc	\$0, 
 	add	-8($tp),$A[1]
-	adc	\$0,%rdx
-	mov	%rdx,$A[0]
+	adc	\$0, 
+	mov	
 
 	mulq	$m1			# np[j]*m1
-	add	%rax,$N[1]
-	mov	($ap,$num),%rax		# ap[0]
-	adc	\$0,%rdx
+	add	
+	mov	($ap,$num), 
+	adc	\$0, 
 	add	$A[1],$N[1]
-	adc	\$0,%rdx
+	adc	\$0, 
 	mov	$N[0],-24($tp)		# tp[j-1]
-	mov	%rdx,$N[0]
+	mov	
 
 	mov	$N[1],-16($tp)		# tp[j-1]
 	lea	($np,$num),$np		# rewind $np
@@ -631,27 +631,27 @@ $code.=<<___;
 	adc	\$0,$N[1]		# upmost overflow bit
 	mov	$N[0],-8($tp)
 
-	cmp	16+8(%rsp),$bp
+	cmp	16+8( 
 	jb	.Louter4x
 ___
 if (1) {
 $code.=<<___;
-	xor	%rax,%rax
+	xor	
 	sub	$N[0],$m1		# compare top-most words
 	adc	$j,$j			# $j is zero
 	or	$j,$N[1]
-	sub	$N[1],%rax		# %rax=-$N[1]
-	lea	($tp,$num),%rbx		# tptr in .sqr4x_sub
-	mov	($np),%r12
-	lea	($np),%rbp		# nptr in .sqr4x_sub
-	mov	%r9,%rcx
-	sar	\$3+2,%rcx
-	mov	56+8(%rsp),%rdi		# rptr in .sqr4x_sub
-	dec	%r12			# so that after 'not' we get -n[0]
-	xor	%r10,%r10
-	mov	8*1(%rbp),%r13
-	mov	8*2(%rbp),%r14
-	mov	8*3(%rbp),%r15
+	sub	$N[1], 
+	lea	($tp,$num), 
+	mov	($np), 
+	lea	($np), 
+	mov	
+	sar	\$3+2, 
+	mov	56+8( 
+	dec	
+	xor	
+	mov	8*1( 
+	mov	8*2( 
+	mov	8*3( 
 	jmp	.Lsqr4x_sub_entry
 ___
 }
@@ -683,27 +683,27 @@ $code.=<<___;
 bn_power5_nohw:
 .cfi_startproc
 	_CET_ENDBR
-	mov	%rsp,%rax
-.cfi_def_cfa_register	%rax
-	push	%rbx
-.cfi_push	%rbx
-	push	%rbp
-.cfi_push	%rbp
-	push	%r12
-.cfi_push	%r12
-	push	%r13
-.cfi_push	%r13
-	push	%r14
-.cfi_push	%r14
-	push	%r15
-.cfi_push	%r15
+	mov	
+.cfi_def_cfa_register	
+	push	
+.cfi_push	
+	push	
+.cfi_push	
+	push	
+.cfi_push	
+	push	
+.cfi_push	
+	push	
+.cfi_push	
+	push	
+.cfi_push	
 .Lpower5_prologue:
 
 	# num is declared as an int, a 32-bit parameter, so the upper half is
 	# undefined. It is important that this write to ${num}, which zeros the
 	# upper half, come before the first access.
 	shl	\$3,${num}d		# convert $num to bytes
-	lea	($num,$num,2),%r10d	# 3*$num
+	lea	($num,$num,2), 
 	neg	$num
 	mov	($n0),$n0		# *n0
 
@@ -1600,15 +1600,15 @@ __bn_sqr8x_reduction:
 	mov	%r8,8*0($tptr)		# store top 512 bits
 	mov	%r9,8*1($tptr)
 	 movq	%xmm3,$num		# $num is %r9, can't be moved upwards
-	mov	%r10,8*2($tptr)
-	mov	%r11,8*3($tptr)
-	mov	%r12,8*4($tptr)
-	mov	%r13,8*5($tptr)
-	mov	%r14,8*6($tptr)
-	mov	%r15,8*7($tptr)
+	mov	
+	mov	
+	mov	
+	mov	
+	mov	
+	mov	
 	lea	8*8($tptr),$tptr
 
-	cmp	%rdx,$tptr		# end of t[]?
+	cmp	
 	jb	.L8x_reduction_loop
 	ret
 .cfi_endproc
@@ -1625,54 +1625,54 @@ $code.=<<___;
 .align	32
 __bn_post4x_internal:
 .cfi_startproc
-	mov	8*0($nptr),%r12
-	lea	(%rdi,$num),$tptr	# %rdi was $tptr above
-	mov	$num,%rcx
-	movq	%xmm1,$rptr		# restore $rptr
-	neg	%rax
-	movq	%xmm1,$aptr		# prepare for back-to-back call
-	sar	\$3+2,%rcx
-	dec	%r12			# so that after 'not' we get -n[0]
-	xor	%r10,%r10
-	mov	8*1($nptr),%r13
-	mov	8*2($nptr),%r14
-	mov	8*3($nptr),%r15
+	mov	8*0($nptr), 
+	lea	( 
+	mov	$num, 
+	movq	
+	neg	
+	movq	
+	sar	\$3+2, 
+	dec	
+	xor	
+	mov	8*1($nptr), 
+	mov	8*2($nptr), 
+	mov	8*3($nptr), 
 	jmp	.Lsqr4x_sub_entry
 
 .align	16
 .Lsqr4x_sub:
-	mov	8*0($nptr),%r12
-	mov	8*1($nptr),%r13
-	mov	8*2($nptr),%r14
-	mov	8*3($nptr),%r15
+	mov	8*0($nptr), 
+	mov	8*1($nptr), 
+	mov	8*2($nptr), 
+	mov	8*3($nptr), 
 .Lsqr4x_sub_entry:
 	lea	8*4($nptr),$nptr
-	not	%r12
-	not	%r13
-	not	%r14
-	not	%r15
-	and	%rax,%r12
-	and	%rax,%r13
-	and	%rax,%r14
-	and	%rax,%r15
+	not	
+	not	
+	not	
+	not	
+	and	
+	and	
+	and	
+	and	
 
-	neg	%r10			# mov %r10,%cf
-	adc	8*0($tptr),%r12
-	adc	8*1($tptr),%r13
-	adc	8*2($tptr),%r14
-	adc	8*3($tptr),%r15
-	mov	%r12,8*0($rptr)
+	neg	
+	adc	8*0($tptr), 
+	adc	8*1($tptr), 
+	adc	8*2($tptr), 
+	adc	8*3($tptr), 
+	mov	
 	lea	8*4($tptr),$tptr
-	mov	%r13,8*1($rptr)
-	sbb	%r10,%r10		# mov %cf,%r10
-	mov	%r14,8*2($rptr)
-	mov	%r15,8*3($rptr)
+	mov	
+	sbb	
+	mov	
+	mov	
 	lea	8*4($rptr),$rptr
 
-	inc	%rcx			# pass %cf
+	inc	
 	jnz	.Lsqr4x_sub
 
-	mov	$num,%r10		# prepare for back-to-back call
+	mov	$num, 
 	neg	$num			# restore $num
 	ret
 .cfi_endproc
@@ -1691,27 +1691,27 @@ $code.=<<___;
 bn_mulx4x_mont_gather5:
 .cfi_startproc
 	_CET_ENDBR
-	mov	%rsp,%rax
-.cfi_def_cfa_register	%rax
-	push	%rbx
-.cfi_push	%rbx
-	push	%rbp
-.cfi_push	%rbp
-	push	%r12
-.cfi_push	%r12
-	push	%r13
-.cfi_push	%r13
-	push	%r14
-.cfi_push	%r14
-	push	%r15
-.cfi_push	%r15
+	mov	
+.cfi_def_cfa_register	
+	push	
+.cfi_push	
+	push	
+.cfi_push	
+	push	
+.cfi_push	
+	push	
+.cfi_push	
+	push	
+.cfi_push	
+	push	
+.cfi_push	
 .Lmulx4x_prologue:
 
 	# num is declared as an int, a 32-bit parameter, so the upper half is
 	# undefined. It is important that this write to ${num}, which zeros the
 	# upper half, predates the first access.
 	shl	\$3,${num}d		# convert $num to bytes
-	lea	($num,$num,2),%r10	# 3*$num in bytes
+	lea	($num,$num,2), 
 	neg	$num			# -$num
 	mov	($n0),$n0		# *n0
 
@@ -1724,38 +1724,38 @@ bn_mulx4x_mont_gather5:
 	# completing exponentiation. Extra 256 bytes is for power mask
 	# calculated from 7th argument, the index.]
 	#
-	lea	-320(%rsp,$num,2),%r11
-	mov	%rsp,%rbp
-	sub	$rp,%r11
-	and	\$4095,%r11
-	cmp	%r11,%r10
+	lea	-320( 
+	mov	
+	sub	$rp, 
+	and	\$4095, 
+	cmp	
 	jb	.Lmulx4xsp_alt
-	sub	%r11,%rbp		# align with $aptr
-	lea	-320(%rbp,$num,2),%rbp	# future alloca(frame+2*$num*8+256)
+	sub	
+	lea	-320( 
 	jmp	.Lmulx4xsp_done
 
 .Lmulx4xsp_alt:
-	lea	4096-320(,$num,2),%r10
-	lea	-320(%rbp,$num,2),%rbp	# future alloca(frame+2*$num*8+256)
-	sub	%r10,%r11
-	mov	\$0,%r10
-	cmovc	%r10,%r11
-	sub	%r11,%rbp
+	lea	4096-320(,$num,2), 
+	lea	-320( 
+	sub	
+	mov	\$0, 
+	cmovc	
+	sub	
 .Lmulx4xsp_done:
-	and	\$-64,%rbp		# ensure alignment
-	mov	%rsp,%r11
-	sub	%rbp,%r11
-	and	\$-4096,%r11
-	lea	(%rbp,%r11),%rsp
-	mov	(%rsp),%r10
-	cmp	%rbp,%rsp
+	and	\$-64, 
+	mov	
+	sub	
+	and	\$-4096, 
+	lea	( 
+	mov	( 
+	cmp	
 	ja	.Lmulx4x_page_walk
 	jmp	.Lmulx4x_page_walk_done
 
 .Lmulx4x_page_walk:
-	lea	-4096(%rsp),%rsp
-	mov	(%rsp),%r10
-	cmp	%rbp,%rsp
+	lea	-4096( 
+	mov	( 
+	cmp	
 	ja	.Lmulx4x_page_walk
 .Lmulx4x_page_walk_done:
 
@@ -1766,35 +1766,35 @@ bn_mulx4x_mont_gather5:
 	# +16	end of b[num]
 	# +24	inner counter
 	# +32	saved n0
-	# +40	saved %rsp
+	# +40	saved 
 	# +48
 	# +56	saved rp
 	# +64	tmp[num+1]
 	#
-	mov	$n0, 32(%rsp)		# save *n0
-	mov	%rax,40(%rsp)		# save original %rsp
-.cfi_cfa_expression	%rsp+40,deref,+8
+	mov	$n0, 32( 
+	mov	
+.cfi_cfa_expression	
 .Lmulx4x_body:
 	call	mulx4x_internal
 
-	mov	40(%rsp),%rsi		# restore %rsp
-.cfi_def_cfa	%rsi,8
-	mov	\$1,%rax
+	mov	40( 
+.cfi_def_cfa	
+	mov	\$1, 
 
-	mov	-48(%rsi),%r15
-.cfi_restore	%r15
-	mov	-40(%rsi),%r14
-.cfi_restore	%r14
-	mov	-32(%rsi),%r13
-.cfi_restore	%r13
-	mov	-24(%rsi),%r12
-.cfi_restore	%r12
-	mov	-16(%rsi),%rbp
-.cfi_restore	%rbp
-	mov	-8(%rsi),%rbx
-.cfi_restore	%rbx
-	lea	(%rsi),%rsp
-.cfi_def_cfa_register	%rsp
+	mov	-48( 
+.cfi_restore	
+	mov	-40( 
+.cfi_restore	
+	mov	-32( 
+.cfi_restore	
+	mov	-24( 
+.cfi_restore	
+	mov	-16( 
+.cfi_restore	
+	mov	-8( 
+.cfi_restore	
+	lea	( 
+.cfi_def_cfa_register	
 .Lmulx4x_epilogue:
 	ret
 .cfi_endproc
@@ -1804,360 +1804,360 @@ bn_mulx4x_mont_gather5:
 .align	32
 mulx4x_internal:
 .cfi_startproc
-	mov	$num,8(%rsp)		# save -$num (it was in bytes)
-	mov	$num,%r10
+	mov	$num,8( 
+	mov	$num, 
 	neg	$num			# restore $num
 	shl	\$5,$num
-	neg	%r10			# restore $num
-	lea	128($bp,$num),%r13	# end of powers table (+size optimization)
+	neg	
+	lea	128($bp,$num), 
 	shr	\$5+5,$num
-	movd	`($win64?56:8)`(%rax),%xmm5	# load 7th argument
+	movd	`($win64?56:8)`( 
 	sub	\$1,$num
-	lea	.Linc(%rip),%rax
-	mov	%r13,16+8(%rsp)		# end of b[num]
-	mov	$num,24+8(%rsp)		# inner counter
-	mov	$rp, 56+8(%rsp)		# save $rp
+	lea	.Linc( 
+	mov	
+	mov	$num,24+8( 
+	mov	$rp, 56+8( 
 ___
 my ($aptr, $bptr, $nptr, $tptr, $mi,  $bi,  $zero, $num)=
    ("%rsi","%rdi","%rcx","%rbx","%r8","%r9","%rbp","%rax");
 my $rptr=$bptr;
 my $STRIDE=2**5*8;		# 5 is "window size"
 $code.=<<___;
-	movdqa	0(%rax),%xmm0		# 00000001000000010000000000000000
-	movdqa	16(%rax),%xmm1		# 00000002000000020000000200000002
-	lea	88-112(%rsp,%r10),%r10	# place the mask after tp[num+1] (+ICache optimization)
+	movdqa	0( 
+	movdqa	16( 
+	lea	88-112( 
 	lea	128($bp),$bptr		# size optimization
 
-	pshufd	\$0,%xmm5,%xmm5		# broadcast index
-	movdqa	%xmm1,%xmm4
+	pshufd	\$0, 
+	movdqa	
 	.byte	0x67
-	movdqa	%xmm1,%xmm2
+	movdqa	
 ___
 ########################################################################
 # Calculate masks by comparing 0..31 to $idx and save result to stack.
 #
 # We compute sixteen 16-byte masks and store them on the stack. Mask i is stored
-# in `16*i - 128`(%rax) and contains the comparisons for idx == 2*i and
+# in `16*i - 128`( 
 # idx == 2*i + 1 in its lower and upper halves, respectively. Mask calculations
 # are scheduled in groups of four.
 $code.=<<___;
 	.byte	0x67
-	paddd	%xmm0,%xmm1
-	pcmpeqd	%xmm5,%xmm0		# compare to 1,0
-	movdqa	%xmm4,%xmm3
+	paddd	
+	pcmpeqd	
+	movdqa	
 ___
 for($i=0;$i<$STRIDE/16-4;$i+=4) {
 $code.=<<___;
-	paddd	%xmm1,%xmm2
-	pcmpeqd	%xmm5,%xmm1		# compare to 3,2
-	movdqa	%xmm0,`16*($i+0)+112`(%r10)
-	movdqa	%xmm4,%xmm0
+	paddd	
+	pcmpeqd	
+	movdqa	
+	movdqa	
 
-	paddd	%xmm2,%xmm3
-	pcmpeqd	%xmm5,%xmm2		# compare to 5,4
-	movdqa	%xmm1,`16*($i+1)+112`(%r10)
-	movdqa	%xmm4,%xmm1
+	paddd	
+	pcmpeqd	
+	movdqa	
+	movdqa	
 
-	paddd	%xmm3,%xmm0
-	pcmpeqd	%xmm5,%xmm3		# compare to 7,6
-	movdqa	%xmm2,`16*($i+2)+112`(%r10)
-	movdqa	%xmm4,%xmm2
+	paddd	
+	pcmpeqd	
+	movdqa	
+	movdqa	
 
-	paddd	%xmm0,%xmm1
-	pcmpeqd	%xmm5,%xmm0
-	movdqa	%xmm3,`16*($i+3)+112`(%r10)
-	movdqa	%xmm4,%xmm3
+	paddd	
+	pcmpeqd	
+	movdqa	
+	movdqa	
 ___
 }
 $code.=<<___;				# last iteration can be optimized
 	.byte	0x67
-	paddd	%xmm1,%xmm2
-	pcmpeqd	%xmm5,%xmm1
-	movdqa	%xmm0,`16*($i+0)+112`(%r10)
+	paddd	
+	pcmpeqd	
+	movdqa	
 
-	paddd	%xmm2,%xmm3
-	pcmpeqd	%xmm5,%xmm2
-	movdqa	%xmm1,`16*($i+1)+112`(%r10)
+	paddd	
+	pcmpeqd	
+	movdqa	
 
-	pcmpeqd	%xmm5,%xmm3
-	movdqa	%xmm2,`16*($i+2)+112`(%r10)
+	pcmpeqd	
+	movdqa	
 
-	pand	`16*($i+0)-128`($bptr),%xmm0	# while it's still in register
-	pand	`16*($i+1)-128`($bptr),%xmm1
-	pand	`16*($i+2)-128`($bptr),%xmm2
-	movdqa	%xmm3,`16*($i+3)+112`(%r10)
-	pand	`16*($i+3)-128`($bptr),%xmm3
-	por	%xmm2,%xmm0
-	por	%xmm3,%xmm1
+	pand	`16*($i+0)-128`($bptr), 
+	pand	`16*($i+1)-128`($bptr), 
+	pand	`16*($i+2)-128`($bptr), 
+	movdqa	
+	pand	`16*($i+3)-128`($bptr), 
+	por	
+	por	
 ___
 for($i=0;$i<$STRIDE/16-4;$i+=4) {
 $code.=<<___;
-	movdqa	`16*($i+0)-128`($bptr),%xmm4
-	movdqa	`16*($i+1)-128`($bptr),%xmm5
-	movdqa	`16*($i+2)-128`($bptr),%xmm2
-	pand	`16*($i+0)+112`(%r10),%xmm4
-	movdqa	`16*($i+3)-128`($bptr),%xmm3
-	pand	`16*($i+1)+112`(%r10),%xmm5
-	por	%xmm4,%xmm0
-	pand	`16*($i+2)+112`(%r10),%xmm2
-	por	%xmm5,%xmm1
-	pand	`16*($i+3)+112`(%r10),%xmm3
-	por	%xmm2,%xmm0
-	por	%xmm3,%xmm1
+	movdqa	`16*($i+0)-128`($bptr), 
+	movdqa	`16*($i+1)-128`($bptr), 
+	movdqa	`16*($i+2)-128`($bptr), 
+	pand	`16*($i+0)+112`( 
+	movdqa	`16*($i+3)-128`($bptr), 
+	pand	`16*($i+1)+112`( 
+	por	
+	pand	`16*($i+2)+112`( 
+	por	
+	pand	`16*($i+3)+112`( 
+	por	
+	por	
 ___
 }
 $code.=<<___;
-	pxor	%xmm1,%xmm0
-	# Combine the upper and lower halves of %xmm0.
-	pshufd	\$0x4e,%xmm0,%xmm1	# Swap upper and lower halves.
-	por	%xmm1,%xmm0
+	pxor	
+	# Combine the upper and lower halves of 
+	pshufd	\$0x4e, 
+	por	
 	lea	$STRIDE($bptr),$bptr
-	movq	%xmm0,%rdx		# bp[0]
-	lea	64+8*4+8(%rsp),$tptr
+	movq	
+	lea	64+8*4+8( 
 
-	mov	%rdx,$bi
-	mulx	0*8($aptr),$mi,%rax	# a[0]*b[0]
-	mulx	1*8($aptr),%r11,%r12	# a[1]*b[0]
-	add	%rax,%r11
-	mulx	2*8($aptr),%rax,%r13	# ...
-	adc	%rax,%r12
-	adc	\$0,%r13
-	mulx	3*8($aptr),%rax,%r14
+	mov	
+	mulx	0*8($aptr),$mi, 
+	mulx	1*8($aptr), 
+	add	
+	mulx	2*8($aptr), 
+	adc	
+	adc	\$0, 
+	mulx	3*8($aptr), 
 
-	mov	$mi,%r15
-	imulq	32+8(%rsp),$mi		# "t[0]"*n0
+	mov	$mi, 
+	imulq	32+8( 
 	xor	$zero,$zero		# cf=0, of=0
-	mov	$mi,%rdx
+	mov	$mi, 
 
-	mov	$bptr,8+8(%rsp)		# off-load &b[i]
+	mov	$bptr,8+8( 
 
 	lea	4*8($aptr),$aptr
-	adcx	%rax,%r13
-	adcx	$zero,%r14		# cf=0
+	adcx	
+	adcx	$zero, 
 
-	mulx	0*8($nptr),%rax,%r10
-	adcx	%rax,%r15		# discarded
-	adox	%r11,%r10
-	mulx	1*8($nptr),%rax,%r11
-	adcx	%rax,%r10
-	adox	%r12,%r11
-	mulx	2*8($nptr),%rax,%r12
-	mov	24+8(%rsp),$bptr	# counter value
-	mov	%r10,-8*4($tptr)
-	adcx	%rax,%r11
-	adox	%r13,%r12
-	mulx	3*8($nptr),%rax,%r15
-	 mov	$bi,%rdx
-	mov	%r11,-8*3($tptr)
-	adcx	%rax,%r12
-	adox	$zero,%r15		# of=0
+	mulx	0*8($nptr), 
+	adcx	
+	adox	
+	mulx	1*8($nptr), 
+	adcx	
+	adox	
+	mulx	2*8($nptr), 
+	mov	24+8( 
+	mov	
+	adcx	
+	adox	
+	mulx	3*8($nptr), 
+	 mov	$bi, 
+	mov	
+	adcx	
+	adox	$zero, 
 	lea	4*8($nptr),$nptr
-	mov	%r12,-8*2($tptr)
+	mov	
 	jmp	.Lmulx4x_1st
 
 .align	32
 .Lmulx4x_1st:
-	adcx	$zero,%r15		# cf=0, modulo-scheduled
-	mulx	0*8($aptr),%r10,%rax	# a[4]*b[0]
-	adcx	%r14,%r10
-	mulx	1*8($aptr),%r11,%r14	# a[5]*b[0]
-	adcx	%rax,%r11
-	mulx	2*8($aptr),%r12,%rax	# ...
-	adcx	%r14,%r12
-	mulx	3*8($aptr),%r13,%r14
+	adcx	$zero, 
+	mulx	0*8($aptr), 
+	adcx	
+	mulx	1*8($aptr), 
+	adcx	
+	mulx	2*8($aptr), 
+	adcx	
+	mulx	3*8($aptr), 
 	 .byte	0x67,0x67
-	 mov	$mi,%rdx
-	adcx	%rax,%r13
-	adcx	$zero,%r14		# cf=0
+	 mov	$mi, 
+	adcx	
+	adcx	$zero, 
 	lea	4*8($aptr),$aptr
 	lea	4*8($tptr),$tptr
 
-	adox	%r15,%r10
-	mulx	0*8($nptr),%rax,%r15
-	adcx	%rax,%r10
-	adox	%r15,%r11
-	mulx	1*8($nptr),%rax,%r15
-	adcx	%rax,%r11
-	adox	%r15,%r12
-	mulx	2*8($nptr),%rax,%r15
-	mov	%r10,-5*8($tptr)
-	adcx	%rax,%r12
-	mov	%r11,-4*8($tptr)
-	adox	%r15,%r13
-	mulx	3*8($nptr),%rax,%r15
-	 mov	$bi,%rdx
-	mov	%r12,-3*8($tptr)
-	adcx	%rax,%r13
-	adox	$zero,%r15
+	adox	
+	mulx	0*8($nptr), 
+	adcx	
+	adox	
+	mulx	1*8($nptr), 
+	adcx	
+	adox	
+	mulx	2*8($nptr), 
+	mov	
+	adcx	
+	mov	
+	adox	
+	mulx	3*8($nptr), 
+	 mov	$bi, 
+	mov	
+	adcx	
+	adox	$zero, 
 	lea	4*8($nptr),$nptr
-	mov	%r13,-2*8($tptr)
+	mov	
 
 	dec	$bptr			# of=0, pass cf
 	jnz	.Lmulx4x_1st
 
-	mov	8(%rsp),$num		# load -num
-	adc	$zero,%r15		# modulo-scheduled
+	mov	8( 
+	adc	$zero, 
 	lea	($aptr,$num),$aptr	# rewind $aptr
-	add	%r15,%r14
-	mov	8+8(%rsp),$bptr		# re-load &b[i]
+	add	
+	mov	8+8( 
 	adc	$zero,$zero		# top-most carry
-	mov	%r14,-1*8($tptr)
+	mov	
 	jmp	.Lmulx4x_outer
 
 .align	32
 .Lmulx4x_outer:
-	lea	16-256($tptr),%r10	# where 256-byte mask is (+density control)
-	pxor	%xmm4,%xmm4
+	lea	16-256($tptr), 
+	pxor	
 	.byte	0x67,0x67
-	pxor	%xmm5,%xmm5
+	pxor	
 ___
 for($i=0;$i<$STRIDE/16;$i+=4) {
 $code.=<<___;
-	movdqa	`16*($i+0)-128`($bptr),%xmm0
-	movdqa	`16*($i+1)-128`($bptr),%xmm1
-	movdqa	`16*($i+2)-128`($bptr),%xmm2
-	pand	`16*($i+0)+256`(%r10),%xmm0
-	movdqa	`16*($i+3)-128`($bptr),%xmm3
-	pand	`16*($i+1)+256`(%r10),%xmm1
-	por	%xmm0,%xmm4
-	pand	`16*($i+2)+256`(%r10),%xmm2
-	por	%xmm1,%xmm5
-	pand	`16*($i+3)+256`(%r10),%xmm3
-	por	%xmm2,%xmm4
-	por	%xmm3,%xmm5
+	movdqa	`16*($i+0)-128`($bptr), 
+	movdqa	`16*($i+1)-128`($bptr), 
+	movdqa	`16*($i+2)-128`($bptr), 
+	pand	`16*($i+0)+256`( 
+	movdqa	`16*($i+3)-128`($bptr), 
+	pand	`16*($i+1)+256`( 
+	por	
+	pand	`16*($i+2)+256`( 
+	por	
+	pand	`16*($i+3)+256`( 
+	por	
+	por	
 ___
 }
 $code.=<<___;
-	por	%xmm5,%xmm4
-	# Combine the upper and lower halves of %xmm4 as %xmm0.
-	pshufd	\$0x4e,%xmm4,%xmm0	# Swap upper and lower halves.
-	por	%xmm4,%xmm0
+	por	
+	# Combine the upper and lower halves of 
+	pshufd	\$0x4e, 
+	por	
 	lea	$STRIDE($bptr),$bptr
-	movq	%xmm0,%rdx		# m0=bp[i]
+	movq	
 
 	mov	$zero,($tptr)		# save top-most carry
 	lea	4*8($tptr,$num),$tptr	# rewind $tptr
-	mulx	0*8($aptr),$mi,%r11	# a[0]*b[i]
+	mulx	0*8($aptr),$mi, 
 	xor	$zero,$zero		# cf=0, of=0
-	mov	%rdx,$bi
-	mulx	1*8($aptr),%r14,%r12	# a[1]*b[i]
+	mov	
+	mulx	1*8($aptr), 
 	adox	-4*8($tptr),$mi		# +t[0]
-	adcx	%r14,%r11
-	mulx	2*8($aptr),%r15,%r13	# ...
-	adox	-3*8($tptr),%r11
-	adcx	%r15,%r12
-	mulx	3*8($aptr),%rdx,%r14
-	adox	-2*8($tptr),%r12
-	adcx	%rdx,%r13
+	adcx	
+	mulx	2*8($aptr), 
+	adox	-3*8($tptr), 
+	adcx	
+	mulx	3*8($aptr), 
+	adox	-2*8($tptr), 
+	adcx	
 	lea	($nptr,$num),$nptr	# rewind $nptr
 	lea	4*8($aptr),$aptr
-	adox	-1*8($tptr),%r13
-	adcx	$zero,%r14
-	adox	$zero,%r14
+	adox	-1*8($tptr), 
+	adcx	$zero, 
+	adox	$zero, 
 
-	mov	$mi,%r15
-	imulq	32+8(%rsp),$mi		# "t[0]"*n0
+	mov	$mi, 
+	imulq	32+8( 
 
-	mov	$mi,%rdx
+	mov	$mi, 
 	xor	$zero,$zero		# cf=0, of=0
-	mov	$bptr,8+8(%rsp)		# off-load &b[i]
+	mov	$bptr,8+8( 
 
-	mulx	0*8($nptr),%rax,%r10
-	adcx	%rax,%r15		# discarded
-	adox	%r11,%r10
-	mulx	1*8($nptr),%rax,%r11
-	adcx	%rax,%r10
-	adox	%r12,%r11
-	mulx	2*8($nptr),%rax,%r12
-	adcx	%rax,%r11
-	adox	%r13,%r12
-	mulx	3*8($nptr),%rax,%r15
-	 mov	$bi,%rdx
-	mov	24+8(%rsp),$bptr	# counter value
-	mov	%r10,-8*4($tptr)
-	adcx	%rax,%r12
-	mov	%r11,-8*3($tptr)
-	adox	$zero,%r15		# of=0
-	mov	%r12,-8*2($tptr)
+	mulx	0*8($nptr), 
+	adcx	
+	adox	
+	mulx	1*8($nptr), 
+	adcx	
+	adox	
+	mulx	2*8($nptr), 
+	adcx	
+	adox	
+	mulx	3*8($nptr), 
+	 mov	$bi, 
+	mov	24+8( 
+	mov	
+	adcx	
+	mov	
+	adox	$zero, 
+	mov	
 	lea	4*8($nptr),$nptr
 	jmp	.Lmulx4x_inner
 
 .align	32
 .Lmulx4x_inner:
-	mulx	0*8($aptr),%r10,%rax	# a[4]*b[i]
-	adcx	$zero,%r15		# cf=0, modulo-scheduled
-	adox	%r14,%r10
-	mulx	1*8($aptr),%r11,%r14	# a[5]*b[i]
-	adcx	0*8($tptr),%r10
-	adox	%rax,%r11
-	mulx	2*8($aptr),%r12,%rax	# ...
-	adcx	1*8($tptr),%r11
-	adox	%r14,%r12
-	mulx	3*8($aptr),%r13,%r14
-	 mov	$mi,%rdx
-	adcx	2*8($tptr),%r12
-	adox	%rax,%r13
-	adcx	3*8($tptr),%r13
-	adox	$zero,%r14		# of=0
+	mulx	0*8($aptr), 
+	adcx	$zero, 
+	adox	
+	mulx	1*8($aptr), 
+	adcx	0*8($tptr), 
+	adox	
+	mulx	2*8($aptr), 
+	adcx	1*8($tptr), 
+	adox	
+	mulx	3*8($aptr), 
+	 mov	$mi, 
+	adcx	2*8($tptr), 
+	adox	
+	adcx	3*8($tptr), 
+	adox	$zero, 
 	lea	4*8($aptr),$aptr
 	lea	4*8($tptr),$tptr
-	adcx	$zero,%r14		# cf=0
+	adcx	$zero, 
 
-	adox	%r15,%r10
-	mulx	0*8($nptr),%rax,%r15
-	adcx	%rax,%r10
-	adox	%r15,%r11
-	mulx	1*8($nptr),%rax,%r15
-	adcx	%rax,%r11
-	adox	%r15,%r12
-	mulx	2*8($nptr),%rax,%r15
-	mov	%r10,-5*8($tptr)
-	adcx	%rax,%r12
-	adox	%r15,%r13
-	mov	%r11,-4*8($tptr)
-	mulx	3*8($nptr),%rax,%r15
-	 mov	$bi,%rdx
+	adox	
+	mulx	0*8($nptr), 
+	adcx	
+	adox	
+	mulx	1*8($nptr), 
+	adcx	
+	adox	
+	mulx	2*8($nptr), 
+	mov	
+	adcx	
+	adox	
+	mov	
+	mulx	3*8($nptr), 
+	 mov	$bi, 
 	lea	4*8($nptr),$nptr
-	mov	%r12,-3*8($tptr)
-	adcx	%rax,%r13
-	adox	$zero,%r15
-	mov	%r13,-2*8($tptr)
+	mov	
+	adcx	
+	adox	$zero, 
+	mov	
 
 	dec	$bptr			# of=0, pass cf
 	jnz	.Lmulx4x_inner
 
-	mov	0+8(%rsp),$num		# load -num
-	adc	$zero,%r15		# modulo-scheduled
-	sub	0*8($tptr),$bptr	# pull top-most carry to %cf
-	mov	8+8(%rsp),$bptr		# re-load &b[i]
-	mov	16+8(%rsp),%r10
-	adc	%r15,%r14
+	mov	0+8( 
+	adc	$zero, 
+	sub	0*8($tptr),$bptr	# pull top-most carry to 
+	mov	8+8( 
+	mov	16+8( 
+	adc	
 	lea	($aptr,$num),$aptr	# rewind $aptr
 	adc	$zero,$zero		# top-most carry
-	mov	%r14,-1*8($tptr)
+	mov	
 
-	cmp	%r10,$bptr
+	cmp	
 	jb	.Lmulx4x_outer
 
-	mov	-8($nptr),%r10
-	mov	$zero,%r8
-	mov	($nptr,$num),%r12
-	lea	($nptr,$num),%rbp	# rewind $nptr
-	mov	$num,%rcx
-	lea	($tptr,$num),%rdi	# rewind $tptr
-	xor	%eax,%eax
-	xor	%r15,%r15
-	sub	%r14,%r10		# compare top-most words
-	adc	%r15,%r15
-	or	%r15,%r8
-	sar	\$3+2,%rcx
-	sub	%r8,%rax		# %rax=-%r8
-	mov	56+8(%rsp),%rdx		# restore rp
-	dec	%r12			# so that after 'not' we get -n[0]
-	mov	8*1(%rbp),%r13
-	xor	%r8,%r8
-	mov	8*2(%rbp),%r14
-	mov	8*3(%rbp),%r15
+	mov	-8($nptr), 
+	mov	$zero, 
+	mov	($nptr,$num), 
+	lea	($nptr,$num), 
+	mov	$num, 
+	lea	($tptr,$num), 
+	xor	
+	xor	
+	sub	
+	adc	
+	or	
+	sar	\$3+2, 
+	sub	
+	mov	56+8( 
+	dec	
+	mov	8*1( 
+	xor	
+	mov	8*2( 
+	mov	8*3( 
 	jmp	.Lsqrx4x_sub_entry	# common post-condition
 .cfi_endproc
 .size	mulx4x_internal,.-mulx4x_internal
@@ -2185,27 +2185,27 @@ $code.=<<___;
 bn_powerx5:
 .cfi_startproc
 	_CET_ENDBR
-	mov	%rsp,%rax
-.cfi_def_cfa_register	%rax
-	push	%rbx
-.cfi_push	%rbx
-	push	%rbp
-.cfi_push	%rbp
-	push	%r12
-.cfi_push	%r12
-	push	%r13
-.cfi_push	%r13
-	push	%r14
-.cfi_push	%r14
-	push	%r15
-.cfi_push	%r15
+	mov	
+.cfi_def_cfa_register	
+	push	
+.cfi_push	
+	push	
+.cfi_push	
+	push	
+.cfi_push	
+	push	
+.cfi_push	
+	push	
+.cfi_push	
+	push	
+.cfi_push	
 .Lpowerx5_prologue:
 
 	# num is declared as an int, a 32-bit parameter, so the upper half is
 	# undefined. It is important that this write to ${num}, which zeros the
 	# upper half, predates the first access.
 	shl	\$3,${num}d		# convert $num to bytes
-	lea	($num,$num,2),%r10	# 3*$num in bytes
+	lea	($num,$num,2), 
 	neg	$num
 	mov	($n0),$n0		# *n0
 
@@ -3070,96 +3070,96 @@ bn_gather5:
 .LSEH_begin_bn_gather5:			# Win64 thing, but harmless in other cases
 	_CET_ENDBR
 	# I can't trust assembler to use specific encoding:-(
-	.byte	0x4c,0x8d,0x14,0x24			#lea    (%rsp),%r10
-.cfi_def_cfa_register	%r10
-	.byte	0x48,0x81,0xec,0x08,0x01,0x00,0x00	#sub	$0x108,%rsp
-	lea	.Linc(%rip),%rax
-	and	\$-16,%rsp		# shouldn't be formally required
+	.byte	0x4c,0x8d,0x14,0x24			#lea    ( 
+.cfi_def_cfa_register	
+	.byte	0x48,0x81,0xec,0x08,0x01,0x00,0x00	#sub	$0x108, 
+	lea	.Linc( 
+	and	\$-16, 
 
-	movd	$idx,%xmm5
-	movdqa	0(%rax),%xmm0		# 00000001000000010000000000000000
-	movdqa	16(%rax),%xmm1		# 00000002000000020000000200000002
-	lea	128($tbl),%r11		# size optimization
-	lea	128(%rsp),%rax		# size optimization
+	movd	$idx, 
+	movdqa	0( 
+	movdqa	16( 
+	lea	128($tbl), 
+	lea	128( 
 
-	pshufd	\$0,%xmm5,%xmm5		# broadcast $idx
-	movdqa	%xmm1,%xmm4
-	movdqa	%xmm1,%xmm2
+	pshufd	\$0, 
+	movdqa	
+	movdqa	
 ___
 ########################################################################
 # Calculate masks by comparing 0..31 to $idx and save result to stack.
 #
 # We compute sixteen 16-byte masks and store them on the stack. Mask i is stored
-# in `16*i - 128`(%rax) and contains the comparisons for idx == 2*i and
+# in `16*i - 128`( 
 # idx == 2*i + 1 in its lower and upper halves, respectively. Mask calculations
 # are scheduled in groups of four.
 for($i=0;$i<$STRIDE/16;$i+=4) {
 $code.=<<___;
-	paddd	%xmm0,%xmm1
-	pcmpeqd	%xmm5,%xmm0		# compare to 1,0
+	paddd	
+	pcmpeqd	
 ___
 $code.=<<___	if ($i);
-	movdqa	%xmm3,`16*($i-1)-128`(%rax)
+	movdqa	
 ___
 $code.=<<___;
-	movdqa	%xmm4,%xmm3
+	movdqa	
 
-	paddd	%xmm1,%xmm2
-	pcmpeqd	%xmm5,%xmm1		# compare to 3,2
-	movdqa	%xmm0,`16*($i+0)-128`(%rax)
-	movdqa	%xmm4,%xmm0
+	paddd	
+	pcmpeqd	
+	movdqa	
+	movdqa	
 
-	paddd	%xmm2,%xmm3
-	pcmpeqd	%xmm5,%xmm2		# compare to 5,4
-	movdqa	%xmm1,`16*($i+1)-128`(%rax)
-	movdqa	%xmm4,%xmm1
+	paddd	
+	pcmpeqd	
+	movdqa	
+	movdqa	
 
-	paddd	%xmm3,%xmm0
-	pcmpeqd	%xmm5,%xmm3		# compare to 7,6
-	movdqa	%xmm2,`16*($i+2)-128`(%rax)
-	movdqa	%xmm4,%xmm2
+	paddd	
+	pcmpeqd	
+	movdqa	
+	movdqa	
 ___
 }
 $code.=<<___;
-	movdqa	%xmm3,`16*($i-1)-128`(%rax)
+	movdqa	
 	jmp	.Lgather
 
 .align	32
 .Lgather:
-	pxor	%xmm4,%xmm4
-	pxor	%xmm5,%xmm5
+	pxor	
+	pxor	
 ___
 for($i=0;$i<$STRIDE/16;$i+=4) {
 # Combine the masks with the corresponding table entries to select the correct
 # entry.
 $code.=<<___;
-	movdqa	`16*($i+0)-128`(%r11),%xmm0
-	movdqa	`16*($i+1)-128`(%r11),%xmm1
-	movdqa	`16*($i+2)-128`(%r11),%xmm2
-	pand	`16*($i+0)-128`(%rax),%xmm0
-	movdqa	`16*($i+3)-128`(%r11),%xmm3
-	pand	`16*($i+1)-128`(%rax),%xmm1
-	por	%xmm0,%xmm4
-	pand	`16*($i+2)-128`(%rax),%xmm2
-	por	%xmm1,%xmm5
-	pand	`16*($i+3)-128`(%rax),%xmm3
-	por	%xmm2,%xmm4
-	por	%xmm3,%xmm5
+	movdqa	`16*($i+0)-128`( 
+	movdqa	`16*($i+1)-128`( 
+	movdqa	`16*($i+2)-128`( 
+	pand	`16*($i+0)-128`( 
+	movdqa	`16*($i+3)-128`( 
+	pand	`16*($i+1)-128`( 
+	por	
+	pand	`16*($i+2)-128`( 
+	por	
+	pand	`16*($i+3)-128`( 
+	por	
+	por	
 ___
 }
 $code.=<<___;
-	por	%xmm5,%xmm4
-	lea	$STRIDE(%r11),%r11
-	# Combine the upper and lower halves of %xmm0.
-	pshufd	\$0x4e,%xmm4,%xmm0	# Swap upper and lower halves.
-	por	%xmm4,%xmm0
-	movq	%xmm0,($out)		# m0=bp[0]
+	por	
+	lea	$STRIDE( 
+	# Combine the upper and lower halves of 
+	pshufd	\$0x4e, 
+	por	
+	movq	
 	lea	8($out),$out
 	sub	\$1,$num
 	jnz	.Lgather
 
-	lea	(%r10),%rsp
-.cfi_def_cfa_register	%rsp
+	lea	( 
+.cfi_def_cfa_register	
 	ret
 .LSEH_end_bn_gather5:
 .cfi_endproc
@@ -3179,7 +3179,7 @@ ___
 # EXCEPTION_DISPOSITION handler (EXCEPTION_RECORD *rec,ULONG64 frame,
 #		CONTEXT *context,DISPATCHER_CONTEXT *disp)
 if ($win64) {
-$rec="%rcx";
+$rec=" 
 $frame="%rdx";
 $context="%r8";
 $disp="%r9";
@@ -3189,102 +3189,102 @@ $code.=<<___;
 .type	mul_handler,\@abi-omnipotent
 .align	16
 mul_handler:
-	push	%rsi
-	push	%rdi
-	push	%rbx
-	push	%rbp
-	push	%r12
-	push	%r13
-	push	%r14
-	push	%r15
+	push	
+	push	
+	push	
+	push	
+	push	
+	push	
+	push	
+	push	
 	pushfq
-	sub	\$64,%rsp
+	sub	\$64, 
 
-	mov	120($context),%rax	# pull context->Rax
-	mov	248($context),%rbx	# pull context->Rip
+	mov	120($context), 
+	mov	248($context), 
 
-	mov	8($disp),%rsi		# disp->ImageBase
-	mov	56($disp),%r11		# disp->HandlerData
+	mov	8($disp), 
+	mov	56($disp), 
 
-	mov	0(%r11),%r10d		# HandlerData[0]
-	lea	(%rsi,%r10),%r10	# end of prologue label
-	cmp	%r10,%rbx		# context->Rip<end of prologue label
+	mov	0( 
+	lea	( 
+	cmp	
 	jb	.Lcommon_seh_tail
 
-	mov	4(%r11),%r10d		# HandlerData[1]
-	lea	(%rsi,%r10),%r10	# beginning of body label
-	cmp	%r10,%rbx		# context->Rip<body label
+	mov	4( 
+	lea	( 
+	cmp	
 	jb	.Lcommon_pop_regs
 
-	mov	152($context),%rax	# pull context->Rsp
+	mov	152($context), 
 
-	mov	8(%r11),%r10d		# HandlerData[2]
-	lea	(%rsi,%r10),%r10	# epilogue label
-	cmp	%r10,%rbx		# context->Rip>=epilogue label
+	mov	8( 
+	lea	( 
+	cmp	
 	jae	.Lcommon_seh_tail
 
-	lea	.Lmul4x_epilogue(%rip),%r10 # *ring*: hacked for deletion of _nohw
-	cmp	%r10,%rbx
+	lea	.Lmul4x_epilogue( 
+	cmp	
 	ja	.Lbody_40
 
-	mov	192($context),%r10	# pull $num
-	mov	8(%rax,%r10,8),%rax	# pull saved stack pointer
+	mov	192($context), 
+	mov	8( 
 
 	jmp	.Lcommon_pop_regs
 
 .Lbody_40:
-	mov	40(%rax),%rax		# pull saved stack pointer
+	mov	40( 
 .Lcommon_pop_regs:
-	mov	-8(%rax),%rbx
-	mov	-16(%rax),%rbp
-	mov	-24(%rax),%r12
-	mov	-32(%rax),%r13
-	mov	-40(%rax),%r14
-	mov	-48(%rax),%r15
-	mov	%rbx,144($context)	# restore context->Rbx
-	mov	%rbp,160($context)	# restore context->Rbp
-	mov	%r12,216($context)	# restore context->R12
-	mov	%r13,224($context)	# restore context->R13
-	mov	%r14,232($context)	# restore context->R14
-	mov	%r15,240($context)	# restore context->R15
+	mov	-8( 
+	mov	-16( 
+	mov	-24( 
+	mov	-32( 
+	mov	-40( 
+	mov	-48( 
+	mov	
+	mov	
+	mov	
+	mov	
+	mov	
+	mov	
 
 .Lcommon_seh_tail:
-	mov	8(%rax),%rdi
-	mov	16(%rax),%rsi
-	mov	%rax,152($context)	# restore context->Rsp
-	mov	%rsi,168($context)	# restore context->Rsi
-	mov	%rdi,176($context)	# restore context->Rdi
+	mov	8( 
+	mov	16( 
+	mov	
+	mov	
+	mov	
 
-	mov	40($disp),%rdi		# disp->ContextRecord
-	mov	$context,%rsi		# context
-	mov	\$154,%ecx		# sizeof(CONTEXT)
+	mov	40($disp), 
+	mov	$context, 
+	mov	\$154, 
 	.long	0xa548f3fc		# cld; rep movsq
 
-	mov	$disp,%rsi
-	xor	%rcx,%rcx		# arg1, UNW_FLAG_NHANDLER
-	mov	8(%rsi),%rdx		# arg2, disp->ImageBase
-	mov	0(%rsi),%r8		# arg3, disp->ControlPc
-	mov	16(%rsi),%r9		# arg4, disp->FunctionEntry
-	mov	40(%rsi),%r10		# disp->ContextRecord
-	lea	56(%rsi),%r11		# &disp->HandlerData
-	lea	24(%rsi),%r12		# &disp->EstablisherFrame
-	mov	%r10,32(%rsp)		# arg5
-	mov	%r11,40(%rsp)		# arg6
-	mov	%r12,48(%rsp)		# arg7
-	mov	%rcx,56(%rsp)		# arg8, (NULL)
-	call	*__imp_RtlVirtualUnwind(%rip)
+	mov	$disp, 
+	xor	
+	mov	8( 
+	mov	0( 
+	mov	16( 
+	mov	40( 
+	lea	56( 
+	lea	24( 
+	mov	
+	mov	
+	mov	
+	mov	
+	call	*__imp_RtlVirtualUnwind( 
 
-	mov	\$1,%eax		# ExceptionContinueSearch
-	add	\$64,%rsp
+	mov	\$1, 
+	add	\$64, 
 	popfq
-	pop	%r15
-	pop	%r14
-	pop	%r13
-	pop	%r12
-	pop	%rbp
-	pop	%rbx
-	pop	%rdi
-	pop	%rsi
+	pop	
+	pop	
+	pop	
+	pop	
+	pop	
+	pop	
+	pop	
+	pop	
 	ret
 .size	mul_handler,.-mul_handler
 

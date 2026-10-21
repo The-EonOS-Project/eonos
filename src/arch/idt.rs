@@ -8,8 +8,8 @@ use crate::{log_critical, log_debug, log_fail, log_ok};
 const IDT_ENTRIES: usize = 256;
 const GATE_INTERRUPT: u8 = 0x8E;
 
-/// Vector the remapped PIC's IRQ0 lands on (see `pic::IRQ_BASE`); IRQs
-/// occupy vectors [IRQ_BASE, IRQ_BASE + IRQ_COUNT).
+
+
 pub const IRQ_BASE: usize = 32;
 pub const IRQ_COUNT: usize = 16;
 const TOTAL_VECTORS: usize = IRQ_BASE + IRQ_COUNT;
@@ -59,16 +59,16 @@ struct Idtr {
 
 static mut IDT: [Entry; IDT_ENTRIES] = [Entry::MISSING; IDT_ENTRIES];
 
-/// A registered IRQ handler takes no arguments — drivers that need the
-/// interrupt frame (none do yet) can register through a richer mechanism
-/// later; a tick counter or "data ready" flag doesn't need one.
+
+
+
 type IrqHandler = fn();
 
 static IRQ_HANDLERS: IrqMutex<[Option<IrqHandler>; IRQ_COUNT]> = IrqMutex::new([None; IRQ_COUNT]);
 
-/// Wire `handler` up to fire whenever ISA IRQ `irq` (0-15) arrives.
-/// Does not unmask the line; use `interrupts::unmask_isa_irq` after
-/// registering the handler.
+
+
+
 pub fn register_irq(irq: u8, handler: IrqHandler) {
     IRQ_HANDLERS.lock()[irq as usize] = Some(handler);
 }
@@ -350,8 +350,8 @@ pub fn init() {
 #[no_mangle]
 extern "C" fn exception_handler(frame: &mut InterruptFrame) {
     if frame.vector as usize == APIC_SPURIOUS_VECTOR {
-        // Intel specifies that a spurious Local APIC interrupt is not
-        // in service and must not receive an EOI.
+        
+        
         return;
     }
     if frame.vector as usize >= IRQ_BASE {
@@ -359,12 +359,12 @@ extern "C" fn exception_handler(frame: &mut InterruptFrame) {
         return;
     }
 
-    // A CPU exception taken while running user code is that process's
-    // problem, not the kernel's: kill the process and carry on. NMI,
-    // double fault and machine check are the exceptions to that -- they
-    // say something is wrong with the machine (or with the kernel's own
-    // handling), not merely with the program, and the double fault
-    // handler is running on its dedicated IST stack anyway.
+    
+    
+    
+    
+    
+    
     if frame.cs & 3 == 3 && !matches!(frame.vector, 2 | 8 | 18) {
         kill_user_process(frame);
     }
@@ -382,11 +382,11 @@ extern "C" fn exception_handler(frame: &mut InterruptFrame) {
     }
 }
 
-/// Terminate the current (user) process after it caused a CPU
-/// exception. Runs on the process's kernel stack, so ending the thread
-/// from here is no different from ending it in a syscall. The exit
-/// status follows the shell convention for death by signal, 128 + the
-/// exception vector.
+
+
+
+
+
 fn kill_user_process(frame: &InterruptFrame) -> ! {
     let name = EXCEPTION_NAMES
         .get(frame.vector as usize)
@@ -424,8 +424,8 @@ fn kill_user_process(frame: &InterruptFrame) -> ! {
         );
     }
 
-    // x86 page fault (#PF) is the user-visible SIGSEGV equivalent.
-    // Keep the conventional shell status 128 + SIGSEGV (11).
+    
+    
     crate::process::exit_current(if frame.vector == 14 {
         139
     } else {
@@ -449,8 +449,8 @@ fn irq_dispatch(frame: &InterruptFrame) {
 
     crate::interrupts::end_of_interrupt(irq);
 
-    // Now that the PIC is free to deliver more interrupts, the scheduler
-    // may switch to another thread from inside this handler.
+    
+    
     crate::scheduler::preempt_if_needed();
 }
 

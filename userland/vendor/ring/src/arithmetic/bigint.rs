@@ -1,40 +1,40 @@
-// Copyright 2015-2023 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-//! Multi-precision integers.
-//!
-//! # Modular Arithmetic.
-//!
-//! Modular arithmetic is done in finite commutative rings ℤ/mℤ for some
-//! modulus *m*. We work in finite commutative rings instead of finite fields
-//! because the RSA public modulus *n* is not prime, which means ℤ/nℤ contains
-//! nonzero elements that have no multiplicative inverse, so ℤ/nℤ is not a
-//! finite field.
-//!
-//! In some calculations we need to deal with multiple rings at once. For
-//! example, RSA private key operations operate in the rings ℤ/nℤ, ℤ/pℤ, and
-//! ℤ/qℤ. Types and functions dealing with such rings are all parameterized
-//! over a type `M` to ensure that we don't wrongly mix up the math, e.g. by
-//! multiplying an element of ℤ/pℤ by an element of ℤ/qℤ modulo q. This follows
-//! the "unit" pattern described in [Static checking of units in Servo].
-//!
-//! `Elem` also uses the static unit checking pattern to statically track the
-//! Montgomery factors that need to be canceled out in each value using it's
-//! `E` parameter.
-//!
-//! [Static checking of units in Servo]:
-//!     https://blog.mozilla.org/research/2014/06/23/static-checking-of-units-in-servo/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use self::boxed_limbs::BoxedLimbs;
 pub(crate) use self::{
@@ -62,9 +62,9 @@ mod private_exponent;
 
 pub trait PublicModulus {}
 
-// When we need to create a new `Elem`, first we create a `Storage` and then
-// move its `limbs` into the new element. When we want to recylce an `Elem`'s
-// memory allocation, we convert it back into a `Storage`.
+
+
+
 pub struct Storage<M> {
     limbs: BoxedLimbs<M>,
 }
@@ -75,16 +75,16 @@ impl<M, E> From<Elem<M, E>> for Storage<M> {
     }
 }
 
-/// Elements of ℤ/mℤ for some modulus *m*.
-//
-// Defaulting `E` to `Unencoded` is a convenience for callers from outside this
-// submodule. However, for maximum clarity, we always explicitly use
-// `Unencoded` within the `bigint` submodule.
+
+
+
+
+
 pub struct Elem<M, E = Unencoded> {
     limbs: BoxedLimbs<M>,
 
-    /// The number of Montgomery factors that need to be canceled out from
-    /// `value` to get the actual value.
+    
+    
     encoding: PhantomData<E>,
 }
 
@@ -105,11 +105,11 @@ impl<M, E> Elem<M, E> {
     }
 }
 
-/// Does a Montgomery reduction on `limbs` assuming they are Montgomery-encoded ('R') and assuming
-/// they are the same size as `m`, but perhaps not reduced mod `m`. The result will be
-/// fully reduced mod `m`.
-///
-/// WARNING: Takes a `Storage` as an in/out value.
+
+
+
+
+
 fn from_montgomery_amm<M>(mut in_out: Storage<M>, m: &Modulus<M>) -> Elem<M, Unencoded> {
     let mut one = [0; MAX_LIMBS];
     one[0] = 1;
@@ -148,7 +148,7 @@ impl<M> Elem<M, Unencoded> {
 
     #[inline]
     pub fn fill_be_bytes(&self, out: &mut [u8]) {
-        // See Falko Strenzke, "Manger's Attack revisited", ICICS 2010.
+        
         limb::big_endian_from_limbs(&self.limbs, out)
     }
 }
@@ -196,16 +196,16 @@ where
     }
 }
 
-// r *= 2.
+
 fn elem_double<M, AF>(r: &mut Elem<M, AF>, m: &Modulus<M>) {
     limb::limbs_double_mod(&mut r.limbs, m.limbs())
         .unwrap_or_else(unwrap_impossible_len_mismatch_error)
 }
 
-// TODO: This is currently unused, but we intend to eventually use this to
-// reduce elements (x mod q) mod p in the RSA CRT. If/when we do so, we
-// should update the testing so it is reflective of that usage, instead of
-// the old usage.
+
+
+
+
 pub fn elem_reduced_once<A, M>(
     mut r: Storage<M>,
     a: &Elem<A, Unencoded>,
@@ -229,12 +229,12 @@ pub fn elem_reduced<Larger, Smaller>(
     m: &Modulus<Smaller>,
     other_prime_len_bits: BitLength,
 ) -> Elem<Smaller, RInverse> {
-    // This is stricter than required mathematically but this is what we
-    // guarantee and this is easier to check. The real requirement is that
-    // that `a < m*R` where `R` is the Montgomery `R` for `m`.
+    
+    
+    
     assert_eq!(other_prime_len_bits, m.len_bits());
 
-    // `limbs_from_mont_in_place` requires this.
+    
     assert_eq!(a.limbs.len(), m.limbs().len() * 2);
 
     let mut tmp = [0; MAX_LIMBS];
@@ -282,17 +282,17 @@ pub fn elem_widen<Larger, Smaller>(
     })
 }
 
-// TODO: Document why this works for all Montgomery factors.
+
 pub fn elem_add<M, E>(mut a: Elem<M, E>, b: Elem<M, E>, m: &Modulus<M>) -> Elem<M, E> {
     limb::limbs_add_assign_mod(&mut a.limbs, &b.limbs, m.limbs())
         .unwrap_or_else(unwrap_impossible_len_mismatch_error);
     a
 }
 
-// TODO: Document why this works for all Montgomery factors.
+
 pub fn elem_sub<M, E>(mut a: Elem<M, E>, b: &Elem<M, E>, m: &Modulus<M>) -> Elem<M, E> {
     prefixed_extern! {
-        // `r` and `a` may alias.
+        
         fn LIMBS_sub_mod(
             r: *mut Limb,
             a: *const Limb,
@@ -304,29 +304,29 @@ pub fn elem_sub<M, E>(mut a: Elem<M, E>, b: &Elem<M, E>, m: &Modulus<M>) -> Elem
     let num_limbs = NonZeroUsize::new(m.limbs().len()).unwrap();
     (a.limbs.as_mut(), b.limbs.as_ref())
         .with_non_dangling_non_null_pointers_rab(num_limbs, |r, a, b| {
-            let m = m.limbs().as_ptr(); // Also non-dangling because num_limbs is non-zero.
+            let m = m.limbs().as_ptr(); 
             unsafe { LIMBS_sub_mod(r, a, b, m, num_limbs) }
         })
         .unwrap_or_else(unwrap_impossible_len_mismatch_error);
     a
 }
 
-// The value 1, Montgomery-encoded some number of times.
+
 pub struct One<M, E>(Elem<M, E>);
 
 impl<M> One<M, RR> {
-    // Returns RR = = R**2 (mod n) where R = 2**r is the smallest power of
-    // 2**LIMB_BITS such that R > m.
-    //
-    // Even though the assembly on some 32-bit platforms works with 64-bit
-    // values, using `LIMB_BITS` here, rather than `N0::LIMBS_USED * LIMB_BITS`,
-    // is correct because R**2 will still be a multiple of the latter as
-    // `N0::LIMBS_USED` is either one or two.
+    
+    
+    
+    
+    
+    
+    
     pub(crate) fn newRR(mut out: Storage<M>, m: &Modulus<M>) -> Self {
-        // The number of limbs in the numbers involved.
+        
         let w = m.limbs().len();
 
-        // The length of the numbers involved, in bits. R = 2**r.
+        
         let r = w * LIMB_BITS;
 
         m.oneR(&mut out.limbs);
@@ -335,16 +335,16 @@ impl<M> One<M, RR> {
             encoding: PhantomData,
         };
 
-        // 2**t * R can be calculated by t doublings starting with R.
-        //
-        // Choose a t that divides r and where t doublings are cheaper than 1 squaring.
-        //
-        // We could choose other values of t than w. But if t < d then the exponentiation that
-        // follows would require multiplications. Normally d is 1 (i.e. the modulus length is a
-        // power of two: RSA 1024, 2048, 4097, 8192) or 3 (RSA 1536, 3072).
-        //
-        // XXX(perf): Currently t = w / 2 is slightly faster. TODO(perf): Optimize `elem_double`
-        // and re-run benchmarks to rebalance this.
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         let t = w;
         let z = w.trailing_zeros();
         let d = w >> z;
@@ -355,27 +355,27 @@ impl<M> One<M, RR> {
             elem_double(&mut acc, m);
         }
 
-        // Because t | r:
-        //
-        //     MontExp(2**t * R, r / t)
-        //   = (2**t)**(r / t)   * R (mod m) by definition of MontExp.
-        //   = (2**t)**(1/t * r) * R (mod m)
-        //   = (2**(t * 1/t))**r * R (mod m)
-        //   = (2**1)**r         * R (mod m)
-        //   = 2**r              * R (mod m)
-        //   = R * R                 (mod m)
-        //   = RR
-        //
-        // Like BoringSSL, use t = w (`m.limbs.len()`) which ensures that the exponent is a power
-        // of two. Consequently, there will be no multiplications in the Montgomery exponentiation;
-        // there will only be lg(r / t) squarings.
-        //
-        //     lg(r / t)
-        //   = lg((w * 2**b) / t)
-        //   = lg((t * 2**b) / t)
-        //   = lg(2**b)
-        //   = b
-        // TODO(MSRV:1.67): const B: u32 = LIMB_BITS.ilog2();
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         const B: u32 = if cfg!(target_pointer_width = "64") {
             6
         } else if cfg!(target_pointer_width = "32") {
@@ -392,7 +392,7 @@ impl<M> One<M, RR> {
 
         Self(Elem {
             limbs: acc.limbs,
-            encoding: PhantomData, // PhantomData<RR>
+            encoding: PhantomData, 
         })
     }
 }
@@ -415,38 +415,38 @@ impl<M: PublicModulus, E> One<M, E> {
     }
 }
 
-/// Calculates base**exponent (mod m).
-///
-/// The run time  is a function of the number of limbs in `m` and the bit
-/// length and Hamming Weight of `exponent`. The bounds on `m` are pretty
-/// obvious but the bounds on `exponent` are less obvious. Callers should
-/// document the bounds they place on the maximum value and maximum Hamming
-/// weight of `exponent`.
-// TODO: The test coverage needs to be expanded, e.g. test with the largest
-// accepted exponent and with the most common values of 65537 and 3.
+
+
+
+
+
+
+
+
+
 pub(crate) fn elem_exp_vartime<M>(
     out: Storage<M>,
     base: Elem<M, R>,
     exponent: NonZeroU64,
     m: &Modulus<M>,
 ) -> Elem<M, R> {
-    // Use what [Knuth] calls the "S-and-X binary method", i.e. variable-time
-    // square-and-multiply that scans the exponent from the most significant
-    // bit to the least significant bit (left-to-right). Left-to-right requires
-    // less storage compared to right-to-left scanning, at the cost of needing
-    // to compute `exponent.leading_zeros()`, which we assume to be cheap.
-    //
-    // As explained in [Knuth], exponentiation by squaring is the most
-    // efficient algorithm when the Hamming weight is 2 or less. It isn't the
-    // most efficient for all other, uncommon, exponent values but any
-    // suboptimality is bounded at least by the small bit length of `exponent`
-    // as enforced by its type.
-    //
-    // This implementation is slightly simplified by taking advantage of the
-    // fact that we require the exponent to be a positive integer.
-    //
-    // [Knuth]: The Art of Computer Programming, Volume 2: Seminumerical
-    //          Algorithms (3rd Edition), Section 4.6.3.
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     let exponent = exponent.get();
     let mut acc = base.clone_into(out);
     let mut bit = 1 << (64 - 1 - exponent.leading_zeros());
@@ -469,8 +469,8 @@ pub fn elem_exp_consttime<N, P>(
     p: &Modulus<P>,
     other_prime_len_bits: BitLength,
 ) -> Result<Elem<P, Unencoded>, LimbSliceError> {
-    // `elem_exp_consttime_inner` is parameterized on `STORAGE_LIMBS` only so
-    // we can run tests with larger-than-supported-in-operation test vectors.
+    
+    
     elem_exp_consttime_inner::<N, P, { ELEM_EXP_CONSTTIME_MAX_MODULUS_LIMBS * STORAGE_ENTRIES }>(
         out,
         base,
@@ -481,8 +481,8 @@ pub fn elem_exp_consttime<N, P>(
     )
 }
 
-// The maximum modulus size supported for `elem_exp_consttime` in normal
-// operation.
+
+
 const ELEM_EXP_CONSTTIME_MAX_MODULUS_LIMBS: usize = 2048 / LIMB_BITS;
 const _LIMBS_PER_CHUNK_DIVIDES_ELEM_EXP_CONSTTIME_MAX_MODULUS_LIMBS: () =
     assert!(ELEM_EXP_CONSTTIME_MAX_MODULUS_LIMBS % limbs512::LIMBS_PER_CHUNK == 0);
@@ -513,17 +513,17 @@ fn elem_exp_consttime_inner<N, M, const STORAGE_LIMBS: usize>(
             )))
         }
     };
-    let cpe = m_chunked.len(); // 512-bit chunks per entry.
+    let cpe = m_chunked.len(); 
 
-    // This code doesn't have the strict alignment requirements that the x86_64
-    // version does, but uses the same aligned storage for convenience.
-    assert!(STORAGE_LIMBS % (STORAGE_ENTRIES * limbs512::LIMBS_PER_CHUNK) == 0); // TODO: `const`
+    
+    
+    assert!(STORAGE_LIMBS % (STORAGE_ENTRIES * limbs512::LIMBS_PER_CHUNK) == 0); 
     let mut table = limbs512::AlignedStorage::<STORAGE_LIMBS>::zeroed();
     let mut table = table
         .aligned_chunks_mut(TABLE_ENTRIES, cpe)
         .map_err(LimbSliceError::len_mismatch)?;
 
-    // TODO: Rewrite the below in terms of `AsChunks`.
+    
     let table = table.as_flattened_mut();
 
     fn gather<M>(table: &[Limb], acc: &mut Elem<M, R>, i: Window) {
@@ -563,10 +563,10 @@ fn elem_exp_consttime_inner<N, M, const STORAGE_LIMBS: usize>(
         &mut table[(i * num_limbs)..][..num_limbs]
     }
 
-    // table[0] = base**0 (i.e. 1).
+    
     m.oneR(entry_mut(table, 0, num_limbs));
 
-    // table[1] = base*R == (base/R * RRR)/R
+    
     limbs_mul_mont(
         (
             entry_mut(table, 1, num_limbs),
@@ -647,7 +647,7 @@ fn elem_exp_consttime_inner<N, M, const STORAGE_LIMBS: usize>(
         (m, []) => m,
         _ => return Err(LimbSliceError::len_mismatch(LenMismatchError::new(8))),
     };
-    let cpe = m_original.len(); // 512-bit chunks per entry
+    let cpe = m_original.len(); 
 
     let oneRRR = &oneRRR.as_ref().limbs;
     let oneRRR = match slice::as_chunks(oneRRR) {
@@ -659,26 +659,26 @@ fn elem_exp_consttime_inner<N, M, const STORAGE_LIMBS: usize>(
         }
     };
 
-    // The x86_64 assembly was written under the assumption that the input data
-    // is aligned to `MOD_EXP_CTIME_ALIGN` bytes, which was/is 64 in OpenSSL.
-    // Subsequently, it was changed such that, according to BoringSSL, they
-    // only require 16 byte alignment. We enforce the old, stronger, alignment
-    // unless/until we can see a benefit to reducing it.
-    //
-    // Similarly, OpenSSL uses the x86_64 assembly functions by giving it only
-    // inputs `tmp`, `am`, and `np` that immediately follow the table.
-    // According to BoringSSL, in older versions of the OpenSSL code, this
-    // extra space was required for memory safety because the assembly code
-    // would over-read the table; according to BoringSSL, this is no longer the
-    // case. Regardless, the upstream code also contained comments implying
-    // that this was also important for performance. For now, we do as OpenSSL
-    // did/does.
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     const MOD_EXP_CTIME_ALIGN: usize = 64;
-    // Required by
+    
     const _TABLE_ENTRIES_IS_32: () = assert!(TABLE_ENTRIES == 32);
     const _STORAGE_ENTRIES_HAS_3_EXTRA: () = assert!(STORAGE_ENTRIES == TABLE_ENTRIES + 3);
 
-    assert!(STORAGE_LIMBS % (STORAGE_ENTRIES * limbs512::LIMBS_PER_CHUNK) == 0); // TODO: `const`
+    assert!(STORAGE_LIMBS % (STORAGE_ENTRIES * limbs512::LIMBS_PER_CHUNK) == 0); 
     let mut table = limbs512::AlignedStorage::<STORAGE_LIMBS>::zeroed();
     let mut table = table
         .aligned_chunks_mut(STORAGE_ENTRIES, cpe)
@@ -686,11 +686,11 @@ fn elem_exp_consttime_inner<N, M, const STORAGE_LIMBS: usize>(
     let (mut table, mut state) = table.split_at_mut(TABLE_ENTRIES * cpe);
     assert_eq!((table.as_ptr() as usize) % MOD_EXP_CTIME_ALIGN, 0);
 
-    // These are named `(tmp, am, np)` in BoringSSL.
+    
     let (mut acc, mut rest) = state.split_at_mut(cpe);
     let (mut base_cached, mut m_cached) = rest.split_at_mut(cpe);
 
-    // "To improve cache locality" according to upstream.
+    
     m_cached
         .as_flattened_mut()
         .copy_from_slice(m_original.as_flattened());
@@ -706,7 +706,7 @@ fn elem_exp_consttime_inner<N, M, const STORAGE_LIMBS: usize>(
         }
     };
 
-    // base_cached = base*R == (base/R * RRR)/R
+    
     mul_mont5(
         base_cached.as_mut(),
         base_rinverse,
@@ -716,10 +716,10 @@ fn elem_exp_consttime_inner<N, M, const STORAGE_LIMBS: usize>(
         cpu2,
     )?;
     let base_cached = base_cached.as_ref();
-    let mut out = Storage::from(out); // recycle.
+    let mut out = Storage::from(out); 
 
-    // Fill in all the powers of 2 of `acc` into the table using only squaring and without any
-    // gathering, storing the last calculated power into `acc`.
+    
+    
     fn scatter_powers_of_2(
         mut table: AsChunksMut<Limb, 8>,
         mut acc: AsChunksMut<Limb, 8>,
@@ -739,23 +739,23 @@ fn elem_exp_consttime_inner<N, M, const STORAGE_LIMBS: usize>(
         Ok(())
     }
 
-    // All entries in `table` will be Montgomery encoded.
+    
 
-    // acc = table[0] = base**0 (i.e. 1).
+    
     m.oneR(acc.as_flattened_mut());
     scatter5(acc.as_ref(), table.as_mut(), 0)?;
 
-    // acc = base**1 (i.e. base).
+    
     acc.as_flattened_mut()
         .copy_from_slice(base_cached.as_flattened());
 
-    // Fill in entries 1, 2, 4, 8, 16.
+    
     scatter_powers_of_2(table.as_mut(), acc.as_mut(), m_cached, n0, 1, cpu2)?;
-    // Fill in entries 3, 6, 12, 24; 5, 10, 20, 30; 7, 14, 28; 9, 18; 11, 22; 13, 26; 15, 30;
-    // 17; 19; 21; 23; 25; 27; 29; 31.
+    
+    
     for i in (3..(TABLE_ENTRIES as LeakyWindow)).step_by(2) {
         let power = Window::from(i - 1);
-        assert!(power < 32); // Not secret,
+        assert!(power < 32); 
         unsafe {
             mul_mont_gather5_amm(
                 acc.as_mut(),
@@ -786,12 +786,12 @@ fn elem_exp_consttime_inner<N, M, const STORAGE_LIMBS: usize>(
         },
     );
 
-    // Reuse `base_rinverse`'s limbs to save an allocation.
+    
     out.limbs.copy_from_slice(acc.as_flattened());
     Ok(from_montgomery_amm(out, m))
 }
 
-/// Verified a == b**-1 (mod m), i.e. a**-1 == b (mod m).
+
 pub fn verify_inverses_consttime<M>(
     a: &Elem<M, R>,
     b: Elem<M, Unencoded>,
@@ -836,7 +836,7 @@ mod tests {
     use crate::cpu;
     use crate::testutil as test;
 
-    // Type-level representation of an arbitrary modulus.
+    
     struct M {}
 
     impl PublicModulus for M {}
@@ -862,10 +862,10 @@ mod tests {
                 let oneRR = One::newRR(m.alloc_zero(), &m);
                 let oneRRR = One::newRRR(oneRR, &m);
 
-                // `base` in the test vectors is reduced (mod M) already but
-                // the API expects the bsae to be (mod N) where N = M * P for
-                // some other prime of the same length. Fake that here.
-                // Pretend there's another prime of equal length.
+                
+                
+                
+                
                 struct N {}
                 let other_modulus_len_bits = m.len_bits();
                 let base: Elem<N> = {
@@ -896,9 +896,9 @@ mod tests {
                         &m,
                         other_modulus_len_bits,
                     );
-                    // TODO: Be more specific with which error we expect?
+                    
                     assert!(actual_result.is_err());
-                    // Try again with a larger-than-normally-supported limit
+                    
                     elem_exp_consttime_inner::<_, _, { (4096 / LIMB_BITS) * STORAGE_ENTRIES }>(
                         m.alloc_zero(),
                         &base,
@@ -920,10 +920,10 @@ mod tests {
         )
     }
 
-    // TODO: fn test_elem_exp_vartime() using
-    // "src/rsa/bigint_elem_exp_vartime_tests.txt". See that file for details.
-    // In the meantime, the function is tested indirectly via the RSA
-    // verification and signing tests.
+    
+    
+    
+    
     #[test]
     fn test_elem_mul() {
         let cpu_features = cpu::features();

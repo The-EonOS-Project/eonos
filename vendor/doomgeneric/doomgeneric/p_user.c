@@ -1,22 +1,22 @@
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 2005-2014 Simon Howard
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// DESCRIPTION:
-//	Player related stuff.
-//	Bobbing POV/weapon, movement.
-//	Pending weapon.
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -30,24 +30,24 @@
 
 
 
-// Index of the special effects (INVUL inverse) map.
+
 #define INVERSECOLORMAP		32
 
 
-//
-// Movement.
-//
 
-// 16 pixels of bob
+
+
+
+
 #define MAXBOB	0x100000	
 
 boolean		onground;
 
 
-//
-// P_Thrust
-// Moves the given origin along a given angle.
-//
+
+
+
+
 void
 P_Thrust
 ( player_t*	player,
@@ -63,21 +63,21 @@ P_Thrust
 
 
 
-//
-// P_CalcHeight
-// Calculate the walking / running height adjustment
-//
+
+
+
+
 void P_CalcHeight (player_t* player) 
 {
     int		angle;
     fixed_t	bob;
     
-    // Regular movement bobbing
-    // (needs to be calculated for gun swing
-    // even if not on ground)
-    // OPTIMIZE: tablify angle
-    // Note: a LUT allows for effects
-    //  like a ramp with low health.
+    
+    
+    
+    
+    
+    
     player->bob =
 	FixedMul (player->mo->momx, player->mo->momx)
 	+ FixedMul (player->mo->momy,player->mo->momy);
@@ -102,7 +102,7 @@ void P_CalcHeight (player_t* player)
     bob = FixedMul ( player->bob/2, finesine[angle]);
 
     
-    // move viewheight
+    
     if (player->playerstate == PST_LIVE)
     {
 	player->viewheight += player->deltaviewheight;
@@ -135,9 +135,9 @@ void P_CalcHeight (player_t* player)
 
 
 
-//
-// P_MovePlayer
-//
+
+
+
 void P_MovePlayer (player_t* player)
 {
     ticcmd_t*		cmd;
@@ -146,8 +146,8 @@ void P_MovePlayer (player_t* player)
 	
     player->mo->angle += (cmd->angleturn<<16);
 
-    // Do not let the player control movement
-    //  if not onground.
+    
+    
     onground = (player->mo->z <= player->mo->floorz);
 	
     if (cmd->forwardmove && onground)
@@ -165,11 +165,11 @@ void P_MovePlayer (player_t* player)
 
 
 
-//
-// P_DeathThink
-// Fall on your face when dying.
-// Decrease POV height to floor height.
-//
+
+
+
+
+
 #define ANG5   	(ANG90/18)
 
 void P_DeathThink (player_t* player)
@@ -179,7 +179,7 @@ void P_DeathThink (player_t* player)
 
     P_MovePsprites (player);
 	
-    // fall to the ground
+    
     if (player->viewheight > 6*FRACUNIT)
 	player->viewheight -= FRACUNIT;
 
@@ -201,8 +201,8 @@ void P_DeathThink (player_t* player)
 	
 	if (delta < ANG5 || delta > (unsigned)-ANG5)
 	{
-	    // Looking at killer,
-	    //  so fade damage flash down.
+	    
+	    
 	    player->mo->angle = angle;
 
 	    if (player->damagecount)
@@ -223,21 +223,21 @@ void P_DeathThink (player_t* player)
 
 
 
-//
-// P_PlayerThink
-//
+
+
+
 void P_PlayerThink (player_t* player)
 {
     ticcmd_t*		cmd;
     weapontype_t	newweapon;
 	
-    // fixme: do this in the cheat code
+    
     if (player->cheats & CF_NOCLIP)
 	player->mo->flags |= MF_NOCLIP;
     else
 	player->mo->flags &= ~MF_NOCLIP;
     
-    // chain saw run forward
+    
     cmd = &player->cmd;
     if (player->mo->flags & MF_JUSTATTACKED)
     {
@@ -254,9 +254,9 @@ void P_PlayerThink (player_t* player)
 	return;
     }
     
-    // Move around.
-    // Reactiontime is used to prevent movement
-    //  for a bit after a teleport.
+    
+    
+    
     if (player->mo->reactiontime)
 	player->mo->reactiontime--;
     else
@@ -267,17 +267,17 @@ void P_PlayerThink (player_t* player)
     if (player->mo->subsector->sector->special)
 	P_PlayerInSpecialSector (player);
     
-    // Check for weapon change.
+    
 
-    // A special event has no other buttons.
+    
     if (cmd->buttons & BT_SPECIAL)
 	cmd->buttons = 0;			
 		
     if (cmd->buttons & BT_CHANGE)
     {
-	// The actual changing of the weapon is done
-	//  when the weapon psprite can do it
-	//  (read: not in the middle of an attack).
+	
+	
+	
 	newweapon = (cmd->buttons&BT_WEAPONMASK)>>BT_WEAPONSHIFT;
 	
 	if (newweapon == wp_fist
@@ -300,8 +300,8 @@ void P_PlayerThink (player_t* player)
 	if (player->weaponowned[newweapon]
 	    && newweapon != player->readyweapon)
 	{
-	    // Do not go to plasma or BFG in shareware,
-	    //  even if cheated.
+	    
+	    
 	    if ((newweapon != wp_plasma
 		 && newweapon != wp_bfg)
 		|| (gamemode != shareware) )
@@ -311,7 +311,7 @@ void P_PlayerThink (player_t* player)
 	}
     }
     
-    // check for use
+    
     if (cmd->buttons & BT_USE)
     {
 	if (!player->usedown)
@@ -323,12 +323,12 @@ void P_PlayerThink (player_t* player)
     else
 	player->usedown = false;
     
-    // cycle psprites
+    
     P_MovePsprites (player);
     
-    // Counters, time dependend power ups.
+    
 
-    // Strength counts up to diminish fade.
+    
     if (player->powers[pw_strength])
 	player->powers[pw_strength]++;	
 		
@@ -352,7 +352,7 @@ void P_PlayerThink (player_t* player)
 	player->bonuscount--;
 
     
-    // Handling colormaps.
+    
     if (player->powers[pw_invulnerability])
     {
 	if (player->powers[pw_invulnerability] > 4*32
@@ -366,7 +366,7 @@ void P_PlayerThink (player_t* player)
 	if (player->powers[pw_infrared] > 4*32
 	    || (player->powers[pw_infrared]&8) )
 	{
-	    // almost full bright
+	    
 	    player->fixedcolormap = 1;
 	}
 	else

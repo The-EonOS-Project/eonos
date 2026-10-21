@@ -1,9 +1,9 @@
-################################################################
-#
-# $Id:$
-#
-# $Log:$
-#
+
+
+
+
+
+
 
 ifeq ($(V),1)
 	VB=''
@@ -16,12 +16,12 @@ SDL_CFLAGS = `sdl2-config --cflags`
 SDL_LIBS = `sdl2-config --cflags --libs` -lSDL2_mixer
 
 
-CC=clang  # gcc or g++
+CC=clang  
 CFLAGS+=-DFEATURE_SOUND $(SDL_CFLAGS)
 LDFLAGS+=
 LIBS+=-lm -lc $(SDL_LIBS)
 
-# subdirectory for objects
+
 OBJDIR=build
 OUTPUT=doomgeneric
 

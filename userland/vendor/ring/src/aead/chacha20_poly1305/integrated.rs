@@ -1,16 +1,16 @@
-// Copyright 2015-2025 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use super::{
     super::{NONCE_LEN, TAG_LEN},
@@ -71,12 +71,12 @@ pub(super) fn seal(
 ) -> Result<Tag, InputTooLongError> {
     check_input_lengths(aad, in_out)?;
 
-    // XXX: BoringSSL uses `alignas(16)` on `key` instead of on the
-    // structure, but Rust can't do that yet; see
-    // https://github.com/rust-lang/rust/issues/73557.
-    //
-    // Keep in sync with the anonymous struct of BoringSSL's
-    // `chacha20_poly1305_seal_data`.
+    
+    
+    
+    
+    
+    
     #[repr(align(16), C)]
     #[derive(Clone, Copy)]
     struct seal_data_in {
@@ -97,7 +97,7 @@ pub(super) fn seal(
         },
     };
 
-    // Encrypts `plaintext_len` bytes from `plaintext` and writes them to `out_ciphertext`.
+    
 
     let output = in_out.as_mut_ptr();
     let input = in_out.as_ptr();
@@ -148,12 +148,12 @@ pub(super) fn open(
 ) -> Result<Tag, InputTooLongError> {
     check_input_lengths(aad, in_out.input())?;
 
-    // XXX: BoringSSL uses `alignas(16)` on `key` instead of on the
-    // structure, but Rust can't do that yet; see
-    // https://github.com/rust-lang/rust/issues/73557.
-    //
-    // Keep in sync with the anonymous struct of BoringSSL's
-    // `chacha20_poly1305_open_data`.
+    
+    
+    
+    
+    
+    
     #[derive(Copy, Clone)]
     #[repr(align(16), C)]
     struct open_data_in {
@@ -208,8 +208,8 @@ pub(super) fn open(
     })
 }
 
-// Keep in sync with BoringSSL's `chacha20_poly1305_open_data` and
-// `chacha20_poly1305_seal_data`.
+
+
 #[repr(C)]
 pub(super) union InOut<T>
 where
@@ -219,10 +219,10 @@ where
     pub(super) out: Out,
 }
 
-// It isn't obvious whether the assembly code works for tags that aren't
-// 16-byte aligned. In practice it will always be 16-byte aligned because it
-// is embedded in a union where the other member of the union is 16-byte
-// aligned.
+
+
+
+
 #[derive(Clone, Copy)]
 #[repr(align(16), C)]
 pub(super) struct Out {

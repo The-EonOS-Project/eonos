@@ -1,16 +1,16 @@
-// Copyright 2016-2023 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use super::{
     elem::{binary_op, binary_op_assign},
@@ -49,12 +49,12 @@ pub static PRIVATE_KEY_OPS: PrivateKeyOps = PrivateKeyOps {
 };
 
 fn p384_elem_inv_squared(q: &Modulus<Q>, a: &Elem<R>) -> Elem<R> {
-    // Calculate a**-2 (mod q) == a**(q - 3) (mod q)
-    //
-    // The exponent (q - 3) is:
-    //
-    //    0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe\
-    //      ffffffff0000000000000000fffffffc
+    
+    
+    
+    
+    
+    
 
     #[inline]
     fn sqr_mul(q: &Modulus<Q>, a: &Elem<R>, squarings: LeakyWord, b: &Elem<R>) -> Elem<R> {
@@ -78,7 +78,7 @@ fn p384_elem_inv_squared(q: &Modulus<Q>, a: &Elem<R>) -> Elem<R> {
 
     let ffffffffffffffffffffffffffffff = sqr_mul(q, &fffffffffffffff, 60, &fffffffffffffff);
 
-    // ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+    
     let mut acc = sqr_mul(
         q,
         &ffffffffffffffffffffffffffffff,
@@ -86,19 +86,19 @@ fn p384_elem_inv_squared(q: &Modulus<Q>, a: &Elem<R>) -> Elem<R> {
         &ffffffffffffffffffffffffffffff,
     );
 
-    // fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff_111
+    
     sqr_mul_acc(q, &mut acc, 15, &fff_111);
 
-    // fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff
+    
     sqr_mul_acc(q, &mut acc, 1 + 30, &fffffff_11);
     sqr_mul_acc(q, &mut acc, 2, &b_11);
 
-    // fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff
-    // 0000000000000000fffffff_11
+    
+    
     sqr_mul_acc(q, &mut acc, 64 + 30, &fffffff_11);
 
-    // fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff
-    // 0000000000000000fffffffc
+    
+    
     q.elem_square(&mut acc);
     q.elem_square(&mut acc);
 
@@ -106,7 +106,7 @@ fn p384_elem_inv_squared(q: &Modulus<Q>, a: &Elem<R>) -> Elem<R> {
 }
 
 fn p384_point_mul_base_impl(a: &Scalar, cpu: cpu::Features) -> Point {
-    // XXX: Not efficient. TODO: Precompute multiples of the generator.
+    
     let generator = (Elem::from(&GENERATOR.0), Elem::from(&GENERATOR.1));
     PRIVATE_KEY_OPS.point_mul(a, &generator, cpu)
 }
@@ -129,7 +129,7 @@ pub static PUBLIC_SCALAR_OPS: PublicScalarOps = PublicScalarOps {
 
     q_minus_n: PublicElem::from_hex("389cb27e0bc8d21fa7e5f24cb74f58851313e696333ad68c"),
 
-    // TODO: Use an optimized variable-time implementation.
+    
     scalar_inv_to_mont_vartime: |s, cpu| PRIVATE_SCALAR_OPS.scalar_inv_to_mont(s, cpu),
 };
 
@@ -141,15 +141,15 @@ pub static PRIVATE_SCALAR_OPS: PrivateScalarOps = PrivateScalarOps {
 };
 
 fn p384_scalar_inv_to_mont(a: Scalar<R>, _cpu: cpu::Features) -> Scalar<R> {
-    // Calculate the modular inverse of scalar |a| using Fermat's Little
-    // Theorem:
-    //
-    //    a**-1 (mod n) == a**(n - 2) (mod n)
-    //
-    // The exponent (n - 2) is:
-    //
-    //    0xffffffffffffffffffffffffffffffffffffffffffffffffc7634d81f4372ddf\
-    //      581a0db248b0a77aecec196accc52971
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     fn mul(a: &Scalar<R>, b: &Scalar<R>) -> Scalar<R> {
         binary_op(p384_scalar_mul_mont, a, b)
@@ -163,7 +163,7 @@ fn p384_scalar_inv_to_mont(a: Scalar<R>, _cpu: cpu::Features) -> Scalar<R> {
         unary_op_from_binary_op_assign(p384_scalar_mul_mont, a);
     }
 
-    // Returns (`a` squared `squarings` times) * `b`.
+    
     fn sqr_mul(a: &Scalar<R>, squarings: LeakyWord, b: &Scalar<R>) -> Scalar<R> {
         debug_assert!(squarings >= 1);
         let mut tmp = sqr(a);
@@ -173,7 +173,7 @@ fn p384_scalar_inv_to_mont(a: Scalar<R>, _cpu: cpu::Features) -> Scalar<R> {
         mul(&tmp, b)
     }
 
-    // Sets `acc` = (`acc` squared `squarings` times) * `b`.
+    
     fn sqr_mul_acc(acc: &mut Scalar<R>, squarings: LeakyWord, b: &Scalar<R>) {
         debug_assert!(squarings >= 1);
         for _ in 0..squarings {
@@ -182,7 +182,7 @@ fn p384_scalar_inv_to_mont(a: Scalar<R>, _cpu: cpu::Features) -> Scalar<R> {
         binary_op_assign(p384_scalar_mul_mont, acc, b)
     }
 
-    // Indexes into `d`.
+    
     const B_1: usize = 0;
     const B_11: usize = 1;
     const B_101: usize = 2;
@@ -208,14 +208,14 @@ fn p384_scalar_inv_to_mont(a: Scalar<R>, _cpu: cpu::Features) -> Scalar<R> {
 
     let ffffffffffffffffffffffff = sqr_mul(&ffffffffffffffff, 0 + 32, &ffffffff);
 
-    // ffffffffffffffffffffffffffffffffffffffffffffffff
+    
     let mut acc = sqr_mul(&ffffffffffffffffffffffff, 0 + 96, &ffffffffffffffffffffffff);
 
-    // The rest of the exponent, in binary, is:
-    //
-    //    1100011101100011010011011000000111110100001101110010110111011111
-    //    0101100000011010000011011011001001001000101100001010011101111010
-    //    1110110011101100000110010110101011001100110001010010100101110001
+    
+    
+    
+    
+    
 
     #[allow(clippy::cast_possible_truncation)]
     static REMAINING_WINDOWS: [(u8, u8); 39] = [
@@ -268,10 +268,10 @@ fn p384_scalar_inv_to_mont(a: Scalar<R>, _cpu: cpu::Features) -> Scalar<R> {
 }
 
 unsafe extern "C" fn p384_elem_sqr_mont(
-    r: *mut Limb,   // [COMMON_OPS.num_limbs]
-    a: *const Limb, // [COMMON_OPS.num_limbs]
+    r: *mut Limb,   
+    a: *const Limb, 
 ) {
-    // XXX: Inefficient. TODO: Make a dedicated squaring routine.
+    
     unsafe {
         p384_elem_mul_mont(r, a, a);
     }
@@ -279,26 +279,26 @@ unsafe extern "C" fn p384_elem_sqr_mont(
 
 prefixed_extern! {
     fn p384_elem_mul_mont(
-        r: *mut Limb,   // [COMMON_OPS.num_limbs]
-        a: *const Limb, // [COMMON_OPS.num_limbs]
-        b: *const Limb, // [COMMON_OPS.num_limbs]
+        r: *mut Limb,   
+        a: *const Limb, 
+        b: *const Limb, 
     );
 
     fn p384_point_add(
-        r: *mut Limb,   // [3][COMMON_OPS.num_limbs]
-        a: *const Limb, // [3][COMMON_OPS.num_limbs]
-        b: *const Limb, // [3][COMMON_OPS.num_limbs]
+        r: *mut Limb,   
+        a: *const Limb, 
+        b: *const Limb, 
     );
     fn p384_point_mul(
-        r: *mut Limb,          // [3][COMMON_OPS.num_limbs]
-        p_scalar: *const Limb, // [COMMON_OPS.num_limbs]
-        p_x: *const Limb,      // [COMMON_OPS.num_limbs]
-        p_y: *const Limb,      // [COMMON_OPS.num_limbs]
+        r: *mut Limb,          
+        p_scalar: *const Limb, 
+        p_x: *const Limb,      
+        p_y: *const Limb,      
     );
 
     fn p384_scalar_mul_mont(
-        r: *mut Limb,   // [COMMON_OPS.num_limbs]
-        a: *const Limb, // [COMMON_OPS.num_limbs]
-        b: *const Limb, // [COMMON_OPS.num_limbs]
+        r: *mut Limb,   
+        a: *const Limb, 
+        b: *const Limb, 
     );
 }

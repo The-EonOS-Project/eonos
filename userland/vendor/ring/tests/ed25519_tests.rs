@@ -1,16 +1,16 @@
-// Copyright 2015-2017 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #![allow(missing_docs)]
 
@@ -27,7 +27,7 @@ use wasm_bindgen_test::{wasm_bindgen_test as test, wasm_bindgen_test_configure};
 #[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
 wasm_bindgen_test_configure!(run_in_browser);
 
-/// Test vectors from BoringSSL.
+
 #[test]
 fn test_signature_ed25519() {
     test::run(test_file!("ed25519_tests.txt"), |section, test_case| {
@@ -48,18 +48,18 @@ fn test_signature_ed25519() {
             assert_eq!(&expected_sig[..], actual_sig.as_ref());
         }
 
-        // Test PKCS#8 generation, parsing, and private-to-public calculations.
+        
         #[allow(deprecated)]
         let rng = test::rand::FixedSliceRandom { bytes: &seed };
         let pkcs8 = Ed25519KeyPair::generate_pkcs8(&rng).unwrap();
         let key_pair = Ed25519KeyPair::from_pkcs8(pkcs8.as_ref()).unwrap();
         assert_eq!(public_key, key_pair.public_key().as_ref());
 
-        // Test Signature generation.
+        
         let actual_sig = key_pair.sign(&msg);
         assert_eq!(&expected_sig[..], actual_sig.as_ref());
 
-        // Test Signature verification.
+        
         test_signature_verification(&public_key, &msg, &expected_sig, Ok(()));
 
         let mut tampered_sig = expected_sig;
@@ -71,7 +71,7 @@ fn test_signature_ed25519() {
     });
 }
 
-/// Test vectors from BoringSSL.
+
 #[test]
 fn test_signature_ed25519_verify() {
     test::run(
@@ -112,13 +112,13 @@ fn test_ed25519_from_seed_and_public_key_misuse() {
 
     assert!(Ed25519KeyPair::from_seed_and_public_key(PRIVATE_KEY, PUBLIC_KEY).is_ok());
 
-    // Truncated private key.
+    
     assert!(Ed25519KeyPair::from_seed_and_public_key(&PRIVATE_KEY[..31], PUBLIC_KEY).is_err());
 
-    // Truncated public key.
+    
     assert!(Ed25519KeyPair::from_seed_and_public_key(PRIVATE_KEY, &PUBLIC_KEY[..31]).is_err());
 
-    // Swapped public and private key.
+    
     assert!(Ed25519KeyPair::from_seed_and_public_key(PUBLIC_KEY, PRIVATE_KEY).is_err());
 }
 
@@ -144,7 +144,7 @@ fn test_ed25519_from_pkcs8_(
     variant: FromPkcs8Variant,
     f: impl Fn(&[u8]) -> Result<Ed25519KeyPair, error::KeyRejected>,
 ) {
-    // Just test that we can parse the input.
+    
     test::run(
         test_file!("ed25519_from_pkcs8_tests.txt"),
         |section, test_case| {
@@ -199,8 +199,8 @@ fn ed25519_test_generate_pkcs8() {
 
     let _ronudtripped = Ed25519KeyPair::from_pkcs8(generated).unwrap();
 
-    // Regression test: Verify we're generating the correct encoding, as
-    // `Ed25519KeyPair::from_pkcs8` also accepts our old wrong encoding.
+    
+    
     assert_eq!(generated.len(), 19 + 32 + 32);
     assert_eq!(&generated[..2], &[0x30, 0x51]);
 }
@@ -214,17 +214,17 @@ fn ed25519_test_public_key_coverage() {
 
     let key_pair = Ed25519KeyPair::from_pkcs8(PRIVATE_KEY).unwrap();
 
-    // Test `AsRef<[u8]>`
+    
     assert_eq!(key_pair.public_key().as_ref(), PUBLIC_KEY);
 
-    // Test `Clone`.
+    
     #[allow(clippy::clone_on_copy)]
     let _: <Ed25519KeyPair as KeyPair>::PublicKey = key_pair.public_key().clone();
 
-    // Test `Copy`.
+    
     let _: <Ed25519KeyPair as KeyPair>::PublicKey = *key_pair.public_key();
 
-    // Test `Debug`.
+    
     assert_eq!(PUBLIC_KEY_DEBUG, format!("{:?}", key_pair.public_key()));
     assert_eq!(
         format!(

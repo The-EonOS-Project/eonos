@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build and run EonOS in QEMU with USB keyboard and mouse input.
+
 set -euo pipefail
 
 PROFILE="${EONOS_PROFILE:-release}"

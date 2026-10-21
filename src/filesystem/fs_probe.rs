@@ -1,7 +1,7 @@
-//! On-disk filesystem identification helpers.
-//!
-//! Identification is deliberately separate from mounting: a recognized
-//! signature does not imply that EonOS can safely interpret that format.
+
+
+
+
 
 use crate::block::BlockDevice;
 use crate::fat32::SECTOR_SIZE;
@@ -42,8 +42,8 @@ impl FsType {
     }
 }
 
-/// Probe well-known boot-sector/superblock signatures. This does not
-/// validate all metadata or determine whether the volume is clean.
+
+
 pub fn detect(device: &dyn BlockDevice) -> FsType {
     let mut boot = [0u8; SECTOR_SIZE];
     if device.read_sector(0, &mut boot).is_err() {
@@ -59,16 +59,16 @@ pub fn detect(device: &dyn BlockDevice) -> FsType {
         && u16::from_le_bytes([boot[11], boot[12]]) == SECTOR_SIZE as u16
         && boot[13].is_power_of_two()
     {
-        // This BPB check alone also matches FAT12/16. FAT32's root-entry
-        // count and FAT16-size fields must both be zero.
+        
+        
         if boot[17] == 0 && boot[18] == 0 && boot[22] == 0 && boot[23] == 0 {
             return FsType::Fat32;
         }
         return FsType::Vfat;
     }
 
-    // ext superblocks start 1024 bytes from the beginning; s_magic is
-    // at offset 0x38 within the superblock.
+    
+    
     if device.sector_count() > 2 {
         let mut sb = [0u8; SECTOR_SIZE];
         if device.read_sector(2, &mut sb).is_ok() && sb[56..58] == [0x53, 0xef] {
@@ -76,8 +76,8 @@ pub fn detect(device: &dyn BlockDevice) -> FsType {
         }
     }
 
-    // Linux swap stores its signature at the end of the first page.
-    // Accept both signatures used by contemporary and older Linux.
+    
+    
     if device.sector_count() >= 8 {
         let mut page = [0u8; 4096];
         let mut ok = true;
@@ -115,8 +115,8 @@ fn text(bytes: &[u8]) -> String {
     String::from_utf8_lossy(&bytes[..end]).trim().into()
 }
 
-/// Read common filesystem label, version, and UUID fields where the
-/// format stores them in its boot/superblock metadata.
+
+
 pub fn inspect(device: &dyn BlockDevice) -> FsInfo {
     let kind = detect(device);
     let mut info = FsInfo {

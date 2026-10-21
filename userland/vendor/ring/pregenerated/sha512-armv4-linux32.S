@@ -1,67 +1,18 @@
-// This file is generated from a similarly-named Perl script in the BoringSSL
-// source tree. Do not edit by hand.
+
+
 
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_ARM) && defined(__ELF__)
-@ Copyright 2007-2016 The OpenSSL Project Authors. All Rights Reserved.
-@
-@ Licensed under the Apache License, Version 2.0 (the "License");
-@ you may not use this file except in compliance with the License.
-@ You may obtain a copy of the License at
-@
-@     https://www.apache.org/licenses/LICENSE-2.0
-@
-@ Unless required by applicable law or agreed to in writing, software
-@ distributed under the License is distributed on an "AS IS" BASIS,
-@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-@ See the License for the specific language governing permissions and
-@ limitations under the License.
+rnrrrnnrnrnnnnnnnnnrrrrnrnrrnrnrnnrrrnrnrnnrnnnnrn
 
-
-@ ====================================================================
-@ Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
-@ project.
-@ ====================================================================
-
-@ SHA512 block procedure for ARMv4. September 2007.
-
-@ This code is ~4.5 (four and a half) times faster than code generated
-@ by gcc 3.4 and it spends ~72 clock cycles per byte [on single-issue
-@ Xscale PXA250 core].
-@
-@ July 2010.
-@
-@ Rescheduling for dual-issue pipeline resulted in 6% improvement on
-@ Cortex A8 core and ~40 cycles per processed byte.
-
-@ February 2011.
-@
-@ Profiler-assisted and platform-specific optimization resulted in 7%
-@ improvement on Coxtex A8 core and ~38 cycles per byte.
-
-@ March 2011.
-@
-@ Add NEON implementation. On Cortex A8 it was measured to process
-@ one byte in 23.3 cycles or ~60% faster than integer-only code.
-
-@ August 2012.
-@
-@ Improve NEON performance by 12% on Snapdragon S4. In absolute
-@ terms it's 22.6 cycles per byte, which is disappointing result.
-@ Technical writers asserted that 3-way S4 pipeline can sustain
-@ multiple NEON instructions per cycle, but dual NEON issue could
-@ not be observed, see http://www.openssl.org/~appro/Snapdragon-S4.html
-@ for further details. On side note Cortex-A15 processes one byte in
-@ 16 cycles.
-
-@ Byte order [in]dependence. =========================================
-@
-@ Originally caller was expected to maintain specific *dword* order in
-@ h[0-7], namely with most significant dword at *lower* address, which
-@ was reflected in below two parameters as 0 and 4. Now caller is
-@ expected to maintain native byte order for whole 64-bit values.
-#ifndef __KERNEL__
+rnnrnrrnr
+rrrr
+rnrnnrnnrnnrnrnrnrnnrrnrr
+rrrrnrnrnrnnrnr
+rnnnrrrnnrrnnrn
+rrrnnnrnnrrnnrnrrrnnnnrnrnrrrrnnrrnn
+rrnnnrnrnnrrrnnnnrrrrnrrnrnnnrrr#ifndef __KERNEL__
 # define VFP_ABI_PUSH	vstmdb	sp!,{d8-d15}
 # define VFP_ABI_POP	vldmia	sp!,{d8-d15}
 #else
@@ -70,9 +21,7 @@
 # define VFP_ABI_POP
 #endif
 
-@ Silence ARMv8 deprecated IT instruction warnings. This file is used by both
-@ ARMv7 and ARMv8 processors and does not use ARMv8 instructions.
-.arch	armv7-a
+nrnrnrnnnrrnnnrn.arch	armv7-a
 
 #ifdef __ARMEL__
 # define LO 0
@@ -142,8 +91,7 @@ K512:
 .hidden	sha512_block_data_order_nohw
 .type	sha512_block_data_order_nohw,%function
 sha512_block_data_order_nohw:
-	add	r2,r1,r2,lsl#7	@ len to point at the end of inp
-	stmdb	sp!,{r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
+	add	r2,r1,r2,lsl#7	nnnn	stmdb	sp!,{r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
 	adr	r14,K512
 	sub	sp,sp,#9*8
 
@@ -201,34 +149,22 @@ sha512_block_data_order_nohw:
 	rev	r4,r4
 #endif
 #endif
-	@ Sigma1(x)	(ROTR((x),14) ^ ROTR((x),18)  ^ ROTR((x),41))
-	@ LO		lo>>14^hi<<18 ^ lo>>18^hi<<14 ^ hi>>9^lo<<23
-	@ HI		hi>>14^lo<<18 ^ hi>>18^lo<<14 ^ lo>>9^hi<<23
-	mov	r9,r7,lsr#14
+				mov	r9,r7,lsr#14
 	str	r3,[sp,#64+0]
 	mov	r10,r8,lsr#14
 	str	r4,[sp,#64+4]
 	eor	r9,r9,r8,lsl#18
-	ldr	r11,[sp,#56+0]	@ h.lo
-	eor	r10,r10,r7,lsl#18
-	ldr	r12,[sp,#56+4]	@ h.hi
-	eor	r9,r9,r7,lsr#18
+	ldr	r11,[sp,#56+0]		eor	r10,r10,r7,lsl#18
+	ldr	r12,[sp,#56+4]		eor	r9,r9,r7,lsr#18
 	eor	r10,r10,r8,lsr#18
 	eor	r9,r9,r8,lsl#14
 	eor	r10,r10,r7,lsl#14
 	eor	r9,r9,r8,lsr#9
 	eor	r10,r10,r7,lsr#9
 	eor	r9,r9,r7,lsl#23
-	eor	r10,r10,r8,lsl#23	@ Sigma1(e)
-	adds	r3,r3,r9
-	ldr	r9,[sp,#40+0]	@ f.lo
-	adc	r4,r4,r10		@ T += Sigma1(e)
-	ldr	r10,[sp,#40+4]	@ f.hi
-	adds	r3,r3,r11
-	ldr	r11,[sp,#48+0]	@ g.lo
-	adc	r4,r4,r12		@ T += h
-	ldr	r12,[sp,#48+4]	@ g.hi
-
+	eor	r10,r10,r8,lsl#23		adds	r3,r3,r9
+	ldr	r9,[sp,#40+0]		adc	r4,r4,r10			ldr	r10,[sp,#40+4]		adds	r3,r3,r11
+	ldr	r11,[sp,#48+0]		adc	r4,r4,r12			ldr	r12,[sp,#48+4]	
 	eor	r9,r9,r11
 	str	r7,[sp,#32+0]
 	eor	r10,r10,r12
@@ -238,31 +174,17 @@ sha512_block_data_order_nohw:
 	and	r10,r10,r8
 	str	r6,[sp,#0+4]
 	eor	r9,r9,r11
-	ldr	r11,[r14,#LO]	@ K[i].lo
-	eor	r10,r10,r12		@ Ch(e,f,g)
-	ldr	r12,[r14,#HI]	@ K[i].hi
-
+	ldr	r11,[r14,#LO]		eor	r10,r10,r12			ldr	r12,[r14,#HI]	
 	adds	r3,r3,r9
-	ldr	r7,[sp,#24+0]	@ d.lo
-	adc	r4,r4,r10		@ T += Ch(e,f,g)
-	ldr	r8,[sp,#24+4]	@ d.hi
-	adds	r3,r3,r11
+	ldr	r7,[sp,#24+0]		adc	r4,r4,r10			ldr	r8,[sp,#24+4]		adds	r3,r3,r11
 	and	r9,r11,#0xff
-	adc	r4,r4,r12		@ T += K[i]
-	adds	r7,r7,r3
-	ldr	r11,[sp,#8+0]	@ b.lo
-	adc	r8,r8,r4		@ d += T
-	teq	r9,#148
+	adc	r4,r4,r12			adds	r7,r7,r3
+	ldr	r11,[sp,#8+0]		adc	r8,r8,r4			teq	r9,#148
 
-	ldr	r12,[sp,#16+0]	@ c.lo
-#if __ARM_ARCH>=7
-	it	eq			@ Thumb2 thing, sanity check in ARM
-#endif
+	ldr	r12,[sp,#16+0]	#if __ARM_ARCH>=7
+	it	eq			nnn#endif
 	orreq	r14,r14,#1
-	@ Sigma0(x)	(ROTR((x),28) ^ ROTR((x),34) ^ ROTR((x),39))
-	@ LO		lo>>28^hi<<4  ^ hi>>2^lo<<30 ^ hi>>7^lo<<25
-	@ HI		hi>>28^lo<<4  ^ lo>>2^hi<<30 ^ lo>>7^hi<<25
-	mov	r9,r5,lsr#28
+				mov	r9,r5,lsr#28
 	mov	r10,r6,lsr#28
 	eor	r9,r9,r6,lsl#4
 	eor	r10,r10,r5,lsl#4
@@ -273,24 +195,17 @@ sha512_block_data_order_nohw:
 	eor	r9,r9,r6,lsr#7
 	eor	r10,r10,r5,lsr#7
 	eor	r9,r9,r5,lsl#25
-	eor	r10,r10,r6,lsl#25	@ Sigma0(a)
-	adds	r3,r3,r9
+	eor	r10,r10,r6,lsl#25		adds	r3,r3,r9
 	and	r9,r5,r11
-	adc	r4,r4,r10		@ T += Sigma0(a)
-
-	ldr	r10,[sp,#8+4]	@ b.hi
-	orr	r5,r5,r11
-	ldr	r11,[sp,#16+4]	@ c.hi
-	and	r5,r5,r12
+	adc	r4,r4,r10		
+	ldr	r10,[sp,#8+4]		orr	r5,r5,r11
+	ldr	r11,[sp,#16+4]		and	r5,r5,r12
 	and	r12,r6,r10
 	orr	r6,r6,r10
-	orr	r5,r5,r9		@ Maj(a,b,c).lo
-	and	r6,r6,r11
+	orr	r5,r5,r9			and	r6,r6,r11
 	adds	r5,r5,r3
-	orr	r6,r6,r12		@ Maj(a,b,c).hi
-	sub	sp,sp,#8
-	adc	r6,r6,r4		@ h += T
-	tst	r14,#1
+	orr	r6,r6,r12			sub	sp,sp,#8
+	adc	r6,r6,r4			tst	r14,#1
 	add	r14,r14,#8
 	tst	r14,#1
 	beq	.L00_15
@@ -298,10 +213,7 @@ sha512_block_data_order_nohw:
 	ldr	r10,[sp,#184+4]
 	bic	r14,r14,#1
 .L16_79:
-	@ sigma0(x)	(ROTR((x),1)  ^ ROTR((x),8)  ^ ((x)>>7))
-	@ LO		lo>>1^hi<<31  ^ lo>>8^hi<<24 ^ lo>>7^hi<<25
-	@ HI		hi>>1^lo<<31  ^ hi>>8^lo<<24 ^ hi>>7
-	mov	r3,r9,lsr#1
+				mov	r3,r9,lsr#1
 	ldr	r11,[sp,#80+0]
 	mov	r4,r10,lsr#1
 	ldr	r12,[sp,#80+4]
@@ -315,10 +227,7 @@ sha512_block_data_order_nohw:
 	eor	r4,r4,r10,lsr#7
 	eor	r3,r3,r10,lsl#25
 
-	@ sigma1(x)	(ROTR((x),19) ^ ROTR((x),61) ^ ((x)>>6))
-	@ LO		lo>>19^hi<<13 ^ hi>>29^lo<<3 ^ lo>>6^hi<<26
-	@ HI		hi>>19^lo<<13 ^ lo>>29^hi<<3 ^ hi>>6
-	mov	r9,r11,lsr#19
+				mov	r9,r11,lsr#19
 	mov	r10,r12,lsr#19
 	eor	r9,r9,r12,lsl#13
 	eor	r10,r10,r11,lsl#13
@@ -341,34 +250,22 @@ sha512_block_data_order_nohw:
 	adc	r4,r4,r12
 	adds	r3,r3,r9
 	adc	r4,r4,r10
-	@ Sigma1(x)	(ROTR((x),14) ^ ROTR((x),18)  ^ ROTR((x),41))
-	@ LO		lo>>14^hi<<18 ^ lo>>18^hi<<14 ^ hi>>9^lo<<23
-	@ HI		hi>>14^lo<<18 ^ hi>>18^lo<<14 ^ lo>>9^hi<<23
-	mov	r9,r7,lsr#14
+				mov	r9,r7,lsr#14
 	str	r3,[sp,#64+0]
 	mov	r10,r8,lsr#14
 	str	r4,[sp,#64+4]
 	eor	r9,r9,r8,lsl#18
-	ldr	r11,[sp,#56+0]	@ h.lo
-	eor	r10,r10,r7,lsl#18
-	ldr	r12,[sp,#56+4]	@ h.hi
-	eor	r9,r9,r7,lsr#18
+	ldr	r11,[sp,#56+0]		eor	r10,r10,r7,lsl#18
+	ldr	r12,[sp,#56+4]		eor	r9,r9,r7,lsr#18
 	eor	r10,r10,r8,lsr#18
 	eor	r9,r9,r8,lsl#14
 	eor	r10,r10,r7,lsl#14
 	eor	r9,r9,r8,lsr#9
 	eor	r10,r10,r7,lsr#9
 	eor	r9,r9,r7,lsl#23
-	eor	r10,r10,r8,lsl#23	@ Sigma1(e)
-	adds	r3,r3,r9
-	ldr	r9,[sp,#40+0]	@ f.lo
-	adc	r4,r4,r10		@ T += Sigma1(e)
-	ldr	r10,[sp,#40+4]	@ f.hi
-	adds	r3,r3,r11
-	ldr	r11,[sp,#48+0]	@ g.lo
-	adc	r4,r4,r12		@ T += h
-	ldr	r12,[sp,#48+4]	@ g.hi
-
+	eor	r10,r10,r8,lsl#23		adds	r3,r3,r9
+	ldr	r9,[sp,#40+0]		adc	r4,r4,r10			ldr	r10,[sp,#40+4]		adds	r3,r3,r11
+	ldr	r11,[sp,#48+0]		adc	r4,r4,r12			ldr	r12,[sp,#48+4]	
 	eor	r9,r9,r11
 	str	r7,[sp,#32+0]
 	eor	r10,r10,r12
@@ -378,31 +275,17 @@ sha512_block_data_order_nohw:
 	and	r10,r10,r8
 	str	r6,[sp,#0+4]
 	eor	r9,r9,r11
-	ldr	r11,[r14,#LO]	@ K[i].lo
-	eor	r10,r10,r12		@ Ch(e,f,g)
-	ldr	r12,[r14,#HI]	@ K[i].hi
-
+	ldr	r11,[r14,#LO]		eor	r10,r10,r12			ldr	r12,[r14,#HI]	
 	adds	r3,r3,r9
-	ldr	r7,[sp,#24+0]	@ d.lo
-	adc	r4,r4,r10		@ T += Ch(e,f,g)
-	ldr	r8,[sp,#24+4]	@ d.hi
-	adds	r3,r3,r11
+	ldr	r7,[sp,#24+0]		adc	r4,r4,r10			ldr	r8,[sp,#24+4]		adds	r3,r3,r11
 	and	r9,r11,#0xff
-	adc	r4,r4,r12		@ T += K[i]
-	adds	r7,r7,r3
-	ldr	r11,[sp,#8+0]	@ b.lo
-	adc	r8,r8,r4		@ d += T
-	teq	r9,#23
+	adc	r4,r4,r12			adds	r7,r7,r3
+	ldr	r11,[sp,#8+0]		adc	r8,r8,r4			teq	r9,#23
 
-	ldr	r12,[sp,#16+0]	@ c.lo
-#if __ARM_ARCH>=7
-	it	eq			@ Thumb2 thing, sanity check in ARM
-#endif
+	ldr	r12,[sp,#16+0]	#if __ARM_ARCH>=7
+	it	eq			nnn#endif
 	orreq	r14,r14,#1
-	@ Sigma0(x)	(ROTR((x),28) ^ ROTR((x),34) ^ ROTR((x),39))
-	@ LO		lo>>28^hi<<4  ^ hi>>2^lo<<30 ^ hi>>7^lo<<25
-	@ HI		hi>>28^lo<<4  ^ lo>>2^hi<<30 ^ lo>>7^hi<<25
-	mov	r9,r5,lsr#28
+				mov	r9,r5,lsr#28
 	mov	r10,r6,lsr#28
 	eor	r9,r9,r6,lsl#4
 	eor	r10,r10,r5,lsl#4
@@ -413,28 +296,20 @@ sha512_block_data_order_nohw:
 	eor	r9,r9,r6,lsr#7
 	eor	r10,r10,r5,lsr#7
 	eor	r9,r9,r5,lsl#25
-	eor	r10,r10,r6,lsl#25	@ Sigma0(a)
-	adds	r3,r3,r9
+	eor	r10,r10,r6,lsl#25		adds	r3,r3,r9
 	and	r9,r5,r11
-	adc	r4,r4,r10		@ T += Sigma0(a)
-
-	ldr	r10,[sp,#8+4]	@ b.hi
-	orr	r5,r5,r11
-	ldr	r11,[sp,#16+4]	@ c.hi
-	and	r5,r5,r12
+	adc	r4,r4,r10		
+	ldr	r10,[sp,#8+4]		orr	r5,r5,r11
+	ldr	r11,[sp,#16+4]		and	r5,r5,r12
 	and	r12,r6,r10
 	orr	r6,r6,r10
-	orr	r5,r5,r9		@ Maj(a,b,c).lo
-	and	r6,r6,r11
+	orr	r5,r5,r9			and	r6,r6,r11
 	adds	r5,r5,r3
-	orr	r6,r6,r12		@ Maj(a,b,c).hi
-	sub	sp,sp,#8
-	adc	r6,r6,r4		@ h += T
-	tst	r14,#1
+	orr	r6,r6,r12			sub	sp,sp,#8
+	adc	r6,r6,r4			tst	r14,#1
 	add	r14,r14,#8
 #if __ARM_ARCH>=7
-	ittt	eq			@ Thumb2 thing, sanity check in ARM
-#endif
+	ittt	eq			nnn#endif
 	ldreq	r9,[sp,#184+0]
 	ldreq	r10,[sp,#184+4]
 	beq	.L16_79
@@ -510,15 +385,12 @@ sha512_block_data_order_nohw:
 	teq	r1,r2
 	bne	.Loop
 
-	add	sp,sp,#8*9		@ destroy frame
-#if __ARM_ARCH>=5
+	add	sp,sp,#8*9		rr#if __ARM_ARCH>=5
 	ldmia	sp!,{r4,r5,r6,r7,r8,r9,r10,r11,r12,pc}
 #else
 	ldmia	sp!,{r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
 	tst	lr,#1
-	moveq	pc,lr			@ be binary compatible with V4, yet
-.word	0xe12fff1e			@ interoperable with Thumb ISA:-)
-#endif
+	moveq	pc,lr			nr.word	0xe12fff1e			nrr#endif
 .size	sha512_block_data_order_nohw,.-sha512_block_data_order_nohw
 #if __ARM_MAX_ARCH__>=7
 .arch	armv7-a
@@ -529,34 +401,27 @@ sha512_block_data_order_nohw:
 .type	sha512_block_data_order_neon,%function
 .align	4
 sha512_block_data_order_neon:
-	dmb	@ errata #451034 on early Cortex A8
-	add	r2,r1,r2,lsl#7	@ len to point at the end of inp
-	adr	r3,K512
+	dmb	rrnrr	add	r2,r1,r2,lsl#7	nnnn	adr	r3,K512
 	VFP_ABI_PUSH
-	vldmia	r0,{d16,d17,d18,d19,d20,d21,d22,d23}		@ load context
-.Loop_neon:
-	vshr.u64	d24,d20,#14	@ 0
-#if 0<16
-	vld1.64	{d0},[r1]!	@ handles unaligned
+	vldmia	r0,{d16,d17,d18,d19,d20,d21,d22,d23}		n.Loop_neon:
+	vshr.u64	d24,d20,#14	#if 0 
+
 #endif
 	vshr.u64	d25,d20,#18
-#if 0>0
-	vadd.i64	d16,d30			@ h+=Maj from the past
+#if 0 
+
 #endif
 	vshr.u64	d26,d20,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d20,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d20,#50
 	vsli.64	d25,d20,#46
 	vmov	d29,d20
 	vsli.64	d26,d20,#23
-#if 0<16 && defined(__ARMEL__)
-	vrev64.8	d0,d0
+#if 0 
+
 #endif
 	veor	d25,d24
-	vbsl	d29,d21,d22		@ Ch(e,f,g)
-	vshr.u64	d24,d16,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d23
+	vbsl	d29,d21,d22			vshr.u64	d24,d16,#28
+	veor	d26,d25				vadd.i64	d27,d29,d23
 	vshr.u64	d25,d16,#34
 	vsli.64	d24,d16,#36
 	vadd.i64	d27,d26
@@ -567,22 +432,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d16,#25
 	veor	d23,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d18,d17		@ Maj(a,b,c)
-	veor	d23,d26			@ Sigma0(a)
-	vadd.i64	d19,d27
+	vbsl	d30,d18,d17			veor	d23,d26				vadd.i64	d19,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d23,d30
-	vshr.u64	d24,d19,#14	@ 1
-#if 1<16
-	vld1.64	{d1},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d19,#14	#if 1<16
+	vld1.64	{d1},[r1]!	nnn#endif
 	vshr.u64	d25,d19,#18
 #if 1>0
-	vadd.i64	d23,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d23,d30			r#endif
 	vshr.u64	d26,d19,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d19,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d19,#50
 	vsli.64	d25,d19,#46
 	vmov	d29,d19
 	vsli.64	d26,d19,#23
@@ -590,10 +448,8 @@ sha512_block_data_order_neon:
 	vrev64.8	d1,d1
 #endif
 	veor	d25,d24
-	vbsl	d29,d20,d21		@ Ch(e,f,g)
-	vshr.u64	d24,d23,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d22
+	vbsl	d29,d20,d21			vshr.u64	d24,d23,#28
+	veor	d26,d25				vadd.i64	d27,d29,d22
 	vshr.u64	d25,d23,#34
 	vsli.64	d24,d23,#36
 	vadd.i64	d27,d26
@@ -604,22 +460,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d23,#25
 	veor	d22,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d17,d16		@ Maj(a,b,c)
-	veor	d22,d26			@ Sigma0(a)
-	vadd.i64	d18,d27
+	vbsl	d30,d17,d16			veor	d22,d26				vadd.i64	d18,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d22,d30
-	vshr.u64	d24,d18,#14	@ 2
-#if 2<16
-	vld1.64	{d2},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d18,#14	#if 2<16
+	vld1.64	{d2},[r1]!	nnn#endif
 	vshr.u64	d25,d18,#18
 #if 2>0
-	vadd.i64	d22,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d22,d30			r#endif
 	vshr.u64	d26,d18,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d18,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d18,#50
 	vsli.64	d25,d18,#46
 	vmov	d29,d18
 	vsli.64	d26,d18,#23
@@ -627,10 +476,8 @@ sha512_block_data_order_neon:
 	vrev64.8	d2,d2
 #endif
 	veor	d25,d24
-	vbsl	d29,d19,d20		@ Ch(e,f,g)
-	vshr.u64	d24,d22,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d21
+	vbsl	d29,d19,d20			vshr.u64	d24,d22,#28
+	veor	d26,d25				vadd.i64	d27,d29,d21
 	vshr.u64	d25,d22,#34
 	vsli.64	d24,d22,#36
 	vadd.i64	d27,d26
@@ -641,22 +488,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d22,#25
 	veor	d21,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d16,d23		@ Maj(a,b,c)
-	veor	d21,d26			@ Sigma0(a)
-	vadd.i64	d17,d27
+	vbsl	d30,d16,d23			veor	d21,d26				vadd.i64	d17,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d21,d30
-	vshr.u64	d24,d17,#14	@ 3
-#if 3<16
-	vld1.64	{d3},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d17,#14	#if 3<16
+	vld1.64	{d3},[r1]!	nnn#endif
 	vshr.u64	d25,d17,#18
 #if 3>0
-	vadd.i64	d21,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d21,d30			r#endif
 	vshr.u64	d26,d17,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d17,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d17,#50
 	vsli.64	d25,d17,#46
 	vmov	d29,d17
 	vsli.64	d26,d17,#23
@@ -664,10 +504,8 @@ sha512_block_data_order_neon:
 	vrev64.8	d3,d3
 #endif
 	veor	d25,d24
-	vbsl	d29,d18,d19		@ Ch(e,f,g)
-	vshr.u64	d24,d21,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d20
+	vbsl	d29,d18,d19			vshr.u64	d24,d21,#28
+	veor	d26,d25				vadd.i64	d27,d29,d20
 	vshr.u64	d25,d21,#34
 	vsli.64	d24,d21,#36
 	vadd.i64	d27,d26
@@ -678,22 +516,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d21,#25
 	veor	d20,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d23,d22		@ Maj(a,b,c)
-	veor	d20,d26			@ Sigma0(a)
-	vadd.i64	d16,d27
+	vbsl	d30,d23,d22			veor	d20,d26				vadd.i64	d16,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d20,d30
-	vshr.u64	d24,d16,#14	@ 4
-#if 4<16
-	vld1.64	{d4},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d16,#14	#if 4<16
+	vld1.64	{d4},[r1]!	nnn#endif
 	vshr.u64	d25,d16,#18
 #if 4>0
-	vadd.i64	d20,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d20,d30			r#endif
 	vshr.u64	d26,d16,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d16,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d16,#50
 	vsli.64	d25,d16,#46
 	vmov	d29,d16
 	vsli.64	d26,d16,#23
@@ -701,10 +532,8 @@ sha512_block_data_order_neon:
 	vrev64.8	d4,d4
 #endif
 	veor	d25,d24
-	vbsl	d29,d17,d18		@ Ch(e,f,g)
-	vshr.u64	d24,d20,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d19
+	vbsl	d29,d17,d18			vshr.u64	d24,d20,#28
+	veor	d26,d25				vadd.i64	d27,d29,d19
 	vshr.u64	d25,d20,#34
 	vsli.64	d24,d20,#36
 	vadd.i64	d27,d26
@@ -715,22 +544,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d20,#25
 	veor	d19,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d22,d21		@ Maj(a,b,c)
-	veor	d19,d26			@ Sigma0(a)
-	vadd.i64	d23,d27
+	vbsl	d30,d22,d21			veor	d19,d26				vadd.i64	d23,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d19,d30
-	vshr.u64	d24,d23,#14	@ 5
-#if 5<16
-	vld1.64	{d5},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d23,#14	#if 5<16
+	vld1.64	{d5},[r1]!	nnn#endif
 	vshr.u64	d25,d23,#18
 #if 5>0
-	vadd.i64	d19,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d19,d30			r#endif
 	vshr.u64	d26,d23,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d23,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d23,#50
 	vsli.64	d25,d23,#46
 	vmov	d29,d23
 	vsli.64	d26,d23,#23
@@ -738,10 +560,8 @@ sha512_block_data_order_neon:
 	vrev64.8	d5,d5
 #endif
 	veor	d25,d24
-	vbsl	d29,d16,d17		@ Ch(e,f,g)
-	vshr.u64	d24,d19,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d18
+	vbsl	d29,d16,d17			vshr.u64	d24,d19,#28
+	veor	d26,d25				vadd.i64	d27,d29,d18
 	vshr.u64	d25,d19,#34
 	vsli.64	d24,d19,#36
 	vadd.i64	d27,d26
@@ -752,22 +572,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d19,#25
 	veor	d18,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d21,d20		@ Maj(a,b,c)
-	veor	d18,d26			@ Sigma0(a)
-	vadd.i64	d22,d27
+	vbsl	d30,d21,d20			veor	d18,d26				vadd.i64	d22,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d18,d30
-	vshr.u64	d24,d22,#14	@ 6
-#if 6<16
-	vld1.64	{d6},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d22,#14	#if 6<16
+	vld1.64	{d6},[r1]!	nnn#endif
 	vshr.u64	d25,d22,#18
 #if 6>0
-	vadd.i64	d18,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d18,d30			r#endif
 	vshr.u64	d26,d22,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d22,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d22,#50
 	vsli.64	d25,d22,#46
 	vmov	d29,d22
 	vsli.64	d26,d22,#23
@@ -775,10 +588,8 @@ sha512_block_data_order_neon:
 	vrev64.8	d6,d6
 #endif
 	veor	d25,d24
-	vbsl	d29,d23,d16		@ Ch(e,f,g)
-	vshr.u64	d24,d18,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d17
+	vbsl	d29,d23,d16			vshr.u64	d24,d18,#28
+	veor	d26,d25				vadd.i64	d27,d29,d17
 	vshr.u64	d25,d18,#34
 	vsli.64	d24,d18,#36
 	vadd.i64	d27,d26
@@ -789,22 +600,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d18,#25
 	veor	d17,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d20,d19		@ Maj(a,b,c)
-	veor	d17,d26			@ Sigma0(a)
-	vadd.i64	d21,d27
+	vbsl	d30,d20,d19			veor	d17,d26				vadd.i64	d21,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d17,d30
-	vshr.u64	d24,d21,#14	@ 7
-#if 7<16
-	vld1.64	{d7},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d21,#14	#if 7<16
+	vld1.64	{d7},[r1]!	nnn#endif
 	vshr.u64	d25,d21,#18
 #if 7>0
-	vadd.i64	d17,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d17,d30			r#endif
 	vshr.u64	d26,d21,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d21,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d21,#50
 	vsli.64	d25,d21,#46
 	vmov	d29,d21
 	vsli.64	d26,d21,#23
@@ -812,10 +616,8 @@ sha512_block_data_order_neon:
 	vrev64.8	d7,d7
 #endif
 	veor	d25,d24
-	vbsl	d29,d22,d23		@ Ch(e,f,g)
-	vshr.u64	d24,d17,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d16
+	vbsl	d29,d22,d23			vshr.u64	d24,d17,#28
+	veor	d26,d25				vadd.i64	d27,d29,d16
 	vshr.u64	d25,d17,#34
 	vsli.64	d24,d17,#36
 	vadd.i64	d27,d26
@@ -826,22 +628,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d17,#25
 	veor	d16,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d19,d18		@ Maj(a,b,c)
-	veor	d16,d26			@ Sigma0(a)
-	vadd.i64	d20,d27
+	vbsl	d30,d19,d18			veor	d16,d26				vadd.i64	d20,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d16,d30
-	vshr.u64	d24,d20,#14	@ 8
-#if 8<16
-	vld1.64	{d8},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d20,#14	#if 8<16
+	vld1.64	{d8},[r1]!	nnn#endif
 	vshr.u64	d25,d20,#18
 #if 8>0
-	vadd.i64	d16,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d16,d30			r#endif
 	vshr.u64	d26,d20,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d20,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d20,#50
 	vsli.64	d25,d20,#46
 	vmov	d29,d20
 	vsli.64	d26,d20,#23
@@ -849,10 +644,8 @@ sha512_block_data_order_neon:
 	vrev64.8	d8,d8
 #endif
 	veor	d25,d24
-	vbsl	d29,d21,d22		@ Ch(e,f,g)
-	vshr.u64	d24,d16,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d23
+	vbsl	d29,d21,d22			vshr.u64	d24,d16,#28
+	veor	d26,d25				vadd.i64	d27,d29,d23
 	vshr.u64	d25,d16,#34
 	vsli.64	d24,d16,#36
 	vadd.i64	d27,d26
@@ -863,22 +656,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d16,#25
 	veor	d23,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d18,d17		@ Maj(a,b,c)
-	veor	d23,d26			@ Sigma0(a)
-	vadd.i64	d19,d27
+	vbsl	d30,d18,d17			veor	d23,d26				vadd.i64	d19,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d23,d30
-	vshr.u64	d24,d19,#14	@ 9
-#if 9<16
-	vld1.64	{d9},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d19,#14	#if 9<16
+	vld1.64	{d9},[r1]!	nnn#endif
 	vshr.u64	d25,d19,#18
 #if 9>0
-	vadd.i64	d23,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d23,d30			r#endif
 	vshr.u64	d26,d19,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d19,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d19,#50
 	vsli.64	d25,d19,#46
 	vmov	d29,d19
 	vsli.64	d26,d19,#23
@@ -886,10 +672,8 @@ sha512_block_data_order_neon:
 	vrev64.8	d9,d9
 #endif
 	veor	d25,d24
-	vbsl	d29,d20,d21		@ Ch(e,f,g)
-	vshr.u64	d24,d23,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d22
+	vbsl	d29,d20,d21			vshr.u64	d24,d23,#28
+	veor	d26,d25				vadd.i64	d27,d29,d22
 	vshr.u64	d25,d23,#34
 	vsli.64	d24,d23,#36
 	vadd.i64	d27,d26
@@ -900,22 +684,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d23,#25
 	veor	d22,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d17,d16		@ Maj(a,b,c)
-	veor	d22,d26			@ Sigma0(a)
-	vadd.i64	d18,d27
+	vbsl	d30,d17,d16			veor	d22,d26				vadd.i64	d18,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d22,d30
-	vshr.u64	d24,d18,#14	@ 10
-#if 10<16
-	vld1.64	{d10},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d18,#14	#if 10<16
+	vld1.64	{d10},[r1]!	nnn#endif
 	vshr.u64	d25,d18,#18
 #if 10>0
-	vadd.i64	d22,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d22,d30			r#endif
 	vshr.u64	d26,d18,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d18,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d18,#50
 	vsli.64	d25,d18,#46
 	vmov	d29,d18
 	vsli.64	d26,d18,#23
@@ -923,10 +700,8 @@ sha512_block_data_order_neon:
 	vrev64.8	d10,d10
 #endif
 	veor	d25,d24
-	vbsl	d29,d19,d20		@ Ch(e,f,g)
-	vshr.u64	d24,d22,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d21
+	vbsl	d29,d19,d20			vshr.u64	d24,d22,#28
+	veor	d26,d25				vadd.i64	d27,d29,d21
 	vshr.u64	d25,d22,#34
 	vsli.64	d24,d22,#36
 	vadd.i64	d27,d26
@@ -937,22 +712,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d22,#25
 	veor	d21,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d16,d23		@ Maj(a,b,c)
-	veor	d21,d26			@ Sigma0(a)
-	vadd.i64	d17,d27
+	vbsl	d30,d16,d23			veor	d21,d26				vadd.i64	d17,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d21,d30
-	vshr.u64	d24,d17,#14	@ 11
-#if 11<16
-	vld1.64	{d11},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d17,#14	#if 11<16
+	vld1.64	{d11},[r1]!	nnn#endif
 	vshr.u64	d25,d17,#18
 #if 11>0
-	vadd.i64	d21,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d21,d30			r#endif
 	vshr.u64	d26,d17,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d17,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d17,#50
 	vsli.64	d25,d17,#46
 	vmov	d29,d17
 	vsli.64	d26,d17,#23
@@ -960,10 +728,8 @@ sha512_block_data_order_neon:
 	vrev64.8	d11,d11
 #endif
 	veor	d25,d24
-	vbsl	d29,d18,d19		@ Ch(e,f,g)
-	vshr.u64	d24,d21,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d20
+	vbsl	d29,d18,d19			vshr.u64	d24,d21,#28
+	veor	d26,d25				vadd.i64	d27,d29,d20
 	vshr.u64	d25,d21,#34
 	vsli.64	d24,d21,#36
 	vadd.i64	d27,d26
@@ -974,22 +740,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d21,#25
 	veor	d20,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d23,d22		@ Maj(a,b,c)
-	veor	d20,d26			@ Sigma0(a)
-	vadd.i64	d16,d27
+	vbsl	d30,d23,d22			veor	d20,d26				vadd.i64	d16,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d20,d30
-	vshr.u64	d24,d16,#14	@ 12
-#if 12<16
-	vld1.64	{d12},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d16,#14	#if 12<16
+	vld1.64	{d12},[r1]!	nnn#endif
 	vshr.u64	d25,d16,#18
 #if 12>0
-	vadd.i64	d20,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d20,d30			r#endif
 	vshr.u64	d26,d16,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d16,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d16,#50
 	vsli.64	d25,d16,#46
 	vmov	d29,d16
 	vsli.64	d26,d16,#23
@@ -997,10 +756,8 @@ sha512_block_data_order_neon:
 	vrev64.8	d12,d12
 #endif
 	veor	d25,d24
-	vbsl	d29,d17,d18		@ Ch(e,f,g)
-	vshr.u64	d24,d20,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d19
+	vbsl	d29,d17,d18			vshr.u64	d24,d20,#28
+	veor	d26,d25				vadd.i64	d27,d29,d19
 	vshr.u64	d25,d20,#34
 	vsli.64	d24,d20,#36
 	vadd.i64	d27,d26
@@ -1011,22 +768,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d20,#25
 	veor	d19,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d22,d21		@ Maj(a,b,c)
-	veor	d19,d26			@ Sigma0(a)
-	vadd.i64	d23,d27
+	vbsl	d30,d22,d21			veor	d19,d26				vadd.i64	d23,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d19,d30
-	vshr.u64	d24,d23,#14	@ 13
-#if 13<16
-	vld1.64	{d13},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d23,#14	#if 13<16
+	vld1.64	{d13},[r1]!	nnn#endif
 	vshr.u64	d25,d23,#18
 #if 13>0
-	vadd.i64	d19,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d19,d30			r#endif
 	vshr.u64	d26,d23,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d23,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d23,#50
 	vsli.64	d25,d23,#46
 	vmov	d29,d23
 	vsli.64	d26,d23,#23
@@ -1034,10 +784,8 @@ sha512_block_data_order_neon:
 	vrev64.8	d13,d13
 #endif
 	veor	d25,d24
-	vbsl	d29,d16,d17		@ Ch(e,f,g)
-	vshr.u64	d24,d19,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d18
+	vbsl	d29,d16,d17			vshr.u64	d24,d19,#28
+	veor	d26,d25				vadd.i64	d27,d29,d18
 	vshr.u64	d25,d19,#34
 	vsli.64	d24,d19,#36
 	vadd.i64	d27,d26
@@ -1048,22 +796,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d19,#25
 	veor	d18,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d21,d20		@ Maj(a,b,c)
-	veor	d18,d26			@ Sigma0(a)
-	vadd.i64	d22,d27
+	vbsl	d30,d21,d20			veor	d18,d26				vadd.i64	d22,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d18,d30
-	vshr.u64	d24,d22,#14	@ 14
-#if 14<16
-	vld1.64	{d14},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d22,#14	#if 14<16
+	vld1.64	{d14},[r1]!	nnn#endif
 	vshr.u64	d25,d22,#18
 #if 14>0
-	vadd.i64	d18,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d18,d30			r#endif
 	vshr.u64	d26,d22,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d22,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d22,#50
 	vsli.64	d25,d22,#46
 	vmov	d29,d22
 	vsli.64	d26,d22,#23
@@ -1071,10 +812,8 @@ sha512_block_data_order_neon:
 	vrev64.8	d14,d14
 #endif
 	veor	d25,d24
-	vbsl	d29,d23,d16		@ Ch(e,f,g)
-	vshr.u64	d24,d18,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d17
+	vbsl	d29,d23,d16			vshr.u64	d24,d18,#28
+	veor	d26,d25				vadd.i64	d27,d29,d17
 	vshr.u64	d25,d18,#34
 	vsli.64	d24,d18,#36
 	vadd.i64	d27,d26
@@ -1085,22 +824,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d18,#25
 	veor	d17,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d20,d19		@ Maj(a,b,c)
-	veor	d17,d26			@ Sigma0(a)
-	vadd.i64	d21,d27
+	vbsl	d30,d20,d19			veor	d17,d26				vadd.i64	d21,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d17,d30
-	vshr.u64	d24,d21,#14	@ 15
-#if 15<16
-	vld1.64	{d15},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d21,#14	#if 15<16
+	vld1.64	{d15},[r1]!	nnn#endif
 	vshr.u64	d25,d21,#18
 #if 15>0
-	vadd.i64	d17,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d17,d30			r#endif
 	vshr.u64	d26,d21,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d21,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d21,#50
 	vsli.64	d25,d21,#46
 	vmov	d29,d21
 	vsli.64	d26,d21,#23
@@ -1108,10 +840,8 @@ sha512_block_data_order_neon:
 	vrev64.8	d15,d15
 #endif
 	veor	d25,d24
-	vbsl	d29,d22,d23		@ Ch(e,f,g)
-	vshr.u64	d24,d17,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d16
+	vbsl	d29,d22,d23			vshr.u64	d24,d17,#28
+	veor	d26,d25				vadd.i64	d27,d29,d16
 	vshr.u64	d25,d17,#34
 	vsli.64	d24,d17,#36
 	vadd.i64	d27,d26
@@ -1122,39 +852,27 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d17,#25
 	veor	d16,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d19,d18		@ Maj(a,b,c)
-	veor	d16,d26			@ Sigma0(a)
-	vadd.i64	d20,d27
+	vbsl	d30,d19,d18			veor	d16,d26				vadd.i64	d20,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d16,d30
-	mov	r12,#4
+		mov	r12,#4
 .L16_79_neon:
 	subs	r12,#1
 	vshr.u64	q12,q7,#19
 	vshr.u64	q13,q7,#61
-	vadd.i64	d16,d30			@ h+=Maj from the past
-	vshr.u64	q15,q7,#6
+	vadd.i64	d16,d30			r	vshr.u64	q15,q7,#6
 	vsli.64	q12,q7,#45
-	vext.8	q14,q0,q1,#8	@ X[i+1]
-	vsli.64	q13,q7,#3
+	vext.8	q14,q0,q1,#8		vsli.64	q13,q7,#3
 	veor	q15,q12
 	vshr.u64	q12,q14,#1
-	veor	q15,q13				@ sigma1(X[i+14])
-	vshr.u64	q13,q14,#8
+	veor	q15,q13					vshr.u64	q13,q14,#8
 	vadd.i64	q0,q15
 	vshr.u64	q15,q14,#7
 	vsli.64	q12,q14,#63
 	vsli.64	q13,q14,#56
-	vext.8	q14,q4,q5,#8	@ X[i+9]
-	veor	q15,q12
-	vshr.u64	d24,d20,#14		@ from NEON_00_15
-	vadd.i64	q0,q14
-	vshr.u64	d25,d20,#18		@ from NEON_00_15
-	veor	q15,q13				@ sigma0(X[i+1])
-	vshr.u64	d26,d20,#41		@ from NEON_00_15
-	vadd.i64	q0,q15
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d20,#50
+	vext.8	q14,q4,q5,#8		veor	q15,q12
+	vshr.u64	d24,d20,#14		r	vadd.i64	q0,q14
+	vshr.u64	d25,d20,#18		r	veor	q15,q13					vshr.u64	d26,d20,#41		r	vadd.i64	q0,q15
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d20,#50
 	vsli.64	d25,d20,#46
 	vmov	d29,d20
 	vsli.64	d26,d20,#23
@@ -1162,10 +880,8 @@ sha512_block_data_order_neon:
 	vrev64.8	,
 #endif
 	veor	d25,d24
-	vbsl	d29,d21,d22		@ Ch(e,f,g)
-	vshr.u64	d24,d16,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d23
+	vbsl	d29,d21,d22			vshr.u64	d24,d16,#28
+	veor	d26,d25				vadd.i64	d27,d29,d23
 	vshr.u64	d25,d16,#34
 	vsli.64	d24,d16,#36
 	vadd.i64	d27,d26
@@ -1176,22 +892,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d16,#25
 	veor	d23,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d18,d17		@ Maj(a,b,c)
-	veor	d23,d26			@ Sigma0(a)
-	vadd.i64	d19,d27
+	vbsl	d30,d18,d17			veor	d23,d26				vadd.i64	d19,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d23,d30
-	vshr.u64	d24,d19,#14	@ 17
-#if 17<16
-	vld1.64	{d1},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d19,#14	#if 17<16
+	vld1.64	{d1},[r1]!	nnn#endif
 	vshr.u64	d25,d19,#18
 #if 17>0
-	vadd.i64	d23,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d23,d30			r#endif
 	vshr.u64	d26,d19,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d19,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d19,#50
 	vsli.64	d25,d19,#46
 	vmov	d29,d19
 	vsli.64	d26,d19,#23
@@ -1199,10 +908,8 @@ sha512_block_data_order_neon:
 	vrev64.8	,
 #endif
 	veor	d25,d24
-	vbsl	d29,d20,d21		@ Ch(e,f,g)
-	vshr.u64	d24,d23,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d22
+	vbsl	d29,d20,d21			vshr.u64	d24,d23,#28
+	veor	d26,d25				vadd.i64	d27,d29,d22
 	vshr.u64	d25,d23,#34
 	vsli.64	d24,d23,#36
 	vadd.i64	d27,d26
@@ -1213,36 +920,24 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d23,#25
 	veor	d22,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d17,d16		@ Maj(a,b,c)
-	veor	d22,d26			@ Sigma0(a)
-	vadd.i64	d18,d27
+	vbsl	d30,d17,d16			veor	d22,d26				vadd.i64	d18,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d22,d30
-	vshr.u64	q12,q0,#19
+		vshr.u64	q12,q0,#19
 	vshr.u64	q13,q0,#61
-	vadd.i64	d22,d30			@ h+=Maj from the past
-	vshr.u64	q15,q0,#6
+	vadd.i64	d22,d30			r	vshr.u64	q15,q0,#6
 	vsli.64	q12,q0,#45
-	vext.8	q14,q1,q2,#8	@ X[i+1]
-	vsli.64	q13,q0,#3
+	vext.8	q14,q1,q2,#8		vsli.64	q13,q0,#3
 	veor	q15,q12
 	vshr.u64	q12,q14,#1
-	veor	q15,q13				@ sigma1(X[i+14])
-	vshr.u64	q13,q14,#8
+	veor	q15,q13					vshr.u64	q13,q14,#8
 	vadd.i64	q1,q15
 	vshr.u64	q15,q14,#7
 	vsli.64	q12,q14,#63
 	vsli.64	q13,q14,#56
-	vext.8	q14,q5,q6,#8	@ X[i+9]
-	veor	q15,q12
-	vshr.u64	d24,d18,#14		@ from NEON_00_15
-	vadd.i64	q1,q14
-	vshr.u64	d25,d18,#18		@ from NEON_00_15
-	veor	q15,q13				@ sigma0(X[i+1])
-	vshr.u64	d26,d18,#41		@ from NEON_00_15
-	vadd.i64	q1,q15
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d18,#50
+	vext.8	q14,q5,q6,#8		veor	q15,q12
+	vshr.u64	d24,d18,#14		r	vadd.i64	q1,q14
+	vshr.u64	d25,d18,#18		r	veor	q15,q13					vshr.u64	d26,d18,#41		r	vadd.i64	q1,q15
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d18,#50
 	vsli.64	d25,d18,#46
 	vmov	d29,d18
 	vsli.64	d26,d18,#23
@@ -1250,10 +945,8 @@ sha512_block_data_order_neon:
 	vrev64.8	,
 #endif
 	veor	d25,d24
-	vbsl	d29,d19,d20		@ Ch(e,f,g)
-	vshr.u64	d24,d22,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d21
+	vbsl	d29,d19,d20			vshr.u64	d24,d22,#28
+	veor	d26,d25				vadd.i64	d27,d29,d21
 	vshr.u64	d25,d22,#34
 	vsli.64	d24,d22,#36
 	vadd.i64	d27,d26
@@ -1264,22 +957,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d22,#25
 	veor	d21,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d16,d23		@ Maj(a,b,c)
-	veor	d21,d26			@ Sigma0(a)
-	vadd.i64	d17,d27
+	vbsl	d30,d16,d23			veor	d21,d26				vadd.i64	d17,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d21,d30
-	vshr.u64	d24,d17,#14	@ 19
-#if 19<16
-	vld1.64	{d3},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d17,#14	#if 19<16
+	vld1.64	{d3},[r1]!	nnn#endif
 	vshr.u64	d25,d17,#18
 #if 19>0
-	vadd.i64	d21,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d21,d30			r#endif
 	vshr.u64	d26,d17,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d17,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d17,#50
 	vsli.64	d25,d17,#46
 	vmov	d29,d17
 	vsli.64	d26,d17,#23
@@ -1287,10 +973,8 @@ sha512_block_data_order_neon:
 	vrev64.8	,
 #endif
 	veor	d25,d24
-	vbsl	d29,d18,d19		@ Ch(e,f,g)
-	vshr.u64	d24,d21,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d20
+	vbsl	d29,d18,d19			vshr.u64	d24,d21,#28
+	veor	d26,d25				vadd.i64	d27,d29,d20
 	vshr.u64	d25,d21,#34
 	vsli.64	d24,d21,#36
 	vadd.i64	d27,d26
@@ -1301,36 +985,24 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d21,#25
 	veor	d20,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d23,d22		@ Maj(a,b,c)
-	veor	d20,d26			@ Sigma0(a)
-	vadd.i64	d16,d27
+	vbsl	d30,d23,d22			veor	d20,d26				vadd.i64	d16,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d20,d30
-	vshr.u64	q12,q1,#19
+		vshr.u64	q12,q1,#19
 	vshr.u64	q13,q1,#61
-	vadd.i64	d20,d30			@ h+=Maj from the past
-	vshr.u64	q15,q1,#6
+	vadd.i64	d20,d30			r	vshr.u64	q15,q1,#6
 	vsli.64	q12,q1,#45
-	vext.8	q14,q2,q3,#8	@ X[i+1]
-	vsli.64	q13,q1,#3
+	vext.8	q14,q2,q3,#8		vsli.64	q13,q1,#3
 	veor	q15,q12
 	vshr.u64	q12,q14,#1
-	veor	q15,q13				@ sigma1(X[i+14])
-	vshr.u64	q13,q14,#8
+	veor	q15,q13					vshr.u64	q13,q14,#8
 	vadd.i64	q2,q15
 	vshr.u64	q15,q14,#7
 	vsli.64	q12,q14,#63
 	vsli.64	q13,q14,#56
-	vext.8	q14,q6,q7,#8	@ X[i+9]
-	veor	q15,q12
-	vshr.u64	d24,d16,#14		@ from NEON_00_15
-	vadd.i64	q2,q14
-	vshr.u64	d25,d16,#18		@ from NEON_00_15
-	veor	q15,q13				@ sigma0(X[i+1])
-	vshr.u64	d26,d16,#41		@ from NEON_00_15
-	vadd.i64	q2,q15
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d16,#50
+	vext.8	q14,q6,q7,#8		veor	q15,q12
+	vshr.u64	d24,d16,#14		r	vadd.i64	q2,q14
+	vshr.u64	d25,d16,#18		r	veor	q15,q13					vshr.u64	d26,d16,#41		r	vadd.i64	q2,q15
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d16,#50
 	vsli.64	d25,d16,#46
 	vmov	d29,d16
 	vsli.64	d26,d16,#23
@@ -1338,10 +1010,8 @@ sha512_block_data_order_neon:
 	vrev64.8	,
 #endif
 	veor	d25,d24
-	vbsl	d29,d17,d18		@ Ch(e,f,g)
-	vshr.u64	d24,d20,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d19
+	vbsl	d29,d17,d18			vshr.u64	d24,d20,#28
+	veor	d26,d25				vadd.i64	d27,d29,d19
 	vshr.u64	d25,d20,#34
 	vsli.64	d24,d20,#36
 	vadd.i64	d27,d26
@@ -1352,22 +1022,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d20,#25
 	veor	d19,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d22,d21		@ Maj(a,b,c)
-	veor	d19,d26			@ Sigma0(a)
-	vadd.i64	d23,d27
+	vbsl	d30,d22,d21			veor	d19,d26				vadd.i64	d23,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d19,d30
-	vshr.u64	d24,d23,#14	@ 21
-#if 21<16
-	vld1.64	{d5},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d23,#14	#if 21<16
+	vld1.64	{d5},[r1]!	nnn#endif
 	vshr.u64	d25,d23,#18
 #if 21>0
-	vadd.i64	d19,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d19,d30			r#endif
 	vshr.u64	d26,d23,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d23,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d23,#50
 	vsli.64	d25,d23,#46
 	vmov	d29,d23
 	vsli.64	d26,d23,#23
@@ -1375,10 +1038,8 @@ sha512_block_data_order_neon:
 	vrev64.8	,
 #endif
 	veor	d25,d24
-	vbsl	d29,d16,d17		@ Ch(e,f,g)
-	vshr.u64	d24,d19,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d18
+	vbsl	d29,d16,d17			vshr.u64	d24,d19,#28
+	veor	d26,d25				vadd.i64	d27,d29,d18
 	vshr.u64	d25,d19,#34
 	vsli.64	d24,d19,#36
 	vadd.i64	d27,d26
@@ -1389,36 +1050,24 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d19,#25
 	veor	d18,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d21,d20		@ Maj(a,b,c)
-	veor	d18,d26			@ Sigma0(a)
-	vadd.i64	d22,d27
+	vbsl	d30,d21,d20			veor	d18,d26				vadd.i64	d22,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d18,d30
-	vshr.u64	q12,q2,#19
+		vshr.u64	q12,q2,#19
 	vshr.u64	q13,q2,#61
-	vadd.i64	d18,d30			@ h+=Maj from the past
-	vshr.u64	q15,q2,#6
+	vadd.i64	d18,d30			r	vshr.u64	q15,q2,#6
 	vsli.64	q12,q2,#45
-	vext.8	q14,q3,q4,#8	@ X[i+1]
-	vsli.64	q13,q2,#3
+	vext.8	q14,q3,q4,#8		vsli.64	q13,q2,#3
 	veor	q15,q12
 	vshr.u64	q12,q14,#1
-	veor	q15,q13				@ sigma1(X[i+14])
-	vshr.u64	q13,q14,#8
+	veor	q15,q13					vshr.u64	q13,q14,#8
 	vadd.i64	q3,q15
 	vshr.u64	q15,q14,#7
 	vsli.64	q12,q14,#63
 	vsli.64	q13,q14,#56
-	vext.8	q14,q7,q0,#8	@ X[i+9]
-	veor	q15,q12
-	vshr.u64	d24,d22,#14		@ from NEON_00_15
-	vadd.i64	q3,q14
-	vshr.u64	d25,d22,#18		@ from NEON_00_15
-	veor	q15,q13				@ sigma0(X[i+1])
-	vshr.u64	d26,d22,#41		@ from NEON_00_15
-	vadd.i64	q3,q15
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d22,#50
+	vext.8	q14,q7,q0,#8		veor	q15,q12
+	vshr.u64	d24,d22,#14		r	vadd.i64	q3,q14
+	vshr.u64	d25,d22,#18		r	veor	q15,q13					vshr.u64	d26,d22,#41		r	vadd.i64	q3,q15
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d22,#50
 	vsli.64	d25,d22,#46
 	vmov	d29,d22
 	vsli.64	d26,d22,#23
@@ -1426,10 +1075,8 @@ sha512_block_data_order_neon:
 	vrev64.8	,
 #endif
 	veor	d25,d24
-	vbsl	d29,d23,d16		@ Ch(e,f,g)
-	vshr.u64	d24,d18,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d17
+	vbsl	d29,d23,d16			vshr.u64	d24,d18,#28
+	veor	d26,d25				vadd.i64	d27,d29,d17
 	vshr.u64	d25,d18,#34
 	vsli.64	d24,d18,#36
 	vadd.i64	d27,d26
@@ -1440,22 +1087,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d18,#25
 	veor	d17,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d20,d19		@ Maj(a,b,c)
-	veor	d17,d26			@ Sigma0(a)
-	vadd.i64	d21,d27
+	vbsl	d30,d20,d19			veor	d17,d26				vadd.i64	d21,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d17,d30
-	vshr.u64	d24,d21,#14	@ 23
-#if 23<16
-	vld1.64	{d7},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d21,#14	#if 23<16
+	vld1.64	{d7},[r1]!	nnn#endif
 	vshr.u64	d25,d21,#18
 #if 23>0
-	vadd.i64	d17,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d17,d30			r#endif
 	vshr.u64	d26,d21,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d21,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d21,#50
 	vsli.64	d25,d21,#46
 	vmov	d29,d21
 	vsli.64	d26,d21,#23
@@ -1463,10 +1103,8 @@ sha512_block_data_order_neon:
 	vrev64.8	,
 #endif
 	veor	d25,d24
-	vbsl	d29,d22,d23		@ Ch(e,f,g)
-	vshr.u64	d24,d17,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d16
+	vbsl	d29,d22,d23			vshr.u64	d24,d17,#28
+	veor	d26,d25				vadd.i64	d27,d29,d16
 	vshr.u64	d25,d17,#34
 	vsli.64	d24,d17,#36
 	vadd.i64	d27,d26
@@ -1477,36 +1115,24 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d17,#25
 	veor	d16,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d19,d18		@ Maj(a,b,c)
-	veor	d16,d26			@ Sigma0(a)
-	vadd.i64	d20,d27
+	vbsl	d30,d19,d18			veor	d16,d26				vadd.i64	d20,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d16,d30
-	vshr.u64	q12,q3,#19
+		vshr.u64	q12,q3,#19
 	vshr.u64	q13,q3,#61
-	vadd.i64	d16,d30			@ h+=Maj from the past
-	vshr.u64	q15,q3,#6
+	vadd.i64	d16,d30			r	vshr.u64	q15,q3,#6
 	vsli.64	q12,q3,#45
-	vext.8	q14,q4,q5,#8	@ X[i+1]
-	vsli.64	q13,q3,#3
+	vext.8	q14,q4,q5,#8		vsli.64	q13,q3,#3
 	veor	q15,q12
 	vshr.u64	q12,q14,#1
-	veor	q15,q13				@ sigma1(X[i+14])
-	vshr.u64	q13,q14,#8
+	veor	q15,q13					vshr.u64	q13,q14,#8
 	vadd.i64	q4,q15
 	vshr.u64	q15,q14,#7
 	vsli.64	q12,q14,#63
 	vsli.64	q13,q14,#56
-	vext.8	q14,q0,q1,#8	@ X[i+9]
-	veor	q15,q12
-	vshr.u64	d24,d20,#14		@ from NEON_00_15
-	vadd.i64	q4,q14
-	vshr.u64	d25,d20,#18		@ from NEON_00_15
-	veor	q15,q13				@ sigma0(X[i+1])
-	vshr.u64	d26,d20,#41		@ from NEON_00_15
-	vadd.i64	q4,q15
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d20,#50
+	vext.8	q14,q0,q1,#8		veor	q15,q12
+	vshr.u64	d24,d20,#14		r	vadd.i64	q4,q14
+	vshr.u64	d25,d20,#18		r	veor	q15,q13					vshr.u64	d26,d20,#41		r	vadd.i64	q4,q15
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d20,#50
 	vsli.64	d25,d20,#46
 	vmov	d29,d20
 	vsli.64	d26,d20,#23
@@ -1514,10 +1140,8 @@ sha512_block_data_order_neon:
 	vrev64.8	,
 #endif
 	veor	d25,d24
-	vbsl	d29,d21,d22		@ Ch(e,f,g)
-	vshr.u64	d24,d16,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d23
+	vbsl	d29,d21,d22			vshr.u64	d24,d16,#28
+	veor	d26,d25				vadd.i64	d27,d29,d23
 	vshr.u64	d25,d16,#34
 	vsli.64	d24,d16,#36
 	vadd.i64	d27,d26
@@ -1528,22 +1152,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d16,#25
 	veor	d23,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d18,d17		@ Maj(a,b,c)
-	veor	d23,d26			@ Sigma0(a)
-	vadd.i64	d19,d27
+	vbsl	d30,d18,d17			veor	d23,d26				vadd.i64	d19,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d23,d30
-	vshr.u64	d24,d19,#14	@ 25
-#if 25<16
-	vld1.64	{d9},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d19,#14	#if 25<16
+	vld1.64	{d9},[r1]!	nnn#endif
 	vshr.u64	d25,d19,#18
 #if 25>0
-	vadd.i64	d23,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d23,d30			r#endif
 	vshr.u64	d26,d19,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d19,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d19,#50
 	vsli.64	d25,d19,#46
 	vmov	d29,d19
 	vsli.64	d26,d19,#23
@@ -1551,10 +1168,8 @@ sha512_block_data_order_neon:
 	vrev64.8	,
 #endif
 	veor	d25,d24
-	vbsl	d29,d20,d21		@ Ch(e,f,g)
-	vshr.u64	d24,d23,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d22
+	vbsl	d29,d20,d21			vshr.u64	d24,d23,#28
+	veor	d26,d25				vadd.i64	d27,d29,d22
 	vshr.u64	d25,d23,#34
 	vsli.64	d24,d23,#36
 	vadd.i64	d27,d26
@@ -1565,36 +1180,24 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d23,#25
 	veor	d22,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d17,d16		@ Maj(a,b,c)
-	veor	d22,d26			@ Sigma0(a)
-	vadd.i64	d18,d27
+	vbsl	d30,d17,d16			veor	d22,d26				vadd.i64	d18,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d22,d30
-	vshr.u64	q12,q4,#19
+		vshr.u64	q12,q4,#19
 	vshr.u64	q13,q4,#61
-	vadd.i64	d22,d30			@ h+=Maj from the past
-	vshr.u64	q15,q4,#6
+	vadd.i64	d22,d30			r	vshr.u64	q15,q4,#6
 	vsli.64	q12,q4,#45
-	vext.8	q14,q5,q6,#8	@ X[i+1]
-	vsli.64	q13,q4,#3
+	vext.8	q14,q5,q6,#8		vsli.64	q13,q4,#3
 	veor	q15,q12
 	vshr.u64	q12,q14,#1
-	veor	q15,q13				@ sigma1(X[i+14])
-	vshr.u64	q13,q14,#8
+	veor	q15,q13					vshr.u64	q13,q14,#8
 	vadd.i64	q5,q15
 	vshr.u64	q15,q14,#7
 	vsli.64	q12,q14,#63
 	vsli.64	q13,q14,#56
-	vext.8	q14,q1,q2,#8	@ X[i+9]
-	veor	q15,q12
-	vshr.u64	d24,d18,#14		@ from NEON_00_15
-	vadd.i64	q5,q14
-	vshr.u64	d25,d18,#18		@ from NEON_00_15
-	veor	q15,q13				@ sigma0(X[i+1])
-	vshr.u64	d26,d18,#41		@ from NEON_00_15
-	vadd.i64	q5,q15
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d18,#50
+	vext.8	q14,q1,q2,#8		veor	q15,q12
+	vshr.u64	d24,d18,#14		r	vadd.i64	q5,q14
+	vshr.u64	d25,d18,#18		r	veor	q15,q13					vshr.u64	d26,d18,#41		r	vadd.i64	q5,q15
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d18,#50
 	vsli.64	d25,d18,#46
 	vmov	d29,d18
 	vsli.64	d26,d18,#23
@@ -1602,10 +1205,8 @@ sha512_block_data_order_neon:
 	vrev64.8	,
 #endif
 	veor	d25,d24
-	vbsl	d29,d19,d20		@ Ch(e,f,g)
-	vshr.u64	d24,d22,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d21
+	vbsl	d29,d19,d20			vshr.u64	d24,d22,#28
+	veor	d26,d25				vadd.i64	d27,d29,d21
 	vshr.u64	d25,d22,#34
 	vsli.64	d24,d22,#36
 	vadd.i64	d27,d26
@@ -1616,22 +1217,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d22,#25
 	veor	d21,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d16,d23		@ Maj(a,b,c)
-	veor	d21,d26			@ Sigma0(a)
-	vadd.i64	d17,d27
+	vbsl	d30,d16,d23			veor	d21,d26				vadd.i64	d17,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d21,d30
-	vshr.u64	d24,d17,#14	@ 27
-#if 27<16
-	vld1.64	{d11},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d17,#14	#if 27<16
+	vld1.64	{d11},[r1]!	nnn#endif
 	vshr.u64	d25,d17,#18
 #if 27>0
-	vadd.i64	d21,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d21,d30			r#endif
 	vshr.u64	d26,d17,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d17,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d17,#50
 	vsli.64	d25,d17,#46
 	vmov	d29,d17
 	vsli.64	d26,d17,#23
@@ -1639,10 +1233,8 @@ sha512_block_data_order_neon:
 	vrev64.8	,
 #endif
 	veor	d25,d24
-	vbsl	d29,d18,d19		@ Ch(e,f,g)
-	vshr.u64	d24,d21,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d20
+	vbsl	d29,d18,d19			vshr.u64	d24,d21,#28
+	veor	d26,d25				vadd.i64	d27,d29,d20
 	vshr.u64	d25,d21,#34
 	vsli.64	d24,d21,#36
 	vadd.i64	d27,d26
@@ -1653,36 +1245,24 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d21,#25
 	veor	d20,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d23,d22		@ Maj(a,b,c)
-	veor	d20,d26			@ Sigma0(a)
-	vadd.i64	d16,d27
+	vbsl	d30,d23,d22			veor	d20,d26				vadd.i64	d16,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d20,d30
-	vshr.u64	q12,q5,#19
+		vshr.u64	q12,q5,#19
 	vshr.u64	q13,q5,#61
-	vadd.i64	d20,d30			@ h+=Maj from the past
-	vshr.u64	q15,q5,#6
+	vadd.i64	d20,d30			r	vshr.u64	q15,q5,#6
 	vsli.64	q12,q5,#45
-	vext.8	q14,q6,q7,#8	@ X[i+1]
-	vsli.64	q13,q5,#3
+	vext.8	q14,q6,q7,#8		vsli.64	q13,q5,#3
 	veor	q15,q12
 	vshr.u64	q12,q14,#1
-	veor	q15,q13				@ sigma1(X[i+14])
-	vshr.u64	q13,q14,#8
+	veor	q15,q13					vshr.u64	q13,q14,#8
 	vadd.i64	q6,q15
 	vshr.u64	q15,q14,#7
 	vsli.64	q12,q14,#63
 	vsli.64	q13,q14,#56
-	vext.8	q14,q2,q3,#8	@ X[i+9]
-	veor	q15,q12
-	vshr.u64	d24,d16,#14		@ from NEON_00_15
-	vadd.i64	q6,q14
-	vshr.u64	d25,d16,#18		@ from NEON_00_15
-	veor	q15,q13				@ sigma0(X[i+1])
-	vshr.u64	d26,d16,#41		@ from NEON_00_15
-	vadd.i64	q6,q15
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d16,#50
+	vext.8	q14,q2,q3,#8		veor	q15,q12
+	vshr.u64	d24,d16,#14		r	vadd.i64	q6,q14
+	vshr.u64	d25,d16,#18		r	veor	q15,q13					vshr.u64	d26,d16,#41		r	vadd.i64	q6,q15
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d16,#50
 	vsli.64	d25,d16,#46
 	vmov	d29,d16
 	vsli.64	d26,d16,#23
@@ -1690,10 +1270,8 @@ sha512_block_data_order_neon:
 	vrev64.8	,
 #endif
 	veor	d25,d24
-	vbsl	d29,d17,d18		@ Ch(e,f,g)
-	vshr.u64	d24,d20,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d19
+	vbsl	d29,d17,d18			vshr.u64	d24,d20,#28
+	veor	d26,d25				vadd.i64	d27,d29,d19
 	vshr.u64	d25,d20,#34
 	vsli.64	d24,d20,#36
 	vadd.i64	d27,d26
@@ -1704,22 +1282,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d20,#25
 	veor	d19,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d22,d21		@ Maj(a,b,c)
-	veor	d19,d26			@ Sigma0(a)
-	vadd.i64	d23,d27
+	vbsl	d30,d22,d21			veor	d19,d26				vadd.i64	d23,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d19,d30
-	vshr.u64	d24,d23,#14	@ 29
-#if 29<16
-	vld1.64	{d13},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d23,#14	#if 29<16
+	vld1.64	{d13},[r1]!	nnn#endif
 	vshr.u64	d25,d23,#18
 #if 29>0
-	vadd.i64	d19,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d19,d30			r#endif
 	vshr.u64	d26,d23,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d23,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d23,#50
 	vsli.64	d25,d23,#46
 	vmov	d29,d23
 	vsli.64	d26,d23,#23
@@ -1727,10 +1298,8 @@ sha512_block_data_order_neon:
 	vrev64.8	,
 #endif
 	veor	d25,d24
-	vbsl	d29,d16,d17		@ Ch(e,f,g)
-	vshr.u64	d24,d19,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d18
+	vbsl	d29,d16,d17			vshr.u64	d24,d19,#28
+	veor	d26,d25				vadd.i64	d27,d29,d18
 	vshr.u64	d25,d19,#34
 	vsli.64	d24,d19,#36
 	vadd.i64	d27,d26
@@ -1741,36 +1310,24 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d19,#25
 	veor	d18,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d21,d20		@ Maj(a,b,c)
-	veor	d18,d26			@ Sigma0(a)
-	vadd.i64	d22,d27
+	vbsl	d30,d21,d20			veor	d18,d26				vadd.i64	d22,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d18,d30
-	vshr.u64	q12,q6,#19
+		vshr.u64	q12,q6,#19
 	vshr.u64	q13,q6,#61
-	vadd.i64	d18,d30			@ h+=Maj from the past
-	vshr.u64	q15,q6,#6
+	vadd.i64	d18,d30			r	vshr.u64	q15,q6,#6
 	vsli.64	q12,q6,#45
-	vext.8	q14,q7,q0,#8	@ X[i+1]
-	vsli.64	q13,q6,#3
+	vext.8	q14,q7,q0,#8		vsli.64	q13,q6,#3
 	veor	q15,q12
 	vshr.u64	q12,q14,#1
-	veor	q15,q13				@ sigma1(X[i+14])
-	vshr.u64	q13,q14,#8
+	veor	q15,q13					vshr.u64	q13,q14,#8
 	vadd.i64	q7,q15
 	vshr.u64	q15,q14,#7
 	vsli.64	q12,q14,#63
 	vsli.64	q13,q14,#56
-	vext.8	q14,q3,q4,#8	@ X[i+9]
-	veor	q15,q12
-	vshr.u64	d24,d22,#14		@ from NEON_00_15
-	vadd.i64	q7,q14
-	vshr.u64	d25,d22,#18		@ from NEON_00_15
-	veor	q15,q13				@ sigma0(X[i+1])
-	vshr.u64	d26,d22,#41		@ from NEON_00_15
-	vadd.i64	q7,q15
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d22,#50
+	vext.8	q14,q3,q4,#8		veor	q15,q12
+	vshr.u64	d24,d22,#14		r	vadd.i64	q7,q14
+	vshr.u64	d25,d22,#18		r	veor	q15,q13					vshr.u64	d26,d22,#41		r	vadd.i64	q7,q15
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d22,#50
 	vsli.64	d25,d22,#46
 	vmov	d29,d22
 	vsli.64	d26,d22,#23
@@ -1778,10 +1335,8 @@ sha512_block_data_order_neon:
 	vrev64.8	,
 #endif
 	veor	d25,d24
-	vbsl	d29,d23,d16		@ Ch(e,f,g)
-	vshr.u64	d24,d18,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d17
+	vbsl	d29,d23,d16			vshr.u64	d24,d18,#28
+	veor	d26,d25				vadd.i64	d27,d29,d17
 	vshr.u64	d25,d18,#34
 	vsli.64	d24,d18,#36
 	vadd.i64	d27,d26
@@ -1792,22 +1347,15 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d18,#25
 	veor	d17,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d20,d19		@ Maj(a,b,c)
-	veor	d17,d26			@ Sigma0(a)
-	vadd.i64	d21,d27
+	vbsl	d30,d20,d19			veor	d17,d26				vadd.i64	d21,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d17,d30
-	vshr.u64	d24,d21,#14	@ 31
-#if 31<16
-	vld1.64	{d15},[r1]!	@ handles unaligned
-#endif
+		vshr.u64	d24,d21,#14	#if 31<16
+	vld1.64	{d15},[r1]!	nnn#endif
 	vshr.u64	d25,d21,#18
 #if 31>0
-	vadd.i64	d17,d30			@ h+=Maj from the past
-#endif
+	vadd.i64	d17,d30			r#endif
 	vshr.u64	d26,d21,#41
-	vld1.64	{d28},[r3,:64]!	@ K[i++]
-	vsli.64	d24,d21,#50
+	vld1.64	{d28},[r3,:64]!		vsli.64	d24,d21,#50
 	vsli.64	d25,d21,#46
 	vmov	d29,d21
 	vsli.64	d26,d21,#23
@@ -1815,10 +1363,8 @@ sha512_block_data_order_neon:
 	vrev64.8	,
 #endif
 	veor	d25,d24
-	vbsl	d29,d22,d23		@ Ch(e,f,g)
-	vshr.u64	d24,d17,#28
-	veor	d26,d25			@ Sigma1(e)
-	vadd.i64	d27,d29,d16
+	vbsl	d29,d22,d23			vshr.u64	d24,d17,#28
+	veor	d26,d25				vadd.i64	d27,d29,d16
 	vshr.u64	d25,d17,#34
 	vsli.64	d24,d17,#36
 	vadd.i64	d27,d26
@@ -1829,29 +1375,20 @@ sha512_block_data_order_neon:
 	vsli.64	d26,d17,#25
 	veor	d16,d24,d25
 	vadd.i64	d27,d28
-	vbsl	d30,d19,d18		@ Maj(a,b,c)
-	veor	d16,d26			@ Sigma0(a)
-	vadd.i64	d20,d27
+	vbsl	d30,d19,d18			veor	d16,d26				vadd.i64	d20,d27
 	vadd.i64	d30,d27
-	@ vadd.i64	d16,d30
-	bne	.L16_79_neon
+		bne	.L16_79_neon
 
-	vadd.i64	d16,d30		@ h+=Maj from the past
-	vldmia	r0,{d24,d25,d26,d27,d28,d29,d30,d31}	@ load context to temp
-	vadd.i64	q8,q12		@ vectorized accumulate
-	vadd.i64	q9,q13
+	vadd.i64	d16,d30		r	vldmia	r0,{d24,d25,d26,d27,d28,d29,d30,d31}	n	vadd.i64	q8,q12		r	vadd.i64	q9,q13
 	vadd.i64	q10,q14
 	vadd.i64	q11,q15
-	vstmia	r0,{d16,d17,d18,d19,d20,d21,d22,d23}	@ save context
-	teq	r1,r2
-	sub	r3,#640	@ rewind K512
-	bne	.Loop_neon
+	vstmia	r0,{d16,d17,d18,d19,d20,d21,d22,d23}	n	teq	r1,r2
+	sub	r3,#640	rn	bne	.Loop_neon
 
 	VFP_ABI_POP
-	bx	lr				@ .word	0xe12fff1e
-.size	sha512_block_data_order_neon,.-sha512_block_data_order_neon
+	bx	lr				r.size	sha512_block_data_order_neon,.-sha512_block_data_order_neon
 #endif
 .byte	83,72,65,53,49,50,32,98,108,111,99,107,32,116,114,97,110,115,102,111,114,109,32,102,111,114,32,65,82,77,118,52,47,78,69,79,78,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
 .align	2
 .align	2
-#endif  // !OPENSSL_NO_ASM && defined(OPENSSL_ARM) && defined(__ELF__)
+#endif  

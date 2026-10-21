@@ -1,23 +1,23 @@
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 1993-2008 Raven Software
-// Copyright(C) 2005-2014 Simon Howard
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// DESCRIPTION:
-//	Gamma correction LUT stuff.
-//	Functions to draw patches (by post) directly to screen.
-//	Functions to blit a block to the screen.
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include <stdio.h>
 #include <string.h>
@@ -41,35 +41,35 @@
 #include <png.h>
 #endif
 
-// TODO: There are separate RANGECHECK defines for different games, but this
-// is common code. Fix this.
+
+
 #define RANGECHECK
 
-// Blending table used for fuzzpatch, etc.
-// Only used in Heretic/Hexen
+
+
 
 byte *tinttable = NULL;
 
-// villsa [STRIFE] Blending table used for Strife
+
 byte *xlatab = NULL;
 
-// The screen buffer that the v_video.c code draws to.
+
 
 static byte *dest_screen = NULL;
 
 int dirtybox[4]; 
 
-// haleyjd 08/28/10: clipping callback function for patches.
-// This is needed for Chocolate Strife, which clips patches to the screen.
+
+
 static vpatchclipfunc_t patchclip_callback = NULL;
 
-//
-// V_MarkRect 
-// 
+
+
+
 void V_MarkRect(int x, int y, int width, int height) 
 { 
-    // If we are temporarily using an alternate screen, do not 
-    // affect the update box.
+    
+    
 
     if (dest_screen == I_VideoBuffer)
     {
@@ -79,9 +79,9 @@ void V_MarkRect(int x, int y, int width, int height)
 } 
  
 
-//
-// V_CopyRect 
-// 
+
+
+
 void V_CopyRect(int srcx, int srcy, byte *source,
                 int width, int height,
                 int destx, int desty)
@@ -116,25 +116,25 @@ void V_CopyRect(int srcx, int srcy, byte *source,
     } 
 } 
  
-//
-// V_SetPatchClipCallback
-//
-// haleyjd 08/28/10: Added for Strife support.
-// By calling this function, you can setup runtime error checking for patch 
-// clipping. Strife never caused errors by drawing patches partway off-screen.
-// Some versions of vanilla DOOM also behaved differently than the default
-// implementation, so this could possibly be extended to those as well for
-// accurate emulation.
-//
+
+
+
+
+
+
+
+
+
+
 void V_SetPatchClipCallback(vpatchclipfunc_t func)
 {
     patchclip_callback = func;
 }
 
-//
-// V_DrawPatch
-// Masks a column based masked pic to the screen. 
-//
+
+
+
+
 
 void V_DrawPatch(int x, int y, patch_t *patch)
 { 
@@ -149,7 +149,7 @@ void V_DrawPatch(int x, int y, patch_t *patch)
     y -= SHORT(patch->topoffset);
     x -= SHORT(patch->leftoffset);
 
-    // haleyjd 08/28/10: Strife needs silent error checking here.
+    
     if(patchclip_callback)
     {
         if(!patchclip_callback(patch, x, y))
@@ -177,7 +177,7 @@ void V_DrawPatch(int x, int y, patch_t *patch)
     {
         column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
 
-        // step through the posts in a column
+        
         while (column->topdelta != 0xff)
         {
             source = (byte *)column + 3;
@@ -194,11 +194,11 @@ void V_DrawPatch(int x, int y, patch_t *patch)
     }
 }
 
-//
-// V_DrawPatchFlipped
-// Masks a column based masked pic to the screen.
-// Flips horizontally, e.g. to mirror face.
-//
+
+
+
+
+
 
 void V_DrawPatchFlipped(int x, int y, patch_t *patch)
 {
@@ -213,7 +213,7 @@ void V_DrawPatchFlipped(int x, int y, patch_t *patch)
     y -= SHORT(patch->topoffset); 
     x -= SHORT(patch->leftoffset); 
 
-    // haleyjd 08/28/10: Strife needs silent error checking here.
+    
     if(patchclip_callback)
     {
         if(!patchclip_callback(patch, x, y))
@@ -241,7 +241,7 @@ void V_DrawPatchFlipped(int x, int y, patch_t *patch)
     {
         column = (column_t *)((byte *)patch + LONG(patch->columnofs[w-1-col]));
 
-        // step through the posts in a column
+        
         while (column->topdelta != 0xff )
         {
             source = (byte *)column + 3;
@@ -260,21 +260,21 @@ void V_DrawPatchFlipped(int x, int y, patch_t *patch)
 
 
 
-//
-// V_DrawPatchDirect
-// Draws directly to the screen on the pc. 
-//
+
+
+
+
 
 void V_DrawPatchDirect(int x, int y, patch_t *patch)
 {
     V_DrawPatch(x, y, patch); 
 } 
 
-//
-// V_DrawTLPatch
-//
-// Masks a column based translucent masked pic to the screen.
-//
+
+
+
+
+
 
 void V_DrawTLPatch(int x, int y, patch_t * patch)
 {
@@ -302,7 +302,7 @@ void V_DrawTLPatch(int x, int y, patch_t * patch)
     {
         column = (column_t *) ((byte *) patch + LONG(patch->columnofs[col]));
 
-        // step through the posts in a column
+        
 
         while (column->topdelta != 0xff)
         {
@@ -320,11 +320,11 @@ void V_DrawTLPatch(int x, int y, patch_t * patch)
     }
 }
 
-//
-// V_DrawXlaPatch
-//
-// villsa [STRIFE] Masks a column based translucent masked pic to the screen.
-//
+
+
+
+
+
 
 void V_DrawXlaPatch(int x, int y, patch_t * patch)
 {
@@ -350,7 +350,7 @@ void V_DrawXlaPatch(int x, int y, patch_t * patch)
     {
         column = (column_t *) ((byte *) patch + LONG(patch->columnofs[col]));
 
-        // step through the posts in a column
+        
 
         while(column->topdelta != 0xff)
         {
@@ -369,11 +369,11 @@ void V_DrawXlaPatch(int x, int y, patch_t * patch)
     }
 }
 
-//
-// V_DrawAltTLPatch
-//
-// Masks a column based translucent masked pic to the screen.
-//
+
+
+
+
+
 
 void V_DrawAltTLPatch(int x, int y, patch_t * patch)
 {
@@ -401,7 +401,7 @@ void V_DrawAltTLPatch(int x, int y, patch_t * patch)
     {
         column = (column_t *) ((byte *) patch + LONG(patch->columnofs[col]));
 
-        // step through the posts in a column
+        
 
         while (column->topdelta != 0xff)
         {
@@ -419,11 +419,11 @@ void V_DrawAltTLPatch(int x, int y, patch_t * patch)
     }
 }
 
-//
-// V_DrawShadowedPatch
-//
-// Masks a column based masked pic to the screen.
-//
+
+
+
+
+
 
 void V_DrawShadowedPatch(int x, int y, patch_t *patch)
 {
@@ -453,7 +453,7 @@ void V_DrawShadowedPatch(int x, int y, patch_t *patch)
     {
         column = (column_t *) ((byte *) patch + LONG(patch->columnofs[col]));
 
-        // step through the posts in a column
+        
 
         while (column->topdelta != 0xff)
         {
@@ -475,30 +475,30 @@ void V_DrawShadowedPatch(int x, int y, patch_t *patch)
     }
 }
 
-//
-// Load tint table from TINTTAB lump.
-//
+
+
+
 
 void V_LoadTintTable(void)
 {
     tinttable = W_CacheLumpName("TINTTAB", PU_STATIC);
 }
 
-//
-// V_LoadXlaTable
-//
-// villsa [STRIFE] Load xla table from XLATAB lump.
-//
+
+
+
+
+
 
 void V_LoadXlaTable(void)
 {
     xlatab = W_CacheLumpName("XLATAB", PU_STATIC);
 }
 
-//
-// V_DrawBlock
-// Draw a linear block of pixels into the view buffer.
-//
+
+
+
+
 
 void V_DrawBlock(int x, int y, int width, int height, byte *src) 
 { 
@@ -581,43 +581,43 @@ void V_DrawBox(int x, int y, int w, int h, int c)
     V_DrawVertLine(x+w-1, y, h, c);
 }
 
-//
-// Draw a "raw" screen (lump containing raw data to blit directly
-// to the screen)
-//
+
+
+
+
  
 void V_DrawRawScreen(byte *raw)
 {
     memcpy(dest_screen, raw, SCREENWIDTH * SCREENHEIGHT);
 }
 
-//
-// V_Init
-// 
+
+
+
 void V_Init (void) 
 { 
-    // no-op!
-    // There used to be separate screens that could be drawn to; these are
-    // now handled in the upper layers.
+    
+    
+    
 }
 
-// Set the buffer that the code draws to.
+
 
 void V_UseBuffer(byte *buffer)
 {
     dest_screen = buffer;
 }
 
-// Restore screen buffer to the i_video screen buffer.
+
 
 void V_RestoreBuffer(void)
 {
     dest_screen = I_VideoBuffer;
 }
 
-//
-// SCREEN SHOTS
-//
+
+
+
 
 typedef struct
 {
@@ -642,13 +642,13 @@ typedef struct
     unsigned short	palette_type;
     
     char		filler[58];
-    unsigned char	data;		// unbounded
+    unsigned char	data;		
 } PACKEDATTR pcx_t;
 
 
-//
-// WritePCXfile
-//
+
+
+
 
 void WritePCXfile(char *filename, byte *data,
                   int width, int height,
@@ -661,10 +661,10 @@ void WritePCXfile(char *filename, byte *data,
 	
     pcx = Z_Malloc (width*height*2+1000, PU_STATIC, NULL);
 
-    pcx->manufacturer = 0x0a;		// PCX id
-    pcx->version = 5;			// 256 color
-    pcx->encoding = 1;			// uncompressed
-    pcx->bits_per_pixel = 8;		// 256 color
+    pcx->manufacturer = 0x0a;		
+    pcx->version = 5;			
+    pcx->encoding = 1;			
+    pcx->bits_per_pixel = 8;		
     pcx->xmin = 0;
     pcx->ymin = 0;
     pcx->xmax = SHORT(width-1);
@@ -672,12 +672,12 @@ void WritePCXfile(char *filename, byte *data,
     pcx->hres = SHORT(width);
     pcx->vres = SHORT(height);
     memset (pcx->palette,0,sizeof(pcx->palette));
-    pcx->color_planes = 1;		// chunky image
+    pcx->color_planes = 1;		
     pcx->bytes_per_line = SHORT(width);
-    pcx->palette_type = SHORT(2);	// not a grey scale
+    pcx->palette_type = SHORT(2);	
     memset (pcx->filler,0,sizeof(pcx->filler));
 
-    // pack the image
+    
     pack = &pcx->data;
 	
     for (i=0 ; i<width*height ; i++)
@@ -691,12 +691,12 @@ void WritePCXfile(char *filename, byte *data,
 	}
     }
     
-    // write the palette
-    *pack++ = 0x0c;	// palette ID byte
+    
+    *pack++ = 0x0c;	
     for (i=0 ; i<768 ; i++)
 	*pack++ = *palette++;
     
-    // write output file
+    
     length = pack - (byte *)pcx;
     M_WriteFile (filename, pcx, length);
 
@@ -704,9 +704,9 @@ void WritePCXfile(char *filename, byte *data,
 }
 
 #ifdef HAVE_LIBPNG
-//
-// WritePNGfile
-//
+
+
+
 
 static void error_fn(png_structp p, png_const_charp s)
 {
@@ -784,17 +784,17 @@ void WritePNGfile(char *filename, byte *data,
 }
 #endif
 
-//
-// V_ScreenShot
-//
+
+
+
 
 void V_ScreenShot(char *format)
 {
     int i;
-    char lbmname[16]; // haleyjd 20110213: BUG FIX - 12 is too small!
+    char lbmname[16]; 
     char *ext;
     
-    // find a file name to save it to
+    
 
 #ifdef HAVE_LIBPNG
     extern int png_screenshots;
@@ -814,7 +814,7 @@ void V_ScreenShot(char *format)
 
         if (!M_FileExists(lbmname))
         {
-            break;      // file doesn't exist
+            break;      
         }
     }
 
@@ -833,7 +833,7 @@ void V_ScreenShot(char *format)
     else
 #endif
     {
-    // save the pcx file
+    
     WritePCXfile(lbmname, I_VideoBuffer,
                  SCREENWIDTH, SCREENHEIGHT,
                  W_CacheLumpName (DEH_String("PLAYPAL"), PU_CACHE));
@@ -852,8 +852,8 @@ void V_DrawMouseSpeedBox(int speed)
     int redline_x;
     int linelen;
 
-    // Get palette indices for colors for widget. These depend on the
-    // palette of the game being played.
+    
+    
 
     bgcolor = I_GetPaletteIndex(0x77, 0x77, 0x77);
     bordercolor = I_GetPaletteIndex(0x55, 0x55, 0x55);
@@ -862,15 +862,15 @@ void V_DrawMouseSpeedBox(int speed)
     yellow = I_GetPaletteIndex(0xff, 0xff, 0x00);
     white = I_GetPaletteIndex(0xff, 0xff, 0xff);
 
-    // If the mouse is turned off or acceleration is turned off, don't
-    // draw the box at all.
+    
+    
 
     if (!usemouse || fabs(mouse_acceleration - 1) < 0.01)
     {
         return;
     }
 
-    // Calculate box position
+    
 
     box_x = SCREENWIDTH - MOUSE_SPEED_BOX_WIDTH - 10;
     box_y = 15;
@@ -880,12 +880,12 @@ void V_DrawMouseSpeedBox(int speed)
     V_DrawBox(box_x, box_y,
               MOUSE_SPEED_BOX_WIDTH, MOUSE_SPEED_BOX_HEIGHT, bordercolor);
 
-    // Calculate the position of the red line.  This is 1/3 of the way
-    // along the box.
+    
+    
 
     redline_x = MOUSE_SPEED_BOX_WIDTH / 3;
 
-    // Undo acceleration and get back the original mouse speed
+    
 
     if (speed < mouse_threshold)
     {
@@ -898,11 +898,11 @@ void V_DrawMouseSpeedBox(int speed)
         original_speed += mouse_threshold;
     }
 
-    // Calculate line length
+    
 
     linelen = (original_speed * redline_x) / mouse_threshold;
 
-    // Draw horizontal "thermometer" 
+    
 
     if (linelen > MOUSE_SPEED_BOX_WIDTH - 1)
     {
@@ -924,7 +924,7 @@ void V_DrawMouseSpeedBox(int speed)
                         linelen - redline_x, yellow);
     }
 
-    // Draw red line
+    
 
     V_DrawVertLine(box_x + redline_x, box_y + 1,
                  MOUSE_SPEED_BOX_HEIGHT - 2, red);

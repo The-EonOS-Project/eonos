@@ -1,19 +1,19 @@
-//
-// Copyright(C) 2005-2014 Simon Howard
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-//
-// Parses "Misc" sections in dehacked files
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #ifndef DEH_MISC_H
 #define DEH_MISC_H
@@ -58,7 +58,7 @@ extern int deh_species_infighting;
 
 #else
 
-// If dehacked is disabled, hard coded values
+
 
 #define deh_initial_health      DEH_DEFAULT_INITIAL_HEALTH
 #define deh_initial_bullets     DEH_DEFAULT_INITIAL_BULLETS
@@ -79,5 +79,5 @@ extern int deh_species_infighting;
 
 #endif
 
-#endif /* #ifndef DEH_MISC_H */
+#endif 
 

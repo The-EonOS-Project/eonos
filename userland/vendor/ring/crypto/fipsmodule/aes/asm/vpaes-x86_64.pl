@@ -56,7 +56,7 @@
 # (**)	"Core 2" refers to initial 65nm design, a.k.a. Conroe.
 #
 # (***)	Less impressive improvement on Core 2 and Atom is due to slow
-#	pshufb,	yet it's respectable +36%/62% improvement on Core 2
+#	pshufb,	yet it's respectable +36 
 #	(as implied, over "hyper-threading-safe" code path).
 #
 #						<appro@openssl.org>
@@ -83,101 +83,101 @@ $code.=<<___;
 ##
 ##  _aes_encrypt_core
 ##
-##  AES-encrypt %xmm0.
+##  AES-encrypt 
 ##
 ##  Inputs:
-##     %xmm0 = input
-##     %xmm9-%xmm15 as in _vpaes_preheat
-##    (%rdx) = scheduled keys
+##     
+##     
+##    ( 
 ##
-##  Output in %xmm0
-##  Clobbers  %xmm1-%xmm5, %r9, %r10, %r11, %rax
-##  Preserves %xmm6 - %xmm8 so you get some local vectors
+##  Output in 
+##  Clobbers  
+##  Preserves 
 ##
 ##
 .type	_vpaes_encrypt_core,\@abi-omnipotent
 .align 16
 _vpaes_encrypt_core:
 .cfi_startproc
-	mov	%rdx,	%r9
-	mov	\$16,	%r11
-	mov	240(%rdx),%eax
-	movdqa	%xmm9,	%xmm1
-	movdqa	.Lk_ipt(%rip), %xmm2	# iptlo
-	pandn	%xmm0,	%xmm1
-	movdqu	(%r9),	%xmm5		# round0 key
-	psrld	\$4,	%xmm1
-	pand	%xmm9,	%xmm0
-	pshufb	%xmm0,	%xmm2
-	movdqa	.Lk_ipt+16(%rip), %xmm0	# ipthi
-	pshufb	%xmm1,	%xmm0
-	pxor	%xmm5,	%xmm2
-	add	\$16,	%r9
-	pxor	%xmm2,	%xmm0
-	lea	.Lk_mc_backward(%rip),%r10
+	mov	
+	mov	\$16,	
+	mov	240( 
+	movdqa	
+	movdqa	.Lk_ipt( 
+	pandn	
+	movdqu	( 
+	psrld	\$4,	
+	pand	
+	pshufb	
+	movdqa	.Lk_ipt+16( 
+	pshufb	
+	pxor	
+	add	\$16,	
+	pxor	
+	lea	.Lk_mc_backward( 
 	jmp	.Lenc_entry
 
 .align 16
 .Lenc_loop:
 	# middle of middle round
-	movdqa  %xmm13,	%xmm4	# 4 : sb1u
-	movdqa  %xmm12,	%xmm0	# 0 : sb1t
-	pshufb  %xmm2,	%xmm4	# 4 = sb1u
-	pshufb  %xmm3,	%xmm0	# 0 = sb1t
-	pxor	%xmm5,	%xmm4	# 4 = sb1u + k
-	movdqa  %xmm15,	%xmm5	# 4 : sb2u
-	pxor	%xmm4,	%xmm0	# 0 = A
-	movdqa	-0x40(%r11,%r10), %xmm1		# .Lk_mc_forward[]
-	pshufb	%xmm2,	%xmm5	# 4 = sb2u
-	movdqa	(%r11,%r10), %xmm4		# .Lk_mc_backward[]
-	movdqa	%xmm14, %xmm2	# 2 : sb2t
-	pshufb	%xmm3,  %xmm2	# 2 = sb2t
-	movdqa	%xmm0,  %xmm3	# 3 = A
-	pxor	%xmm5,	%xmm2	# 2 = 2A
-	pshufb  %xmm1,  %xmm0	# 0 = B
-	add	\$16,	%r9	# next key
-	pxor	%xmm2,  %xmm0	# 0 = 2A+B
-	pshufb	%xmm4,	%xmm3	# 3 = D
-	add	\$16,	%r11	# next mc
-	pxor	%xmm0,	%xmm3	# 3 = 2A+B+D
-	pshufb  %xmm1,	%xmm0	# 0 = 2B+C
-	and	\$0x30,	%r11	# ... mod 4
-	sub	\$1,%rax	# nr--
-	pxor	%xmm3,	%xmm0	# 0 = 2A+3B+C+D
+	movdqa  
+	movdqa  
+	pshufb  
+	pshufb  
+	pxor	
+	movdqa  
+	pxor	
+	movdqa	-0x40( 
+	pshufb	
+	movdqa	( 
+	movdqa	
+	pshufb	
+	movdqa	
+	pxor	
+	pshufb  
+	add	\$16,	
+	pxor	
+	pshufb	
+	add	\$16,	
+	pxor	
+	pshufb  
+	and	\$0x30,	
+	sub	\$1, 
+	pxor	
 
 .Lenc_entry:
 	# top of round
-	movdqa  %xmm9, 	%xmm1	# 1 : i
-	movdqa	%xmm11, %xmm5	# 2 : a/k
-	pandn	%xmm0, 	%xmm1	# 1 = i<<4
-	psrld	\$4,   	%xmm1   # 1 = i
-	pand	%xmm9, 	%xmm0   # 0 = k
-	pshufb  %xmm0,  %xmm5	# 2 = a/k
-	movdqa	%xmm10,	%xmm3  	# 3 : 1/i
-	pxor	%xmm1,	%xmm0	# 0 = j
-	pshufb  %xmm1, 	%xmm3  	# 3 = 1/i
-	movdqa	%xmm10,	%xmm4  	# 4 : 1/j
-	pxor	%xmm5, 	%xmm3  	# 3 = iak = 1/i + a/k
-	pshufb	%xmm0, 	%xmm4  	# 4 = 1/j
-	movdqa	%xmm10,	%xmm2  	# 2 : 1/iak
-	pxor	%xmm5, 	%xmm4  	# 4 = jak = 1/j + a/k
-	pshufb  %xmm3,	%xmm2  	# 2 = 1/iak
-	movdqa	%xmm10, %xmm3   # 3 : 1/jak
-	pxor	%xmm0, 	%xmm2  	# 2 = io
-	pshufb  %xmm4,  %xmm3   # 3 = 1/jak
-	movdqu	(%r9),	%xmm5
-	pxor	%xmm1,  %xmm3   # 3 = jo
+	movdqa  
+	movdqa	
+	pandn	
+	psrld	\$4,   	
+	pand	
+	pshufb  
+	movdqa	
+	pxor	
+	pshufb  
+	movdqa	
+	pxor	
+	pshufb	
+	movdqa	
+	pxor	
+	pshufb  
+	movdqa	
+	pxor	
+	pshufb  
+	movdqu	( 
+	pxor	
 	jnz	.Lenc_loop
 
 	# middle of last round
-	movdqa	-0x60(%r10), %xmm4	# 3 : sbou	.Lk_sbo
-	movdqa	-0x50(%r10), %xmm0	# 0 : sbot	.Lk_sbo+16
-	pshufb  %xmm2,  %xmm4	# 4 = sbou
-	pxor	%xmm5,  %xmm4	# 4 = sb1u + k
-	pshufb  %xmm3,	%xmm0	# 0 = sb1t
-	movdqa	0x40(%r11,%r10), %xmm1		# .Lk_sr[]
-	pxor	%xmm4,	%xmm0	# 0 = A
-	pshufb	%xmm1,	%xmm0
+	movdqa	-0x60( 
+	movdqa	-0x50( 
+	pshufb  
+	pxor	
+	pshufb  
+	movdqa	0x40( 
+	pxor	
+	pshufb	
 	ret
 .cfi_endproc
 .size	_vpaes_encrypt_core,.-_vpaes_encrypt_core
@@ -185,29 +185,29 @@ _vpaes_encrypt_core:
 ##
 ##  _aes_encrypt_core_2x
 ##
-##  AES-encrypt %xmm0 and %xmm6 in parallel.
+##  AES-encrypt 
 ##
 ##  Inputs:
-##     %xmm0 and %xmm6 = input
-##     %xmm9 and %xmm10 as in _vpaes_preheat
-##    (%rdx) = scheduled keys
+##     
+##     
+##    ( 
 ##
-##  Output in %xmm0 and %xmm6
-##  Clobbers  %xmm1-%xmm5, %xmm7, %xmm8, %xmm11-%xmm13, %r9, %r10, %r11, %rax
-##  Preserves %xmm14 and %xmm15
+##  Output in 
+##  Clobbers  
+##  Preserves 
 ##
 ##  This function stitches two parallel instances of _vpaes_encrypt_core. x86_64
 ##  provides 16 XMM registers. _vpaes_encrypt_core computes over six registers
-##  (%xmm0-%xmm5) and additionally uses seven registers with preloaded constants
-##  from _vpaes_preheat (%xmm9-%xmm15). This does not quite fit two instances,
-##  so we spill some of %xmm9 through %xmm15 back to memory. We keep %xmm9 and
-##  %xmm10 in registers as these values are used several times in a row. The
+##  ( 
+##  from _vpaes_preheat ( 
+##  so we spill some of 
+##  
 ##  remainder are read once per round and are spilled to memory. This leaves two
 ##  registers preserved for the caller.
 ##
-##  Thus, of the two _vpaes_encrypt_core instances, the first uses (%xmm0-%xmm5)
-##  as before. The second uses %xmm6-%xmm8,%xmm11-%xmm13. (Add 6 to %xmm2 and
-##  below. Add 8 to %xmm3 and up.) Instructions in the second instance are
+##  Thus, of the two _vpaes_encrypt_core instances, the first uses ( 
+##  as before. The second uses 
+##  below. Add 8 to 
 ##  indented by one space.
 ##
 ##
@@ -215,144 +215,144 @@ _vpaes_encrypt_core:
 .align 16
 _vpaes_encrypt_core_2x:
 .cfi_startproc
-	mov	%rdx,	%r9
-	mov	\$16,	%r11
-	mov	240(%rdx),%eax
-	movdqa	%xmm9,	%xmm1
-	 movdqa	%xmm9,	%xmm7
-	movdqa	.Lk_ipt(%rip), %xmm2	# iptlo
-	 movdqa	%xmm2,	%xmm8
-	pandn	%xmm0,	%xmm1
-	 pandn	%xmm6,	%xmm7
-	movdqu	(%r9),	%xmm5		# round0 key
-	 # Also use %xmm5 in the second instance.
-	psrld	\$4,	%xmm1
-	 psrld	\$4,	%xmm7
-	pand	%xmm9,	%xmm0
-	 pand	%xmm9,	%xmm6
-	pshufb	%xmm0,	%xmm2
-	 pshufb	%xmm6,	%xmm8
-	movdqa	.Lk_ipt+16(%rip), %xmm0	# ipthi
-	 movdqa	%xmm0,	%xmm6
-	pshufb	%xmm1,	%xmm0
-	 pshufb	%xmm7,	%xmm6
-	pxor	%xmm5,	%xmm2
-	 pxor	%xmm5,	%xmm8
-	add	\$16,	%r9
-	pxor	%xmm2,	%xmm0
-	 pxor	%xmm8,	%xmm6
-	lea	.Lk_mc_backward(%rip),%r10
+	mov	
+	mov	\$16,	
+	mov	240( 
+	movdqa	
+	 movdqa	
+	movdqa	.Lk_ipt( 
+	 movdqa	
+	pandn	
+	 pandn	
+	movdqu	( 
+	 # Also use 
+	psrld	\$4,	
+	 psrld	\$4,	
+	pand	
+	 pand	
+	pshufb	
+	 pshufb	
+	movdqa	.Lk_ipt+16( 
+	 movdqa	
+	pshufb	
+	 pshufb	
+	pxor	
+	 pxor	
+	add	\$16,	
+	pxor	
+	 pxor	
+	lea	.Lk_mc_backward( 
 	jmp	.Lenc2x_entry
 
 .align 16
 .Lenc2x_loop:
 	# middle of middle round
-	movdqa  .Lk_sb1(%rip),	%xmm4		# 4 : sb1u
-	movdqa  .Lk_sb1+16(%rip),%xmm0		# 0 : sb1t
-	 movdqa	%xmm4,	%xmm12
-	 movdqa	%xmm0,	%xmm6
-	pshufb  %xmm2,	%xmm4			# 4 = sb1u
-	 pshufb	%xmm8,	%xmm12
-	pshufb  %xmm3,	%xmm0			# 0 = sb1t
-	 pshufb	%xmm11,	%xmm6
-	pxor	%xmm5,	%xmm4			# 4 = sb1u + k
-	 pxor	%xmm5,	%xmm12
-	movdqa  .Lk_sb2(%rip),	%xmm5		# 4 : sb2u
-	 movdqa	%xmm5,	%xmm13
-	pxor	%xmm4,	%xmm0			# 0 = A
-	 pxor	%xmm12,	%xmm6
-	movdqa	-0x40(%r11,%r10), %xmm1		# .Lk_mc_forward[]
-	 # Also use %xmm1 in the second instance.
-	pshufb	%xmm2,	%xmm5			# 4 = sb2u
-	 pshufb	%xmm8,	%xmm13
-	movdqa	(%r11,%r10), %xmm4		# .Lk_mc_backward[]
-	 # Also use %xmm4 in the second instance.
-	movdqa	.Lk_sb2+16(%rip), %xmm2		# 2 : sb2t
-	 movdqa	%xmm2,	%xmm8
-	pshufb	%xmm3,  %xmm2			# 2 = sb2t
-	 pshufb	%xmm11,	%xmm8
-	movdqa	%xmm0,  %xmm3			# 3 = A
-	 movdqa	%xmm6,	%xmm11
-	pxor	%xmm5,	%xmm2			# 2 = 2A
-	 pxor	%xmm13,	%xmm8
-	pshufb  %xmm1,  %xmm0			# 0 = B
-	 pshufb	%xmm1,	%xmm6
-	add	\$16,	%r9			# next key
-	pxor	%xmm2,  %xmm0			# 0 = 2A+B
-	 pxor	%xmm8,	%xmm6
-	pshufb	%xmm4,	%xmm3			# 3 = D
-	 pshufb	%xmm4,	%xmm11
-	add	\$16,	%r11			# next mc
-	pxor	%xmm0,	%xmm3			# 3 = 2A+B+D
-	 pxor	%xmm6,	%xmm11
-	pshufb  %xmm1,	%xmm0			# 0 = 2B+C
-	 pshufb	%xmm1,	%xmm6
-	and	\$0x30,	%r11			# ... mod 4
-	sub	\$1,%rax			# nr--
-	pxor	%xmm3,	%xmm0			# 0 = 2A+3B+C+D
-	 pxor	%xmm11,	%xmm6
+	movdqa  .Lk_sb1( 
+	movdqa  .Lk_sb1+16( 
+	 movdqa	
+	 movdqa	
+	pshufb  
+	 pshufb	
+	pshufb  
+	 pshufb	
+	pxor	
+	 pxor	
+	movdqa  .Lk_sb2( 
+	 movdqa	
+	pxor	
+	 pxor	
+	movdqa	-0x40( 
+	 # Also use 
+	pshufb	
+	 pshufb	
+	movdqa	( 
+	 # Also use 
+	movdqa	.Lk_sb2+16( 
+	 movdqa	
+	pshufb	
+	 pshufb	
+	movdqa	
+	 movdqa	
+	pxor	
+	 pxor	
+	pshufb  
+	 pshufb	
+	add	\$16,	
+	pxor	
+	 pxor	
+	pshufb	
+	 pshufb	
+	add	\$16,	
+	pxor	
+	 pxor	
+	pshufb  
+	 pshufb	
+	and	\$0x30,	
+	sub	\$1, 
+	pxor	
+	 pxor	
 
 .Lenc2x_entry:
 	# top of round
-	movdqa  %xmm9, 	%xmm1	# 1 : i
-	 movdqa	%xmm9,	%xmm7
-	movdqa	.Lk_inv+16(%rip), %xmm5	# 2 : a/k
-	 movdqa	%xmm5,	%xmm13
-	pandn	%xmm0, 	%xmm1	# 1 = i<<4
-	 pandn	%xmm6,	%xmm7
-	psrld	\$4,   	%xmm1   # 1 = i
-	 psrld	\$4,	%xmm7
-	pand	%xmm9, 	%xmm0   # 0 = k
-	 pand	%xmm9,	%xmm6
-	pshufb  %xmm0,  %xmm5	# 2 = a/k
-	 pshufb	%xmm6,	%xmm13
-	movdqa	%xmm10,	%xmm3  	# 3 : 1/i
-	 movdqa	%xmm10,	%xmm11
-	pxor	%xmm1,	%xmm0	# 0 = j
-	 pxor	%xmm7,	%xmm6
-	pshufb  %xmm1, 	%xmm3  	# 3 = 1/i
-	 pshufb	%xmm7,	%xmm11
-	movdqa	%xmm10,	%xmm4  	# 4 : 1/j
-	 movdqa	%xmm10,	%xmm12
-	pxor	%xmm5, 	%xmm3  	# 3 = iak = 1/i + a/k
-	 pxor	%xmm13,	%xmm11
-	pshufb	%xmm0, 	%xmm4  	# 4 = 1/j
-	 pshufb	%xmm6,	%xmm12
-	movdqa	%xmm10,	%xmm2  	# 2 : 1/iak
-	 movdqa	%xmm10,	%xmm8
-	pxor	%xmm5, 	%xmm4  	# 4 = jak = 1/j + a/k
-	 pxor	%xmm13,	%xmm12
-	pshufb  %xmm3,	%xmm2  	# 2 = 1/iak
-	 pshufb	%xmm11,	%xmm8
-	movdqa	%xmm10, %xmm3   # 3 : 1/jak
-	 movdqa	%xmm10,	%xmm11
-	pxor	%xmm0, 	%xmm2  	# 2 = io
-	 pxor	%xmm6,	%xmm8
-	pshufb  %xmm4,  %xmm3   # 3 = 1/jak
-	 pshufb	%xmm12,	%xmm11
-	movdqu	(%r9),	%xmm5
-	 # Also use %xmm5 in the second instance.
-	pxor	%xmm1,  %xmm3   # 3 = jo
-	 pxor	%xmm7,	%xmm11
+	movdqa  
+	 movdqa	
+	movdqa	.Lk_inv+16( 
+	 movdqa	
+	pandn	
+	 pandn	
+	psrld	\$4,   	
+	 psrld	\$4,	
+	pand	
+	 pand	
+	pshufb  
+	 pshufb	
+	movdqa	
+	 movdqa	
+	pxor	
+	 pxor	
+	pshufb  
+	 pshufb	
+	movdqa	
+	 movdqa	
+	pxor	
+	 pxor	
+	pshufb	
+	 pshufb	
+	movdqa	
+	 movdqa	
+	pxor	
+	 pxor	
+	pshufb  
+	 pshufb	
+	movdqa	
+	 movdqa	
+	pxor	
+	 pxor	
+	pshufb  
+	 pshufb	
+	movdqu	( 
+	 # Also use 
+	pxor	
+	 pxor	
 	jnz	.Lenc2x_loop
 
 	# middle of last round
-	movdqa	-0x60(%r10), %xmm4	# 3 : sbou	.Lk_sbo
-	movdqa	-0x50(%r10), %xmm0	# 0 : sbot	.Lk_sbo+16
-	 movdqa	%xmm4,	%xmm12
-	 movdqa	%xmm0,	%xmm6
-	pshufb  %xmm2,  %xmm4	# 4 = sbou
-	 pshufb	%xmm8,	%xmm12
-	pxor	%xmm5,  %xmm4	# 4 = sb1u + k
-	 pxor	%xmm5,	%xmm12
-	pshufb  %xmm3,	%xmm0	# 0 = sb1t
-	 pshufb	%xmm11,	%xmm6
-	movdqa	0x40(%r11,%r10), %xmm1		# .Lk_sr[]
-	 # Also use %xmm1 in the second instance.
-	pxor	%xmm4,	%xmm0	# 0 = A
-	 pxor	%xmm12,	%xmm6
-	pshufb	%xmm1,	%xmm0
-	 pshufb	%xmm1,	%xmm6
+	movdqa	-0x60( 
+	movdqa	-0x50( 
+	 movdqa	
+	 movdqa	
+	pshufb  
+	 pshufb	
+	pxor	
+	 pxor	
+	pshufb  
+	 pshufb	
+	movdqa	0x40( 
+	 # Also use 
+	pxor	
+	 pxor	
+	pshufb	
+	 pshufb	
 	ret
 .cfi_endproc
 .size	_vpaes_encrypt_core_2x,.-_vpaes_encrypt_core_2x
@@ -372,22 +372,22 @@ _vpaes_schedule_core:
 	# rcx = direction.  0=encrypt, 1=decrypt
 
 	call	_vpaes_preheat		# load the tables
-	movdqa	.Lk_rcon(%rip), %xmm8	# load rcon
-	movdqu	(%rdi),	%xmm0		# load key (unaligned)
+	movdqa	.Lk_rcon( 
+	movdqu	( 
 
 	# input transform
-	movdqa	%xmm0,	%xmm3
-	lea	.Lk_ipt(%rip), %r11
+	movdqa	
+	lea	.Lk_ipt( 
 	call	_vpaes_schedule_transform
-	movdqa	%xmm0,	%xmm7
+	movdqa	
 
-	lea	.Lk_sr(%rip),%r10
+	lea	.Lk_sr( 
 
 	# encrypting, output zeroth round key after transform
-	movdqu	%xmm0,	(%rdx)
+	movdqu	
 
 .Lschedule_go:
-	cmp	\$192,	%esi
+	cmp	\$192,	
 	ja	.Lschedule_256
 	# 192-bit key support was removed.
 	# 128: fall though
@@ -401,11 +401,11 @@ _vpaes_schedule_core:
 ##  are accomplished by the subroutines.
 ##
 .Lschedule_128:
-	mov	\$10, %esi
+	mov	\$10, 
 
 .Loop_schedule_128:
 	call 	_vpaes_schedule_round
-	dec	%rsi
+	dec	
 	jz 	.Lschedule_mangle_last
 	call	_vpaes_schedule_mangle	# write output
 	jmp 	.Loop_schedule_128
@@ -417,7 +417,7 @@ _vpaes_schedule_core:
 ##
 ##  The structure here is very similar to the 128-bit
 ##  schedule, but with an additional "low side" in
-##  %xmm6.  The low side's rounds are the same as the
+##  
 ##  high side's, except no rcon and no rotation.
 ##
 .align	16
@@ -918,78 +918,78 @@ $code.=<<___;
 .type	se_handler,\@abi-omnipotent
 .align	16
 se_handler:
-	push	%rsi
-	push	%rdi
-	push	%rbx
-	push	%rbp
-	push	%r12
-	push	%r13
-	push	%r14
-	push	%r15
+	push	
+	push	
+	push	
+	push	
+	push	
+	push	
+	push	
+	push	
 	pushfq
-	sub	\$64,%rsp
+	sub	\$64, 
 
-	mov	120($context),%rax	# pull context->Rax
-	mov	248($context),%rbx	# pull context->Rip
+	mov	120($context), 
+	mov	248($context), 
 
-	mov	8($disp),%rsi		# disp->ImageBase
-	mov	56($disp),%r11		# disp->HandlerData
+	mov	8($disp), 
+	mov	56($disp), 
 
-	mov	0(%r11),%r10d		# HandlerData[0]
-	lea	(%rsi,%r10),%r10	# prologue label
-	cmp	%r10,%rbx		# context->Rip<prologue label
+	mov	0( 
+	lea	( 
+	cmp	
 	jb	.Lin_prologue
 
-	mov	152($context),%rax	# pull context->Rsp
+	mov	152($context), 
 
-	mov	4(%r11),%r10d		# HandlerData[1]
-	lea	(%rsi,%r10),%r10	# epilogue label
-	cmp	%r10,%rbx		# context->Rip>=epilogue label
+	mov	4( 
+	lea	( 
+	cmp	
 	jae	.Lin_prologue
 
-	lea	16(%rax),%rsi		# %xmm save area
-	lea	512($context),%rdi	# &context.Xmm6
-	mov	\$20,%ecx		# 10*sizeof(%xmm0)/sizeof(%rax)
+	lea	16( 
+	lea	512($context), 
+	mov	\$20, 
 	.long	0xa548f3fc		# cld; rep movsq
-	lea	0xb8(%rax),%rax		# adjust stack pointer
+	lea	0xb8( 
 
 .Lin_prologue:
-	mov	8(%rax),%rdi
-	mov	16(%rax),%rsi
-	mov	%rax,152($context)	# restore context->Rsp
-	mov	%rsi,168($context)	# restore context->Rsi
-	mov	%rdi,176($context)	# restore context->Rdi
+	mov	8( 
+	mov	16( 
+	mov	
+	mov	
+	mov	
 
-	mov	40($disp),%rdi		# disp->ContextRecord
-	mov	$context,%rsi		# context
-	mov	\$`1232/8`,%ecx		# sizeof(CONTEXT)
+	mov	40($disp), 
+	mov	$context, 
+	mov	\$`1232/8`, 
 	.long	0xa548f3fc		# cld; rep movsq
 
-	mov	$disp,%rsi
-	xor	%rcx,%rcx		# arg1, UNW_FLAG_NHANDLER
-	mov	8(%rsi),%rdx		# arg2, disp->ImageBase
-	mov	0(%rsi),%r8		# arg3, disp->ControlPc
-	mov	16(%rsi),%r9		# arg4, disp->FunctionEntry
-	mov	40(%rsi),%r10		# disp->ContextRecord
-	lea	56(%rsi),%r11		# &disp->HandlerData
-	lea	24(%rsi),%r12		# &disp->EstablisherFrame
-	mov	%r10,32(%rsp)		# arg5
-	mov	%r11,40(%rsp)		# arg6
-	mov	%r12,48(%rsp)		# arg7
-	mov	%rcx,56(%rsp)		# arg8, (NULL)
-	call	*__imp_RtlVirtualUnwind(%rip)
+	mov	$disp, 
+	xor	
+	mov	8( 
+	mov	0( 
+	mov	16( 
+	mov	40( 
+	lea	56( 
+	lea	24( 
+	mov	
+	mov	
+	mov	
+	mov	
+	call	*__imp_RtlVirtualUnwind( 
 
-	mov	\$1,%eax		# ExceptionContinueSearch
-	add	\$64,%rsp
+	mov	\$1, 
+	add	\$64, 
 	popfq
-	pop	%r15
-	pop	%r14
-	pop	%r13
-	pop	%r12
-	pop	%rbp
-	pop	%rbx
-	pop	%rdi
-	pop	%rsi
+	pop	
+	pop	
+	pop	
+	pop	
+	pop	
+	pop	
+	pop	
+	pop	
 	ret
 .size	se_handler,.-se_handler
 

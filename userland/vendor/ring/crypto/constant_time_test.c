@@ -1,16 +1,16 @@
-// Copyright 2014-2016 The OpenSSL Project Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include "internal.h"
 
@@ -96,13 +96,13 @@ int bssl_constant_time_test_main(void) {
   return num_failed == 0;
 }
 
-// Exposes `constant_time_conditional_memcpy` to Rust for tests only.
+
 void bssl_constant_time_test_conditional_memcpy(uint8_t dst[256], const uint8_t src[256],
                                                 crypto_word_t b) {
     constant_time_conditional_memcpy(dst, src, 256, b);
  }
 
-// Exposes `constant_time_conditional_memxor` to Rust for tests only.
+
 void bssl_constant_time_test_conditional_memxor(uint8_t dst[256],
                                                const uint8_t src[256],
                                                crypto_word_t b) {

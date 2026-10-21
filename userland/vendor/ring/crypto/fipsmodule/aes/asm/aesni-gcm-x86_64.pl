@@ -141,7 +141,7 @@ _aesni_ctr32_ghash_6x:
 	# input we're currently processing, or else we'd read past the end of
 	# the input buffer. Here, we set |%r12| to 96 if there are at least 96
 	# bytes of input beyond the 96 bytes we're already processing, and we
-	# set |%r12| to 0 otherwise. In the case where we set |%r12| to 96,
+	# set | 
 	# we'll read in the next block so that it is in registers for the next
 	# loop iteration. In the case where we set |%r12| to 0, we'll re-read
 	# the current block and then ignore what we re-read.
@@ -150,45 +150,45 @@ _aesni_ctr32_ghash_6x:
 	# registers) block, and |$end0| points to 2*96 bytes before the end of
 	# the input. Thus, |$in0| > |$end0| means that we do not have the next
 	# 96-byte block to read in, and |$in0| <= |$end0| means we do.
-	xor		%r12,%r12
+	xor		
 	cmp		$in0,$end0
 
 	  vaesenc	$T2,$inout0,$inout0
-	vmovdqu		0x30+8(%rsp),$Ii	# I[4]
+	vmovdqu		0x30+8( 
 	  vpxor		$rndkey,$inout4,$inout4
 	vpclmulqdq	\$0x00,$Hkey,$Z3,$T1
 	  vaesenc	$T2,$inout1,$inout1
 	  vpxor		$rndkey,$inout5,$inout5
-	setnc		%r12b
+	setnc		
 	vpclmulqdq	\$0x11,$Hkey,$Z3,$Z3
 	  vaesenc	$T2,$inout2,$inout2
 	vmovdqu		0x10-0x20($Htable),$Hkey	# $Hkey^2
-	neg		%r12
+	neg		
 	  vaesenc	$T2,$inout3,$inout3
 	 vpxor		$Z1,$Z2,$Z2
 	vpclmulqdq	\$0x00,$Hkey,$Ii,$Z1
 	 vpxor		$Z0,$Xi,$Xi		# modulo-scheduled
 	  vaesenc	$T2,$inout4,$inout4
 	 vpxor		$Z1,$T1,$Z0
-	and		\$0x60,%r12
+	and		\$0x60, 
 	  vmovups	0x20-0x80($key),$rndkey
 	vpclmulqdq	\$0x10,$Hkey,$Ii,$T1
 	  vaesenc	$T2,$inout5,$inout5
 
 	vpclmulqdq	\$0x01,$Hkey,$Ii,$T2
-	lea		($in0,%r12),$in0
+	lea		($in0, 
 	  vaesenc	$rndkey,$inout0,$inout0
-	 vpxor		16+8(%rsp),$Xi,$Xi	# modulo-scheduled [vpxor $Z3,$Xi,$Xi]
+	 vpxor		16+8( 
 	vpclmulqdq	\$0x11,$Hkey,$Ii,$Hkey
-	 vmovdqu	0x40+8(%rsp),$Ii	# I[3]
+	 vmovdqu	0x40+8( 
 	  vaesenc	$rndkey,$inout1,$inout1
-	movbe		0x58($in0),%r13
+	movbe		0x58($in0), 
 	  vaesenc	$rndkey,$inout2,$inout2
-	movbe		0x50($in0),%r12
+	movbe		0x50($in0), 
 	  vaesenc	$rndkey,$inout3,$inout3
-	mov		%r13,0x20+8(%rsp)
+	mov		
 	  vaesenc	$rndkey,$inout4,$inout4
-	mov		%r12,0x28+8(%rsp)
+	mov		
 	vmovdqu		0x30-0x20($Htable),$Z1	# borrow $Z1 for $Hkey^3
 	  vaesenc	$rndkey,$inout5,$inout5
 
@@ -203,7 +203,7 @@ _aesni_ctr32_ghash_6x:
 	vpclmulqdq	\$0x01,$Z1,$Ii,$Hkey
 	  vaesenc	$rndkey,$inout2,$inout2
 	vpclmulqdq	\$0x11,$Z1,$Ii,$Z1
-	 vmovdqu	0x50+8(%rsp),$Ii	# I[2]
+	 vmovdqu	0x50+8( 
 	  vaesenc	$rndkey,$inout3,$inout3
 	  vaesenc	$rndkey,$inout4,$inout4
 	 vpxor		$T1,$Z0,$Z0
@@ -217,17 +217,17 @@ _aesni_ctr32_ghash_6x:
 	 vpxor		$Hkey,$Z2,$Z2
 	vpclmulqdq	\$0x10,$T1,$Ii,$Hkey
 	  vaesenc	$rndkey,$inout1,$inout1
-	movbe		0x48($in0),%r13
+	movbe		0x48($in0), 
 	 vpxor		$Z1,$Z3,$Z3
 	vpclmulqdq	\$0x01,$T1,$Ii,$Z1
 	  vaesenc	$rndkey,$inout2,$inout2
-	movbe		0x40($in0),%r12
+	movbe		0x40($in0), 
 	vpclmulqdq	\$0x11,$T1,$Ii,$T1
-	 vmovdqu	0x60+8(%rsp),$Ii	# I[1]
+	 vmovdqu	0x60+8( 
 	  vaesenc	$rndkey,$inout3,$inout3
-	mov		%r13,0x30+8(%rsp)
+	mov		
 	  vaesenc	$rndkey,$inout4,$inout4
-	mov		%r12,0x38+8(%rsp)
+	mov		
 	 vpxor		$T2,$Z0,$Z0
 	vmovdqu		0x60-0x20($Htable),$T2	# borrow $T2 for $Hkey^5
 	  vaesenc	$rndkey,$inout5,$inout5
@@ -239,17 +239,17 @@ _aesni_ctr32_ghash_6x:
 	 vpxor		$Z1,$Z2,$Z2
 	vpclmulqdq	\$0x10,$T2,$Ii,$Z1
 	  vaesenc	$rndkey,$inout1,$inout1
-	movbe		0x38($in0),%r13
+	movbe		0x38($in0), 
 	 vpxor		$T1,$Z3,$Z3
 	vpclmulqdq	\$0x01,$T2,$Ii,$T1
-	 vpxor		0x70+8(%rsp),$Xi,$Xi	# accumulate I[0]
+	 vpxor		0x70+8( 
 	  vaesenc	$rndkey,$inout2,$inout2
-	movbe		0x30($in0),%r12
+	movbe		0x30($in0), 
 	vpclmulqdq	\$0x11,$T2,$Ii,$T2
 	  vaesenc	$rndkey,$inout3,$inout3
-	mov		%r13,0x40+8(%rsp)
+	mov		
 	  vaesenc	$rndkey,$inout4,$inout4
-	mov		%r12,0x48+8(%rsp)
+	mov		
 	 vpxor		$Hkey,$Z0,$Z0
 	 vmovdqu	0x70-0x20($Htable),$Hkey	# $Hkey^6
 	  vaesenc	$rndkey,$inout5,$inout5
@@ -261,16 +261,16 @@ _aesni_ctr32_ghash_6x:
 	 vpxor		$T1,$Z2,$Z2
 	vpclmulqdq	\$0x01,$Hkey,$Xi,$T1
 	  vaesenc	$rndkey,$inout1,$inout1
-	movbe		0x28($in0),%r13
+	movbe		0x28($in0), 
 	 vpxor		$T2,$Z3,$Z3
 	vpclmulqdq	\$0x00,$Hkey,$Xi,$T2
 	  vaesenc	$rndkey,$inout2,$inout2
-	movbe		0x20($in0),%r12
+	movbe		0x20($in0), 
 	vpclmulqdq	\$0x11,$Hkey,$Xi,$Xi
 	  vaesenc	$rndkey,$inout3,$inout3
-	mov		%r13,0x50+8(%rsp)
+	mov		
 	  vaesenc	$rndkey,$inout4,$inout4
-	mov		%r12,0x58+8(%rsp)
+	mov		
 	vpxor		$Z1,$Z2,$Z2
 	  vaesenc	$rndkey,$inout5,$inout5
 	vpxor		$T1,$Z2,$Z2
@@ -284,14 +284,14 @@ _aesni_ctr32_ghash_6x:
 	vpxor		$Xi,$Z3,$Z3
 	  vaesenc	$rndkey,$inout1,$inout1
 	vpxor		$Z1,$Z0,$Z0
-	movbe		0x18($in0),%r13
+	movbe		0x18($in0), 
 	  vaesenc	$rndkey,$inout2,$inout2
-	movbe		0x10($in0),%r12
+	movbe		0x10($in0), 
 	vpalignr	\$8,$Z0,$Z0,$Ii		# 1st phase
 	vpclmulqdq	\$0x10,$Hkey,$Z0,$Z0
-	mov		%r13,0x60+8(%rsp)
+	mov		
 	  vaesenc	$rndkey,$inout3,$inout3
-	mov		%r12,0x68+8(%rsp)
+	mov		
 	  vaesenc	$rndkey,$inout4,$inout4
 	  vmovups	0x80-0x80($key),$T1	# borrow $T1 for $rndkey
 	  vaesenc	$rndkey,$inout5,$inout5
@@ -304,9 +304,9 @@ _aesni_ctr32_ghash_6x:
 	vpxor		$Z2,$Z3,$Z3
 	  vaesenc	$T1,$inout3,$inout3
 	vpxor		$Ii,$Z0,$Z0
-	movbe		0x08($in0),%r13
+	movbe		0x08($in0), 
 	  vaesenc	$T1,$inout4,$inout4
-	movbe		0x00($in0),%r12
+	movbe		0x00($in0), 
 	  vaesenc	$T1,$inout5,$inout5
 	  vmovups	0xa0-0x80($key),$T1
 	  cmp		\$11,$rounds
@@ -371,7 +371,7 @@ _aesni_ctr32_ghash_6x:
 .align	32
 .Lenc_tail:
 	  vaesenc	$rndkey,$inout0,$inout0
-	vmovdqu		$Z3,16+8(%rsp)		# postpone vpxor $Z3,$Xi,$Xi
+	vmovdqu		$Z3,16+8( 
 	vpalignr	\$8,$Z0,$Z0,$Xi		# 2nd phase
 	  vaesenc	$rndkey,$inout1,$inout1
 	vpclmulqdq	\$0x10,$Hkey,$Z0,$Z0
@@ -391,14 +391,14 @@ _aesni_ctr32_ghash_6x:
 	  vmovdqu	0x20($const),$T2	# borrow $T2, .Lone_msb
 	  vaesenclast	$Ii,$inout1,$inout1
 	 vpaddb		$T2,$T1,$Ii
-	mov		%r13,0x70+8(%rsp)
+	mov		
 	lea		0x60($inp),$inp
 	# These two prefetches were added in BoringSSL. See change that added them.
 	 prefetcht0	512($inp)		# We use 96-byte block so prefetch 2 lines (128 bytes)
 	 prefetcht0	576($inp)
 	  vaesenclast	$Z1,$inout2,$inout2
 	 vpaddb		$T2,$Ii,$Z1
-	mov		%r12,0x78+8(%rsp)
+	mov		
 	lea		0x60($out),$out
 	  vmovdqu	0x00-0x80($key),$rndkey
 	  vaesenclast	$Z2,$inout3,$inout3
@@ -408,7 +408,7 @@ _aesni_ctr32_ghash_6x:
 	  vaesenclast	$Hkey,$inout5,$inout5
 	 vpaddb		$T2,$Z3,$Hkey
 
-	add		\$0x60,%rax
+	add		\$0x60, 
 	sub		\$0x6,$len
 	jc		.L6x_done
 
@@ -424,11 +424,11 @@ _aesni_ctr32_ghash_6x:
 	 vmovdqa	$Z3,$inout4		# 0 latency
 	  vmovups	$inout5,-0x10($out)
 	 vmovdqa	$Hkey,$inout5		# 0 latency
-	vmovdqu		0x20+8(%rsp),$Z3	# I[5]
+	vmovdqu		0x20+8( 
 	jmp		.Loop6x
 
 .L6x_done:
-	vpxor		16+8(%rsp),$Xi,$Xi	# modulo-scheduled
+	vpxor		16+8( 
 	vpxor		$Z0,$Xi,$Xi		# modulo-scheduled
 
 	ret
@@ -448,84 +448,84 @@ aesni_gcm_decrypt:
 .cfi_startproc
 .seh_startproc
 	_CET_ENDBR
-	xor	%rax,%rax
+	xor	
 
 	# We call |_aesni_ctr32_ghash_6x|, which requires at least 96 (0x60)
 	# bytes of input.
 	cmp	\$0x60,$len			# minimal accepted length
 	jb	.Lgcm_dec_abort
 
-	push	%rbp
-.cfi_push	%rbp
-.seh_pushreg	%rbp
-	mov	%rsp, %rbp			# save stack pointer
-.cfi_def_cfa_register	%rbp
-	push	%rbx
-.cfi_push	%rbx
-.seh_pushreg	%rbx
-	push	%r12
-.cfi_push	%r12
-.seh_pushreg	%r12
-	push	%r13
-.cfi_push	%r13
-.seh_pushreg	%r13
-	push	%r14
-.cfi_push	%r14
-.seh_pushreg	%r14
-	push	%r15
-.cfi_push	%r15
-.seh_pushreg	%r15
+	push	
+.cfi_push	
+.seh_pushreg	
+	mov	
+.cfi_def_cfa_register	
+	push	
+.cfi_push	
+.seh_pushreg	
+	push	
+.cfi_push	
+.seh_pushreg	
+	push	
+.cfi_push	
+.seh_pushreg	
+	push	
+.cfi_push	
+.seh_pushreg	
+	push	
+.cfi_push	
+.seh_pushreg	
 ___
 if ($win64) {
 $code.=<<___
-	lea	-0xa8(%rsp),%rsp		# 8 extra bytes to align the stack
+	lea	-0xa8( 
 .seh_stackalloc	0xa8
-.seh_setframe	%rbp, 0xa8+5*8
-	# Load the last two parameters. These go into %rdi and %rsi, which are
+.seh_setframe	
+	# Load the last two parameters. These go into 
 	# non-volatile on Windows, so stash them in the parameter stack area
 	# first.
-	mov	%rdi, 0x10(%rbp)
-.seh_savereg	%rdi, 0xa8+5*8+0x10
-	mov	%rsi, 0x18(%rbp)
-.seh_savereg	%rsi, 0xa8+5*8+0x18
-	mov	0x30(%rbp), $ivp
-	mov	0x38(%rbp), $Htable
+	mov	
+.seh_savereg	
+	mov	
+.seh_savereg	
+	mov	0x30( 
+	mov	0x38( 
 	# Save non-volatile XMM registers.
-	movaps	%xmm6,-0xd0(%rbp)
-.seh_savexmm	%xmm6, 0xa8+5*8-0xd0
-	movaps	%xmm7,-0xc0(%rbp)
-.seh_savexmm	%xmm7, 0xa8+5*8-0xc0
-	movaps	%xmm8,-0xb0(%rbp)
-.seh_savexmm	%xmm8, 0xa8+5*8-0xb0
-	movaps	%xmm9,-0xa0(%rbp)
-.seh_savexmm	%xmm9, 0xa8+5*8-0xa0
-	movaps	%xmm10,-0x90(%rbp)
-.seh_savexmm	%xmm10, 0xa8+5*8-0x90
-	movaps	%xmm11,-0x80(%rbp)
-.seh_savexmm	%xmm11, 0xa8+5*8-0x80
-	movaps	%xmm12,-0x70(%rbp)
-.seh_savexmm	%xmm12, 0xa8+5*8-0x70
-	movaps	%xmm13,-0x60(%rbp)
-.seh_savexmm	%xmm13, 0xa8+5*8-0x60
-	movaps	%xmm14,-0x50(%rbp)
-.seh_savexmm	%xmm14, 0xa8+5*8-0x50
-	movaps	%xmm15,-0x40(%rbp)
-.seh_savexmm	%xmm15, 0xa8+5*8-0x40
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
 .seh_endprologue
 ___
 }
 $code.=<<___;
 	vzeroupper
 
-	mov		$Xip_offset(%rbp), %r12
+	mov		$Xip_offset( 
 	vmovdqu		($ivp),$T1		# input counter value
-	add		\$-128,%rsp
+	add		\$-128, 
 	mov		12($ivp),$counter
-	lea		.Lbswap_mask(%rip),$const
+	lea		.Lbswap_mask( 
 	lea		-0x80($key),$in0	# borrow $in0
 	mov		\$0xf80,$end0		# borrow $end0
-	vmovdqu		(%r12),$Xi		# load Xi
-	and		\$-128,%rsp		# ensure stack alignment
+	vmovdqu		( 
+	and		\$-128, 
 	vmovdqu		($const),$Ii		# borrow $Ii for .Lbswap_mask
 	lea		0x80($key),$key		# size optimization
 	lea		0x20($Htable),$Htable	# size optimization
@@ -533,12 +533,12 @@ $code.=<<___;
 	vpshufb		$Ii,$Xi,$Xi
 
 	and		$end0,$in0
-	and		%rsp,$end0
+	and		
 	sub		$in0,$end0
 	jc		.Ldec_no_key_aliasing
 	cmp		\$768,$end0
 	jnc		.Ldec_no_key_aliasing
-	sub		$end0,%rsp		# avoid aliasing with key
+	sub		$end0, 
 .Ldec_no_key_aliasing:
 
 	vmovdqu		0x50($inp),$Z3		# I[5]
@@ -555,25 +555,25 @@ $code.=<<___;
 
 	vmovdqu		0x30($inp),$Z1
 	shr		\$4,$len
-	xor		%rax,%rax
+	xor		
 	vmovdqu		0x20($inp),$Z2
 	 vpshufb	$Ii,$Z3,$Z3		# passed to _aesni_ctr32_ghash_6x
 	vmovdqu		0x10($inp),$T2
 	 vpshufb	$Ii,$Z0,$Z0
 	vmovdqu		($inp),$Hkey
 	 vpshufb	$Ii,$Z1,$Z1
-	vmovdqu		$Z0,0x30(%rsp)
+	vmovdqu		$Z0,0x30( 
 	 vpshufb	$Ii,$Z2,$Z2
-	vmovdqu		$Z1,0x40(%rsp)
+	vmovdqu		$Z1,0x40( 
 	 vpshufb	$Ii,$T2,$T2
-	vmovdqu		$Z2,0x50(%rsp)
+	vmovdqu		$Z2,0x50( 
 	 vpshufb	$Ii,$Hkey,$Hkey
-	vmovdqu		$T2,0x60(%rsp)
-	vmovdqu		$Hkey,0x70(%rsp)
+	vmovdqu		$T2,0x60( 
+	vmovdqu		$Hkey,0x70( 
 
 	call		_aesni_ctr32_ghash_6x
 
-	mov		$Xip_offset(%rbp), %r12
+	mov		$Xip_offset( 
 	vmovups		$inout0,-0x60($out)	# save output
 	vmovups		$inout1,-0x50($out)
 	vmovups		$inout2,-0x40($out)
@@ -582,39 +582,39 @@ $code.=<<___;
 	vmovups		$inout5,-0x10($out)
 
 	vpshufb		($const),$Xi,$Xi	# .Lbswap_mask
-	vmovdqu		$Xi,(%r12)		# output Xi
+	vmovdqu		$Xi,( 
 
 	vzeroupper
 ___
 $code.=<<___ if ($win64);
-	movaps	-0xd0(%rbp),%xmm6
-	movaps	-0xc0(%rbp),%xmm7
-	movaps	-0xb0(%rbp),%xmm8
-	movaps	-0xa0(%rbp),%xmm9
-	movaps	-0x90(%rbp),%xmm10
-	movaps	-0x80(%rbp),%xmm11
-	movaps	-0x70(%rbp),%xmm12
-	movaps	-0x60(%rbp),%xmm13
-	movaps	-0x50(%rbp),%xmm14
-	movaps	-0x40(%rbp),%xmm15
-	mov	0x10(%rbp),%rdi
-	mov	0x18(%rbp),%rsi
+	movaps	-0xd0( 
+	movaps	-0xc0( 
+	movaps	-0xb0( 
+	movaps	-0xa0( 
+	movaps	-0x90( 
+	movaps	-0x80( 
+	movaps	-0x70( 
+	movaps	-0x60( 
+	movaps	-0x50( 
+	movaps	-0x40( 
+	mov	0x10( 
+	mov	0x18( 
 ___
 $code.=<<___;
-	lea	-0x28(%rbp), %rsp	# restore %rsp to fixed allocation
-.cfi_def_cfa	%rsp, 0x38
-	pop	%r15
-.cfi_pop	%r15
-	pop	%r14
-.cfi_pop	%r14
-	pop	%r13
-.cfi_pop	%r13
-	pop	%r12
-.cfi_pop	%r12
-	pop	%rbx
-.cfi_pop	%rbx
-	pop	%rbp
-.cfi_pop	%rbp
+	lea	-0x28( 
+.cfi_def_cfa	
+	pop	
+.cfi_pop	
+	pop	
+.cfi_pop	
+	pop	
+.cfi_pop	
+	pop	
+.cfi_pop	
+	pop	
+.cfi_pop	
+	pop	
+.cfi_pop	
 .Lgcm_dec_abort:
 	ret
 .seh_endproc
@@ -629,9 +629,9 @@ _aesni_ctr32_6x:
 .cfi_startproc
 	vmovdqu		0x00-0x80($key),$Z0	# borrow $Z0 for $rndkey
 	vmovdqu		0x20($const),$T2	# borrow $T2, .Lone_msb
-	lea		-1($rounds),%r13
+	lea		-1($rounds), 
 	vmovups		0x10-0x80($key),$rndkey
-	lea		0x20-0x80($key),%r12
+	lea		0x20-0x80($key), 
 	vpxor		$Z0,$T1,$inout0
 	add		\$`6<<24`,$counter
 	jc		.Lhandle_ctr32_2
@@ -656,12 +656,12 @@ _aesni_ctr32_6x:
 	vaesenc		$rndkey,$inout3,$inout3
 	vaesenc		$rndkey,$inout4,$inout4
 	vaesenc		$rndkey,$inout5,$inout5
-	vmovups		(%r12),$rndkey
-	lea		0x10(%r12),%r12
-	dec		%r13d
+	vmovups		( 
+	lea		0x10( 
+	dec		
 	jnz		.Loop_ctr32
 
-	vmovdqu		(%r12),$Hkey		# last round key
+	vmovdqu		( 
 	vaesenc		$rndkey,$inout0,$inout0
 	vpxor		0x00($inp),$Hkey,$Z0
 	vaesenc		$rndkey,$inout1,$inout1
@@ -725,9 +725,9 @@ aesni_gcm_encrypt:
 	_CET_ENDBR
 #ifdef BORINGSSL_DISPATCH_TEST
 .extern	BORINGSSL_function_hit
-	movb \$1,BORINGSSL_function_hit+2(%rip)
+	movb \$1,BORINGSSL_function_hit+2( 
 #endif
-	xor	%rax,%rax
+	xor	
 
 	# We call |_aesni_ctr32_6x| twice, each call consuming 96 bytes of
 	# input. Then we call |_aesni_ctr32_ghash_6x|, which requires at
@@ -735,62 +735,62 @@ aesni_gcm_encrypt:
 	cmp	\$0x60*3,$len			# minimal accepted length
 	jb	.Lgcm_enc_abort
 
-	push	%rbp
-.cfi_push	%rbp
-.seh_pushreg	%rbp
-	mov	%rsp, %rbp			# save stack pointer
-.cfi_def_cfa_register	%rbp
-	push	%rbx
-.cfi_push	%rbx
-.seh_pushreg	%rbx
-	push	%r12
-.cfi_push	%r12
-.seh_pushreg	%r12
-	push	%r13
-.cfi_push	%r13
-.seh_pushreg	%r13
-	push	%r14
-.cfi_push	%r14
-.seh_pushreg	%r14
-	push	%r15
-.cfi_push	%r15
-.seh_pushreg	%r15
+	push	
+.cfi_push	
+.seh_pushreg	
+	mov	
+.cfi_def_cfa_register	
+	push	
+.cfi_push	
+.seh_pushreg	
+	push	
+.cfi_push	
+.seh_pushreg	
+	push	
+.cfi_push	
+.seh_pushreg	
+	push	
+.cfi_push	
+.seh_pushreg	
+	push	
+.cfi_push	
+.seh_pushreg	
 ___
 if ($win64) {
 $code.=<<___
-	lea	-0xa8(%rsp),%rsp		# 8 extra bytes to align the stack
+	lea	-0xa8( 
 .seh_stackalloc	0xa8
-.seh_setframe	%rbp, 0xa8+5*8
-	# Load the last two parameters. These go into %rdi and %rsi, which are
+.seh_setframe	
+	# Load the last two parameters. These go into 
 	# non-volatile on Windows, so stash them in the parameter stack area
 	# first.
-	mov	%rdi, 0x10(%rbp)
-.seh_savereg	%rdi, 0xa8+5*8+0x10
-	mov	%rsi, 0x18(%rbp)
-.seh_savereg	%rsi, 0xa8+5*8+0x18
-	mov	0x30(%rbp), $ivp
-	mov	0x38(%rbp), $Htable
+	mov	
+.seh_savereg	
+	mov	
+.seh_savereg	
+	mov	0x30( 
+	mov	0x38( 
 	# Save non-volatile XMM registers.
-	movaps	%xmm6,-0xd0(%rbp)
-.seh_savexmm	%xmm6, 0xa8+5*8-0xd0
-	movaps	%xmm7,-0xc0(%rbp)
-.seh_savexmm	%xmm7, 0xa8+5*8-0xc0
-	movaps	%xmm8,-0xb0(%rbp)
-.seh_savexmm	%xmm8, 0xa8+5*8-0xb0
-	movaps	%xmm9,-0xa0(%rbp)
-.seh_savexmm	%xmm9, 0xa8+5*8-0xa0
-	movaps	%xmm10,-0x90(%rbp)
-.seh_savexmm	%xmm10, 0xa8+5*8-0x90
-	movaps	%xmm11,-0x80(%rbp)
-.seh_savexmm	%xmm11, 0xa8+5*8-0x80
-	movaps	%xmm12,-0x70(%rbp)
-.seh_savexmm	%xmm12, 0xa8+5*8-0x70
-	movaps	%xmm13,-0x60(%rbp)
-.seh_savexmm	%xmm13, 0xa8+5*8-0x60
-	movaps	%xmm14,-0x50(%rbp)
-.seh_savexmm	%xmm14, 0xa8+5*8-0x50
-	movaps	%xmm15,-0x40(%rbp)
-.seh_savexmm	%xmm15, 0xa8+5*8-0x40
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
 .seh_endprologue
 ___
 }
@@ -798,23 +798,23 @@ $code.=<<___;
 	vzeroupper
 
 	vmovdqu		($ivp),$T1		# input counter value
-	add		\$-128,%rsp
+	add		\$-128, 
 	mov		12($ivp),$counter
-	lea		.Lbswap_mask(%rip),$const
+	lea		.Lbswap_mask( 
 	lea		-0x80($key),$in0	# borrow $in0
 	mov		\$0xf80,$end0		# borrow $end0
 	lea		0x80($key),$key		# size optimization
 	vmovdqu		($const),$Ii		# borrow $Ii for .Lbswap_mask
-	and		\$-128,%rsp		# ensure stack alignment
+	and		\$-128, 
 	mov		0xf0-0x80($key),$rounds
 
 	and		$end0,$in0
-	and		%rsp,$end0
+	and		
 	sub		$in0,$end0
 	jc		.Lenc_no_key_aliasing
 	cmp		\$768,$end0
 	jnc		.Lenc_no_key_aliasing
-	sub		$end0,%rsp		# avoid aliasing with key
+	sub		$end0, 
 .Lenc_no_key_aliasing:
 
 	mov		$out,$in0
@@ -833,27 +833,27 @@ $code.=<<___;
 	call		_aesni_ctr32_6x
 	vpshufb		$Ii,$inout0,$Xi		# save bswapped output on stack
 	vpshufb		$Ii,$inout1,$T2
-	vmovdqu		$Xi,0x70(%rsp)
+	vmovdqu		$Xi,0x70( 
 	vpshufb		$Ii,$inout2,$Z0
-	vmovdqu		$T2,0x60(%rsp)
+	vmovdqu		$T2,0x60( 
 	vpshufb		$Ii,$inout3,$Z1
-	vmovdqu		$Z0,0x50(%rsp)
+	vmovdqu		$Z0,0x50( 
 	vpshufb		$Ii,$inout4,$Z2
-	vmovdqu		$Z1,0x40(%rsp)
+	vmovdqu		$Z1,0x40( 
 	vpshufb		$Ii,$inout5,$Z3		# passed to _aesni_ctr32_ghash_6x
-	vmovdqu		$Z2,0x30(%rsp)
+	vmovdqu		$Z2,0x30( 
 
 	call		_aesni_ctr32_6x
 
-	mov		$Xip_offset(%rbp), %r12
+	mov		$Xip_offset( 
 	lea		0x20($Htable),$Htable	# size optimization
-	vmovdqu		(%r12),$Xi		# load Xi
+	vmovdqu		( 
 	sub		\$12,$len
-	mov		\$0x60*2,%rax
+	mov		\$0x60*2, 
 	vpshufb		$Ii,$Xi,$Xi
 
 	call		_aesni_ctr32_ghash_6x
-	vmovdqu		0x20(%rsp),$Z3		# I[5]
+	vmovdqu		0x20( 
 	 vmovdqu	($const),$Ii		# borrow $Ii for .Lbswap_mask
 	vmovdqu		0x00-0x20($Htable),$Hkey	# $Hkey^1
 	vpunpckhqdq	$Z3,$Z3,$T1
@@ -871,12 +871,12 @@ $code.=<<___;
 	 vpshufb	$Ii,$inout4,$inout4
 	 vmovups	$inout5,-0x10($out)
 	 vpshufb	$Ii,$inout5,$inout5
-	 vmovdqu	$inout0,0x10(%rsp)	# free $inout0
+	 vmovdqu	$inout0,0x10( 
 ___
 { my ($HK,$T3)=($rndkey,$inout0);
 
 $code.=<<___;
-	 vmovdqu	0x30(%rsp),$Z2		# I[4]
+	 vmovdqu	0x30( 
 	 vmovdqu	0x10-0x20($Htable),$Ii	# borrow $Ii for $Hkey^2
 	 vpunpckhqdq	$Z2,$Z2,$T2
 	vpclmulqdq	\$0x00,$Hkey,$Z3,$Z1
@@ -884,7 +884,7 @@ $code.=<<___;
 	vpclmulqdq	\$0x11,$Hkey,$Z3,$Z3
 	vpclmulqdq	\$0x00,$HK,$T1,$T1
 
-	 vmovdqu	0x40(%rsp),$T3		# I[3]
+	 vmovdqu	0x40( 
 	vpclmulqdq	\$0x00,$Ii,$Z2,$Z0
 	 vmovdqu	0x30-0x20($Htable),$Hkey	# $Hkey^3
 	vpxor		$Z1,$Z0,$Z0
@@ -896,7 +896,7 @@ $code.=<<___;
 	 vmovdqu	0x50-0x20($Htable),$HK
 	vpxor		$T1,$T2,$T2
 
-	 vmovdqu	0x50(%rsp),$T1		# I[2]
+	 vmovdqu	0x50( 
 	vpclmulqdq	\$0x00,$Hkey,$T3,$Z3
 	 vmovdqu	0x40-0x20($Htable),$Ii	# borrow $Ii for $Hkey^4
 	vpxor		$Z0,$Z3,$Z3
@@ -907,7 +907,7 @@ $code.=<<___;
 	vpclmulqdq	\$0x00,$HK,$Z1,$Z1
 	vpxor		$T2,$Z1,$Z1
 
-	 vmovdqu	0x60(%rsp),$T2		# I[1]
+	 vmovdqu	0x60( 
 	vpclmulqdq	\$0x00,$Ii,$T1,$Z2
 	 vmovdqu	0x60-0x20($Htable),$Hkey	# $Hkey^5
 	vpxor		$Z3,$Z2,$Z2
@@ -919,7 +919,7 @@ $code.=<<___;
 	 vmovdqu	0x80-0x20($Htable),$HK
 	vpxor		$Z1,$Z0,$Z0
 
-	 vpxor		0x70(%rsp),$Xi,$Xi	# accumulate I[0]
+	 vpxor		0x70( 
 	vpclmulqdq	\$0x00,$Hkey,$T2,$Z1
 	 vmovdqu	0x70-0x20($Htable),$Ii	# borrow $Ii for $Hkey^6
 	 vpunpckhqdq	$Xi,$Xi,$T3
@@ -973,7 +973,7 @@ $code.=<<___;
 	vpclmulqdq	\$0x11,$Hkey,$inout3,$inout3
 	 vpxor		$inout2,$T1,$T1
 	vpxor		$inout4,$inout3,$inout3
-	  vxorps	0x10(%rsp),$Z3,$Z3	# accumulate $inout0
+	  vxorps	0x10( 
 	vpclmulqdq	\$0x00,$HK,$T3,$T3
 	vpxor		$T2,$T3,$T3
 
@@ -1032,41 +1032,41 @@ $code.=<<___;
 ___
 }
 $code.=<<___;
-	mov		$Xip_offset(%rbp), %r12
+	mov		$Xip_offset( 
 	vpshufb		($const),$Xi,$Xi	# .Lbswap_mask
-	vmovdqu		$Xi,(%r12)		# output Xi
+	vmovdqu		$Xi,( 
 
 	vzeroupper
 ___
 $code.=<<___ if ($win64);
-	movaps	-0xd0(%rbp),%xmm6
-	movaps	-0xc0(%rbp),%xmm7
-	movaps	-0xb0(%rbp),%xmm8
-	movaps	-0xa0(%rbp),%xmm9
-	movaps	-0x90(%rbp),%xmm10
-	movaps	-0x80(%rbp),%xmm11
-	movaps	-0x70(%rbp),%xmm12
-	movaps	-0x60(%rbp),%xmm13
-	movaps	-0x50(%rbp),%xmm14
-	movaps	-0x40(%rbp),%xmm15
-	mov	0x10(%rbp),%rdi
-	mov	0x18(%rbp),%rsi
+	movaps	-0xd0( 
+	movaps	-0xc0( 
+	movaps	-0xb0( 
+	movaps	-0xa0( 
+	movaps	-0x90( 
+	movaps	-0x80( 
+	movaps	-0x70( 
+	movaps	-0x60( 
+	movaps	-0x50( 
+	movaps	-0x40( 
+	mov	0x10( 
+	mov	0x18( 
 ___
 $code.=<<___;
-	lea	-0x28(%rbp), %rsp	# restore %rsp to fixed allocation
-.cfi_def_cfa	%rsp, 0x38
-	pop	%r15
-.cfi_pop	%r15
-	pop	%r14
-.cfi_pop	%r14
-	pop	%r13
-.cfi_pop	%r13
-	pop	%r12
-.cfi_pop	%r12
-	pop	%rbx
-.cfi_pop	%rbx
-	pop	%rbp
-.cfi_pop	%rbp
+	lea	-0x28( 
+.cfi_def_cfa	
+	pop	
+.cfi_pop	
+	pop	
+.cfi_pop	
+	pop	
+.cfi_pop	
+	pop	
+.cfi_pop	
+	pop	
+.cfi_pop	
+	pop	
+.cfi_pop	
 .Lgcm_enc_abort:
 	ret
 .seh_endproc
@@ -1099,7 +1099,7 @@ $code=<<___;	# assembler is too old
 .type	aesni_gcm_encrypt,\@abi-omnipotent
 aesni_gcm_encrypt:
 	_CET_ENDBR
-	xor	%eax,%eax
+	xor	
 	ret
 .size	aesni_gcm_encrypt,.-aesni_gcm_encrypt
 
@@ -1107,7 +1107,7 @@ aesni_gcm_encrypt:
 .type	aesni_gcm_decrypt,\@abi-omnipotent
 aesni_gcm_decrypt:
 	_CET_ENDBR
-	xor	%eax,%eax
+	xor	
 	ret
 .size	aesni_gcm_decrypt,.-aesni_gcm_decrypt
 ___

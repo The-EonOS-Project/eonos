@@ -1,20 +1,20 @@
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 2005-2014 Simon Howard
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// DESCRIPTION:
-//	The status bar widget code.
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #include <stdio.h>
@@ -36,16 +36,16 @@
 #include "r_local.h"
 
 
-// in AM_map.c
+
 extern boolean		automapactive; 
 
 
 
 
-//
-// Hack display negative frags.
-//  Loads and store the stminus lump.
-//
+
+
+
+
 patch_t*		sttminus;
 
 void STlib_init(void)
@@ -54,7 +54,7 @@ void STlib_init(void)
 }
 
 
-// ?
+
 void
 STlib_initNum
 ( st_number_t*		n,
@@ -75,11 +75,11 @@ STlib_initNum
 }
 
 
-// 
-// A fairly efficient way to draw a number
-//  based on differences from the old number.
-// Note: worth the trouble?
-//
+
+
+
+
+
 void
 STlib_drawNum
 ( st_number_t*	n,
@@ -109,7 +109,7 @@ STlib_drawNum
 	num = -num;
     }
 
-    // clear the area
+    
     x = n->x - numdigits*w;
 
     if (n->y - ST_Y < 0)
@@ -117,17 +117,17 @@ STlib_drawNum
 
     V_CopyRect(x, n->y - ST_Y, st_backing_screen, w*numdigits, h, x, n->y);
 
-    // if non-number, do not draw it
+    
     if (num == 1994)
 	return;
 
     x = n->x;
 
-    // in the special case of 0, you draw 0
+    
     if (!num)
 	V_DrawPatch(x - w, n->y, n->p[ 0 ]);
 
-    // draw the new number
+    
     while (num && numdigits--)
     {
 	x -= w;
@@ -135,13 +135,13 @@ STlib_drawNum
 	num /= 10;
     }
 
-    // draw a minus sign if necessary
+    
     if (neg)
 	V_DrawPatch(x - 8, n->y, sttminus);
 }
 
 
-//
+
 void
 STlib_updateNum
 ( st_number_t*		n,
@@ -151,7 +151,7 @@ STlib_updateNum
 }
 
 
-//
+
 void
 STlib_initPercent
 ( st_percent_t*		p,

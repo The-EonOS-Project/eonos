@@ -1,9 +1,9 @@
-//! Minimal VirtIO GPU PCI driver for QEMU's 2D display backend.
-//!
-//! This is a modern VirtIO PCI driver (VERSION_1, split control queue). It
-//! creates one host-visible 2D resource and backs it with a contiguous guest
-//! framebuffer. Rendering stays in the existing software console; dirty
-//! rectangles are transferred to the device and presented through VirtIO.
+
+
+
+
+
+
 
 use core::ptr;
 use core::sync::atomic::{fence, AtomicBool, Ordering};
@@ -492,7 +492,7 @@ impl Driver {
             return false;
         }
 
-        // One contiguous backing entry keeps attach and transfer simple.
+        
         let mut attach = [0u8; 48];
         Self::command_header(&mut attach, GPU_CMD_RESOURCE_ATTACH_BACKING);
         attach[24..28].copy_from_slice(&RESOURCE_ID.to_le_bytes());
@@ -531,9 +531,9 @@ impl Driver {
         transfer[28..32].copy_from_slice(&(y as u32).to_le_bytes());
         transfer[32..36].copy_from_slice(&(width as u32).to_le_bytes());
         transfer[36..40].copy_from_slice(&(height as u32).to_le_bytes());
-        // TRANSFER_TO_HOST_2D's offset is the source byte offset in guest
-        // backing memory. QEMU advances by one stride per row but does not
-        // add rect.x, so start at this rectangle's actual top-left pixel.
+        
+        
+        
         let Some(offset) = y
             .checked_mul(self.pitch)
             .and_then(|row| x.checked_mul(4).and_then(|column| row.checked_add(column)))
@@ -609,9 +609,9 @@ unsafe fn initialize(location: PciLocation, caps: VirtioCaps) -> Option<Driver> 
     }
     driver.set_status(STATUS_ACKNOWLEDGE | STATUS_DRIVER | STATUS_FEATURES_OK | STATUS_DRIVER_OK);
 
-    // QEMU reports its initial blank display as 640x480 even when a larger
-    // xres/yres mode was requested. Use the intended guest mode for the
-    // resource and SET_SCANOUT rectangle instead of inheriting that default.
+    
+    
+    
     if driver.get_display_info().is_none() {
         return None;
     }
@@ -629,8 +629,8 @@ unsafe fn initialize(location: PciLocation, caps: VirtioCaps) -> Option<Driver> 
         return None;
     }
 
-    // Keep the GPU configuration mapping alive by reading its scanout count;
-    // this also verifies the advertised device configuration was accessible.
+    
+    
     if ptr::read_volatile(device.add(8).cast::<u32>()) == 0 {
         return None;
     }
@@ -640,8 +640,8 @@ unsafe fn initialize(location: PciLocation, caps: VirtioCaps) -> Option<Driver> 
     Some(driver)
 }
 
-/// Find and initialize a modern VirtIO GPU. Failure leaves the Limine
-/// framebuffer active, so unsupported physical machines still boot normally.
+
+
 pub fn init() {
     let Some(location) = find_gpu() else {
         crate::log_ok!(
@@ -684,8 +684,8 @@ pub fn init() {
     );
 }
 
-/// Submit a dirty rectangle after the console has copied its shadow pixels
-/// into the GPU resource backing. Returns false when no VirtIO backend exists.
+
+
 pub fn present_rect(x: usize, y: usize, width: usize, height: usize) -> bool {
     if !GPU_ACTIVE.load(Ordering::Acquire) {
         return false;

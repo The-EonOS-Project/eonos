@@ -81,7 +81,7 @@ void DG_Init()
 {
 	memset(s_KeyQueue, 0, KEYQUEUE_SIZE * sizeof(unsigned short));
 
-    // window creation
+    
 
     s_Display = XOpenDisplay(NULL);
 
@@ -109,7 +109,7 @@ void DG_Init()
 
     XkbSetDetectableAutoRepeat(s_Display, 1, 0);
 
-    // Wait for the MapNotify event
+    
 
     while(1)
     {
@@ -136,24 +136,24 @@ void DG_DrawFrame()
             if (e.type == KeyPress)
             {
                 KeySym sym = XkbKeycodeToKeysym(s_Display, e.xkey.keycode, 0, 0);
-                //printf("KeyPress:%d sym:%d\n", e.xkey.keycode, sym);
+                
 
                 addKeyToQueue(1, sym);
             }
             else if (e.type == KeyRelease)
             {
                 KeySym sym = XkbKeycodeToKeysym(s_Display, e.xkey.keycode, 0, 0);
-                //printf("KeyRelease:%d sym:%d\n", e.xkey.keycode, sym);
+                
                 addKeyToQueue(0, sym);
             }
         }
 
         XPutImage(s_Display, s_Window, s_Gc, s_Image, 0, 0, 0, 0, DOOMGENERIC_RESX, DOOMGENERIC_RESY);
 
-        //XFlush(s_Display);
+        
     }
 
-    //printf("frame\n");
+    
 }
 
 void DG_SleepMs(uint32_t ms)
@@ -168,14 +168,14 @@ uint32_t DG_GetTicksMs()
 
     gettimeofday(&tp, &tzp);
 
-    return (tp.tv_sec * 1000) + (tp.tv_usec / 1000); /* return milliseconds */
+    return (tp.tv_sec * 1000) + (tp.tv_usec / 1000); 
 }
 
 int DG_GetKey(int* pressed, unsigned char* doomKey)
 {
 	if (s_KeyQueueReadIndex == s_KeyQueueWriteIndex)
 	{
-		//key queue is empty
+		
 
 		return 0;
 	}

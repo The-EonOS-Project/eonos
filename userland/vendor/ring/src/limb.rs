@@ -1,22 +1,22 @@
-// Copyright 2016 David Judd.
-// Copyright 2016 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-//! Unsigned multi-precision integer arithmetic.
-//!
-//! Limbs ordered least-significant-limb to most-significant-limb. The bits
-//! limbs use the native endianness.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use crate::{
     arithmetic::inout::{AliasingSlices2, AliasingSlices3},
@@ -32,7 +32,7 @@ use crate::bits;
 #[cfg(feature = "alloc")]
 use core::num::Wrapping;
 
-// XXX: Not correct for x32 ABIs.
+
 pub type Limb = bb::Word;
 pub type LeakyLimb = bb::LeakyWord;
 pub const LIMB_BITS: usize = usize_from_u32(Limb::BITS);
@@ -55,10 +55,10 @@ fn limbs_less_than_limbs(a: &[Limb], b: &[Limb]) -> Result<LimbMask, LenMismatch
         fn LIMBS_less_than(a: *const Limb, b: *const Limb, num_limbs: c::NonZero_size_t)
             -> LimbMask;
     }
-    // Use `b.len` because usually `b` will be the modulus which is likely to
-    // have had its length checked already so this can be elided by the
-    // optimizer.
-    // XXX: Questionable whether `LenMismatchError` is appropriate.
+    
+    
+    
+    
     let len = NonZeroUsize::new(b.len()).ok_or_else(|| LenMismatchError::new(a.len()))?;
     if a.len() != len.get() {
         return Err(LenMismatchError::new(a.len()));
@@ -98,8 +98,8 @@ pub fn limbs_are_zero(limbs: &[Limb]) -> LimbMask {
     limb_is_zero(limbs.iter().fold(0, |a, b| a | b))
 }
 
-/// Leaks one bit of information (other than the lengths of the inputs):
-/// Whether the given limbs are even.
+
+
 #[cfg(any(test, feature = "alloc"))]
 #[inline]
 pub fn limbs_reject_even_leak_bit(limbs: &[Limb]) -> Result<(), error::Unspecified> {
@@ -122,22 +122,22 @@ pub fn verify_limbs_equal_1_leak_bit(a: &[Limb]) -> Result<(), error::Unspecifie
     Err(error::Unspecified)
 }
 
-/// Returns the number of bits in `a`.
-//
-// This strives to be constant-time with respect to the values of all bits
-// except the most significant bit. This does not attempt to be constant-time
-// with respect to `a.len()` or the value of the result or the value of the
-// most significant bit (It's 1, unless the input is zero, in which case it's
-// zero.)
+
+
+
+
+
+
+
 #[cfg(any(test, feature = "alloc"))]
 pub fn limbs_minimal_bits(a: &[Limb]) -> bits::BitLength {
     for num_limbs in (1..=a.len()).rev() {
         let high_limb = a[num_limbs - 1];
 
-        // Find the number of set bits in |high_limb| by a linear scan from the
-        // most significant bit to the least significant bit. This works great
-        // for the most common inputs because usually the most significant bit
-        // it set.
+        
+        
+        
+        
         for high_limb_num_bits in (1..=LIMB_BITS).rev() {
             let shifted = unsafe { LIMB_shr(high_limb, high_limb_num_bits - 1) };
             if shifted != 0 {
@@ -148,19 +148,19 @@ pub fn limbs_minimal_bits(a: &[Limb]) -> bits::BitLength {
         }
     }
 
-    // No bits were set.
+    
     bits::BitLength::from_bits(0)
 }
 
-/// Equivalent to `if (r >= m) { r -= m; }`
+
 #[inline]
 pub fn limbs_reduce_once(r: &mut [Limb], m: &[Limb]) -> Result<(), LenMismatchError> {
     prefixed_extern! {
         fn LIMBS_reduce_once(r: *mut Limb, m: *const Limb, num_limbs: c::NonZero_size_t);
     }
     let num_limbs = NonZeroUsize::new(r.len()).ok_or_else(|| LenMismatchError::new(m.len()))?;
-    let r = r.as_mut_ptr(); // Non-dangling because num_limbs is non-zero.
-    let m = m.as_ptr(); // Non-dangling because num_limbs is non-zero.
+    let r = r.as_mut_ptr(); 
+    let m = m.as_ptr(); 
     unsafe { LIMBS_reduce_once(r, m, num_limbs) };
     Ok(())
 }
@@ -171,14 +171,14 @@ pub enum AllowZero {
     Yes,
 }
 
-/// Parses `input` into `result`, verifies that the value is less than
-/// `max_exclusive`, and pads `result` with zeros to its length. If `allow_zero`
-/// is not `AllowZero::Yes`, zero values are rejected.
-///
-/// This attempts to be constant-time with respect to the actual value *only if*
-/// the value is actually in range. In other words, this won't leak anything
-/// about a valid value, but it might leak small amounts of information about an
-/// invalid value (which constraint it failed).
+
+
+
+
+
+
+
+
 pub fn parse_big_endian_in_range_and_pad_consttime(
     input: untrusted::Input,
     allow_zero: AllowZero,
@@ -195,9 +195,9 @@ pub fn parse_big_endian_in_range_and_pad_consttime(
     Ok(())
 }
 
-/// Parses `input` into `result`, padding `result` with zeros to its length.
-/// This attempts to be constant-time with respect to the value but not with
-/// respect to the length; it is assumed that the length is public knowledge.
+
+
+
 pub fn parse_big_endian_and_pad_consttime(
     input: untrusted::Input,
     result: &mut [Limb],
@@ -230,33 +230,33 @@ pub fn big_endian_from_limbs(limbs: &[Limb], out: &mut [u8]) {
     });
 }
 
-/// Returns an iterator of the big-endian encoding of `limbs`.
-///
-/// The number of bytes returned will be a multiple of `LIMB_BYTES`
-/// and thus may be padded with leading zeros.
+
+
+
+
 pub fn unstripped_be_bytes(limbs: &[Limb]) -> impl ExactSizeIterator<Item = u8> + Clone + '_ {
-    // The unwrap is safe because a slice can never be larger than `usize` bytes.
+    
     ArrayFlatMap::new(limbs.iter().rev().copied(), Limb::to_be_bytes).unwrap()
 }
 
-// Used in FFI
+
 pub type Window = bb::Word;
 
-// Used in FFI
+
 pub type LeakyWindow = bb::LeakyWord;
 
-/// Processes `limbs` as a sequence of 5-bit windows, folding the windows from
-/// most significant to least significant and returning the accumulated result.
-/// The first window will be mapped by `init` to produce the initial value for
-/// the accumulator. Then `f` will be called to fold the accumulator and the
-/// next window until all windows are processed. When the input's bit length
-/// isn't divisible by 5, the window passed to `init` will be partial; all
-/// windows passed to `fold` will be full.
-///
-/// This is designed to avoid leaking the contents of `limbs` through side
-/// channels as long as `init` and `fold` are side-channel free.
-///
-/// Panics if `limbs` is empty.
+
+
+
+
+
+
+
+
+
+
+
+
 #[cfg(feature = "alloc")]
 pub fn fold_5_bit_windows<R, I: FnOnce(Window) -> R, F: Fn(R, Window) -> R>(
     limbs: &[Limb],
@@ -308,12 +308,12 @@ pub fn fold_5_bit_windows<R, I: FnOnce(Window) -> R, F: Fn(R, Window) -> R>(
         };
         while window_low_bit.0 < Wrapping(LIMB_BITS) {
             let window = unsafe { LIMBS_window5_unsplit_window(low_limb, window_low_bit) };
-            // The loop exits when this subtraction underflows, causing `window_low_bit` to
-            // wrap around to a very large value.
+            
+            
             window_low_bit.0 -= WINDOW_BITS;
             acc = fold(acc, window);
         }
-        window_low_bit.0 += Wrapping(LIMB_BITS); // "Fix" the underflow.
+        window_low_bit.0 += Wrapping(LIMB_BITS); 
 
         acc
     })
@@ -326,7 +326,7 @@ pub(crate) fn limbs_add_assign_mod(
     m: &[Limb],
 ) -> Result<(), LenMismatchError> {
     prefixed_extern! {
-        // `r` and `a` may alias.
+        
         fn LIMBS_add_mod(
             r: *mut Limb,
             a: *const Limb,
@@ -337,15 +337,15 @@ pub(crate) fn limbs_add_assign_mod(
     }
     let num_limbs = NonZeroUsize::new(m.len()).ok_or_else(|| LenMismatchError::new(m.len()))?;
     (a, b).with_non_dangling_non_null_pointers_rab(num_limbs, |r, a, b| {
-        let m = m.as_ptr(); // Also non-dangling because `num_limbs` is non-zero.
+        let m = m.as_ptr(); 
         unsafe { LIMBS_add_mod(r, a, b, m, num_limbs) }
     })
 }
 
-// r *= 2 (mod m).
+
 pub(crate) fn limbs_double_mod(r: &mut [Limb], m: &[Limb]) -> Result<(), LenMismatchError> {
     prefixed_extern! {
-        // `r` and `a` may alias.
+        
         fn LIMBS_shl_mod(
             r: *mut Limb,
             a: *const Limb,
@@ -354,23 +354,23 @@ pub(crate) fn limbs_double_mod(r: &mut [Limb], m: &[Limb]) -> Result<(), LenMism
     }
     let num_limbs = NonZeroUsize::new(m.len()).ok_or_else(|| LenMismatchError::new(m.len()))?;
     r.with_non_dangling_non_null_pointers_ra(num_limbs, |r, a| {
-        let m = m.as_ptr(); // Also non-dangling because num_limbs > 0.
+        let m = m.as_ptr(); 
         unsafe {
             LIMBS_shl_mod(r, a, m, num_limbs);
         }
     })
 }
 
-// *r = -a, assuming a is odd.
+
 pub(crate) fn limbs_negative_odd(r: &mut [Limb], a: &[Limb]) {
     debug_assert_eq!(r.len(), a.len());
-    // Two's complement step 1: flip all the bits.
-    // The compiler should optimize this to vectorized (a ^ !0).
+    
+    
     r.iter_mut().zip(a.iter()).for_each(|(r, &a)| {
         *r = !a;
     });
-    // Two's complement step 2: Add one. Since `a` is odd, `r` is even. Thus we
-    // can use a bitwise or for addition.
+    
+    
     r[0] |= 1;
 }
 
@@ -464,14 +464,14 @@ mod tests {
 
     #[test]
     fn test_limbs_equal_limb() {
-        // Equal
+        
         static EQUAL: &[&[LeakyLimb]] = &[&[1], &[1, 0], &[1, 0, 0], &[1, 0, 0, 0, 0, 0, 0]];
         for a in EQUAL {
             let a = &Vec::from_iter(a.iter().copied().map(Limb::from));
             assert!(matches!(verify_limbs_equal_1_leak_bit(a), Ok(())));
         }
 
-        // Unequal
+        
         static UNEQUAL: &[&[LeakyLimb]] = &[
             &[0],
             &[2],
@@ -498,13 +498,13 @@ mod tests {
         const LIMBS: usize = 4;
 
         {
-            // Empty input.
+            
             let inp = untrusted::Input::from(&[]);
             let mut result = [0; LIMBS].map(From::<LeakyLimb>::from);
             assert!(parse_big_endian_and_pad_consttime(inp, &mut result).is_err());
         }
 
-        // The input is longer than will fit in the given number of limbs.
+        
         {
             let inp = [1, 2, 3, 4, 5, 6, 7, 8, 9];
             let inp = untrusted::Input::from(&inp);
@@ -512,7 +512,7 @@ mod tests {
             assert!(parse_big_endian_and_pad_consttime(inp, &mut result[..]).is_err());
         }
 
-        // Less than a full limb.
+        
         {
             let inp = [0xfe];
             let inp = untrusted::Input::from(&inp);
@@ -524,7 +524,7 @@ mod tests {
             assert_eq!(&[0xfe, 0, 0, 0], &result);
         }
 
-        // A whole limb for 32-bit, half a limb for 64-bit.
+        
         {
             let inp = [0xbe, 0xef, 0xf0, 0x0d];
             let inp = untrusted::Input::from(&inp);
@@ -578,7 +578,7 @@ mod tests {
                 panic!("Unsupported target_pointer_width");
             }
 
-            // XXX: This is a weak set of tests. TODO: expand it.
+            
         }
     }
 
@@ -615,12 +615,12 @@ mod tests {
     #[test]
     fn test_big_endian_from_limbs_fewer_limbs() {
         #[cfg(target_pointer_width = "32")]
-        // Two fewer limbs.
+        
         let limbs = [
             0xbccddeef, 0x89900aab, 0x45566778, 0x01122334, 0xddeeff00, 0x99aabbcc,
         ];
 
-        // One fewer limb.
+        
         #[cfg(target_pointer_width = "64")]
         let limbs = [
             0x8990_0aab_bccd_deef,

@@ -1,4 +1,4 @@
-# Tiny standalone user program for exercising `exec /hello`.
+
 
 .intel_syntax noprefix
 

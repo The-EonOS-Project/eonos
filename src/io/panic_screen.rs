@@ -10,8 +10,8 @@ pub fn force_unlock_all() {
     }
 }
 
-/// Print a bounded hexdump of memory already known to be readable by the
-/// caller. Panic paths pass only their saved exception frame or current stack.
+
+
 pub fn write_memory_dump<W: Write>(console: &mut W, address: usize, bytes: &[u8]) {
     let length = bytes.len().min(64);
     let _ = writeln!(console, "Memory dump ({} bytes):", length);
@@ -24,9 +24,9 @@ pub fn write_memory_dump<W: Write>(console: &mut W, address: usize, bytes: &[u8]
     }
 }
 
-/// Print the active thread and (when it is a user process) process name.
-/// The scheduler and process table are only sampled with try-locks because
-/// either lock may be held by the code that just crashed.
+
+
+
 pub fn write_crash_context<W: Write>(console: &mut W, fault_cs: Option<u64>) -> Option<(u64, u64)> {
     let Some(context) = crate::scheduler::try_crash_context() else {
         let _ = writeln!(console, "Execution context: unavailable (scheduler busy)");
@@ -76,8 +76,8 @@ pub fn write_crash_context<W: Write>(console: &mut W, fault_cs: Option<u64>) -> 
     }
 }
 
-/// Walk a short x86-64 frame-pointer chain. Every read is checked against
-/// the current thread's known kernel stack bounds before it is dereferenced.
+
+
 pub fn write_stack_trace<W: Write>(
     console: &mut W,
     frame_pointer: u64,
@@ -104,8 +104,8 @@ pub fn write_stack_trace<W: Write>(
         if current < low || end > high || current & 7 != 0 {
             break;
         }
-        // SAFETY: bounds and alignment are validated against the mapped
-        // stack slot owned by the currently executing thread.
+        
+        
         let (next, return_address) = unsafe {
             let frame = current as *const u64;
             (
@@ -132,8 +132,8 @@ pub fn write_stack_trace<W: Write>(
 
 const CRASHLOG_CAPACITY: usize = 4096;
 
-/// A formatting target that displays panic text and keeps a bounded copy
-/// for `/disk/crashlog.txt`. The fixed buffer avoids allocating in a panic.
+
+
 pub struct PanicOutput<'a> {
     console: &'a mut Console,
     report: [u8; CRASHLOG_CAPACITY],
@@ -165,7 +165,7 @@ where
     force_unlock_all();
 
     if let Some(console) = CONSOLE.lock().as_mut() {
-        // Classic full-screen panic blue, with white foreground text.
+        
         console.clear();
 
         let _ = write!(console, "\x1b[48;2;0;0;170m\x1b[97m");

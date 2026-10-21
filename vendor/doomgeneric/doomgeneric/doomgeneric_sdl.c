@@ -1,4 +1,4 @@
-//doomgeneric for cross-platform development library 'Simple DirectMedia Layer'
+
 
 #include "doomkeys.h"
 #include "m_argv.h"
@@ -119,12 +119,12 @@ static void handleKeyInput(){
       exit(1);
     }
     if (e.type == SDL_KEYDOWN) {
-      //KeySym sym = XKeycodeToKeysym(s_Display, e.xkey.keycode, 0);
-      //printf("KeyPress:%d sym:%d\n", e.xkey.keycode, sym);
+      
+      
       addKeyToQueue(1, e.key.keysym.sym);
     } else if (e.type == SDL_KEYUP) {
-      //KeySym sym = XKeycodeToKeysym(s_Display, e.xkey.keycode, 0);
-      //printf("KeyRelease:%d sym:%d\n", e.xkey.keycode, sym);
+      
+      
       addKeyToQueue(0, e.key.keysym.sym);
     }
   }
@@ -140,11 +140,11 @@ void DG_Init(){
                             SDL_WINDOW_SHOWN
                             );
 
-  // Setup renderer
+  
   renderer =  SDL_CreateRenderer( window, -1, SDL_RENDERER_ACCELERATED);
-  // Clear winow
+  
   SDL_RenderClear( renderer );
-  // Render the rect to the screen
+  
   SDL_RenderPresent(renderer);
 
   texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, DOOMGENERIC_RESX, DOOMGENERIC_RESY);
@@ -174,7 +174,7 @@ uint32_t DG_GetTicksMs()
 int DG_GetKey(int* pressed, unsigned char* doomKey)
 {
   if (s_KeyQueueReadIndex == s_KeyQueueWriteIndex){
-    //key queue is empty
+    
     return 0;
   }else{
     unsigned short keyData = s_KeyQueue[s_KeyQueueReadIndex];

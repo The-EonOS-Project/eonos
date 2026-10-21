@@ -1,5 +1,5 @@
-; This file is generated from a similarly-named Perl script in the BoringSSL
-; source tree. Do not edit by hand.
+
+
 
 %ifidn __OUTPUT_FORMAT__, win64
 default	rel
@@ -16,7 +16,7 @@ global	bn_mul4x_mont_gather5
 
 ALIGN	32
 bn_mul4x_mont_gather5:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_bn_mul4x_mont_gather5:
@@ -127,7 +127,7 @@ $L$mul4x_body:
 	lea	rsp,[rsi]
 
 $L$mul4x_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -666,7 +666,7 @@ global	bn_power5_nohw
 
 ALIGN	32
 bn_power5_nohw:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_bn_power5_nohw:
@@ -805,7 +805,7 @@ DB	102,72,15,126,226
 	lea	rsp,[rsi]
 
 $L$power5_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -1655,7 +1655,7 @@ global	bn_mulx4x_mont_gather5
 
 ALIGN	32
 bn_mulx4x_mont_gather5:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_bn_mulx4x_mont_gather5:
@@ -1774,7 +1774,7 @@ $L$mulx4x_body:
 	lea	rsp,[rsi]
 
 $L$mulx4x_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -2210,7 +2210,7 @@ global	bn_powerx5
 
 ALIGN	32
 bn_powerx5:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_bn_powerx5:
@@ -2353,7 +2353,7 @@ DB	102,72,15,126,226
 	lea	rsp,[rsi]
 
 $L$powerx5_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -3396,6 +3396,6 @@ $L$SEH_info_bn_gather5:
 	DB	0x04,0xa3,0x00,0x00
 ALIGN	8
 %else
-; Work around https://bugzilla.nasm.us/show_bug.cgi?id=3392738
+
 ret
 %endif

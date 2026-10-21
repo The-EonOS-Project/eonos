@@ -1,29 +1,29 @@
-//! ELF64 loader for static, non-PIE x86-64 executables.
-//!
-//! `load` takes the raw bytes of an executable and maps its `PT_LOAD`
-//! segments into a fresh `vmm::AddressSpace`, returning the entry point.
-//! Nothing is ever mapped into the kernel's own address space, and the
-//! image bytes are only read, never trusted: every offset, size and
-//! address in the file is range-checked before it is used.
-//!
-//! Policy:
-//! - Only `ET_EXEC` for x86-64. Position-independent and dynamically
-//!   linked programs (`PT_INTERP`) are rejected; there is no dynamic
-//!   linker to hand them to.
-//! - Segments must lie entirely inside `[LOAD_MIN, LOAD_MAX)`. That keeps
-//!   them out of kernel space, out of the null page, and clear of the
-//!   user stack `process.rs` puts near the top of user space.
-//! - W^X: a segment (or a page shared by two segments) may be writable
-//!   or executable, never both.
-//! - Segments may not overlap each other. Two segments *may* share a page
-//!   (linkers that don't page-align sections produce that); the page then
-//!   gets the union of their permissions.
-//!
-//! Every frame the loader allocates is either mapped into the address
-//! space (which then owns it and frees it on drop) or freed again by the
-//! loader itself when loading fails, so a failed `load` leaks nothing.
-//! Mapping happens in one pass at the very end, after everything that
-//! can fail has succeeded.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #![allow(dead_code)]
 
@@ -34,16 +34,16 @@ use core::fmt;
 use crate::pmm::{self, PAGE_SIZE};
 use crate::vmm::{self, AddressSpace};
 
-/// Lowest address a segment may occupy. The page at 0 stays unmapped so
-/// null-pointer dereferences fault.
+
+
 pub const LOAD_MIN: u64 = 0x1000;
-/// First address segments may *not* reach. Far below the user stack.
+
 pub const LOAD_MAX: u64 = 0x0000_4000_0000_0000;
 
 const MAX_SEGMENTS: usize = 16;
 const MAX_PHDRS: u16 = 64;
-/// Cap on the pages one image may ask for (64 MiB), so a hostile header
-/// can't make the loader eat all of physical memory.
+
+
 const MAX_PAGES: u64 = 16 * 1024;
 
 const EHDR_SIZE: usize = 64;
@@ -60,38 +60,38 @@ const PF_W: u32 = 2;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum ElfError {
-    /// Shorter than an ELF header.
+    
     TooShort,
-    /// Doesn't start with `\x7fELF`.
+    
     BadMagic,
-    /// Not a 64-bit little-endian ELF.
+    
     NotElf64Le,
-    /// Not `ET_EXEC` (e.g. a shared object or PIE).
+    
     NotExecutable,
-    /// Not built for x86-64.
+    
     WrongArch,
-    /// Program header table has a wrong entry size, no entries, or too many.
+    
     BadHeader,
-    /// Has a `PT_INTERP`: needs a dynamic linker.
+    
     Dynamic,
-    /// A header or segment points outside the file.
+    
     Truncated,
-    /// A segment has an impossible size or lies outside the allowed
-    /// user address range.
+    
+    
     BadSegment,
-    /// More than `MAX_SEGMENTS` loadable segments.
+    
     TooManySegments,
-    /// Two loadable segments overlap.
+    
     Overlap,
-    /// Asks for writable *and* executable memory.
+    
     WritableExecutable,
-    /// Asks for more than `MAX_PAGES` pages.
+    
     TooLarge,
-    /// No loadable segment at all.
+    
     NoLoadable,
-    /// The entry point isn't inside an executable segment.
+    
     BadEntry,
-    /// Out of physical memory.
+    
     NoMemory,
 }
 
@@ -124,7 +124,7 @@ impl fmt::Display for ElfError {
     }
 }
 
-/// One `PT_LOAD` entry, already validated.
+
 struct Segment {
     vaddr: u64,
     offset: u64,
@@ -133,7 +133,7 @@ struct Segment {
     flags: u32,
 }
 
-/// One page of the image while it is being assembled.
+
 struct Page {
     phys: u64,
     writable: bool,
@@ -148,7 +148,7 @@ const fn align_up(v: u64) -> u64 {
     (v + PAGE_SIZE - 1) & !(PAGE_SIZE - 1)
 }
 
-// Callers guarantee `o + N <= b.len()`.
+
 fn rd16(b: &[u8], o: usize) -> u16 {
     u16::from_le_bytes([b[o], b[o + 1]])
 }
@@ -170,8 +170,8 @@ fn rd64(b: &[u8], o: usize) -> u64 {
     ])
 }
 
-/// Validate the headers and collect the loadable segments. Allocates no
-/// physical memory.
+
+
 fn parse(image: &[u8]) -> Result<(u64, Vec<Segment>), ElfError> {
     if image.len() < EHDR_SIZE {
         return Err(ElfError::TooShort);
@@ -179,7 +179,7 @@ fn parse(image: &[u8]) -> Result<(u64, Vec<Segment>), ElfError> {
     if &image[0..4] != b"\x7fELF" {
         return Err(ElfError::BadMagic);
     }
-    // e_ident[EI_CLASS] == ELFCLASS64, e_ident[EI_DATA] == ELFDATA2LSB
+    
     if image[4] != 2 || image[5] != 1 {
         return Err(ElfError::NotElf64Le);
     }
@@ -260,8 +260,8 @@ fn parse(image: &[u8]) -> Result<(u64, Vec<Segment>), ElfError> {
         return Err(ElfError::NoLoadable);
     }
 
-    // Every range was checked against LOAD_MAX above, so none of these
-    // sums can overflow.
+    
+    
     for i in 0..segments.len() {
         for j in (i + 1)..segments.len() {
             let a = &segments[i];
@@ -282,11 +282,11 @@ fn parse(image: &[u8]) -> Result<(u64, Vec<Segment>), ElfError> {
     Ok((entry, segments))
 }
 
-/// Allocate a zeroed frame for every page the segments touch and copy
-/// the file-backed bytes in. The tail of each segment (`memsz > filesz`,
-/// i.e. .bss) is left as the zeros the frames already hold. Frames are
-/// recorded in `pages` the moment they are allocated, so on error the
-/// caller can free exactly what was allocated.
+
+
+
+
+
 fn populate(
     image: &[u8],
     segments: &[Segment],
@@ -300,7 +300,7 @@ fn populate(
         let last = align_up(seg.vaddr + seg.memsz);
         while va < last {
             if let Some(page) = pages.get_mut(&va) {
-                // A page shared with an earlier segment.
+                
                 page.writable |= writable;
                 page.executable |= executable;
             } else {
@@ -324,7 +324,7 @@ fn populate(
             let in_page = dst_va - page_va;
             let n = (seg.filesz - copied).min(PAGE_SIZE - in_page);
             let Some(page) = pages.get(&page_va) else {
-                return Err(ElfError::BadSegment); // unreachable: allocated above
+                return Err(ElfError::BadSegment); 
             };
             unsafe {
                 core::ptr::copy_nonoverlapping(
@@ -337,8 +337,8 @@ fn populate(
         }
     }
 
-    // Two segments sharing a page could add up to writable + executable
-    // even though neither is on its own.
+    
+    
     if pages.values().any(|p| p.writable && p.executable) {
         return Err(ElfError::WritableExecutable);
     }
@@ -351,8 +351,8 @@ fn free_pages(pages: &BTreeMap<u64, Page>) {
     }
 }
 
-/// Load the executable in `image` into `aspace` and return its entry
-/// point. On error nothing stays allocated and nothing is mapped.
+
+
 pub fn load(image: &[u8], aspace: &AddressSpace) -> Result<u64, ElfError> {
     let (entry, segments) = parse(image)?;
 
@@ -362,13 +362,13 @@ pub fn load(image: &[u8], aspace: &AddressSpace) -> Result<u64, ElfError> {
         return Err(e);
     }
 
-    // Point of no return: hand every frame to the address space.
+    
     for (&va, page) in pages.iter() {
         let flags = match (page.writable, page.executable) {
             (false, false) => vmm::USER_RO,
             (true, false) => vmm::USER_RW,
             (false, true) => vmm::USER_RX,
-            // Rejected in `populate`.
+            
             (true, true) => vmm::USER_RO,
         };
         aspace.map(va, page.phys, flags);

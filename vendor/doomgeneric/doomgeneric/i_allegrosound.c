@@ -1,21 +1,21 @@
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 2005-2014 Simon Howard
-// Copyright(C) 2008 David Flater
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// DESCRIPTION:
-//	System interface for sound.
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include "config.h"
 
@@ -57,21 +57,21 @@ static SAMPLE *dummy_sample = NULL;
 static boolean use_sfx_prefix;
 
 
-// We don't support libsamplerate with Allegro but these have to be here since
-// other code requires them
+
+
 int use_libsamplerate = 0;
 
-// Scale factor used when converting libsamplerate floating point numbers
-// to integers. Too high means the sounds can clip; too low means they
-// will be too quiet. This is an amount that should avoid clipping most
-// of the time: with all the Doom IWAD sound effects, at least. If a PWAD
-// is used, clipping might occur.
+
+
+
+
+
 
 float libsamplerate_scale = 0.65f;
 
 
-// Load and convert a sound effect
-// Returns true if successful
+
+
 
 static boolean CacheSFX(sfxinfo_t *sfxinfo)
 {
@@ -82,43 +82,43 @@ static boolean CacheSFX(sfxinfo_t *sfxinfo)
 	byte *data;
 	SAMPLE *sample;
 
-	// need to load the sound
+	
 
 	lumpnum = sfxinfo->lumpnum;
 	data = W_CacheLumpNum(lumpnum, PU_STATIC);
 	lumplen = W_LumpLength(lumpnum);
 
-	// Check the header, and ensure this is a valid sound
+	
 
 	if (lumplen < 8
 	 || data[0] != 0x03 || data[1] != 0x00)
 	{
-		// Invalid sound
+		
 
 		return false;
 	}
 
-	// 16 bit sample rate field, 32 bit length field
+	
 
 	samplerate = (data[3] << 8) | data[2];
 	length = (data[7] << 24) | (data[6] << 16) | (data[5] << 8) | data[4];
 
-	// If the header specifies that the length of the sound is greater than
-	// the length of the lump itself, this is an invalid sound lump
+	
+	
 
-	// We also discard sound lumps that are less than 49 samples long,
-	// as this is how DMX behaves - although the actual cut-off length
-	// seems to vary slightly depending on the sample rate.  This needs
-	// further investigation to better understand the correct
-	// behavior.
+	
+	
+	
+	
+	
 
 	if (length > lumplen - 8 || length <= 48)
 	{
 		return false;
 	}
 
-	// The DMX sound library seems to skip the first 16 and last 16
-	// bytes of the lump - reason unknown.
+	
+	
 
 	data += 16;
 	length -= 32;
@@ -131,7 +131,7 @@ static boolean CacheSFX(sfxinfo_t *sfxinfo)
 
 	sfxinfo->driver_data = sample;
 
-	// don't need the original lump any more
+	
 
 	W_ReleaseLumpNum(lumpnum);
 
@@ -141,15 +141,15 @@ static boolean CacheSFX(sfxinfo_t *sfxinfo)
 
 static void GetSfxLumpName(sfxinfo_t *sfx, char *buf, size_t buf_len)
 {
-	// Linked sfx lumps? Get the lump number for the sound linked to.
+	
 
 	if (sfx->link != NULL)
 	{
 		sfx = sfx->link;
 	}
 
-	// Doom adds a DS* prefix to sound lumps; Heretic and Hexen don't
-	// do this.
+	
+	
 
 	if (use_sfx_prefix)
 	{
@@ -191,10 +191,10 @@ static void I_Allegro_PrecacheSounds(sfxinfo_t *sounds, int num_sounds)
 }
 
 
-//
-// Retrieve the raw data lump index
-//  for a given SFX name.
-//
+
+
+
+
 
 static int I_Allegro_GetSfxLumpNum(sfxinfo_t *sfx)
 {
@@ -222,18 +222,18 @@ static void I_Allegro_UpdateSoundParams(int handle, int vol, int sep)
 	voice_set_pan(allegro_voices[handle], sep);
 }
 
-//
-// Starting a sound means adding it
-//  to the current list of active sounds
-//  in the internal channels.
-// As the SFX info struct contains
-//  e.g. a pointer to the raw data,
-//  it is ignored.
-// As our sound handling does not handle
-//  priority, it is ignored.
-// Pitching (that is, increased speed of playback)
-//  is set, but currently not used by mixing.
-//
+
+
+
+
+
+
+
+
+
+
+
+
 
 static int I_Allegro_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int sep)
 {
@@ -242,14 +242,14 @@ static int I_Allegro_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int se
 		return -1;
 	}
 
-	// Release a sound effect if there is already one playing
-	// on this channel
+	
+	
 	if (channels_playing[channel]) {
 		voice_stop(allegro_voices[channel]);
 		channels_playing[channel] = NULL;
 	}
 
-	// Get the sound data
+	
 	if (sfxinfo->driver_data == NULL)
 	{
 		if (!CacheSFX(sfxinfo))
@@ -259,7 +259,7 @@ static int I_Allegro_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int se
 	}
 	assert(sfxinfo->driver_data);
 
-	// play sound
+	
 	reallocate_voice(allegro_voices[channel], sfxinfo->driver_data);
 	voice_set_volume(allegro_voices[channel], vol);
 	voice_set_pan(allegro_voices[channel], sep);
@@ -302,28 +302,28 @@ static boolean I_Allegro_SoundIsPlaying(int handle)
 
 	position = voice_get_position(allegro_voices[handle]);
 	if (position < 0) {
-		// finished
+		
 		return false;
 	}
 
-	// still playing
+	
 	return true;
 }
 
-// 
-// Periodically called to update the sound system
-//
+
+
+
 
 static void I_Allegro_UpdateSound(void)
 {
 	int i;
 
-	// loop through all channels which have sample, check if they're finished
+	
 	for (i = 0; i < NUM_CHANNELS; i++) {
 		if (channels_playing[i]) {
 			int position = voice_get_position(allegro_voices[i]);
 			if (position < 0) {
-				// finished
+				
 				channels_playing[i] = NULL;
 			}
 		}
@@ -364,7 +364,7 @@ static boolean I_Allegro_InitSound(boolean _use_sfx_prefix)
 
 	use_sfx_prefix = _use_sfx_prefix;
 
-	// No sounds yet
+	
 
 	for (i=0; i<NUM_CHANNELS; ++i)
 	{
@@ -388,7 +388,7 @@ static boolean I_Allegro_InitSound(boolean _use_sfx_prefix)
 	printf("Mixer voices %d\n",        get_mixer_voices());
 	printf("Mixer buffer length %d\n", get_mixer_buffer_length());
 
-	// create a dummy sample used to create voices
+	
 	dummy_sample = create_sample(8, 0, 11025, 8);
 	if (dummy_sample == NULL) {
 		printf("Failed to create sound sample: %s\n", allegro_error);

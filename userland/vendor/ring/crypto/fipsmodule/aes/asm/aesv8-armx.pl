@@ -27,7 +27,7 @@
 # instructions. This has no effect on mighty Apple A7, where results
 # are literally equal to the theoretical estimates based on AES
 # instruction latencies and issue rates. On Cortex-A53, an in-order
-# execution core, this costs up to 10-15%, which is partially
+# execution core, this costs up to 10-15 
 # compensated by implementing dedicated code path for 128-bit
 # CBC encrypt case. On Cortex-A57 parallelizable mode performance
 # seems to be limited by sheer amount of NEON instructions...

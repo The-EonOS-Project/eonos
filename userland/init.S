@@ -1,31 +1,31 @@
-# EonOS /init -- now a small interactive shell ("eonsh").
-#
-# Freestanding x86-64 assembly, no libc. It talks to the kernel with the
-# Linux-style syscall convention EonOS uses (number in RAX, arguments in
-# RDI/RSI/RDX/R10, result in RAX):
-#
-#     0  read(fd, buf, len)          -- fd 0 reads a canonical line;
-#                                       opened files support sequential reads
-#                                       mode, echoed by the kernel, from
-#                                       the PS/2 keyboard and/or COM1.
-#     1  write(fd, buf, len)
-#     2  open(path, path_len, flags)
-#     3  close(fd)
-#    24  sched_yield()
-#    39  getpid()
-#    60  exit(status)
-#  9001  eonos_list_files(buf, len)  -- newline-separated file listing.
-#  9003  eonos_uptime_ms()           -- milliseconds since boot.
-#  9005  eonos_exec(path, len, argv, envp) -- launch child ELF.
-#  9006  eonos_list_processes(buf, len)
-#  9009  eonos_sync()                 -- flush mounted storage.
-#  9010  eonos_list_block_devices(buf, len) -- lsblk-style block-device table.
-#
-# Commands: ls, lsblk, mount <device> <directory>, cat <file>,
-# exec <file> [args...], write <file> <text>,
-# echo <text>, ps, clear,
-# uptime, sync, pid, panic, help, exit.
-# No pipes, no scripting -- just enough to poke around from a prompt.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 .intel_syntax noprefix
 
@@ -136,7 +136,7 @@ _start:
     test rax, rax
     jle  .Lloop                         # error or empty read: try again
 
-    # Trim a trailing '\n', if present.
+
     mov  rcx, rax                       # rcx = length (line_buf[0..rcx))
     lea  rsi, [rip + line_buf]
     cmp  byte ptr [rsi + rcx - 1], 10
@@ -147,7 +147,7 @@ _start:
     test rcx, rcx
     jz   .Lloop                         # blank line: reprompt
 
-    # --- "ls" ------------------------------------------------------
+
     cmp  rcx, 2
     jne  .Ltry_lsblk
     lea  rdi, [rip + cmd_ls]
@@ -269,7 +269,7 @@ _start:
     call strprefix
     test rax, rax
     jz   .Ltry_write
-    # Split the command tail on spaces in place and build argv.
+
     lea  r12, [rip + line_buf + 5]
     lea  r13, [rip + exec_argv]
     xor  r14d, r14d
@@ -599,8 +599,8 @@ _start:
     jmp  .Lloop
 
 .Lunknown:
-    # The syscall instruction clobbers RCX, so preserve the command
-    # length before printing the prefix and reuse it for the command.
+
+
     push rcx
     lea  rsi, [rip + msg_unknown]
     mov  edx, msg_unknown_len
@@ -613,9 +613,9 @@ _start:
     call print
     jmp  .Lloop
 
-# ---------------------------------------------------------------------
-# do_ls: list every file in the initramfs.
-# ---------------------------------------------------------------------
+
+
+
 do_ls:
     push rbx
     lea  rdi, [rip + file_buf]
@@ -636,9 +636,9 @@ do_ls:
 2:  pop  rbx
     ret
 
-# ---------------------------------------------------------------------
-# do_lsblk: display registered block devices and detected filesystem types.
-# ---------------------------------------------------------------------
+
+
+
 do_lsblk:
     push rbx
     lea  rdi, [rip + file_buf]
@@ -661,9 +661,9 @@ do_lsblk:
     pop  rbx
     ret
 
-# ---------------------------------------------------------------------
-# do_mount: mount a block device from /device at a VFS directory.
-# ---------------------------------------------------------------------
+
+
+
 do_mount:
     push rbx
     push r12
@@ -709,9 +709,9 @@ do_mount:
 1:  pop  rbx
     ret
 
-# ---------------------------------------------------------------------
-# do_ps: display the kernel's tracked user process records.
-# ---------------------------------------------------------------------
+
+
+
 do_ps:
     push rbx
     lea  rdi, [rip + file_buf]
@@ -733,9 +733,9 @@ do_ps:
 2:  pop  rbx
     ret
 
-# ---------------------------------------------------------------------
-# do_cat: rsi = filename ptr, rdx = filename length.
-# ---------------------------------------------------------------------
+
+
+
 do_cat:
     push rbx
     push r12
@@ -782,10 +782,10 @@ do_cat:
     pop  rbx
     ret
 
-# ---------------------------------------------------------------------
-# do_edit: a tiny append-only, line-oriented editor. The canonical input
-# path provides line editing; .save writes the buffer and .quit returns.
-# ---------------------------------------------------------------------
+
+
+
+
 do_edit:
     push rbx
     push r12
@@ -912,9 +912,9 @@ do_edit:
     pop  rbx
     ret
 
-# ---------------------------------------------------------------------
-# do_uptime: print milliseconds since boot.
-# ---------------------------------------------------------------------
+
+
+
 do_uptime:
     push rbx
     mov  eax, 9003                      # eonos_uptime_ms
@@ -927,9 +927,9 @@ do_uptime:
     pop  rbx
     ret
 
-# ---------------------------------------------------------------------
-# do_pid: print this process's pid.
-# ---------------------------------------------------------------------
+
+
+
 do_pid:
     push rbx
     mov  eax, 39                        # getpid
@@ -942,13 +942,13 @@ do_pid:
     pop  rbx
     ret
 
-# ---------------------------------------------------------------------
-# print_u64_decimal: print rbx as unsigned decimal, no newline. Builds
-# digits least-significant-first into numbuf from the end, then prints
-# the used portion in one write -- simplest way to get the digits out
-# in the right order without a second reversal pass over the buffer.
-# Clobbers rax, rcx, rdx, rsi, rdi, r8, r9.
-# ---------------------------------------------------------------------
+
+
+
+
+
+
+
 print_u64_decimal:
     lea  r8, [rip + numbuf]
     add  r8, 24                         # r9 will fill backward from here
@@ -969,10 +969,10 @@ print_u64_decimal:
     call print
     ret
 
-# ---------------------------------------------------------------------
-# streq: compare rcx bytes at [rsi] against r8 bytes at [rdi].
-# Returns rax = 1 if equal length and content, else 0. Clobbers rcx.
-# ---------------------------------------------------------------------
+
+
+
+
 streq:
     cmp  rcx, r8
     jne  .Lstreq_no
@@ -990,11 +990,11 @@ streq:
     xor  eax, eax
     ret
 
-# ---------------------------------------------------------------------
-# strprefix: does the r8-byte string at [rdi] match the first r8 bytes
-# at [rsi]? (rcx = total available bytes at [rsi]; only a length check,
-# not part of the comparison itself.) Returns rax = 1/0. Clobbers rcx.
-# ---------------------------------------------------------------------
+
+
+
+
+
 strprefix:
     cmp  rcx, r8
     jl   .Lprefix_no
@@ -1013,21 +1013,21 @@ strprefix:
     xor  eax, eax
     ret
 
-# ---------------------------------------------------------------------
-# read_line: rsi = buffer, edx = capacity. Returns rax = bytes read
-# (>= 0, may be 0), or a negative errno. rsi/rdx already line up with
-# the syscall's own arg2/arg3 -- only rdi (fd) and rax (syscall number)
-# need setting.
-# ---------------------------------------------------------------------
+
+
+
+
+
+
 read_line:
     xor  edi, edi                       # fd = 0 (stdin)
     xor  eax, eax                       # SYS_READ = 0
     syscall
     ret
 
-# ---------------------------------------------------------------------
-# print: write RDX bytes at RSI to stdout.
-# ---------------------------------------------------------------------
+
+
+
 print:
     mov  edi, 1
     mov  eax, 1

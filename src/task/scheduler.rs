@@ -1,35 +1,35 @@
-//! Kernel thread scheduler (preemptive round-robin, single core).
-//!
-//! Threads switch voluntarily (`yield_now`, `sleep_ms`, `exit`) and are
-//! also preempted by the timer: `tick()` runs from the PIT interrupt,
-//! decides whether the running thread's time slice is over (or a sleeper
-//! is due), and raises `NEED_RESCHED`. `idt::irq_dispatch` calls
-//! `preempt_if_needed()` right after acknowledging the interrupt, which
-//! switches threads *inside* the interrupt handler. The interrupted
-//! thread's registers and interrupt frame simply stay on its own kernel
-//! stack until it is scheduled again and returns through `iretq`.
-//!
-//! Everything shared sits behind an `IrqMutex` (interrupts are off while
-//! a lock is held, so the tick can never land in the middle of a
-//! scheduler critical section), and the context switch itself always
-//! runs with interrupts off.
-//!
-//! Design:
-//! - Every thread has its own kernel stack in a dedicated virtual region.
-//!   Each stack slot has an unmapped guard page at its bottom, so an
-//!   overflow is a clean page fault instead of silent corruption.
-//! - The boot thread (Limine's stack) becomes thread 0. A dedicated idle
-//!   thread runs `hlt` whenever nothing else is runnable.
-//! - Round-robin ready queue; sleeping threads are woken by comparing
-//!   against `pit::uptime_ms()` whenever the scheduler runs.
-//! - A thread that exits can't free the stack it is still running on, so
-//!   it parks itself on a zombie list and whichever thread runs next
-//!   reaps it (`finish_switch`).
-//! - A thread may own a user address space (`spawn_user`). The scheduler
-//!   loads the next thread's page tables into CR3 on every switch
-//!   (kernel threads run on the kernel's own tables) and the address
-//!   space is torn down together with the thread when it is reaped -- by
-//!   then CR3 is guaranteed to point somewhere else.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #![allow(dead_code)]
 
@@ -43,27 +43,27 @@ use crate::sync::{self, IrqMutex};
 use crate::{idt, pit, vmm};
 use crate::{log_fail, log_ok};
 
-/// Virtual region for kernel stacks. Sits between the heap
-/// (0xffffffff90000000 + 64 MiB) and the VMM self-test page
-/// (0xffffffffc0000000).
+
+
+
 const STACK_REGION: u64 = 0xffff_ffff_a000_0000;
-/// Virtual size of one slot: 1 guard page + `STACK_PAGES` mapped pages
-/// (the rest of the slot is simply never mapped).
-const SLOT_SIZE: u64 = 0x2_0000; // 128 KiB
+
+
+const SLOT_SIZE: u64 = 0x2_0000; 
 const MAX_SLOTS: usize = 512;
-const STACK_PAGES: u64 = 16; // 64 KiB of usable stack per thread
+const STACK_PAGES: u64 = 16; 
 
 extern "C" {
-    /// Save callee-saved registers on the current stack, store the
-    /// resulting RSP through `old_rsp`, load `new_rsp` and restore the
-    /// registers saved there.
+    
+    
+    
     fn switch_context(
         old_rsp: *mut u64,
         new_rsp: u64,
         old_fpu: *mut crate::fpu::FpuState,
         new_fpu: *const crate::fpu::FpuState,
     );
-    /// First code a new thread executes; see `create_thread`.
+    
     fn thread_trampoline();
 }
 
@@ -102,28 +102,28 @@ thread_trampoline:
 struct Thread {
     id: u64,
     name: &'static str,
-    /// Saved kernel RSP while the thread is not running.
+    
     rsp: u64,
-    /// Index into the stack region; `None` for the boot thread, which
-    /// runs on the bootloader's stack.
+    
+    
     stack_slot: Option<usize>,
-    /// Uptime (ms) at which a sleeping thread becomes runnable again.
+    
     wake_at: u64,
     is_idle: bool,
-    /// The user address space this thread runs in; `None` for kernel
-    /// threads, which run on the kernel's own page tables. Owned by the
-    /// thread: dropping it (in `free_thread`) frees every page the
-    /// process had mapped.
+    
+    
+    
+    
     aspace: Option<vmm::AddressSpace>,
-    /// Where `user_thread_main` drops into ring 3, and on which stack.
+    
     user_entry: u64,
     user_rsp: u64,
-    /// Saved x87/MMX/SSE state. Aligned and restored at every switch.
+    
     fpu: crate::fpu::FpuState,
 }
 
-/// Lock-safe snapshot used only by fatal diagnostics. The scheduler lock is
-/// acquired with `try_lock`, so a panic while scheduling never waits on it.
+
+
 pub struct CrashContext {
     pub id: u64,
     pub thread_name: &'static str,
@@ -153,7 +153,7 @@ impl Scheduler {
             zombies: Vec::new(),
             free_slots: Vec::new(),
             next_slot: 0,
-            next_id: 1, // 0 is the boot thread
+            next_id: 1, 
         }
     }
 }
@@ -161,22 +161,22 @@ impl Scheduler {
 static SCHED: IrqMutex<Scheduler> = IrqMutex::new(Scheduler::new());
 static READY: AtomicBool = AtomicBool::new(false);
 
-/// Length of a thread's time slice.
+
 const TIME_SLICE_MS: u64 = 10;
 
-/// Timer ticks the current thread has used up of its slice.
+
 static SLICE_TICKS: AtomicU64 = AtomicU64::new(0);
-/// Set by `tick()`, consumed by `preempt_if_needed()`.
+
 static NEED_RESCHED: AtomicBool = AtomicBool::new(false);
-/// How many times a thread was preempted by the timer.
+
 static PREEMPTIONS: AtomicU64 = AtomicU64::new(0);
 
 enum Next<'a> {
     Yield,
     Sleep(u64),
     Exit,
-    /// Park the current thread on an external queue instead of `ready`
-    /// or `sleeping`. Used by `WaitQueue::wait_until`.
+    
+    
     Block(&'a IrqMutex<VecDeque<Box<Thread>>>),
 }
 
@@ -184,8 +184,8 @@ fn slot_base(slot: usize) -> u64 {
     STACK_REGION + slot as u64 * SLOT_SIZE
 }
 
-/// Unmap the first `pages` stack pages of the slot at `base` (page 0 of
-/// the slot is the guard and is never mapped) and return their frames.
+
+
 fn unmap_stack(base: u64, pages: u64) {
     for i in 0..pages {
         let virt = base + (1 + i) * PAGE_SIZE;
@@ -195,7 +195,7 @@ fn unmap_stack(base: u64, pages: u64) {
     }
 }
 
-/// Build a thread that will start in `entry`. It is not queued anywhere.
+
 fn create_thread(name: &'static str, entry: fn(), is_idle: bool) -> Option<Box<Thread>> {
     let (slot, id) = {
         let mut guard = SCHED.lock();
@@ -224,11 +224,11 @@ fn create_thread(name: &'static str, entry: fn(), is_idle: bool) -> Option<Box<T
         vmm::map_page(base + (1 + i) * PAGE_SIZE, phys, vmm::KERNEL_RW);
     }
 
-    // Initial frame, lowest address first, exactly what `switch_context`
-    // pops: r15 r14 r13 r12 rbx rbp, then the return address. After the
-    // `ret` into the trampoline RSP equals `stack_top` (16-byte aligned),
-    // so the trampoline's `call` gives the callee a correctly aligned
-    // stack.
+    
+    
+    
+    
+    
     let stack_top = base + (1 + STACK_PAGES) * PAGE_SIZE;
     let rsp = stack_top - 7 * 8;
     unsafe {
@@ -236,10 +236,10 @@ fn create_thread(name: &'static str, entry: fn(), is_idle: bool) -> Option<Box<T
         for k in 0..7 {
             frame.add(k).write(0);
         }
-        frame.add(3).write(entry as usize as u64); // r12
+        frame.add(3).write(entry as usize as u64); 
         frame
             .add(6)
-            .write(thread_trampoline as *const () as usize as u64); // return address
+            .write(thread_trampoline as *const () as usize as u64); 
     }
 
     Some(Box::new(Thread {
@@ -256,11 +256,11 @@ fn create_thread(name: &'static str, entry: fn(), is_idle: bool) -> Option<Box<T
     }))
 }
 
-/// Release a dead thread's stack and bookkeeping. If the thread owned a
-/// user address space, dropping `t` tears that down too. That is safe
-/// here: this runs on some *other* thread (see `finish_switch`), and
-/// `reschedule` had already loaded that thread's page tables into CR3,
-/// so the dying thread's PML4 is not in use.
+
+
+
+
+
 fn free_thread(t: Box<Thread>) {
     if let Some(slot) = t.stack_slot {
         unmap_stack(slot_base(slot), STACK_PAGES);
@@ -269,8 +269,8 @@ fn free_thread(t: Box<Thread>) {
     drop(t);
 }
 
-/// Runs right after every context switch, on the new thread's stack:
-/// frees any thread that exited just before the switch.
+
+
 fn finish_switch() {
     let dead = {
         let mut guard = SCHED.lock();
@@ -297,13 +297,13 @@ fn wake_sleepers(s: &mut Scheduler) {
     }
 }
 
-/// Take the current thread off the CPU (yielding, sleeping or exiting)
-/// and run the next one. Returns when this thread is scheduled again;
-/// for `Next::Exit` it never does.
+
+
+
 fn reschedule(how: Next<'_>) {
     let saved = sync::irq_save();
 
-    // Whoever runs next gets a fresh time slice.
+    
     SLICE_TICKS.store(0, Ordering::Relaxed);
     NEED_RESCHED.store(false, Ordering::Relaxed);
 
@@ -330,10 +330,10 @@ fn reschedule(how: Next<'_>) {
             }
             Next::Exit => s.zombies.push(cur),
             Next::Block(queue) => {
-                // Locking `queue` while `guard` (SCHED) is held is safe:
-                // this is a single-core scheduler and both locks disable
-                // interrupts, so there is no real concurrency to race
-                // against, only nesting, which `IrqMutex` handles fine.
+                
+                
+                
+                
                 queue.lock().push_back(cur);
             }
         }
@@ -344,21 +344,21 @@ fn reschedule(how: Next<'_>) {
         };
         let next_ptr: *mut Thread = &mut *next;
         let next_rsp = next.rsp;
-        // Whichever thread runs next, point TSS.rsp0 (and its `syscall`
-        // mirror) at the top of *its* kernel stack: that's where the CPU
-        // must land if this thread later traps into ring 0, whether via
-        // a hardware interrupt/exception taken while it's running user
-        // code, or via `syscall`. The boot thread has no dedicated slot
-        // (it runs on Limine's stack) and isn't expected to run user
-        // code, so it's simply left with whatever rsp0 was set before.
+        
+        
+        
+        
+        
+        
+        
         if let Some(slot) = next.stack_slot {
             crate::gdt::set_kernel_stack(slot_base(slot) + (1 + STACK_PAGES) * PAGE_SIZE);
         }
-        // Likewise for the page tables: a user thread runs in its own
-        // address space, everything else on the kernel's. Every address
-        // space shares the kernel half, so the kernel stacks, the heap
-        // and this very code stay mapped across the write. Skipping it
-        // when nothing changes avoids a pointless TLB flush.
+        
+        
+        
+        
+        
         let want_cr3 = match next.aspace.as_ref() {
             Some(a) => a.phys(),
             None => vmm::kernel_cr3(),
@@ -369,7 +369,7 @@ fn reschedule(how: Next<'_>) {
         s.current = Some(next);
 
         if cur_ptr == next_ptr {
-            // Nobody else wants the CPU: keep running.
+            
             None
         } else {
             Some((
@@ -383,18 +383,18 @@ fn reschedule(how: Next<'_>) {
 
     if let Some((old_rsp, new_rsp, old_fpu, new_fpu)) = switch {
         unsafe { switch_context(old_rsp, new_rsp, old_fpu, new_fpu) };
-        // We are running again, possibly much later.
+        
         finish_switch();
     }
 
     sync::irq_restore(saved);
 }
 
-/// Entry point of every new thread (called from `thread_trampoline`).
+
 #[no_mangle]
 extern "C" fn thread_start(entry: usize) -> ! {
     finish_switch();
-    // The switch that got us here ran with interrupts off.
+    
     idt::enable_interrupts();
     let f: fn() = unsafe { core::mem::transmute(entry) };
     f();
@@ -403,16 +403,16 @@ extern "C" fn thread_start(entry: usize) -> ! {
 
 fn idle_main() {
     loop {
-        // `sti; hlt` back to back: the CPU can't take an interrupt
-        // between them, so a wakeup can't slip past the hlt.
+        
+        
         unsafe { core::arch::asm!("sti", "hlt", options(nomem, nostack)) };
         yield_now();
     }
 }
 
-/// Turn the currently running code into thread 0, create the idle
-/// thread, and enable the scheduler. Call after the heap, VMM and PIT
-/// are up and interrupts are enabled.
+
+
+
 pub fn init() {
     let Some(idle) = create_thread("idle", idle_main, true) else {
         log_fail!("Scheduler", "Init", "Could not create the idle thread");
@@ -446,7 +446,7 @@ pub fn init() {
     );
 }
 
-/// Start a new kernel thread running `entry`. Returns its id.
+
 pub fn spawn(name: &'static str, entry: fn()) -> Option<u64> {
     let t = create_thread(name, entry, false)?;
     let id = t.id;
@@ -454,25 +454,25 @@ pub fn spawn(name: &'static str, entry: fn()) -> Option<u64> {
     Some(id)
 }
 
-/// First (and only) kernel-side code a user thread runs: read where the
-/// process wants to start and drop into ring 3 there. Never returns --
-/// the thread ends through `sys_exit`, or is killed by a user-mode fault.
+
+
+
 fn user_thread_main() {
     let (entry, rsp) = {
         let s = SCHED.lock();
         let t = s.current.as_ref().expect("scheduler: no current thread");
         (t.user_entry, t.user_rsp)
     };
-    // The lock guard is gone before the jump: nothing may be held while
-    // in user mode.
+    
+    
     crate::syscall::enter_user_mode(entry, rsp)
 }
 
-/// Start a new thread that runs `entry` in ring 3, on stack pointer
-/// `user_rsp`, inside `aspace`. The thread takes ownership of the
-/// address space and frees it when it is reaped. Returns its id, or
-/// `None` (dropping, and thereby freeing, `aspace`) if no thread could
-/// be created.
+
+
+
+
+
 pub fn spawn_user(
     name: &'static str,
     aspace: vmm::AddressSpace,
@@ -488,8 +488,8 @@ pub fn spawn_user(
     Some(id)
 }
 
-/// Stop a non-running user thread waiting in the ready or sleep queue.
-/// Its address space and kernel stack are reclaimed after the next switch.
+
+
 pub fn kill_user(id: u64) -> bool {
     let saved = sync::irq_save();
     let killed = {
@@ -520,14 +520,14 @@ pub fn kill_user(id: u64) -> bool {
     killed
 }
 
-/// Give up the CPU; the thread stays runnable.
+
 pub fn yield_now() {
     if READY.load(Ordering::SeqCst) {
         reschedule(Next::Yield);
     }
 }
 
-/// Sleep for at least `ms` milliseconds (needs the PIT tick running).
+
 pub fn sleep_ms(ms: u64) {
     if !READY.load(Ordering::SeqCst) {
         return;
@@ -535,20 +535,20 @@ pub fn sleep_ms(ms: u64) {
     reschedule(Next::Sleep(pit::uptime_ms() + ms));
 }
 
-/// End the calling thread.
+
 pub fn exit() -> ! {
     if READY.load(Ordering::SeqCst) {
         reschedule(Next::Exit);
     }
-    // Only reachable if the scheduler was never initialised.
+    
     loop {
         unsafe { core::arch::asm!("cli; hlt", options(nomem, nostack)) };
     }
 }
 
-/// Called from the timer interrupt on every tick (interrupts are off).
-/// Decides whether the running thread should be preempted: its slice is
-/// used up and someone else is waiting, or a sleeper's deadline passed.
+
+
+
 pub fn tick() {
     if !READY.load(Ordering::Relaxed) {
         return;
@@ -556,9 +556,9 @@ pub fn tick() {
     let used = SLICE_TICKS.fetch_add(1, Ordering::Relaxed) + 1;
     let slice_ticks = (pit::frequency_hz() * TIME_SLICE_MS / 1000).max(1);
 
-    // Interrupts were off while the interrupted code ran any scheduler
-    // critical section, so this can't normally fail; if it does, just
-    // try again on the next tick rather than risk spinning here.
+    
+    
+    
     let Some(s) = SCHED.try_lock() else { return };
     let now = pit::uptime_ms();
     let sleeper_due = s.sleeping.iter().any(|t| t.wake_at <= now);
@@ -570,8 +570,8 @@ pub fn tick() {
     }
 }
 
-/// Called by the IRQ dispatcher after the interrupt has been
-/// acknowledged. Switches to another thread if `tick()` asked for it.
+
+
 pub fn preempt_if_needed() {
     if NEED_RESCHED.swap(false, Ordering::Relaxed) {
         PREEMPTIONS.fetch_add(1, Ordering::Relaxed);
@@ -607,29 +607,29 @@ pub fn try_crash_context() -> Option<CrashContext> {
     })
 }
 
-/// Stack slots currently in use (live threads other than the boot thread).
+
 pub fn stack_slots_in_use() -> usize {
     let s = SCHED.lock();
     s.next_slot - s.free_slots.len()
 }
 
-// ---------------------------------------------------------------------
-// Blocking primitives
-// ---------------------------------------------------------------------
 
-/// A queue of threads parked waiting for some condition, plus the
-/// primitive other synchronization types (blocking `Mutex`, `Semaphore`,
-/// ...) are built on. Unlike `sleep_ms`, threads on a `WaitQueue` are
-/// not touched by the timer at all: they only become ready again
-/// through `wake_one`/`wake_all`, so this costs nothing while blocked
-/// and wakes are exact instead of poll-driven.
-///
-/// `wait_until` is the primitive to reach for: it evaluates `cond`
-/// and, if the thread needs to block, parks it on the queue in the
-/// same interrupts-off critical section, so a wakeup that happens
-/// between the check and the park can never be lost. Plain `wait()` has
-/// no such guard and is only safe when the caller has independently
-/// ruled out a racing wakeup (e.g. nothing else can run yet).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 pub struct WaitQueue {
     waiters: IrqMutex<VecDeque<Box<Thread>>>,
 }
@@ -641,15 +641,15 @@ impl WaitQueue {
         }
     }
 
-    /// Block the current thread until `cond` returns `true`.
-    ///
-    /// `cond` is called with interrupts disabled; if it returns `false`
-    /// the thread is parked on this queue and switched away *before*
-    /// interrupts come back on, so nothing can slip a wakeup in between
-    /// the check and the park. `cond` may be called more than once
-    /// (once per wakeup, spuriously or not) and must be cheap and
-    /// side-effect-safe to repeat -- exactly like a condition variable
-    /// predicate.
+    
+    
+    
+    
+    
+    
+    
+    
+    
     pub fn wait_until<F: FnMut() -> bool>(&self, mut cond: F) {
         loop {
             let saved = sync::irq_save();
@@ -658,20 +658,20 @@ impl WaitQueue {
                 return;
             }
             if !READY.load(Ordering::SeqCst) {
-                // Scheduler isn't up yet; nobody could ever wake us.
+                
                 sync::irq_restore(saved);
                 return;
             }
-            // `reschedule` manages its own (nested) interrupt state and
-            // only returns here once we've been woken and rescheduled.
+            
+            
             reschedule(Next::Block(&self.waiters));
             sync::irq_restore(saved);
         }
     }
 
-    /// Unconditionally park the current thread here. Only safe when the
-    /// caller can guarantee nothing wakes this queue before the thread
-    /// is actually parked; prefer `wait_until` otherwise.
+    
+    
+    
     pub fn wait(&self) {
         if !READY.load(Ordering::SeqCst) {
             return;
@@ -679,8 +679,8 @@ impl WaitQueue {
         reschedule(Next::Block(&self.waiters));
     }
 
-    /// Move one waiting thread (if any) back onto the ready queue.
-    /// Returns whether a thread was woken.
+    
+    
     pub fn wake_one(&self) -> bool {
         let woken = self.waiters.lock().pop_front();
         match woken {
@@ -692,7 +692,7 @@ impl WaitQueue {
         }
     }
 
-    /// Move every waiting thread back onto the ready queue.
+    
     pub fn wake_all(&self) {
         let all: Vec<Box<Thread>> = self.waiters.lock().drain(..).collect();
         if all.is_empty() {
@@ -704,15 +704,15 @@ impl WaitQueue {
         }
     }
 
-    /// Number of threads currently parked here. For diagnostics/tests.
+    
     pub fn len(&self) -> usize {
         self.waiters.lock().len()
     }
 }
 
-// ---------------------------------------------------------------------
-// Self-test
-// ---------------------------------------------------------------------
+
+
+
 
 static DONE: AtomicUsize = AtomicUsize::new(0);
 static ORDER_LEN: AtomicUsize = AtomicUsize::new(0);
@@ -746,7 +746,7 @@ fn sleeper() {
     DONE.fetch_add(1, Ordering::SeqCst);
 }
 
-/// Busy threads that never yield: only the timer can take the CPU away.
+
 fn spinner_a() {
     while !STOP.load(Ordering::Relaxed) {
         SPIN_A.fetch_add(1, Ordering::Relaxed);
@@ -763,7 +763,7 @@ fn spinner_b() {
     SPIN_DONE.fetch_add(1, Ordering::SeqCst);
 }
 
-/// Yield until `DONE` reaches `target`, or give up after two seconds.
+
 fn wait_for(counter: &AtomicUsize, target: usize) -> bool {
     let deadline = pit::uptime_ms() + 2000;
     while counter.load(Ordering::SeqCst) < target {
@@ -785,7 +785,7 @@ pub fn self_test() {
     ORDER_LEN.store(0, Ordering::SeqCst);
     let slots_before = stack_slots_in_use();
 
-    // --- Part 1: cooperative switching, sleeping, exit/reap -----------
+    
     for _ in 0..WORKERS {
         if spawn("worker", worker).is_none() {
             log_fail!("Scheduler", "SelfTest", "Could not spawn a worker thread");
@@ -812,8 +812,8 @@ pub fn self_test() {
         return;
     }
 
-    // Let the last exited thread be reaped (this also exercises sleeping
-    // the boot thread while the idle thread runs).
+    
+    
     sleep_ms(20);
 
     let total = ORDER_LEN.load(Ordering::SeqCst);
@@ -828,10 +828,10 @@ pub fn self_test() {
         return;
     }
 
-    // With the timer able to preempt a worker between two of its steps,
-    // the exact order is no longer guaranteed, but each worker must
-    // still have taken exactly ROUNDS steps and the first steps must not
-    // all belong to one thread.
+    
+    
+    
+    
     let order: [u64; 16] = core::array::from_fn(|i| ORDER[i].load(Ordering::SeqCst));
     for i in 0..total {
         let n = order[..total].iter().filter(|&&x| x == order[i]).count();
@@ -858,9 +858,9 @@ pub fn self_test() {
         return;
     }
 
-    // --- Part 2: preemption --------------------------------------------
-    // Two threads that never yield. If the timer could not preempt them,
-    // the boot thread's sleep below would never end.
+    
+    
+    
     STOP.store(false, Ordering::SeqCst);
     SPIN_A.store(0, Ordering::SeqCst);
     SPIN_B.store(0, Ordering::SeqCst);
@@ -884,7 +884,7 @@ pub fn self_test() {
         log_fail!("Scheduler", "SelfTest", "Busy threads did not stop");
         return;
     }
-    sleep_ms(20); // reap them
+    sleep_ms(20); 
 
     let preemptions = preemption_count() - preempt_before;
     if a == 0 || b == 0 {

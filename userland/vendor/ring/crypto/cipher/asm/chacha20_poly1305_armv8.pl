@@ -323,7 +323,7 @@ $code.=<<___;
 
 .text
 
-.type   .Lpoly_hash_ad_internal,%function
+.type   .Lpoly_hash_ad_internal, 
 .align  6
 .Lpoly_hash_ad_internal:
     .cfi_startproc
@@ -367,7 +367,7 @@ $code.=<<___;
 // void chacha20_poly1305_seal(uint8_t *pt, uint8_t *ct, size_t len_in, uint8_t *ad, size_t len_ad, union open_data *seal_data);
 //
 .globl  chacha20_poly1305_seal
-.type   chacha20_poly1305_seal,%function
+.type   chacha20_poly1305_seal, 
 .align  6
 chacha20_poly1305_seal:
     AARCH64_SIGN_LINK_REGISTER
@@ -975,7 +975,7 @@ $code.=<<___;
 // void chacha20_poly1305_open(uint8_t *pt, uint8_t *ct, size_t len_in, uint8_t *ad, size_t len_ad, union open_data *aead_data);
 //
 .globl	chacha20_poly1305_open
-.type	chacha20_poly1305_open,%function
+.type	chacha20_poly1305_open, 
 .align	6
 chacha20_poly1305_open:
     AARCH64_SIGN_LINK_REGISTER

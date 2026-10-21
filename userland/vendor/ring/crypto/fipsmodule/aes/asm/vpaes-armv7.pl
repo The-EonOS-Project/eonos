@@ -135,7 +135,7 @@ $code.=<<___;
 
 .text
 
-.type	_vpaes_consts,%object
+.type	_vpaes_consts, 
 .align	7	@ totally strategic alignment
 _vpaes_consts:
 .Lk_mc_forward:	@ mc_forward
@@ -190,7 +190,7 @@ $code.=<<___;
 @@
 @@  Fills q9-q15 as specified below.
 @@
-.type	_vpaes_preheat,%function
+.type	_vpaes_preheat, 
 .align	4
 _vpaes_preheat:
 	adr	r10, .Lk_inv
@@ -216,25 +216,25 @@ _vpaes_preheat:
 @@  Preserves q6-q8 so you get some local vectors
 @@
 @@
-.type	_vpaes_encrypt_core,%function
+.type	_vpaes_encrypt_core, 
 .align 4
 _vpaes_encrypt_core:
 	mov	r9, $key
 	ldr	r8, [$key,#240]		@ pull rounds
 	adr	r11, .Lk_ipt
-	@ vmovdqa	.Lk_ipt(%rip),	%xmm2	# iptlo
-	@ vmovdqa	.Lk_ipt+16(%rip), %xmm3	# ipthi
+	@ vmovdqa	.Lk_ipt( 
+	@ vmovdqa	.Lk_ipt+16( 
 	vld1.64	{q2, q3}, [r11]
 	adr	r11, .Lk_mc_forward+16
-	vld1.64	{q5}, [r9]!		@ vmovdqu	(%r9),	%xmm5		# round0 key
-	vand	q1, q0, q9		@ vpand	%xmm9,	%xmm0,	%xmm1
-	vshr.u8	q0, q0, #4		@ vpsrlb	\$4,	%xmm0,	%xmm0
-	vtbl.8	q1#lo, {q2}, q1#lo	@ vpshufb	%xmm1,	%xmm2,	%xmm1
+	vld1.64	{q5}, [r9]!		@ vmovdqu	( 
+	vand	q1, q0, q9		@ vpand	
+	vshr.u8	q0, q0, #4		@ vpsrlb	\$4,	
+	vtbl.8	q1#lo, {q2}, q1#lo	@ vpshufb	
 	vtbl.8	q1#hi, {q2}, q1#hi
-	vtbl.8	q2#lo, {q3}, q0#lo	@ vpshufb	%xmm0,	%xmm3,	%xmm2
+	vtbl.8	q2#lo, {q3}, q0#lo	@ vpshufb	
 	vtbl.8	q2#hi, {q3}, q0#hi
-	veor	q0, q1, q5		@ vpxor	%xmm5,	%xmm1,	%xmm0
-	veor	q0, q0, q2		@ vpxor	%xmm2,	%xmm0,	%xmm0
+	veor	q0, q1, q5		@ vpxor	
+	veor	q0, q0, q2		@ vpxor	
 
 	@ .Lenc_entry ends with a bnz instruction which is normally paired with
 	@ subs in .Lenc_loop.
@@ -245,54 +245,54 @@ _vpaes_encrypt_core:
 .Lenc_loop:
 	@ middle of middle round
 	add	r10, r11, #0x40
-	vtbl.8	q4#lo, {$sb1t}, q2#lo	@ vpshufb	%xmm2,	%xmm13,	%xmm4	# 4 = sb1u
+	vtbl.8	q4#lo, {$sb1t}, q2#lo	@ vpshufb	
 	vtbl.8	q4#hi, {$sb1t}, q2#hi
-	vld1.64	{q1}, [r11]!		@ vmovdqa	-0x40(%r11,%r10), %xmm1	# .Lk_mc_forward[]
-	vtbl.8	q0#lo, {$sb1u}, q3#lo	@ vpshufb	%xmm3,	%xmm12,	%xmm0	# 0 = sb1t
+	vld1.64	{q1}, [r11]!		@ vmovdqa	-0x40( 
+	vtbl.8	q0#lo, {$sb1u}, q3#lo	@ vpshufb	
 	vtbl.8	q0#hi, {$sb1u}, q3#hi
-	veor	q4, q4, q5		@ vpxor		%xmm5,	%xmm4,	%xmm4	# 4 = sb1u + k
-	vtbl.8	q5#lo, {$sb2t}, q2#lo	@ vpshufb	%xmm2,	%xmm15,	%xmm5	# 4 = sb2u
+	veor	q4, q4, q5		@ vpxor		
+	vtbl.8	q5#lo, {$sb2t}, q2#lo	@ vpshufb	
 	vtbl.8	q5#hi, {$sb2t}, q2#hi
-	veor	q0, q0, q4		@ vpxor		%xmm4,	%xmm0,	%xmm0	# 0 = A
-	vtbl.8	q2#lo, {$sb2u}, q3#lo	@ vpshufb	%xmm3,	%xmm14,	%xmm2	# 2 = sb2t
+	veor	q0, q0, q4		@ vpxor		
+	vtbl.8	q2#lo, {$sb2u}, q3#lo	@ vpshufb	
 	vtbl.8	q2#hi, {$sb2u}, q3#hi
-	vld1.64	{q4}, [r10]		@ vmovdqa	(%r11,%r10), %xmm4	# .Lk_mc_backward[]
-	vtbl.8	q3#lo, {q0}, q1#lo	@ vpshufb	%xmm1,	%xmm0,	%xmm3	# 0 = B
+	vld1.64	{q4}, [r10]		@ vmovdqa	( 
+	vtbl.8	q3#lo, {q0}, q1#lo	@ vpshufb	
 	vtbl.8	q3#hi, {q0}, q1#hi
-	veor	q2, q2, q5		@ vpxor		%xmm5,	%xmm2,	%xmm2	# 2 = 2A
+	veor	q2, q2, q5		@ vpxor		
 	@ Write to q5 instead of q0, so the table and destination registers do
 	@ not overlap.
-	vtbl.8	q5#lo, {q0}, q4#lo	@ vpshufb	%xmm4,	%xmm0,	%xmm0	# 3 = D
+	vtbl.8	q5#lo, {q0}, q4#lo	@ vpshufb	
 	vtbl.8	q5#hi, {q0}, q4#hi
-	veor	q3, q3, q2		@ vpxor		%xmm2,	%xmm3,	%xmm3	# 0 = 2A+B
-	vtbl.8	q4#lo, {q3}, q1#lo	@ vpshufb	%xmm1,	%xmm3,	%xmm4	# 0 = 2B+C
+	veor	q3, q3, q2		@ vpxor		
+	vtbl.8	q4#lo, {q3}, q1#lo	@ vpshufb	
 	vtbl.8	q4#hi, {q3}, q1#hi
 	@ Here we restore the original q0/q5 usage.
-	veor	q0, q5, q3		@ vpxor		%xmm3,	%xmm0,	%xmm0	# 3 = 2A+B+D
-	and	r11, r11, #~(1<<6)	@ and		\$0x30,	%r11		# ... mod 4
-	veor	q0, q0, q4		@ vpxor		%xmm4,	%xmm0, %xmm0	# 0 = 2A+3B+C+D
+	veor	q0, q5, q3		@ vpxor		
+	and	r11, r11, #~(1<<6)	@ and		\$0x30,	
+	veor	q0, q0, q4		@ vpxor		
 	subs	r8, r8, #1		@ nr--
 
 .Lenc_entry:
 	@ top of round
-	vand	q1, q0, q9		@ vpand		%xmm0,	%xmm9,	%xmm1   # 0 = k
-	vshr.u8	q0, q0, #4		@ vpsrlb	\$4,	%xmm0,	%xmm0	# 1 = i
-	vtbl.8	q5#lo, {$invhi}, q1#lo	@ vpshufb	%xmm1,	%xmm11,	%xmm5	# 2 = a/k
+	vand	q1, q0, q9		@ vpand		
+	vshr.u8	q0, q0, #4		@ vpsrlb	\$4,	
+	vtbl.8	q5#lo, {$invhi}, q1#lo	@ vpshufb	
 	vtbl.8	q5#hi, {$invhi}, q1#hi
-	veor	q1, q1, q0		@ vpxor		%xmm0,	%xmm1,	%xmm1	# 0 = j
-	vtbl.8	q3#lo, {$invlo}, q0#lo	@ vpshufb	%xmm0, 	%xmm10,	%xmm3  	# 3 = 1/i
+	veor	q1, q1, q0		@ vpxor		
+	vtbl.8	q3#lo, {$invlo}, q0#lo	@ vpshufb	
 	vtbl.8	q3#hi, {$invlo}, q0#hi
-	vtbl.8	q4#lo, {$invlo}, q1#lo	@ vpshufb	%xmm1, 	%xmm10,	%xmm4  	# 4 = 1/j
+	vtbl.8	q4#lo, {$invlo}, q1#lo	@ vpshufb	
 	vtbl.8	q4#hi, {$invlo}, q1#hi
-	veor	q3, q3, q5		@ vpxor		%xmm5,	%xmm3,	%xmm3	# 3 = iak = 1/i + a/k
-	veor	q4, q4, q5		@ vpxor		%xmm5,	%xmm4,	%xmm4  	# 4 = jak = 1/j + a/k
-	vtbl.8	q2#lo, {$invlo}, q3#lo	@ vpshufb	%xmm3,	%xmm10,	%xmm2  	# 2 = 1/iak
+	veor	q3, q3, q5		@ vpxor		
+	veor	q4, q4, q5		@ vpxor		
+	vtbl.8	q2#lo, {$invlo}, q3#lo	@ vpshufb	
 	vtbl.8	q2#hi, {$invlo}, q3#hi
-	vtbl.8	q3#lo, {$invlo}, q4#lo	@ vpshufb	%xmm4,	%xmm10,	%xmm3	# 3 = 1/jak
+	vtbl.8	q3#lo, {$invlo}, q4#lo	@ vpshufb	
 	vtbl.8	q3#hi, {$invlo}, q4#hi
-	veor	q2, q2, q1		@ vpxor		%xmm1,	%xmm2,	%xmm2  	# 2 = io
-	veor	q3, q3, q0		@ vpxor		%xmm0,	%xmm3,	%xmm3	# 3 = jo
-	vld1.64	{q5}, [r9]!		@ vmovdqu	(%r9),	%xmm5
+	veor	q2, q2, q1		@ vpxor		
+	veor	q3, q3, q0		@ vpxor		
+	vld1.64	{q5}, [r9]!		@ vmovdqu	( 
 	bne	.Lenc_loop
 
 	@ middle of last round
@@ -301,19 +301,19 @@ _vpaes_encrypt_core:
 	adr	r11, .Lk_sbo
 	@ Read to q1 instead of q4, so the vtbl.8 instruction below does not
 	@ overlap table and destination registers.
-	vld1.64 {q1}, [r11]!		@ vmovdqa	-0x60(%r10), %xmm4	# 3 : sbou
-	vld1.64 {q0}, [r11]		@ vmovdqa	-0x50(%r10), %xmm0	# 0 : sbot	.Lk_sbo+16
-	vtbl.8	q4#lo, {q1}, q2#lo	@ vpshufb	%xmm2,	%xmm4,	%xmm4	# 4 = sbou
+	vld1.64 {q1}, [r11]!		@ vmovdqa	-0x60( 
+	vld1.64 {q0}, [r11]		@ vmovdqa	-0x50( 
+	vtbl.8	q4#lo, {q1}, q2#lo	@ vpshufb	
 	vtbl.8	q4#hi, {q1}, q2#hi
-	vld1.64	{q1}, [r10]		@ vmovdqa	0x40(%r11,%r10), %xmm1	# .Lk_sr[]
+	vld1.64	{q1}, [r10]		@ vmovdqa	0x40( 
 	@ Write to q2 instead of q0 below, to avoid overlapping table and
 	@ destination registers.
-	vtbl.8	q2#lo, {q0}, q3#lo	@ vpshufb	%xmm3,	%xmm0,	%xmm0	# 0 = sb1t
+	vtbl.8	q2#lo, {q0}, q3#lo	@ vpshufb	
 	vtbl.8	q2#hi, {q0}, q3#hi
-	veor	q4, q4, q5		@ vpxor	%xmm5,	%xmm4,	%xmm4	# 4 = sb1u + k
-	veor	q2, q2, q4		@ vpxor	%xmm4,	%xmm0,	%xmm0	# 0 = A
+	veor	q4, q4, q5		@ vpxor	
+	veor	q2, q2, q4		@ vpxor	
 	@ Here we restore the original q0/q2 usage.
-	vtbl.8	q0#lo, {q2}, q1#lo	@ vpshufb	%xmm1,	%xmm0,	%xmm0
+	vtbl.8	q0#lo, {q2}, q1#lo	@ vpshufb	
 	vtbl.8	q0#hi, {q2}, q1#hi
 	bx	lr
 .size	_vpaes_encrypt_core,.-_vpaes_encrypt_core
@@ -356,7 +356,7 @@ _vpaes_key_consts:
 	.quad	0x5F36B5DC83EA6900, 0x2841C2ABF49D1E77
 .size	_vpaes_key_consts,.-_vpaes_key_consts
 
-.type	_vpaes_key_preheat,%function
+.type	_vpaes_key_preheat, 
 .align	4
 _vpaes_key_preheat:
 	adr	r11, .Lk_rcon
@@ -368,7 +368,7 @@ _vpaes_key_preheat:
 	bx	lr
 .size	_vpaes_key_preheat,.-_vpaes_key_preheat
 
-.type	_vpaes_schedule_core,%function
+.type	_vpaes_schedule_core, 
 .align	4
 _vpaes_schedule_core:
 	@ We only need to save lr, but ARM requires an 8-byte stack alignment,
@@ -378,25 +378,25 @@ _vpaes_schedule_core:
 	bl	_vpaes_key_preheat	@ load the tables
 
 	adr	r11, .Lk_ipt		@ Must be aligned to 8 mod 16.
-	vld1.64	{q0}, [$inp]!		@ vmovdqu	(%rdi),	%xmm0		# load key (unaligned)
+	vld1.64	{q0}, [$inp]!		@ vmovdqu	( 
 
 	@ input transform
 	@ Use q4 here rather than q3 so .Lschedule_am_decrypting does not
 	@ overlap table and destination.
-	vmov	q4, q0			@ vmovdqa	%xmm0,	%xmm3
+	vmov	q4, q0			@ vmovdqa	
 	bl	_vpaes_schedule_transform
 	adr	r10, .Lk_sr		@ Must be aligned to 8 mod 16.
-	vmov	q7, q0			@ vmovdqa	%xmm0,	%xmm7
+	vmov	q7, q0			@ vmovdqa	
 
 	add	r8, r8, r10
 
 	@ encrypting, output zeroth round key after transform
-	vst1.64	{q0}, [$out]		@ vmovdqu	%xmm0,	(%rdx)
+	vst1.64	{q0}, [$out]		@ vmovdqu	
 
 	@ *ring*: Decryption removed.
 
 .Lschedule_go:
-	cmp	$bits, #192		@ cmp	\$192,	%esi
+	cmp	$bits, #192		@ cmp	\$192,	
 	bhi	.Lschedule_256
 	@ 128: fall though
 
@@ -409,11 +409,11 @@ _vpaes_schedule_core:
 @@  are accomplished by the subroutines.
 @@
 .Lschedule_128:
-	mov	$inp, #10		@ mov	\$10, %esi
+	mov	$inp, #10		@ mov	\$10, 
 
 .Loop_schedule_128:
 	bl 	_vpaes_schedule_round
-	subs	$inp, $inp, #1		@ dec	%esi
+	subs	$inp, $inp, #1		@ dec	
 	beq 	.Lschedule_mangle_last
 	bl	_vpaes_schedule_mangle	@ write output
 	b 	.Loop_schedule_128
@@ -430,27 +430,27 @@ _vpaes_schedule_core:
 @@
 .align	4
 .Lschedule_256:
-	vld1.64	{q0}, [$inp]			@ vmovdqu	16(%rdi),%xmm0		# load key part 2 (unaligned)
+	vld1.64	{q0}, [$inp]			@ vmovdqu	16( 
 	bl	_vpaes_schedule_transform	@ input transform
-	mov	$inp, #7			@ mov	\$7, %esi
+	mov	$inp, #7			@ mov	\$7, 
 
 .Loop_schedule_256:
 	bl	_vpaes_schedule_mangle		@ output low result
-	vmov	q6, q0				@ vmovdqa	%xmm0,	%xmm6		# save cur_lo in xmm6
+	vmov	q6, q0				@ vmovdqa	
 
 	@ high round
 	bl	_vpaes_schedule_round
-	subs	$inp, $inp, #1			@ dec	%esi
+	subs	$inp, $inp, #1			@ dec	
 	beq 	.Lschedule_mangle_last
 	bl	_vpaes_schedule_mangle
 
 	@ low round. swap xmm7 and xmm6
-	vdup.32	q0, q0#hi[1]		@ vpshufd	\$0xFF,	%xmm0,	%xmm0
+	vdup.32	q0, q0#hi[1]		@ vpshufd	\$0xFF,	
 	vmov.i8	q4, #0
-	vmov	q5, q7			@ vmovdqa	%xmm7,	%xmm5
-	vmov	q7, q6			@ vmovdqa	%xmm6,	%xmm7
+	vmov	q5, q7			@ vmovdqa	
+	vmov	q7, q6			@ vmovdqa	
 	bl	_vpaes_schedule_low_round
-	vmov	q7, q5			@ vmovdqa	%xmm5,	%xmm7
+	vmov	q7, q5			@ vmovdqa	
 
 	b	.Loop_schedule_256
 
@@ -467,31 +467,31 @@ _vpaes_schedule_core:
 .align	4
 .Lschedule_mangle_last:
 	@ schedule last round key from xmm0
-	adr	r11, .Lk_deskew			@ lea	.Lk_deskew(%rip),%r11	# prepare to deskew
+	adr	r11, .Lk_deskew			@ lea	.Lk_deskew( 
 
 	@ encrypting
-	vld1.64	{q1}, [r8]		@ vmovdqa	(%r8,%r10),%xmm1
-	adr	r11, .Lk_opt		@ lea		.Lk_opt(%rip),	%r11		# prepare to output transform
-	add	$out, $out, #32		@ add		\$32,	%rdx
+	vld1.64	{q1}, [r8]		@ vmovdqa	( 
+	adr	r11, .Lk_opt		@ lea		.Lk_opt( 
+	add	$out, $out, #32		@ add		\$32,	
 	vmov	q2, q0
-	vtbl.8	q0#lo, {q2}, q1#lo	@ vpshufb	%xmm1,	%xmm0,	%xmm0		# output permute
+	vtbl.8	q0#lo, {q2}, q1#lo	@ vpshufb	
 	vtbl.8	q0#hi, {q2}, q1#hi
 
 .Lschedule_mangle_last_dec:
-	sub	$out, $out, #16			@ add	\$-16,	%rdx
-	veor	q0, q0, $s63			@ vpxor	.Lk_s63(%rip),	%xmm0,	%xmm0
+	sub	$out, $out, #16			@ add	\$-16,	
+	veor	q0, q0, $s63			@ vpxor	.Lk_s63( 
 	bl	_vpaes_schedule_transform	@ output transform
-	vst1.64	{q0}, [$out]			@ vmovdqu	%xmm0,	(%rdx)		# save last key
+	vst1.64	{q0}, [$out]			@ vmovdqu	
 
 	@ cleanup
-	veor	q0, q0, q0		@ vpxor	%xmm0,	%xmm0,	%xmm0
-	veor	q1, q1, q1		@ vpxor	%xmm1,	%xmm1,	%xmm1
-	veor	q2, q2, q2		@ vpxor	%xmm2,	%xmm2,	%xmm2
-	veor	q3, q3, q3		@ vpxor	%xmm3,	%xmm3,	%xmm3
-	veor	q4, q4, q4		@ vpxor	%xmm4,	%xmm4,	%xmm4
-	veor	q5, q5, q5		@ vpxor	%xmm5,	%xmm5,	%xmm5
-	veor	q6, q6, q6		@ vpxor	%xmm6,	%xmm6,	%xmm6
-	veor	q7, q7, q7		@ vpxor	%xmm7,	%xmm7,	%xmm7
+	veor	q0, q0, q0		@ vpxor	
+	veor	q1, q1, q1		@ vpxor	
+	veor	q2, q2, q2		@ vpxor	
+	veor	q3, q3, q3		@ vpxor	
+	veor	q4, q4, q4		@ vpxor	
+	veor	q5, q5, q5		@ vpxor	
+	veor	q6, q6, q6		@ vpxor	
+	veor	q7, q7, q7		@ vpxor	
 	ldmia	sp!, {r3,pc}		@ return
 .size	_vpaes_schedule_core,.-_vpaes_schedule_core
 
@@ -513,62 +513,62 @@ _vpaes_schedule_core:
 @@  Returns results in q7 = q0.
 @@  Clobbers q1-q4, r11.
 @@
-.type	_vpaes_schedule_round,%function
+.type	_vpaes_schedule_round, 
 .align	4
 _vpaes_schedule_round:
 	@ extract rcon from xmm8
-	vmov.i8	q4, #0				@ vpxor		%xmm4,	%xmm4,	%xmm4
-	vext.8	q1, $rcon, q4, #15		@ vpalignr	\$15,	%xmm8,	%xmm4,	%xmm1
-	vext.8	$rcon, $rcon, $rcon, #15	@ vpalignr	\$15,	%xmm8,	%xmm8,	%xmm8
-	veor	q7, q7, q1			@ vpxor		%xmm1,	%xmm7,	%xmm7
+	vmov.i8	q4, #0				@ vpxor		
+	vext.8	q1, $rcon, q4, #15		@ vpalignr	\$15,	
+	vext.8	$rcon, $rcon, $rcon, #15	@ vpalignr	\$15,	
+	veor	q7, q7, q1			@ vpxor		
 
 	@ rotate
-	vdup.32	q0, q0#hi[1]			@ vpshufd	\$0xFF,	%xmm0,	%xmm0
-	vext.8	q0, q0, q0, #1			@ vpalignr	\$1,	%xmm0,	%xmm0,	%xmm0
+	vdup.32	q0, q0#hi[1]			@ vpshufd	\$0xFF,	
+	vext.8	q0, q0, q0, #1			@ vpalignr	\$1,	
 
 	@ fall through...
 
 	@ low round: same as high round, but no rotation and no rcon.
 _vpaes_schedule_low_round:
-	@ The x86_64 version pins .Lk_sb1 in %xmm13 and .Lk_sb1+16 in %xmm12.
+	@ The x86_64 version pins .Lk_sb1 in 
 	@ We pin other values in _vpaes_key_preheat, so load them now.
 	adr	r11, .Lk_sb1
 	vld1.64	{q14,q15}, [r11]
 
 	@ smear xmm7
-	vext.8	q1, q4, q7, #12			@ vpslldq	\$4,	%xmm7,	%xmm1
-	veor	q7, q7, q1			@ vpxor	%xmm1,	%xmm7,	%xmm7
-	vext.8	q4, q4, q7, #8			@ vpslldq	\$8,	%xmm7,	%xmm4
+	vext.8	q1, q4, q7, #12			@ vpslldq	\$4,	
+	veor	q7, q7, q1			@ vpxor	
+	vext.8	q4, q4, q7, #8			@ vpslldq	\$8,	
 
 	@ subbytes
-	vand	q1, q0, $s0F			@ vpand		%xmm9,	%xmm0,	%xmm1		# 0 = k
-	vshr.u8	q0, q0, #4			@ vpsrlb	\$4,	%xmm0,	%xmm0		# 1 = i
-	 veor	q7, q7, q4			@ vpxor		%xmm4,	%xmm7,	%xmm7
-	vtbl.8	q2#lo, {$invhi}, q1#lo		@ vpshufb	%xmm1,	%xmm11,	%xmm2		# 2 = a/k
+	vand	q1, q0, $s0F			@ vpand		
+	vshr.u8	q0, q0, #4			@ vpsrlb	\$4,	
+	 veor	q7, q7, q4			@ vpxor		
+	vtbl.8	q2#lo, {$invhi}, q1#lo		@ vpshufb	
 	vtbl.8	q2#hi, {$invhi}, q1#hi
-	veor	q1, q1, q0			@ vpxor		%xmm0,	%xmm1,	%xmm1		# 0 = j
-	vtbl.8	q3#lo, {$invlo}, q0#lo		@ vpshufb	%xmm0, 	%xmm10,	%xmm3		# 3 = 1/i
+	veor	q1, q1, q0			@ vpxor		
+	vtbl.8	q3#lo, {$invlo}, q0#lo		@ vpshufb	
 	vtbl.8	q3#hi, {$invlo}, q0#hi
-	veor	q3, q3, q2			@ vpxor		%xmm2,	%xmm3,	%xmm3		# 3 = iak = 1/i + a/k
-	vtbl.8	q4#lo, {$invlo}, q1#lo		@ vpshufb	%xmm1,	%xmm10,	%xmm4		# 4 = 1/j
+	veor	q3, q3, q2			@ vpxor		
+	vtbl.8	q4#lo, {$invlo}, q1#lo		@ vpshufb	
 	vtbl.8	q4#hi, {$invlo}, q1#hi
-	 veor	q7, q7, $s63			@ vpxor		.Lk_s63(%rip),	%xmm7,	%xmm7
-	vtbl.8	q3#lo, {$invlo}, q3#lo		@ vpshufb	%xmm3,	%xmm10,	%xmm3		# 2 = 1/iak
+	 veor	q7, q7, $s63			@ vpxor		.Lk_s63( 
+	vtbl.8	q3#lo, {$invlo}, q3#lo		@ vpshufb	
 	vtbl.8	q3#hi, {$invlo}, q3#hi
-	veor	q4, q4, q2			@ vpxor		%xmm2,	%xmm4,	%xmm4		# 4 = jak = 1/j + a/k
-	vtbl.8	q2#lo, {$invlo}, q4#lo		@ vpshufb	%xmm4,	%xmm10,	%xmm2		# 3 = 1/jak
+	veor	q4, q4, q2			@ vpxor		
+	vtbl.8	q2#lo, {$invlo}, q4#lo		@ vpshufb	
 	vtbl.8	q2#hi, {$invlo}, q4#hi
-	veor	q3, q3, q1			@ vpxor		%xmm1,	%xmm3,	%xmm3		# 2 = io
-	veor	q2, q2, q0			@ vpxor		%xmm0,	%xmm2,	%xmm2		# 3 = jo
-	vtbl.8	q4#lo, {q15}, q3#lo		@ vpshufb	%xmm3,	%xmm13,	%xmm4		# 4 = sbou
+	veor	q3, q3, q1			@ vpxor		
+	veor	q2, q2, q0			@ vpxor		
+	vtbl.8	q4#lo, {q15}, q3#lo		@ vpshufb	
 	vtbl.8	q4#hi, {q15}, q3#hi
-	vtbl.8	q1#lo, {q14}, q2#lo		@ vpshufb	%xmm2,	%xmm12,	%xmm1		# 0 = sb1t
+	vtbl.8	q1#lo, {q14}, q2#lo		@ vpshufb	
 	vtbl.8	q1#hi, {q14}, q2#hi
-	veor	q1, q1, q4			@ vpxor		%xmm4,	%xmm1,	%xmm1		# 0 = sbox output
+	veor	q1, q1, q4			@ vpxor		
 
 	@ add in smeared stuff
-	veor	q0, q1, q7			@ vpxor	%xmm7,	%xmm1,	%xmm0
-	veor	q7, q1, q7			@ vmovdqa	%xmm0,	%xmm7
+	veor	q0, q1, q7			@ vpxor	
+	veor	q7, q1, q7			@ vmovdqa	
 	bx	lr
 .size	_vpaes_schedule_round,.-_vpaes_schedule_round
 
@@ -581,18 +581,18 @@ _vpaes_schedule_low_round:
 @@  Output in q0
 @@  Clobbers q1, q2, q14, q15
 @@
-.type	_vpaes_schedule_transform,%function
+.type	_vpaes_schedule_transform, 
 .align	4
 _vpaes_schedule_transform:
-	vld1.64	{q14,q15}, [r11]	@ vmovdqa	(%r11),	%xmm2 	# lo
-					@ vmovdqa	16(%r11),	%xmm1 # hi
-	vand	q1, q0, $s0F		@ vpand	%xmm9,	%xmm0,	%xmm1
-	vshr.u8	q0, q0, #4		@ vpsrlb	\$4,	%xmm0,	%xmm0
-	vtbl.8	q2#lo, {q14}, q1#lo	@ vpshufb	%xmm1,	%xmm2,	%xmm2
+	vld1.64	{q14,q15}, [r11]	@ vmovdqa	( 
+					@ vmovdqa	16( 
+	vand	q1, q0, $s0F		@ vpand	
+	vshr.u8	q0, q0, #4		@ vpsrlb	\$4,	
+	vtbl.8	q2#lo, {q14}, q1#lo	@ vpshufb	
 	vtbl.8	q2#hi, {q14}, q1#hi
-	vtbl.8	q0#lo, {q15}, q0#lo	@ vpshufb	%xmm0,	%xmm1,	%xmm0
+	vtbl.8	q0#lo, {q15}, q0#lo	@ vpshufb	
 	vtbl.8	q0#hi, {q15}, q0#hi
-	veor	q0, q0, q2		@ vpxor	%xmm2,	%xmm0,	%xmm0
+	veor	q0, q0, q2		@ vpxor	
 	bx	lr
 .size	_vpaes_schedule_transform,.-_vpaes_schedule_transform
 
@@ -619,51 +619,51 @@ _vpaes_schedule_transform:
 @@  Preserves q0
 @@  Clobbers q1-q5
 @@
-.type	_vpaes_schedule_mangle,%function
+.type	_vpaes_schedule_mangle, 
 .align	4
 _vpaes_schedule_mangle:
 	tst	$dir, $dir
-	vmov	q4, q0			@ vmovdqa	%xmm0,	%xmm4	# save xmm0 for later
+	vmov	q4, q0			@ vmovdqa	
 	adr	r11, .Lk_mc_forward	@ Must be aligned to 8 mod 16.
-	vld1.64	{q5}, [r11]		@ vmovdqa	.Lk_mc_forward(%rip),%xmm5
+	vld1.64	{q5}, [r11]		@ vmovdqa	.Lk_mc_forward( 
 
 	@ encrypting
 	@ Write to q2 so we do not overlap table and destination below.
-	veor	q2, q0, $s63		@ vpxor		.Lk_s63(%rip),	%xmm0,	%xmm4
-	add	$out, $out, #16		@ add		\$16,	%rdx
-	vtbl.8	q4#lo, {q2}, q5#lo	@ vpshufb	%xmm5,	%xmm4,	%xmm4
+	veor	q2, q0, $s63		@ vpxor		.Lk_s63( 
+	add	$out, $out, #16		@ add		\$16,	
+	vtbl.8	q4#lo, {q2}, q5#lo	@ vpshufb	
 	vtbl.8	q4#hi, {q2}, q5#hi
-	vtbl.8	q1#lo, {q4}, q5#lo	@ vpshufb	%xmm5,	%xmm4,	%xmm1
+	vtbl.8	q1#lo, {q4}, q5#lo	@ vpshufb	
 	vtbl.8	q1#hi, {q4}, q5#hi
-	vtbl.8	q3#lo, {q1}, q5#lo	@ vpshufb	%xmm5,	%xmm1,	%xmm3
+	vtbl.8	q3#lo, {q1}, q5#lo	@ vpshufb	
 	vtbl.8	q3#hi, {q1}, q5#hi
-	veor	q4, q4, q1		@ vpxor		%xmm1,	%xmm4,	%xmm4
-	vld1.64	{q1}, [r8]		@ vmovdqa	(%r8,%r10),	%xmm1
-	veor	q3, q3, q4		@ vpxor		%xmm4,	%xmm3,	%xmm3
+	veor	q4, q4, q1		@ vpxor		
+	vld1.64	{q1}, [r8]		@ vmovdqa	( 
+	veor	q3, q3, q4		@ vpxor		
 
 .Lschedule_mangle_both:
 	@ Write to q2 so table and destination do not overlap.
-	vtbl.8	q2#lo, {q3}, q1#lo	@ vpshufb	%xmm1,	%xmm3,	%xmm3
+	vtbl.8	q2#lo, {q3}, q1#lo	@ vpshufb	
 	vtbl.8	q2#hi, {q3}, q1#hi
-	add	r8, r8, #64-16		@ add	\$-16,	%r8
-	and	r8, r8, #~(1<<6)	@ and	\$0x30,	%r8
-	vst1.64	{q2}, [$out]		@ vmovdqu	%xmm3,	(%rdx)
+	add	r8, r8, #64-16		@ add	\$-16,	
+	and	r8, r8, #~(1<<6)	@ and	\$0x30,	
+	vst1.64	{q2}, [$out]		@ vmovdqu	
 	bx	lr
 .size	_vpaes_schedule_mangle,.-_vpaes_schedule_mangle
 
 .globl	vpaes_set_encrypt_key
-.type	vpaes_set_encrypt_key,%function
+.type	vpaes_set_encrypt_key, 
 .align	4
 vpaes_set_encrypt_key:
 	stmdb	sp!, {r7-r11, lr}
 	vstmdb	sp!, {d8-d15}
 
-	lsr	r9, $bits, #5		@ shr	\$5,%eax
-	add	r9, r9, #5		@ \$5,%eax
-	str	r9, [$out,#240]		@ mov	%eax,240(%rdx)	# AES_KEY->rounds = nbits/32+5;
+	lsr	r9, $bits, #5		@ shr	\$5, 
+	add	r9, r9, #5		@ \$5, 
+	str	r9, [$out,#240]		@ mov	
 
-	mov	$dir, #0		@ mov	\$0,%ecx
-	mov	r8, #0x30		@ mov	\$0x30,%r8d
+	mov	$dir, #0		@ mov	\$0, 
+	mov	r8, #0x30		@ mov	\$0x30, 
 	bl	_vpaes_schedule_core
 	eor	r0, r0, r0
 
@@ -680,7 +680,7 @@ my ($s0F, $s63, $s63_raw, $mc_forward) = map("q$_", (9..12));
 $code .= <<___;
 
 @ Additional constants for converting to bsaes.
-.type	_vpaes_convert_consts,%object
+.type	_vpaes_convert_consts, 
 .align	4
 _vpaes_convert_consts:
 @ .Lk_opt_then_skew applies skew(opt(x)) XOR 0x63, where skew is the linear
@@ -712,15 +712,15 @@ _vpaes_convert_consts:
 @   for i in range(16):
 @       table[0] |= (skew(opt(i)) ^ 0x63) << (i*8)
 @       table[1] |= skew(opt(i<<4)) << (i*8)
-@   print("\t.quad\t0x%016x, 0x%016x" % u128_to_u64s(table[0]))
-@   print("\t.quad\t0x%016x, 0x%016x" % u128_to_u64s(table[1]))
+@   print("\t.quad\t0x%016x, 0x%016x" 
+@   print("\t.quad\t0x%016x, 0x%016x" 
 .Lk_opt_then_skew:
 	.quad	0x9cb8436798bc4763, 0x6440bb9f6044bf9b
 	.quad	0x1f30062936192f00, 0xb49bad829db284ab
 
 @ void vpaes_encrypt_key_to_bsaes(AES_KEY *bsaes, const AES_KEY *vpaes);
 .globl	vpaes_encrypt_key_to_bsaes
-.type	vpaes_encrypt_key_to_bsaes,%function
+.type	vpaes_encrypt_key_to_bsaes, 
 .align	4
 vpaes_encrypt_key_to_bsaes:
 	stmdb	sp!, {r11, lr}
@@ -828,7 +828,7 @@ my ($ctr, $ivec, $tmp) = map("r$_", 7..9);
 #                                 const AES_KEY *key, const uint8_t ivec[16]);
 $code .= <<___;
 .globl	vpaes_ctr32_encrypt_blocks
-.type	vpaes_ctr32_encrypt_blocks,%function
+.type	vpaes_ctr32_encrypt_blocks, 
 .align	4
 vpaes_ctr32_encrypt_blocks:
 	mov	ip, sp

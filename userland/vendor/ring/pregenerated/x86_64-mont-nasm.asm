@@ -1,5 +1,5 @@
-; This file is generated from a similarly-named Perl script in the BoringSSL
-; source tree. Do not edit by hand.
+
+
 
 %ifidn __OUTPUT_FORMAT__, win64
 default	rel
@@ -16,7 +16,7 @@ global	bn_mul_mont_nohw
 
 ALIGN	16
 bn_mul_mont_nohw:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_bn_mul_mont_nohw:
@@ -262,7 +262,7 @@ $L$copy:
 	lea	rsp,[rsi]
 
 $L$mul_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -271,7 +271,7 @@ global	bn_mul4x_mont
 
 ALIGN	16
 bn_mul4x_mont:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_bn_mul4x_mont:
@@ -708,7 +708,7 @@ $L$copy4x:
 	lea	rsp,[rsi]
 
 $L$mul4x_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -720,7 +720,7 @@ global	bn_sqr8x_mont
 
 ALIGN	32
 bn_sqr8x_mont:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_bn_sqr8x_mont:
@@ -912,7 +912,7 @@ $L$sqr8x_cond_copy:
 	lea	rsp,[rsi]
 
 $L$sqr8x_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -921,7 +921,7 @@ global	bn_mulx4x_mont
 
 ALIGN	32
 bn_mulx4x_mont:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_bn_mulx4x_mont:
@@ -1283,7 +1283,7 @@ $L$mulx4x_cond_copy:
 	lea	rsp,[rsi]
 
 $L$mulx4x_epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -1463,6 +1463,6 @@ $L$SEH_info_bn_mulx4x_mont:
 	DD	$L$mulx4x_prologue wrt ..imagebase,$L$mulx4x_body wrt ..imagebase,$L$mulx4x_epilogue wrt ..imagebase
 ALIGN	8
 %else
-; Work around https://bugzilla.nasm.us/show_bug.cgi?id=3392738
+
 ret
 %endif

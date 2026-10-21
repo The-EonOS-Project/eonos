@@ -27,13 +27,13 @@
 #
 #			IALU/gcc-4.9    3xNEON+1xIALU	6xNEON+2xIALU
 #
-# Apple A7		5.50/+49%       3.33            1.70
-# Cortex-A53		8.40/+80%       4.72		4.72(*)
-# Cortex-A57		8.06/+43%       4.90            4.43(**)
-# Denver		4.50/+82%       2.63		2.67(*)
-# X-Gene		9.50/+46%       8.82		8.89(*)
-# Mongoose		8.00/+44%	3.64		3.25
-# Kryo			8.17/+50%	4.83		4.65
+# Apple A7		5.50/+49 
+# Cortex-A53		8.40/+80 
+# Cortex-A57		8.06/+43 
+# Denver		4.50/+82 
+# X-Gene		9.50/+46 
+# Mongoose		8.00/+44 
+# Kryo			8.17/+50 
 #
 # (*)	it's expected that doubling interleave factor doesn't help
 #	all processors, only those with higher NEON latency and

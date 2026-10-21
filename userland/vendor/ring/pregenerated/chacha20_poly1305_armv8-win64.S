@@ -1,5 +1,5 @@
-// This file is generated from a similarly-named Perl script in the BoringSSL
-// source tree. Do not edit by hand.
+
+
 
 #include <ring-core/asm_base.h>
 
@@ -34,14 +34,14 @@ Lpoly_hash_intro:
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -51,22 +51,22 @@ Lpoly_hash_intro:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 	sub	x4, x4, #16
 	b	Lpoly_hash_ad_internal
 
 Lpoly_hash_ad_tail:
 	cbz	x4, Lpoly_hash_ad_ret
 
-	eor	v20.16b, v20.16b, v20.16b // Use T0 to load the AAD
+	eor	v20.16b, v20.16b, v20.16b 
 	sub	x4, x4, #1
 
 Lpoly_hash_tail_16_compose:
@@ -80,14 +80,14 @@ Lpoly_hash_tail_16_compose:
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -97,25 +97,25 @@ Lpoly_hash_tail_16_compose:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 
 Lpoly_hash_ad_ret:
 	ret
 .cfi_endproc
 
 
-/////////////////////////////////
-//
-// void chacha20_poly1305_seal(uint8_t *pt, uint8_t *ct, size_t len_in, uint8_t *ad, size_t len_ad, union open_data *seal_data);
-//
+
+
+
+
 .globl	chacha20_poly1305_seal
 
 .def chacha20_poly1305_seal
@@ -130,9 +130,9 @@ chacha20_poly1305_seal:
 .cfi_offset	w30, -72
 .cfi_offset	w29, -80
 	mov	x29, sp
-    // We probably could do .cfi_def_cfa w29, 80 at this point, but since
-    // we don't actually use the frame pointer like that, it's probably not
-    // worth bothering.
+    
+    
+    
 	stp	d8, d9, [sp, #16]
 	stp	d10, d11, [sp, #32]
 	stp	d12, d13, [sp, #48]
@@ -149,25 +149,25 @@ chacha20_poly1305_seal:
 	adrp	x11, Lchacha20_consts
 	add	x11, x11, :lo12:Lchacha20_consts
 
-	ld1	{v24.16b - v27.16b}, [x11] // Load the CONSTS, INC, ROL8 and CLAMP values
+	ld1	{v24.16b - v27.16b}, [x11] 
 	ld1	{v28.16b - v30.16b}, [x5]
 
-	mov	x15, #1 // Prepare the Poly1305 state
+	mov	x15, #1 
 	mov	x8, #0
 	mov	x9, #0
 	mov	x10, #0
 
-	ldr	x12, [x5, #56]   // The total cipher text length includes extra_in_len
+	ldr	x12, [x5, #56]   
 	add	x12, x12, x2
-	mov	v31.d[0], x4  // Store the input and aad lengths
+	mov	v31.d[0], x4  
 	mov	v31.d[1], x12
 
 	cmp	x2, #128
-	b.le	Lseal_128 // Optimization for smaller buffers
+	b.le	Lseal_128 
 
-    // Initially we prepare 5 ChaCha20 blocks. Four to encrypt up to 4 blocks (256 bytes) of plaintext,
-    // and one for the Poly1305 R and S keys. The first four blocks (A0-A3..D0-D3) are computed vertically,
-    // the fifth block (A4-D4) horizontally.
+    
+    
+    
 	ld4r	{v0.4s,v1.4s,v2.4s,v3.4s}, [x11]
 	mov	v4.16b, v24.16b
 
@@ -429,9 +429,9 @@ Lseal_init_rounds:
 	add	v13.4s, v13.4s, v29.4s
 	add	v18.4s, v18.4s, v30.4s
 
-	mov	x16, v4.d[0] // Move the R key to GPRs
+	mov	x16, v4.d[0] 
 	mov	x17, v4.d[1]
-	mov	v27.16b, v9.16b // Store the S key
+	mov	v27.16b, v9.16b 
 
 	bl	Lpoly_hash_ad_internal
 
@@ -469,8 +469,8 @@ Lseal_init_rounds:
 
 	sub	x2, x2, #256
 
-	mov	x6, #4 // In the first run of the loop we need to hash 256 bytes, therefore we hash one block for the first 4 rounds
-	mov	x7, #6 // and two blocks for the remaining 6, for a total of (1 * 4 + 2 * 6) * 16 = 256
+	mov	x6, #4 
+	mov	x7, #6 
 
 Lseal_main_loop:
 	adrp	x11, Lchacha20_consts
@@ -489,10 +489,10 @@ Lseal_main_loop:
 	add	v15.4s, v15.4s, v25.4s
 	mov	v19.16b, v30.16b
 
-	eor	v20.16b, v20.16b, v20.16b //zero
-	not	v21.16b, v20.16b // -1
-	sub	v21.4s, v25.4s, v21.4s // Add +1
-	ext	v20.16b, v21.16b, v20.16b, #12 // Get the last element (counter)
+	eor	v20.16b, v20.16b, v20.16b 
+	not	v21.16b, v20.16b 
+	sub	v21.4s, v25.4s, v21.4s 
+	ext	v20.16b, v21.16b, v20.16b, #12 
 	add	v19.4s, v19.4s, v20.4s
 
 	sub	x5, x5, #32
@@ -587,14 +587,14 @@ Lseal_main_loop_rounds:
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -604,15 +604,15 @@ Lseal_main_loop_rounds:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 	add	v0.4s, v0.4s, v6.4s
 	add	v1.4s, v1.4s, v7.4s
 	add	v2.4s, v2.4s, v8.4s
@@ -704,14 +704,14 @@ Lseal_main_loop_rounds:
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -721,22 +721,22 @@ Lseal_main_loop_rounds:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 	subs	x7, x7, #1
 	b.gt	Lseal_main_loop_rounds
 
-	eor	v20.16b, v20.16b, v20.16b //zero
-	not	v21.16b, v20.16b // -1
-	sub	v21.4s, v25.4s, v21.4s // Add +1
-	ext	v20.16b, v21.16b, v20.16b, #12 // Get the last element (counter)
+	eor	v20.16b, v20.16b, v20.16b 
+	not	v21.16b, v20.16b 
+	sub	v21.4s, v25.4s, v21.4s 
+	ext	v20.16b, v21.16b, v20.16b, #12 
 	add	v19.4s, v19.4s, v20.4s
 
 	add	v15.4s, v15.4s, v25.4s
@@ -850,17 +850,17 @@ Lseal_main_loop_rounds:
 	sub	x2, x2, #320
 
 	mov	x6, #0
-	mov	x7, #10 // For the remainder of the loop we always hash and encrypt 320 bytes per iteration
+	mov	x7, #10 
 
 	b	Lseal_main_loop
 
 Lseal_tail:
-    // This part of the function handles the storage and authentication of the last [0,320) bytes
-    // We assume A0-A4 ... D0-D4 hold at least inl (320 max) bytes of the stream data.
+    
+    
 	cmp	x2, #64
 	b.lt	Lseal_tail_64
 
-    // Store and authenticate 64B blocks per iteration
+    
 	ld1	{v20.16b - v23.16b}, [x1], #64
 
 	eor	v20.16b, v20.16b, v0.16b
@@ -872,14 +872,14 @@ Lseal_tail:
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -889,28 +889,28 @@ Lseal_tail:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 	mov	x11, v21.d[0]
 	mov	x12, v21.d[1]
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -920,28 +920,28 @@ Lseal_tail:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 	mov	x11, v22.d[0]
 	mov	x12, v22.d[1]
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -951,28 +951,28 @@ Lseal_tail:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 	mov	x11, v23.d[0]
 	mov	x12, v23.d[1]
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -982,19 +982,19 @@ Lseal_tail:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 	st1	{v20.16b - v23.16b}, [x0], #64
 	sub	x2, x2, #64
 
-    // Shift the state left by 64 bytes for the next iteration of the loop
+    
 	mov	v0.16b, v1.16b
 	mov	v5.16b, v6.16b
 	mov	v10.16b, v11.16b
@@ -1018,12 +1018,12 @@ Lseal_tail:
 	b	Lseal_tail
 
 Lseal_tail_64:
-	ldp	x3, x4, [x5, #48] // extra_in_len and extra_in_ptr
+	ldp	x3, x4, [x5, #48] 
 
-    // Here we handle the last [0,64) bytes of plaintext
+    
 	cmp	x2, #16
 	b.lt	Lseal_tail_16
-    // Each iteration encrypt and authenticate a 16B block
+    
 	ld1	{v20.16b}, [x1], #16
 	eor	v20.16b, v20.16b, v0.16b
 	mov	x11, v20.d[0]
@@ -1031,14 +1031,14 @@ Lseal_tail_64:
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -1048,20 +1048,20 @@ Lseal_tail_64:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 	st1	{v20.16b}, [x0], #16
 
 	sub	x2, x2, #16
 
-    // Shift the state left by 16 bytes for the next iteration of the loop
+    
 	mov	v0.16b, v5.16b
 	mov	v5.16b, v10.16b
 	mov	v10.16b, v15.16b
@@ -1069,22 +1069,22 @@ Lseal_tail_64:
 	b	Lseal_tail_64
 
 Lseal_tail_16:
-    // Here we handle the last [0,16) bytes of ciphertext that require a padded block
+    
 	cbz	x2, Lseal_hash_extra
 
-	eor	v20.16b, v20.16b, v20.16b // Use T0 to load the plaintext/extra in
-	eor	v21.16b, v21.16b, v21.16b // Use T1 to generate an AND mask that will only mask the ciphertext bytes
+	eor	v20.16b, v20.16b, v20.16b 
+	eor	v21.16b, v21.16b, v21.16b 
 	not	v22.16b, v20.16b
 
 	mov	x6, x2
 	add	x1, x1, x2
 
-	cbz	x4, Lseal_tail_16_compose // No extra data to pad with, zero padding
+	cbz	x4, Lseal_tail_16_compose 
 
-	mov	x7, #16          // We need to load some extra_in first for padding
+	mov	x7, #16          
 	sub	x7, x7, x2
 	cmp	x4, x7
-	csel	x7, x4, x7, lt // Load the minimum of extra_in_len and the amount needed to fill the register
+	csel	x7, x4, x7, lt 
 	mov	x12, x7
 	add	x3, x3, x7
 	sub	x4, x4, x7
@@ -1117,20 +1117,20 @@ Lseal_tail_16_store:
 	subs	x6, x6, #1
 	b.gt	Lseal_tail_16_store
 
-    // Hash in the final ct block concatenated with extra_in
+    
 	mov	x11, v21.d[0]
 	mov	x12, v21.d[1]
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -1140,15 +1140,15 @@ Lseal_tail_16_store:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 
 Lseal_hash_extra:
 	cbz	x4, Lseal_finalize
@@ -1162,14 +1162,14 @@ Lseal_hash_extra_loop:
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -1179,21 +1179,21 @@ Lseal_hash_extra_loop:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 	sub	x4, x4, #16
 	b	Lseal_hash_extra_loop
 
 Lseal_hash_extra_tail:
 	cbz	x4, Lseal_finalize
-	eor	v20.16b, v20.16b, v20.16b // Use T0 to load the remaining extra ciphertext
+	eor	v20.16b, v20.16b, v20.16b 
 	add	x3, x3, x4
 
 Lseal_hash_extra_load:
@@ -1203,20 +1203,20 @@ Lseal_hash_extra_load:
 	subs	x4, x4, #1
 	b.gt	Lseal_hash_extra_load
 
-    // Hash in the final padded extra_in blcok
+    
 	mov	x11, v20.d[0]
 	mov	x12, v20.d[1]
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -1226,15 +1226,15 @@ Lseal_hash_extra_load:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 
 Lseal_finalize:
 	mov	x11, v31.d[0]
@@ -1242,14 +1242,14 @@ Lseal_finalize:
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -1259,16 +1259,16 @@ Lseal_finalize:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
-    // Final reduction step
+	adc	x10, x10, xzr      
+    
 	sub	x12, xzr, x15
 	orr	x13, xzr, #3
 	subs	x11, x8, #-5
@@ -1305,7 +1305,7 @@ Lseal_finalize:
 	ret
 
 Lseal_128:
-    // On some architectures preparing 5 blocks for small buffers is wasteful
+    
 	eor	v25.16b, v25.16b, v25.16b
 	mov	x11, #1
 	mov	v25.s[0], w11
@@ -1450,8 +1450,8 @@ Lseal_128_rounds:
 	add	v6.4s, v6.4s, v28.4s
 	add	v7.4s, v7.4s, v28.4s
 
-    // Only the first 32 bytes of the third block (counter = 0) are needed,
-    // so skip updating v12 and v17.
+    
+    
 	add	v10.4s, v10.4s, v29.4s
 	add	v11.4s, v11.4s, v29.4s
 
@@ -1461,19 +1461,19 @@ Lseal_128_rounds:
 	add	v16.4s, v16.4s, v30.4s
 
 	and	v2.16b, v2.16b, v27.16b
-	mov	x16, v2.d[0] // Move the R key to GPRs
+	mov	x16, v2.d[0] 
 	mov	x17, v2.d[1]
-	mov	v27.16b, v7.16b // Store the S key
+	mov	v27.16b, v7.16b 
 
 	bl	Lpoly_hash_ad_internal
 	b	Lseal_tail
 .cfi_endproc
 
 
-/////////////////////////////////
-//
-// void chacha20_poly1305_open(uint8_t *pt, uint8_t *ct, size_t len_in, uint8_t *ad, size_t len_ad, union open_data *aead_data);
-//
+
+
+
+
 .globl	chacha20_poly1305_open
 
 .def chacha20_poly1305_open
@@ -1488,9 +1488,9 @@ chacha20_poly1305_open:
 .cfi_offset	w30, -72
 .cfi_offset	w29, -80
 	mov	x29, sp
-    // We probably could do .cfi_def_cfa w29, 80 at this point, but since
-    // we don't actually use the frame pointer like that, it's probably not
-    // worth bothering.
+    
+    
+    
 	stp	d8, d9, [sp, #16]
 	stp	d10, d11, [sp, #32]
 	stp	d12, d13, [sp, #48]
@@ -1507,21 +1507,21 @@ chacha20_poly1305_open:
 	adrp	x11, Lchacha20_consts
 	add	x11, x11, :lo12:Lchacha20_consts
 
-	ld1	{v24.16b - v27.16b}, [x11] // Load the CONSTS, INC, ROL8 and CLAMP values
+	ld1	{v24.16b - v27.16b}, [x11] 
 	ld1	{v28.16b - v30.16b}, [x5]
 
-	mov	x15, #1 // Prepare the Poly1305 state
+	mov	x15, #1 
 	mov	x8, #0
 	mov	x9, #0
 	mov	x10, #0
 
-	mov	v31.d[0], x4  // Store the input and aad lengths
+	mov	v31.d[0], x4  
 	mov	v31.d[1], x2
 
 	cmp	x2, #128
-	b.le	Lopen_128 // Optimization for smaller buffers
+	b.le	Lopen_128 
 
-    // Initially we prepare a single ChaCha20 block for the Poly1305 R and S keys
+    
 	mov	v0.16b, v24.16b
 	mov	v5.16b, v28.16b
 	mov	v10.16b, v29.16b
@@ -1576,16 +1576,16 @@ Lopen_init_rounds:
 	add	v5.4s, v5.4s, v28.4s
 
 	and	v0.16b, v0.16b, v27.16b
-	mov	x16, v0.d[0] // Move the R key to GPRs
+	mov	x16, v0.d[0] 
 	mov	x17, v0.d[1]
-	mov	v27.16b, v5.16b // Store the S key
+	mov	v27.16b, v5.16b 
 
 	bl	Lpoly_hash_ad_internal
 
 Lopen_ad_done:
 	mov	x3, x1
 
-// Each iteration of the loop hash 320 bytes, and prepare stream for 320 bytes
+
 Lopen_main_loop:
 
 	cmp	x2, #192
@@ -1608,19 +1608,19 @@ Lopen_main_loop:
 	add	v15.4s, v15.4s, v25.4s
 	mov	v19.16b, v30.16b
 
-	eor	v20.16b, v20.16b, v20.16b //zero
-	not	v21.16b, v20.16b // -1
-	sub	v21.4s, v25.4s, v21.4s // Add +1
-	ext	v20.16b, v21.16b, v20.16b, #12 // Get the last element (counter)
+	eor	v20.16b, v20.16b, v20.16b 
+	not	v21.16b, v20.16b 
+	sub	v21.4s, v25.4s, v21.4s 
+	ext	v20.16b, v21.16b, v20.16b, #12 
 	add	v19.4s, v19.4s, v20.4s
 
-	lsr	x4, x2, #4 // How many whole blocks we have to hash, will always be at least 12
+	lsr	x4, x2, #4 
 	sub	x4, x4, #10
 
 	mov	x7, #10
 	subs	x6, x7, x4
-	subs	x6, x7, x4 // itr1 can be negative if we have more than 320 bytes to hash
-	csel	x7, x7, x4, le // if itr1 is zero or less, itr2 should be 10 to indicate all 10 rounds are full
+	subs	x6, x7, x4 
+	csel	x7, x7, x4, le 
 
 	cbz	x7, Lopen_main_loop_rounds_short
 
@@ -1630,14 +1630,14 @@ Lopen_main_loop_rounds:
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -1647,15 +1647,15 @@ Lopen_main_loop_rounds:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 Lopen_main_loop_rounds_short:
 	add	v0.4s, v0.4s, v5.4s
 	add	v1.4s, v1.4s, v6.4s
@@ -1746,14 +1746,14 @@ Lopen_main_loop_rounds_short:
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -1763,15 +1763,15 @@ Lopen_main_loop_rounds_short:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 	add	v0.4s, v0.4s, v6.4s
 	add	v1.4s, v1.4s, v7.4s
 	add	v2.4s, v2.4s, v8.4s
@@ -1862,10 +1862,10 @@ Lopen_main_loop_rounds_short:
 	subs	x6, x6, #1
 	b.ge	Lopen_main_loop_rounds_short
 
-	eor	v20.16b, v20.16b, v20.16b //zero
-	not	v21.16b, v20.16b // -1
-	sub	v21.4s, v25.4s, v21.4s // Add +1
-	ext	v20.16b, v21.16b, v20.16b, #12 // Get the last element (counter)
+	eor	v20.16b, v20.16b, v20.16b 
+	not	v21.16b, v20.16b 
+	sub	v21.4s, v25.4s, v21.4s 
+	ext	v20.16b, v21.16b, v20.16b, #12 
 	add	v19.4s, v19.4s, v20.4s
 
 	add	v15.4s, v15.4s, v25.4s
@@ -1938,7 +1938,7 @@ Lopen_main_loop_rounds_short:
 	add	v14.4s, v14.4s, v29.4s
 	add	v19.4s, v19.4s, v30.4s
 
-    // We can always safely store 192 bytes
+    
 	ld1	{v20.16b - v23.16b}, [x1], #64
 	eor	v20.16b, v20.16b, v0.16b
 	eor	v21.16b, v21.16b, v5.16b
@@ -2001,7 +2001,7 @@ Lopen_tail:
 
 	cbz	x2, Lopen_finalize
 
-	lsr	x4, x2, #4 // How many whole blocks we have to hash
+	lsr	x4, x2, #4 
 
 	cmp	x2, #64
 	b.le	Lopen_tail_64
@@ -2009,7 +2009,7 @@ Lopen_tail:
 	b.le	Lopen_tail_128
 
 Lopen_tail_192:
-     // We need three more blocks
+     
 	mov	v0.16b, v24.16b
 	mov	v1.16b, v24.16b
 	mov	v2.16b, v24.16b
@@ -2035,8 +2035,8 @@ Lopen_tail_192:
 	add	v17.4s, v17.4s, v22.4s
 
 	mov	x7, #10
-	subs	x6, x7, x4 // itr1 can be negative if we have more than 160 bytes to hash
-	csel	x7, x7, x4, le // if itr1 is zero or less, itr2 should be 10 to indicate all 10 rounds are hashing
+	subs	x6, x7, x4 
+	csel	x7, x7, x4, le 
 	sub	x4, x4, x7
 
 	cbz	x7, Lopen_tail_192_rounds_no_hash
@@ -2046,14 +2046,14 @@ Lopen_tail_192_rounds:
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -2063,15 +2063,15 @@ Lopen_tail_192_rounds:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 Lopen_tail_192_rounds_no_hash:
 	add	v0.4s, v0.4s, v5.4s
 	add	v1.4s, v1.4s, v6.4s
@@ -2192,21 +2192,21 @@ Lopen_tail_192_rounds_no_hash:
 	subs	x6, x6, #1
 	b.ge	Lopen_tail_192_rounds_no_hash
 
-    // We hashed 160 bytes at most, may still have 32 bytes left
+    
 Lopen_tail_192_hash:
 	cbz	x4, Lopen_tail_192_hash_done
 	ldp	x11, x12, [x3], 16
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -2216,15 +2216,15 @@ Lopen_tail_192_hash:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 	sub	x4, x4, #1
 	b	Lopen_tail_192_hash
 
@@ -2269,7 +2269,7 @@ Lopen_tail_192_hash_done:
 	b	Lopen_tail_64_store
 
 Lopen_tail_128:
-     // We need two more blocks
+     
 	mov	v0.16b, v24.16b
 	mov	v1.16b, v24.16b
 	mov	v5.16b, v28.16b
@@ -2375,14 +2375,14 @@ Lopen_tail_128_rounds:
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -2392,15 +2392,15 @@ Lopen_tail_128_rounds:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 	b	Lopen_tail_128_rounds
 
 Lopen_tail_128_rounds_done:
@@ -2428,7 +2428,7 @@ Lopen_tail_128_rounds_done:
 	b	Lopen_tail_64_store
 
 Lopen_tail_64:
-    // We just need a single block
+    
 	mov	v0.16b, v24.16b
 	mov	v5.16b, v28.16b
 	mov	v10.16b, v29.16b
@@ -2487,14 +2487,14 @@ Lopen_tail_64_rounds:
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -2504,15 +2504,15 @@ Lopen_tail_64_rounds:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 	b	Lopen_tail_64_rounds
 
 Lopen_tail_64_rounds_done:
@@ -2536,11 +2536,11 @@ Lopen_tail_64_store:
 	b	Lopen_tail_64_store
 
 Lopen_tail_16:
-    // Here we handle the last [0,16) bytes that require a padded block
+    
 	cbz	x2, Lopen_finalize
 
-	eor	v20.16b, v20.16b, v20.16b // Use T0 to load the ciphertext
-	eor	v21.16b, v21.16b, v21.16b // Use T1 to generate an AND mask
+	eor	v20.16b, v20.16b, v20.16b 
+	eor	v21.16b, v21.16b, v21.16b 
 	not	v22.16b, v20.16b
 
 	add	x7, x1, x2
@@ -2555,20 +2555,20 @@ Lopen_tail_16_compose:
 	b.gt	Lopen_tail_16_compose
 
 	and	v20.16b, v20.16b, v21.16b
-    // Hash in the final padded block
+    
 	mov	x11, v20.d[0]
 	mov	x12, v20.d[1]
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -2578,15 +2578,15 @@ Lopen_tail_16_compose:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 	eor	v20.16b, v20.16b, v0.16b
 
 Lopen_tail_16_store:
@@ -2602,14 +2602,14 @@ Lopen_finalize:
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -2619,16 +2619,16 @@ Lopen_finalize:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
-    // Final reduction step
+	adc	x10, x10, xzr      
+    
 	sub	x12, xzr, x15
 	orr	x13, xzr, #3
 	subs	x11, x8, #-5
@@ -2665,7 +2665,7 @@ Lopen_finalize:
 	ret
 
 Lopen_128:
-    // On some architectures preparing 5 blocks for small buffers is wasteful
+    
 	eor	v25.16b, v25.16b, v25.16b
 	mov	x11, #1
 	mov	v25.s[0], w11
@@ -2819,9 +2819,9 @@ Lopen_128_rounds:
 	add	v16.4s, v16.4s, v30.4s
 
 	and	v2.16b, v2.16b, v27.16b
-	mov	x16, v2.d[0] // Move the R key to GPRs
+	mov	x16, v2.d[0] 
 	mov	x17, v2.d[1]
-	mov	v27.16b, v7.16b // Store the S key
+	mov	v27.16b, v7.16b 
 
 	bl	Lpoly_hash_ad_internal
 
@@ -2836,14 +2836,14 @@ Lopen_128_store:
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -2853,28 +2853,28 @@ Lopen_128_store:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 	mov	x11, v21.d[0]
 	mov	x12, v21.d[1]
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -2884,28 +2884,28 @@ Lopen_128_store:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 	mov	x11, v22.d[0]
 	mov	x12, v22.d[1]
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -2915,28 +2915,28 @@ Lopen_128_store:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 	mov	x11, v23.d[0]
 	mov	x12, v23.d[1]
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -2946,15 +2946,15 @@ Lopen_128_store:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 
 	eor	v20.16b, v20.16b, v0.16b
 	eor	v21.16b, v21.16b, v5.16b
@@ -2981,14 +2981,14 @@ Lopen_128_hash_64:
 	adds	x8, x8, x11
 	adcs	x9, x9, x12
 	adc	x10, x10, x15
-	mul	x11, x8, x16     // [t2:t1:t0] = [acc2:acc1:acc0] * r0
+	mul	x11, x8, x16     
 	umulh	x12, x8, x16
 	mul	x13, x9, x16
 	umulh	x14, x9, x16
 	adds	x12, x12, x13
 	mul	x13, x10, x16
 	adc	x13, x13, x14
-	mul	x14, x8, x17       // [t3:t2:t1:t0] = [acc2:acc1:acc0] * [r1:r0]
+	mul	x14, x8, x17       
 	umulh	x8, x8, x17
 	adds	x12, x12, x14
 	mul	x14, x9, x17
@@ -2998,17 +2998,17 @@ Lopen_128_hash_64:
 	adc	x10, x10, x9
 	adds	x13, x13, x14
 	adc	x14, x10, xzr
-	and	x10, x13, #3         // At this point acc2 is 2 bits at most (value of 3)
+	and	x10, x13, #3         
 	and	x8, x13, #-4
 	extr	x13, x14, x13, #2
 	adds	x8, x8, x11
 	lsr	x11, x14, #2
-	adc	x9, x14, x11        // No carry out since t0 is 61 bits and t3 is 63 bits
+	adc	x9, x14, x11        
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
-	adc	x10, x10, xzr      // At this point acc2 has the value of 4 at most
+	adc	x10, x10, xzr      
 	sub	x4, x4, #1
 	b	Lopen_128_hash_64
 .cfi_endproc
 
-#endif  // !OPENSSL_NO_ASM && defined(OPENSSL_AARCH64) && defined(_WIN32)
+#endif  

@@ -682,8 +682,8 @@ fn poll_konsul_command(state: &mut KonsulState) {
     let mut drained_to_empty = false;
     let mut read_failure = None;
     let mut wait_failure = None;
-    // Drain promptly so a chatty command cannot fill the pipe and block the
-    // shell, while keeping every read nonblocking on Era's UI thread.
+    
+    
     {
         let command = state.running.as_mut().unwrap();
         for _ in 0..8 {
@@ -714,8 +714,8 @@ fn poll_konsul_command(state: &mut KonsulState) {
     }
     if let Some(error) = wait_failure { state.push_output(&error); }
     let command = state.running.as_ref().unwrap();
-    // The child's exit closes its pipe reference. A final empty read means
-    // all captured output has been consumed and the prompt can return.
+    
+    
     if !command.finished || !drained_to_empty { return; }
     let command = state.running.take().unwrap();
     let _ = eonos_rt::close(command.read_fd);
@@ -812,9 +812,9 @@ fn main(args: eonos_rt::Args<'_>) -> i32 {
     let mut last_app_pointer: Option<(usize, i32, i32, u8)> = None;
     let mut app_pointer_armed = false;
 
-    // Debounce the physical button state. A single noisy USB report should
-    // not open or close a window, and returning from the terminal must not
-    // replay the click that launched it.
+    
+    
+    
     let initial_buttons = eonos_rt::mouse_state().map(|state| state.buttons).unwrap_or(0);
     let mut stable_left = initial_buttons & 1 != 0;
     let mut candidate_left = stable_left;
@@ -1774,13 +1774,13 @@ fn draw_window(layout: &Layout, view: View, files: &FileState, processes: &str, 
     let y = layout.window_y;
     let w = layout.window_w;
     let h = layout.window_h;
-    // Only paint the two exposed edges of the shadow. Filling its full area
-    // first redraws almost the entire window immediately before covering it.
+    
+    
     rect(x + w, y + 10, 8, h, 0x101522);
     rect(x + 8, y + h, w, 10, 0x101522);
 
-    // The active window keeps the blue title bar; inactive windows use gray
-    // chrome so focus is clear while preserving the same classic frame.
+    
+    
     rect(x, y, w, h, 0xC0C0C0);
     rect(x, y, w, 2, 0xFFFFFF);
     rect(x, y, 2, h, 0xFFFFFF);
@@ -1805,9 +1805,9 @@ fn draw_window(layout: &Layout, view: View, files: &FileState, processes: &str, 
     } else { window_title(view) };
     text(x + 28, y + 8, 0xFFFFFF, title);
 
-    // The compact gray control buttons use the raised Windows-style bevel.
-    // Close is wired to Era's existing close action; minimize and maximize
-    // are shown as window chrome while Era remains a single-window desktop.
+    
+    
+    
     let controls_x = x + w - 65;
     draw_window_control(controls_x, y + 6, 18, 18, WindowControl::Minimize);
     draw_window_control(controls_x + 20, y + 6, 18, 18, WindowControl::Maximize);
@@ -2076,7 +2076,7 @@ fn draw_taskbar(layout: &Layout, view: Option<View>, minimized: bool) {
     rect(0, y, layout.width, 2, 0xFFFFFF);
     rect(0, y + 2, layout.width, 1, 0x808080);
 
-    // Start button.
+    
     rect(4, y + 4, 94, 22, 0xC0C0C0);
     rect(4, y + 4, 94, 2, 0xFFFFFF);
     rect(4, y + 4, 2, 22, 0xFFFFFF);
@@ -2088,8 +2088,8 @@ fn draw_taskbar(layout: &Layout, view: Option<View>, minimized: bool) {
     rect(12, y + 18, 12, 2, 0xFFFFFF);
     text(32, y + 7, 0x101010, "EonOS");
 
-    // Each open window gets a taskbar button. The active window is sunken;
-    // the other buttons stay raised and can be clicked to focus that window.
+    
+    
     let available = (layout.width - 254).max(1);
     if layout.windows.is_empty() {
         text(112, y + 7, 0x404040, "Desktop");
@@ -2112,7 +2112,7 @@ fn draw_taskbar(layout: &Layout, view: Option<View>, minimized: bool) {
         }
     }
 
-    // Power controls and the UTC real-time clock live in the notification area.
+    
     classic_button(layout.width - 142, y + 4, 66, 22, "Power");
     rect(layout.width - 72, y + 4, 68, 22, 0xC0C0C0);
     rect(layout.width - 72, y + 4, 1, 22, 0x808080);

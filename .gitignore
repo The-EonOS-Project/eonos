@@ -1,8 +1,8 @@
-# Rust / Cargo Outputs
+
 /target/
 **/*.rs.bk
 
-# Bootable Images & Archive Artifacts
+
 *.iso
 *.img
 *.bin
@@ -12,16 +12,16 @@
 *.gz
 *.7z
 
-# Intermediate Build Folders (QEMU, Limine, GRUB)
+
 /isodir/
 /build/
 /dist/
 
-# OS / System Temporary Files
+
 .DS_Store
 Thumbs.db
 
-# Editor & Tooling Configs
+
 .vscode/
 .idea/
 limine/
@@ -29,10 +29,10 @@ iso_root/
 *.swp
 *.swo
 
-# vars.fd
+
 vars.fd
-# Cargo build outputs in any workspace
+
 **/target/
 
-# Apps maintained in The-EonOS-Project/eon-apps
+
 /eon-apps/

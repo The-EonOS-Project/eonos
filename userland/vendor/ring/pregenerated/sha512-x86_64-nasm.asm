@@ -1,5 +1,5 @@
-; This file is generated from a similarly-named Perl script in the BoringSSL
-; source tree. Do not edit by hand.
+
+
 
 %ifidn __OUTPUT_FORMAT__, win64
 default	rel
@@ -16,7 +16,7 @@ global	sha512_block_data_order_nohw
 
 ALIGN	16
 sha512_block_data_order_nohw:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_sha512_block_data_order_nohw:
@@ -1730,7 +1730,7 @@ $L$rounds_16_xx:
 	lea	rsp,[rsi]
 
 $L$epilogue:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -1833,7 +1833,7 @@ global	sha512_block_data_order_avx
 
 ALIGN	64
 sha512_block_data_order_avx:
-	mov	QWORD[8+rsp],rdi	;WIN64 prologue
+	mov	QWORD[8+rsp],rdi	
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
 $L$SEH_begin_sha512_block_data_order_avx:
@@ -3013,7 +3013,7 @@ $L$avx_00_47:
 	lea	rsp,[rsi]
 
 $L$epilogue_avx:
-	mov	rdi,QWORD[8+rsp]	;WIN64 epilogue
+	mov	rdi,QWORD[8+rsp]	
 	mov	rsi,QWORD[16+rsp]
 	ret
 
@@ -3133,6 +3133,6 @@ $L$SEH_info_sha512_block_data_order_avx:
 	DD	se_handler wrt ..imagebase
 	DD	$L$prologue_avx wrt ..imagebase,$L$epilogue_avx wrt ..imagebase
 %else
-; Work around https://bugzilla.nasm.us/show_bug.cgi?id=3392738
+
 ret
 %endif

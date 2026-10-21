@@ -1,11 +1,11 @@
-//! Focus-routed keyboard events shared by the PS/2 and USB HID drivers.
+
 
 use crate::sync::IrqMutex;
 
 const QUEUE_CAPACITY: usize = 512;
 
-/// USB HID keyboard usage and edge state. Modifier bits follow the HID boot
-/// protocol: left Ctrl/Shift/Alt/GUI, then right Ctrl/Shift/Alt/GUI.
+
+
 #[derive(Clone, Copy, Debug, Default)]
 #[repr(C)]
 pub struct KeyEvent {
@@ -50,8 +50,8 @@ impl EventQueue {
 
 static EVENTS: IrqMutex<EventQueue> = IrqMutex::new(EventQueue::new());
 
-/// Claim keyboard events for one foreground user process. Claiming discards
-/// stale input so keys typed before focus transfer cannot leak into the app.
+
+
 pub fn claim(pid: u64) -> bool {
     let mut queue = EVENTS.lock();
     if queue.owner.is_some_and(|owner| owner != pid) { return false; }
@@ -70,9 +70,9 @@ pub fn release(pid: u64) {
     }
 }
 
-/// Called by keyboard drivers after translating their hardware-specific
-/// reports to HID usage IDs. Returns true when a focused app owns the event,
-/// so drivers can keep it out of the shell's legacy ASCII queue.
+
+
+
 pub fn push(usage: u8, pressed: bool, modifiers: u8) -> bool {
     let mut queue = EVENTS.lock();
     if queue.owner.is_none() { return false; }
@@ -80,9 +80,9 @@ pub fn push(usage: u8, pressed: bool, modifiers: u8) -> bool {
     let mask = 1u64 << (usage % 64);
     if pressed { queue.held[slot] |= mask; } else { queue.held[slot] &= !mask; }
 
-    // If a consumer falls behind, flush the queue and synthesize releases
-    // for every held key before accepting new edges. This prevents stuck
-    // movement/fire keys after queue overflow.
+    
+    
+    
     if queue.len == QUEUE_CAPACITY {
         queue.clear_events();
         let held = queue.held;

@@ -1,19 +1,19 @@
-//! The initial RAM filesystem: a plain `ustar` tar archive that Limine
-//! loads next to the kernel as a boot module (`module_path` in
-//! `limine.conf`).
-//!
-//! The archive is never copied or unpacked. Limine puts it in memory
-//! marked "kernel and modules", which the PMM never hands out and the VMM
-//! maps into the higher-half direct map, so the bytes stay valid (and
-//! immutable, as far as the kernel is concerned) for the lifetime of the
-//! kernel. `find` just walks the 512-byte tar headers and returns a slice
-//! straight into that memory.
-//!
-//! Supported: regular files, in ustar format, names up to 100 bytes plus
-//! an optional ustar prefix. Directories, links and extension headers
-//! (pax `x`/`g`, GNU `L`/`K`) are skipped. Paths are compared without
-//! leading `./` or `/`, so `"/init"`, `"init"` and tar's `"./init"` are
-//! all the same file.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #![allow(dead_code)]
 
@@ -29,17 +29,17 @@ use crate::{log_debug, log_fail, log_ok};
 #[link_section = ".requests"]
 static MODULE_REQUEST: ModuleRequest = ModuleRequest::new();
 
-/// The archive, once `init` has found and sanity-checked it.
+
 static ARCHIVE: IrqMutex<Option<&'static [u8]>> = IrqMutex::new(None);
 
-/// Number of regular files seen by `init`, for the log line.
+
 static FILE_COUNT: AtomicUsize = AtomicUsize::new(0);
 
 const BLOCK: usize = 512;
 
-/// One regular file in the archive.
+
 pub struct Entry {
-    /// Normalized path: no leading `./` or `/`.
+    
     pub name: String,
     pub data: &'static [u8],
 }
@@ -54,8 +54,8 @@ fn cstr(field: &[u8]) -> &[u8] {
     &field[..end]
 }
 
-/// Parse a tar numeric field: octal digits, optionally padded with
-/// leading spaces and terminated by a NUL or space.
+
+
 fn parse_octal(field: &[u8]) -> Option<u64> {
     let mut value = 0u64;
     let mut seen = false;
@@ -81,8 +81,8 @@ fn parse_octal(field: &[u8]) -> Option<u64> {
 }
 
 fn checksum_ok(hdr: &[u8]) -> bool {
-    // The checksum is the sum of all header bytes with the checksum
-    // field itself counted as eight spaces.
+    
+    
     let mut sum = 0u64;
     for (i, &b) in hdr.iter().enumerate() {
         sum += if (148..156).contains(&i) {
@@ -94,7 +94,7 @@ fn checksum_ok(hdr: &[u8]) -> bool {
     parse_octal(&hdr[148..156]) == Some(sum)
 }
 
-/// Strip any leading `./` and `/` components.
+
 fn normalize(mut s: &str) -> &str {
     loop {
         if let Some(rest) = s.strip_prefix("./") {
@@ -129,8 +129,8 @@ impl Iterator for Entries {
     type Item = Entry;
 
     fn next(&mut self) -> Option<Entry> {
-        // A copy of the `&'static` slice, so everything borrowed from it
-        // below is independent of the borrow of `self`.
+        
+        
         let data: &'static [u8] = self.data;
         loop {
             let hdr_end = self.off.checked_add(BLOCK)?;
@@ -139,12 +139,12 @@ impl Iterator for Entries {
             }
             let hdr = &data[self.off..hdr_end];
 
-            // An all-zero block marks the end of the archive.
+            
             if hdr.iter().all(|&b| b == 0) {
                 return None;
             }
-            // Anything that isn't a valid header means we've lost sync
-            // (or this isn't a tar at all): stop rather than guess.
+            
+            
             if !checksum_ok(hdr) {
                 return None;
             }
@@ -156,7 +156,7 @@ impl Iterator for Entries {
             if data_end > data.len() {
                 return None;
             }
-            // File data is padded up to a whole number of blocks.
+            
             let padded = size.checked_add(BLOCK - 1)? / BLOCK * BLOCK;
             self.off = data_start.checked_add(padded)?;
 
@@ -167,13 +167,13 @@ impl Iterator for Entries {
                     data: &data[data_start..data_end],
                 });
             }
-            // Directory, symlink, extension header, ...: skip it.
+            
         }
     }
 }
 
-/// Every regular file in the archive, in archive order. Empty if there
-/// is no initramfs.
+
+
 pub fn entries() -> Entries {
     Entries {
         data: (*ARCHIVE.lock()).unwrap_or(&[]),
@@ -181,14 +181,14 @@ pub fn entries() -> Entries {
     }
 }
 
-/// The contents of the file at `path`, or `None`.
+
 pub fn find(path: &str) -> Option<&'static [u8]> {
     let want = normalize(path);
     entries().find(|e| e.name == want).map(|e| e.data)
 }
 
-/// Return bytes for a boot module whose configured path ends in
-/// `suffix`, such as `initramfs.tar` or `fat32.img`.
+
+
 pub fn module_bytes(suffix: &str) -> Option<&'static [u8]> {
     let response = MODULE_REQUEST.get_response()?;
     let file = response.modules().iter().find(|f| {
@@ -208,8 +208,8 @@ pub fn module_bytes(suffix: &str) -> Option<&'static [u8]> {
     Some(unsafe { core::slice::from_raw_parts(base, size) })
 }
 
-/// Locate the initramfs module Limine loaded. Call after `vmm::init`
-/// (the module is reached through the direct map).
+
+
 pub fn init() {
     let Some(response) = MODULE_REQUEST.get_response() else {
         log_fail!(
@@ -244,9 +244,9 @@ pub fn init() {
         return;
     }
 
-    // The direct map is built from the memory map, so a module Limine
-    // put somewhere unexpected would show up here as an unmapped page
-    // instead of as a page fault later.
+    
+    
+    
     let first = base as u64;
     let last = first + (size as u64 - 1);
     if crate::vmm::translate(first).is_none() || crate::vmm::translate(last).is_none() {

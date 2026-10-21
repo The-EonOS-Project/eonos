@@ -290,8 +290,8 @@ def run() -> None:
             era_pid = match.group(1).decode("ascii")
             first.command("sleep 500")
             doom_output_start = len(first.output)
-            first.mouse_click_to(670, 750, 640, 400)  # Apps in the dock.
-            first.mouse_click_to(640, 308, 670, 750)  # DOOM application card.
+            first.mouse_click_to(670, 750, 640, 400)  
+            first.mouse_click_to(640, 308, 670, 750)  
             first.expect(
                 b"doom: engine initialized; rendering game frames",
                 "DOOM engine initialization and first frame",
@@ -314,8 +314,8 @@ def run() -> None:
             ):
                 first.fail("Era did not remain active after DOOM exited")
             second_doom_start = len(first.output)
-            first.mouse_click_to(670, 750, 640, 308)  # Reopen Apps after Era resumes.
-            first.mouse_click_to(640, 308, 670, 750)  # Relaunch DOOM.
+            first.mouse_click_to(670, 750, 640, 308)  
+            first.mouse_click_to(640, 308, 670, 750)  
             first.expect(
                 b"doom: engine initialized; rendering game frames",
                 "DOOM relaunch after returning to Era",
@@ -430,7 +430,7 @@ def run() -> None:
             second.command("sync", (b"sync: storage reports durable writes",))
             second.command("smoke-unknown", (b"smoke-unknown: command not found",))
 
-            # Panic is terminal: exercise it last and expect QEMU to remain halted.
+            
             assert second.process.stdin is not None
             panic_start = len(second.output)
             second.process.stdin.write(b"panic\n")

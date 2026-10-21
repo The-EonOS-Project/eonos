@@ -3,7 +3,7 @@
 
 extern crate alloc;
 
-// Keep crate module names stable while grouping subsystem files by directory.
+
 #[path = "arch/acpi.rs"]
 pub mod acpi;
 #[path = "io/block.rs"]
@@ -111,9 +111,9 @@ unsafe extern "C" fn _start() -> ! {
         "Breakpoint exception handled and returned"
     );
 
-    // Kernel Exceptions!
-    // core::arch::asm!("ud2");                                      // #UD invalid opcode
-    // core::ptr::read_volatile(0xffff_8000_dead_0000 as *const u8); // #PF page fault
+    
+    
+    
 
     pmm::init();
     pmm::self_test();
@@ -124,8 +124,8 @@ unsafe extern "C" fn _start() -> ! {
 
     heap::init();
     drivers::virtio_gpu::init();
-    // Console shadow storage uses the kernel heap. Bring the console up
-    // after VMM/heap so rendering and scrollback never read from WC memory.
+    
+    
     console::init();
     heap::self_test();
 
@@ -149,14 +149,14 @@ unsafe extern "C" fn _start() -> ! {
             "APIC setup unavailable; continuing with legacy PIC routing"
         );
     }
-    pit::init(1000); // 1kHz tick, i.e. 1ms resolution
+    pit::init(1000); 
     idt::enable_interrupts();
     pit::self_test();
     rtc::init();
 
-    // Keyboard drivers need the IDT and interrupt controller (for IRQ1)
-    // already up, but come before the scheduler so a typed
-    // command doesn't have to wait on anything else finishing init.
+    
+    
+    
     drivers::ps2::init();
     drivers::usb::init();
     drivers::ahci::init();
@@ -173,8 +173,8 @@ unsafe extern "C" fn _start() -> ! {
 
     vmm::address_space_self_test();
 
-    // The initramfs is a Limine module reached through the direct map, so
-    // this has to come after the VMM is up.
+    
+    
     initramfs::init();
     initramfs::self_test();
     vfs::init();
@@ -191,7 +191,7 @@ unsafe extern "C" fn _start() -> ! {
         "Initialization complete, handing over to the scheduler"
     );
 
-    // The boot thread is done; the idle thread takes over from here.
+    
     scheduler::exit();
 }
 

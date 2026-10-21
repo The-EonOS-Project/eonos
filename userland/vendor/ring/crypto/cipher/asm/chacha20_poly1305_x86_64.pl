@@ -105,7 +105,7 @@ my ($a,$b,$c,$d,$t,$dir)=@_;
 $code.="movdqa $t, $tmp_store\n" if ($dir =~ /store/);
 $code.="paddd $b, $a
         pxor $a, $d
-        pshufb .Lrol16(%rip), $d
+        pshufb .Lrol16( 
         paddd $d, $c
         pxor $c, $b
         movdqa $b, $t
@@ -114,7 +114,7 @@ $code.="paddd $b, $a
         pxor $t, $b
         paddd $b, $a
         pxor $a, $d
-        pshufb .Lrol8(%rip), $d
+        pshufb .Lrol8( 
         paddd $d, $c
         pxor $c, $b
         movdqa $b, $t
@@ -138,29 +138,29 @@ $code.="add 0+$src, $acc0
 }
 
 sub poly_stage1 {
-$code.="mov 0+$r_store, %rax
-        mov %rax, $t2
+$code.="mov 0+$r_store, 
+        mov 
         mul $acc0
-        mov %rax, $t0
-        mov %rdx, $t1
-        mov 0+$r_store, %rax
+        mov 
+        mov 
+        mov 0+$r_store, 
         mul $acc1
         imulq $acc2, $t2
-        add %rax, $t1
-        adc %rdx, $t2\n";
+        add 
+        adc 
 }
 
 sub poly_stage2 {
-$code.="mov 8+$r_store, %rax
-        mov %rax, $t3
+$code.="mov 8+$r_store, 
+        mov 
         mul $acc0
-        add %rax, $t1
-        adc \$0, %rdx
-        mov %rdx, $acc0
-        mov 8+$r_store, %rax
+        add 
+        adc \$0, 
+        mov 
+        mov 8+$r_store, 
         mul $acc1
-        add %rax, $t2
-        adc \$0, %rdx\n";
+        add 
+        adc \$0, 
 }
 
 sub poly_stage3 {
@@ -200,7 +200,7 @@ sub poly_mul {
 
 sub prep_state {
 my ($n)=@_;
-$code.="movdqa .Lchacha20_consts(%rip), $A0
+$code.="movdqa .Lchacha20_consts( 
         movdqa $state1_store, $B0
         movdqa $state2_store, $C0\n";
 $code.="movdqa $A0, $A1
@@ -213,31 +213,31 @@ $code.="movdqa $A0, $A3
         movdqa $B0, $B3
         movdqa $C0, $C3\n" if ($n ge 4);
 $code.="movdqa $ctr0_store, $D0
-        paddd .Lsse_inc(%rip), $D0
+        paddd .Lsse_inc( 
         movdqa $D0, $ctr0_store\n" if ($n eq 1);
 $code.="movdqa $ctr0_store, $D1
-        paddd .Lsse_inc(%rip), $D1
+        paddd .Lsse_inc( 
         movdqa $D1, $D0
-        paddd .Lsse_inc(%rip), $D0
+        paddd .Lsse_inc( 
         movdqa $D0, $ctr0_store
         movdqa $D1, $ctr1_store\n" if ($n eq 2);
 $code.="movdqa $ctr0_store, $D2
-        paddd .Lsse_inc(%rip), $D2
+        paddd .Lsse_inc( 
         movdqa $D2, $D1
-        paddd .Lsse_inc(%rip), $D1
+        paddd .Lsse_inc( 
         movdqa $D1, $D0
-        paddd .Lsse_inc(%rip), $D0
+        paddd .Lsse_inc( 
         movdqa $D0, $ctr0_store
         movdqa $D1, $ctr1_store
         movdqa $D2, $ctr2_store\n" if ($n eq 3);
 $code.="movdqa $ctr0_store, $D3
-        paddd .Lsse_inc(%rip), $D3
+        paddd .Lsse_inc( 
         movdqa $D3, $D2
-        paddd .Lsse_inc(%rip), $D2
+        paddd .Lsse_inc( 
         movdqa $D2, $D1
-        paddd .Lsse_inc(%rip), $D1
+        paddd .Lsse_inc( 
         movdqa $D1, $D0
-        paddd .Lsse_inc(%rip), $D0
+        paddd .Lsse_inc( 
         movdqa $D0, $ctr0_store
         movdqa $D1, $ctr1_store
         movdqa $D2, $ctr2_store
@@ -246,19 +246,19 @@ $code.="movdqa $ctr0_store, $D3
 
 sub finalize_state {
 my ($n)=@_;
-$code.="paddd .Lchacha20_consts(%rip), $A3
+$code.="paddd .Lchacha20_consts( 
         paddd $state1_store, $B3
         paddd $state2_store, $C3
         paddd $ctr3_store, $D3\n" if ($n eq 4);
-$code.="paddd .Lchacha20_consts(%rip), $A2
+$code.="paddd .Lchacha20_consts( 
         paddd $state1_store, $B2
         paddd $state2_store, $C2
         paddd $ctr2_store, $D2\n" if ($n ge 3);
-$code.="paddd .Lchacha20_consts(%rip), $A1
+$code.="paddd .Lchacha20_consts( 
         paddd $state1_store, $B1
         paddd $state2_store, $C1
         paddd $ctr1_store, $D1\n" if ($n ge 2);
-$code.="paddd .Lchacha20_consts(%rip), $A0
+$code.="paddd .Lchacha20_consts( 
         paddd $state1_store, $B0
         paddd $state2_store, $C0
         paddd $ctr0_store, $D0\n";
@@ -359,7 +359,7 @@ if (($shift =~ /left/) || ($shift =~ /right/));
 return $round;
 };
 
-$chacha_body = &gen_chacha_round(20, ".Lrol16(%rip)") .
+$chacha_body = &gen_chacha_round(20, ".Lrol16( 
                &gen_chacha_round(25, ".Lrol8(%rip)", "left") .
                &gen_chacha_round(20, ".Lrol16(%rip)") .
                &gen_chacha_round(25, ".Lrol8(%rip)", "right");
@@ -446,27 +446,27 @@ $code.="
 chacha20_poly1305_open_sse41:
 .cfi_startproc
     _CET_ENDBR
-    push %rbp
-.cfi_push %rbp
-    push %rbx
-.cfi_push %rbx
-    push %r12
-.cfi_push %r12
-    push %r13
-.cfi_push %r13
-    push %r14
-.cfi_push %r14
-    push %r15
-.cfi_push %r15
+    push 
+.cfi_push 
+    push 
+.cfi_push 
+    push 
+.cfi_push 
+    push 
+.cfi_push 
+    push 
+.cfi_push 
+    push 
+.cfi_push 
     # We write the calculated authenticator back to keyp at the end, so save
     # the pointer on the stack too.
     push $keyp
 .cfi_push $keyp
-    sub \$288 + $xmm_storage + 32, %rsp
+    sub \$288 + $xmm_storage + 32, 
 .cfi_adjust_cfa_offset 288 + 32
 
-    lea 32(%rsp), %rbp
-    and \$-32, %rbp\n";
+    lea 32( 
+    and \$-32, 
 $code.="
     movaps %xmm6,16*0+$xmm_store
     movaps %xmm7,16*1+$xmm_store
@@ -479,14 +479,14 @@ $code.="
     movaps %xmm14,16*8+$xmm_store
     movaps %xmm15,16*9+$xmm_store\n" if ($win64);
 $code.="
-    mov %rdx, $inl
+    mov 
     mov $adl, 0+$len_store
     mov $inl, 8+$len_store
 
     cmp \$128, $inl
     jbe .Lopen_sse_128
     # For long buffers, prepare the poly key first
-    movdqa .Lchacha20_consts(%rip), $A0
+    movdqa .Lchacha20_consts( 
     movdqu 0*16($keyp), $B0
     movdqu 1*16($keyp), $C0
     movdqu 2*16($keyp), $D0
@@ -503,10 +503,10 @@ $code.="
         dec $acc0
     jne .Lopen_sse_init_rounds
     # A0|B0 hold the Poly1305 32-byte key, C0,D0 can be discarded
-    paddd .Lchacha20_consts(%rip), $A0
+    paddd .Lchacha20_consts( 
     paddd $state1_store, $B0
     # Clamp and store the key
-    pand .Lclamp(%rip), $A0
+    pand .Lclamp( 
     movdqa $A0, $r_store
     movdqa $B0, $s_store
     # Hash
@@ -759,47 +759,47 @@ $code.="
     adc 8+$s_store, $acc1\n";
 
 $code.="
-    movaps 16*0+$xmm_store, %xmm6
-    movaps 16*1+$xmm_store, %xmm7
-    movaps 16*2+$xmm_store, %xmm8
-    movaps 16*3+$xmm_store, %xmm9
-    movaps 16*4+$xmm_store, %xmm10
-    movaps 16*5+$xmm_store, %xmm11
-    movaps 16*6+$xmm_store, %xmm12
-    movaps 16*7+$xmm_store, %xmm13
-    movaps 16*8+$xmm_store, %xmm14
-    movaps 16*9+$xmm_store, %xmm15\n" if ($win64);
+    movaps 16*0+$xmm_store, 
+    movaps 16*1+$xmm_store, 
+    movaps 16*2+$xmm_store, 
+    movaps 16*3+$xmm_store, 
+    movaps 16*4+$xmm_store, 
+    movaps 16*5+$xmm_store, 
+    movaps 16*6+$xmm_store, 
+    movaps 16*7+$xmm_store, 
+    movaps 16*8+$xmm_store, 
+    movaps 16*9+$xmm_store, 
 $code.="
 .cfi_remember_state
-    add \$288 + $xmm_storage + 32, %rsp
+    add \$288 + $xmm_storage + 32, 
 .cfi_adjust_cfa_offset -(288 + 32)
     # The tag replaces the key on return
     pop $keyp
 .cfi_pop $keyp
     mov $acc0, ($keyp)
     mov $acc1, 8($keyp)
-    pop %r15
-.cfi_pop %r15
-    pop %r14
-.cfi_pop %r14
-    pop %r13
-.cfi_pop %r13
-    pop %r12
-.cfi_pop %r12
-    pop %rbx
-.cfi_pop %rbx
-    pop %rbp
-.cfi_pop %rbp
+    pop 
+.cfi_pop 
+    pop 
+.cfi_pop 
+    pop 
+.cfi_pop 
+    pop 
+.cfi_pop 
+    pop 
+.cfi_pop 
+    pop 
+.cfi_pop 
     ret
 ###############################################################################
 .Lopen_sse_128:
 .cfi_restore_state
-    movdqu .Lchacha20_consts(%rip), $A0\nmovdqa $A0, $A1\nmovdqa $A0, $A2
+    movdqu .Lchacha20_consts( 
     movdqu 0*16($keyp), $B0\nmovdqa $B0, $B1\nmovdqa $B0, $B2
     movdqu 1*16($keyp), $C0\nmovdqa $C0, $C1\nmovdqa $C0, $C2
     movdqu 2*16($keyp), $D0
-    movdqa $D0, $D1\npaddd .Lsse_inc(%rip), $D1
-    movdqa $D1, $D2\npaddd .Lsse_inc(%rip), $D2
+    movdqa $D0, $D1\npaddd .Lsse_inc( 
+    movdqa $D1, $D2\npaddd .Lsse_inc( 
     movdqa $B0, $T1\nmovdqa $C0, $T2\nmovdqa $D1, $T3
     mov \$10, $acc0
 
@@ -812,16 +812,16 @@ $code.="
         &chacha_qr($A2,$B2,$C2,$D2,$T0,"right"); $code.="
     dec $acc0
     jnz .Lopen_sse_128_rounds
-    paddd .Lchacha20_consts(%rip), $A0
-    paddd .Lchacha20_consts(%rip), $A1
-    paddd .Lchacha20_consts(%rip), $A2
+    paddd .Lchacha20_consts( 
+    paddd .Lchacha20_consts( 
+    paddd .Lchacha20_consts( 
     paddd $T1, $B0\npaddd $T1, $B1\npaddd $T1, $B2
     paddd $T2, $C1\npaddd $T2, $C2
     paddd $T3, $D1
-    paddd .Lsse_inc(%rip), $T3
+    paddd .Lsse_inc( 
     paddd $T3, $D2
     # Clamp and store the key
-    pand .Lclamp(%rip), $A0
+    pand .Lclamp( 
     movdqa $A0, $r_store
     movdqa $B0, $s_store
     # Hash
@@ -864,26 +864,26 @@ $code.="
 chacha20_poly1305_seal_sse41:
 .cfi_startproc
     _CET_ENDBR
-    push %rbp
-.cfi_push %rbp
-    push %rbx
-.cfi_push %rbx
-    push %r12
-.cfi_push %r12
-    push %r13
-.cfi_push %r13
-    push %r14
-.cfi_push %r14
-    push %r15
-.cfi_push %r15   
+    push 
+.cfi_push 
+    push 
+.cfi_push 
+    push 
+.cfi_push 
+    push 
+.cfi_push 
+    push 
+.cfi_push 
+    push 
+.cfi_push 
 # We write the calculated authenticator back to keyp at the end, so save
 # the pointer on the stack too.
     push $keyp
 .cfi_push $keyp
-    sub \$288 + $xmm_storage + 32, %rsp
+    sub \$288 + $xmm_storage + 32, 
 .cfi_adjust_cfa_offset 288 + 32
-    lea 32(%rsp), %rbp
-    and \$-32, %rbp\n";
+    lea 32( 
+    and \$-32, 
 $code.="
     movaps %xmm6,16*0+$xmm_store
     movaps %xmm7,16*1+$xmm_store
@@ -897,15 +897,15 @@ $code.="
     movaps %xmm15,16*9+$xmm_store\n" if ($win64);
 $code.="
     mov 56($keyp), $inl  # extra_in_len
-    addq %rdx, $inl
+    addq 
     mov $adl, 0+$len_store
     mov $inl, 8+$len_store
-    mov %rdx, $inl
+    mov 
 
     cmp \$128, $inl
     jbe .Lseal_sse_128
     # For longer buffers, prepare the poly key + some stream
-    movdqa .Lchacha20_consts(%rip), $A0
+    movdqa .Lchacha20_consts( 
     movdqu 0*16($keyp), $B0
     movdqu 1*16($keyp), $C0
     movdqu 2*16($keyp), $D0
@@ -920,11 +920,11 @@ $code.="
     movdqa $C0, $C2
     movdqa $C0, $C3
     movdqa $D0, $D3
-    paddd .Lsse_inc(%rip), $D0
+    paddd .Lsse_inc( 
     movdqa $D0, $D2
-    paddd .Lsse_inc(%rip), $D0
+    paddd .Lsse_inc( 
     movdqa $D0, $D1
-    paddd .Lsse_inc(%rip), $D0
+    paddd .Lsse_inc( 
     # Store on stack
     movdqa $B0, $state1_store
     movdqa $C0, $state2_store
@@ -940,7 +940,7 @@ $code.="
     jnz .Lseal_sse_init_rounds\n";
     &finalize_state(4); $code.="
     # Clamp and store the key
-    pand .Lclamp(%rip), $A3
+    pand .Lclamp( 
     movdqa $A3, $r_store
     movdqa $B3, $s_store
     # Hash
@@ -1164,7 +1164,7 @@ $code.="
     #
     # $keyp points to the tag output, which is actually a struct with the
     # extra_in pointer and length at offset 48.
-    movq 288 + $xmm_storage + 32(%rsp), $keyp
+    movq 288 + $xmm_storage + 32( 
     movq 56($keyp), $t1  # extra_in_len
     movq 48($keyp), $t0  # extra_in
     test $t1, $t1
@@ -1214,7 +1214,7 @@ $code.="
     # Mask $T3 (the remainder from the main encryption) so that superfluous
     # bytes are zero. This means that the non-zero bytes in $T2 and $T3 are
     # disjoint and so we can merge them with an OR.
-    lea .Land_masks(%rip), $t2
+    lea .Land_masks( 
     shl \$4, $inl
     pand -16($t2,$inl), $T3
 
@@ -1232,7 +1232,7 @@ $code.="
 
 .Lprocess_blocks_of_extra_in:
     # There may be additional bytes of extra_in to process.
-    movq 288+32+$xmm_storage (%rsp), $keyp
+    movq 288+32+$xmm_storage ( 
     movq 48($keyp), $inp   # extra_in
     movq 56($keyp), $itr2  # extra_in_len
     movq $itr2, $itr1
@@ -1260,7 +1260,7 @@ process_extra_in_trailer:
 
 .Lprocess_partial_block:
     # $T3 contains $inl bytes of data to be fed into Poly1305. $inl != 0
-    lea .Land_masks(%rip), $t2
+    lea .Land_masks( 
     shl \$4, $inl
     pand -16($t2,$inl), $T3
     movq $T3, $t0
@@ -1288,47 +1288,47 @@ process_extra_in_trailer:
     adc 8+$s_store, $acc1\n";
 
 $code.="
-    movaps 16*0+$xmm_store, %xmm6
-    movaps 16*1+$xmm_store, %xmm7
-    movaps 16*2+$xmm_store, %xmm8
-    movaps 16*3+$xmm_store, %xmm9
-    movaps 16*4+$xmm_store, %xmm10
-    movaps 16*5+$xmm_store, %xmm11
-    movaps 16*6+$xmm_store, %xmm12
-    movaps 16*7+$xmm_store, %xmm13
-    movaps 16*8+$xmm_store, %xmm14
-    movaps 16*9+$xmm_store, %xmm15\n" if ($win64);
+    movaps 16*0+$xmm_store, 
+    movaps 16*1+$xmm_store, 
+    movaps 16*2+$xmm_store, 
+    movaps 16*3+$xmm_store, 
+    movaps 16*4+$xmm_store, 
+    movaps 16*5+$xmm_store, 
+    movaps 16*6+$xmm_store, 
+    movaps 16*7+$xmm_store, 
+    movaps 16*8+$xmm_store, 
+    movaps 16*9+$xmm_store, 
 $code.="
 .cfi_remember_state
-    add \$288 + $xmm_storage + 32, %rsp
+    add \$288 + $xmm_storage + 32, 
 .cfi_adjust_cfa_offset -(288 + 32)
     # The tag replaces the key on return
     pop $keyp
 .cfi_pop $keyp
     mov $acc0, ($keyp)
     mov $acc1, 8($keyp)
-    pop %r15
-.cfi_pop %r15
-    pop %r14
-.cfi_pop %r14
-    pop %r13
-.cfi_pop %r13
-    pop %r12
-.cfi_pop %r12
-    pop %rbx
-.cfi_pop %rbx
-    pop %rbp
-.cfi_pop %rbp
+    pop 
+.cfi_pop 
+    pop 
+.cfi_pop 
+    pop 
+.cfi_pop 
+    pop 
+.cfi_pop 
+    pop 
+.cfi_pop 
+    pop 
+.cfi_pop 
     ret
 ################################################################################
 .Lseal_sse_128:
 .cfi_restore_state
-    movdqu .Lchacha20_consts(%rip), $A0\nmovdqa $A0, $A1\nmovdqa $A0, $A2
+    movdqu .Lchacha20_consts( 
     movdqu 0*16($keyp), $B0\nmovdqa $B0, $B1\nmovdqa $B0, $B2
     movdqu 1*16($keyp), $C0\nmovdqa $C0, $C1\nmovdqa $C0, $C2
     movdqu 2*16($keyp), $D2
-    movdqa $D2, $D0\npaddd .Lsse_inc(%rip), $D0
-    movdqa $D0, $D1\npaddd .Lsse_inc(%rip), $D1
+    movdqa $D2, $D0\npaddd .Lsse_inc( 
+    movdqa $D0, $D1\npaddd .Lsse_inc( 
     movdqa $B0, $T1\nmovdqa $C0, $T2\nmovdqa $D0, $T3
     mov \$10, $acc0
 
@@ -1341,20 +1341,20 @@ $code.="
         &chacha_qr($A2,$B2,$C2,$D2,$T0,"right"); $code.="
         dec $acc0
     jnz .Lseal_sse_128_rounds
-    paddd .Lchacha20_consts(%rip), $A0
-    paddd .Lchacha20_consts(%rip), $A1
-    paddd .Lchacha20_consts(%rip), $A2
+    paddd .Lchacha20_consts( 
+    paddd .Lchacha20_consts( 
+    paddd .Lchacha20_consts( 
     paddd $T1, $B0\npaddd $T1, $B1\npaddd $T1, $B2
     paddd $T2, $C0\npaddd $T2, $C1
     paddd $T3, $D0
-    paddd .Lsse_inc(%rip), $T3
+    paddd .Lsse_inc( 
     paddd $T3, $D1
     # Clamp and store the key
-    pand .Lclamp(%rip), $A2
+    pand .Lclamp( 
     movdqa $A2, $r_store
     movdqa $B2, $s_store
     # Hash
-    mov %r8, $itr2
+    mov 
     call poly_hash_ad_internal
     jmp .Lseal_sse_128_tail_xor
 .size chacha20_poly1305_seal_sse41, .-chacha20_poly1305_seal_sse41
@@ -1363,7 +1363,7 @@ $code.="
 
 if ($avx>1) {
 
-($A0,$A1,$A2,$A3,$B0,$B1,$B2,$B3,$C0,$C1,$C2,$C3,$D0,$D1,$D2,$D3)=map("%ymm$_",(0..15));
+($A0,$A1,$A2,$A3,$B0,$B1,$B2,$B3,$C0,$C1,$C2,$C3,$D0,$D1,$D2,$D3)=map(" 
 my ($A0x,$A1x,$A2x,$A3x,$B0x,$B1x,$B2x,$B3x,$C0x,$C1x,$C2x,$C3x,$D0x,$D1x,$D2x,$D3x)=map("%xmm$_",(0..15));
 ($T0,$T1,$T2,$T3)=($A3,$B3,$C3,$D3);
 $state1_store="$xmm_storage+2*32(%rbp)";
@@ -1382,7 +1382,7 @@ ___
 $code.=<<___;
     vpaddd $b, $a, $a
     vpxor $a, $d, $d
-    vpshufb .Lrol16(%rip), $d, $d
+    vpshufb .Lrol16( 
     vpaddd $d, $c, $c
     vpxor $c, $b, $b
     vpsrld \$20, $b, $t
@@ -1390,7 +1390,7 @@ $code.=<<___;
     vpxor $t, $b, $b
     vpaddd $b, $a, $a
     vpxor $a, $d, $d
-    vpshufb .Lrol8(%rip), $d, $d
+    vpshufb .Lrol8( 
     vpaddd $d, $c, $c
     vpxor $c, $b, $b
     vpslld \$7, $b, $t
@@ -1415,7 +1415,7 @@ ___
 sub prep_state_avx2 {
 my ($n)=@_;
 $code.=<<___;
-    vmovdqa .Lchacha20_consts(%rip), $A0
+    vmovdqa .Lchacha20_consts( 
     vmovdqa $state1_store, $B0
     vmovdqa $state2_store, $C0
 ___
@@ -1435,19 +1435,19 @@ $code.=<<___ if ($n ge 4);
     vmovdqa $C0, $C3
 ___
 $code.=<<___ if ($n eq 1);
-    vmovdqa .Lavx2_inc(%rip), $D0
+    vmovdqa .Lavx2_inc( 
     vpaddd $ctr0_store, $D0, $D0
     vmovdqa $D0, $ctr0_store
 ___
 $code.=<<___ if ($n eq 2);
-    vmovdqa .Lavx2_inc(%rip), $D0
+    vmovdqa .Lavx2_inc( 
     vpaddd $ctr0_store, $D0, $D1
     vpaddd $D1, $D0, $D0
     vmovdqa $D0, $ctr0_store
     vmovdqa $D1, $ctr1_store
 ___
 $code.=<<___ if ($n eq 3);
-    vmovdqa .Lavx2_inc(%rip), $D0
+    vmovdqa .Lavx2_inc( 
     vpaddd $ctr0_store, $D0, $D2
     vpaddd $D2, $D0, $D1
     vpaddd $D1, $D0, $D0
@@ -1456,7 +1456,7 @@ $code.=<<___ if ($n eq 3);
     vmovdqa $D2, $ctr2_store
 ___
 $code.=<<___ if ($n eq 4);
-    vmovdqa .Lavx2_inc(%rip), $D0
+    vmovdqa .Lavx2_inc( 
     vpaddd $ctr0_store, $D0, $D3
     vpaddd $D3, $D0, $D2
     vpaddd $D2, $D0, $D1
@@ -1471,25 +1471,25 @@ ___
 sub finalize_state_avx2 {
 my ($n)=@_;
 $code.=<<___ if ($n eq 4);
-    vpaddd .Lchacha20_consts(%rip), $A3, $A3
+    vpaddd .Lchacha20_consts( 
     vpaddd $state1_store, $B3, $B3
     vpaddd $state2_store, $C3, $C3
     vpaddd $ctr3_store, $D3, $D3
 ___
 $code.=<<___ if ($n ge 3);
-    vpaddd .Lchacha20_consts(%rip), $A2, $A2
+    vpaddd .Lchacha20_consts( 
     vpaddd $state1_store, $B2, $B2
     vpaddd $state2_store, $C2, $C2
     vpaddd $ctr2_store, $D2, $D2
 ___
 $code.=<<___ if ($n ge 2);
-    vpaddd .Lchacha20_consts(%rip), $A1, $A1
+    vpaddd .Lchacha20_consts( 
     vpaddd $state1_store, $B1, $B1
     vpaddd $state2_store, $C1, $C1
     vpaddd $ctr1_store, $D1, $D1
 ___
 $code.=<<___;
-    vpaddd .Lchacha20_consts(%rip), $A0, $A0
+    vpaddd .Lchacha20_consts( 
     vpaddd $state1_store, $B0, $B0
     vpaddd $state2_store, $C0, $C0
     vpaddd $ctr0_store, $D0, $D0
@@ -1527,32 +1527,32 @@ ___
 
 sub poly_stage1_mulx {
 $code.=<<___;
-    mov 0+$r_store, %rdx
-    mov %rdx, $t2
+    mov 0+$r_store, 
+    mov 
     mulx $acc0, $t0, $t1
-    mulx $acc1, %rax, %rdx
+    mulx $acc1, 
     imulq $acc2, $t2
-    add %rax, $t1
-    adc %rdx, $t2
+    add 
+    adc 
 ___
 }
 
 sub poly_stage2_mulx {
 $code.=<<___;
-    mov 8+$r_store, %rdx
-    mulx $acc0, $acc0, %rax
+    mov 8+$r_store, 
+    mulx $acc0, $acc0, 
     add $acc0, $t1
     mulx $acc1, $acc1, $t3
     adc $acc1, $t2
     adc \$0, $t3
-    imulq $acc2, %rdx
+    imulq $acc2, 
 ___
 }
 
 sub poly_stage3_mulx {
 $code.=<<___;
-    add %rax, $t2
-    adc %rdx, $t3
+    add 
+    adc 
 ___
 }
 
@@ -1620,7 +1620,7 @@ if (($shift =~ /left/) || ($shift =~ /right/));
 return $round;
 };
 
-$chacha_body = &gen_chacha_round_avx2(20, ".Lrol16(%rip)") .
+$chacha_body = &gen_chacha_round_avx2(20, ".Lrol16( 
                &gen_chacha_round_avx2(25, ".Lrol8(%rip)", "left") .
                &gen_chacha_round_avx2(20, ".Lrol16(%rip)") .
                &gen_chacha_round_avx2(25, ".Lrol8(%rip)", "right");
@@ -1635,27 +1635,27 @@ $code.="
 chacha20_poly1305_open_avx2:
 .cfi_startproc
     _CET_ENDBR
-    push %rbp
-.cfi_push %rbp
-    push %rbx
-.cfi_push %rbx
-    push %r12
-.cfi_push %r12
-    push %r13
-.cfi_push %r13
-    push %r14
-.cfi_push %r14
-    push %r15
-.cfi_push %r15
+    push 
+.cfi_push 
+    push 
+.cfi_push 
+    push 
+.cfi_push 
+    push 
+.cfi_push 
+    push 
+.cfi_push 
+    push 
+.cfi_push 
     # We write the calculated authenticator back to keyp at the end, so save
     # the pointer on the stack too.
     push $keyp
 .cfi_push $keyp
-    sub \$288 + $xmm_storage + 32, %rsp
+    sub \$288 + $xmm_storage + 32, 
 .cfi_adjust_cfa_offset 288 + 32
 
-    lea 32(%rsp), %rbp
-    and \$-32, %rbp\n";
+    lea 32( 
+    and \$-32, 
 $code.="
     movaps %xmm6,16*0+$xmm_store
     movaps %xmm7,16*1+$xmm_store
@@ -1668,16 +1668,16 @@ $code.="
     movaps %xmm14,16*8+$xmm_store
     movaps %xmm15,16*9+$xmm_store\n" if ($win64);
 $code.="
-    mov %rdx, $inl
+    mov 
     mov $adl, 0+$len_store
     mov $inl, 8+$len_store
 
     vzeroupper
-    vmovdqa .Lchacha20_consts(%rip), $A0
+    vmovdqa .Lchacha20_consts( 
     vbroadcasti128 0*16($keyp), $B0
     vbroadcasti128 1*16($keyp), $C0
     vbroadcasti128 2*16($keyp), $D0
-    vpaddd .Lavx2_init(%rip), $D0, $D0
+    vpaddd .Lavx2_init( 
     cmp \$6*32, $inl
     jbe .Lopen_avx2_192
     cmp \$10*32, $inl
@@ -1692,14 +1692,14 @@ $code.="
         &chacha_qr_avx2($A0,$B0,$C0,$D0,$T0,"right"); $code.="
         dec $acc0
     jne .Lopen_avx2_init_rounds
-    vpaddd .Lchacha20_consts(%rip), $A0, $A0
+    vpaddd .Lchacha20_consts( 
     vpaddd $state1_store, $B0, $B0
     vpaddd $state2_store, $C0, $C0
     vpaddd $ctr0_store, $D0, $D0
 
     vperm2i128 \$0x02, $A0, $B0, $T0
     # Clamp and store key
-    vpand .Lclamp(%rip), $T0, $T0
+    vpand .Lclamp( 
     vmovdqa $T0, $r_store
     # Stream for the first 64 bytes
     vperm2i128 \$0x13, $A0, $B0, $A0
@@ -1997,7 +1997,7 @@ $code.="
     vmovdqa $B0, $B2
     vmovdqa $C0, $C1
     vmovdqa $C0, $C2
-    vpaddd .Lavx2_inc(%rip), $D0, $D1
+    vpaddd .Lavx2_inc( 
     vmovdqa $D0, $T2
     vmovdqa $D1, $T3
     mov \$10, $acc0
@@ -2018,7 +2018,7 @@ $code.="
     vpaddd $T3, $D1, $D1
     vperm2i128 \$0x02, $A0, $B0, $T0
     # Clamp and store the key
-    vpand .Lclamp(%rip), $T0, $T0
+    vpand .Lclamp( 
     vmovdqa $T0, $r_store
     # Stream for up to 192 bytes
     vperm2i128 \$0x13, $A0, $B0, $A0
@@ -2078,8 +2078,8 @@ $code.="
     vmovdqa $B0, $B2
     vmovdqa $C0, $C1
     vmovdqa $C0, $C2
-    vpaddd .Lavx2_inc(%rip), $D0, $D1
-    vpaddd .Lavx2_inc(%rip), $D1, $D2
+    vpaddd .Lavx2_inc( 
+    vpaddd .Lavx2_inc( 
     vmovdqa $B0, $T1
     vmovdqa $C0, $T2
     vmovdqa $D0, $ctr0_store
@@ -2095,9 +2095,9 @@ $code.="
         &chacha_qr_avx2($A2,$B2,$C2,$D2,$T0,"right"); $code.="
         dec $acc0
     jne .Lopen_avx2_320_rounds
-    vpaddd .Lchacha20_consts(%rip), $A0, $A0
-    vpaddd .Lchacha20_consts(%rip), $A1, $A1
-    vpaddd .Lchacha20_consts(%rip), $A2, $A2
+    vpaddd .Lchacha20_consts( 
+    vpaddd .Lchacha20_consts( 
+    vpaddd .Lchacha20_consts( 
     vpaddd $T1, $B0, $B0
     vpaddd $T1, $B1, $B1
     vpaddd $T1, $B2, $B2
@@ -2109,7 +2109,7 @@ $code.="
     vpaddd $ctr2_store, $D2, $D2
     vperm2i128 \$0x02, $A0, $B0, $T0
     # Clamp and store the key
-    vpand .Lclamp(%rip), $T0, $T0
+    vpand .Lclamp( 
     vmovdqa $T0, $r_store
     # Stream for up to 320 bytes
     vperm2i128 \$0x13, $A0, $B0, $A0
@@ -2133,26 +2133,26 @@ $code.="
 chacha20_poly1305_seal_avx2:
 .cfi_startproc
     _CET_ENDBR
-    push %rbp
-.cfi_push %rbp
-    push %rbx
-.cfi_push %rbx
-    push %r12
-.cfi_push %r12
-    push %r13
-.cfi_push %r13
-    push %r14
-.cfi_push %r14
-    push %r15
-.cfi_push %r15   
+    push 
+.cfi_push 
+    push 
+.cfi_push 
+    push 
+.cfi_push 
+    push 
+.cfi_push 
+    push 
+.cfi_push 
+    push 
+.cfi_push 
 # We write the calculated authenticator back to keyp at the end, so save
 # the pointer on the stack too.
     push $keyp
 .cfi_push $keyp
-    sub \$288 + $xmm_storage + 32, %rsp
+    sub \$288 + $xmm_storage + 32, 
 .cfi_adjust_cfa_offset 288 + 32
-    lea 32(%rsp), %rbp
-    and \$-32, %rbp\n";
+    lea 32( 
+    and \$-32, 
 $code.="
     movaps %xmm6,16*0+$xmm_store
     movaps %xmm7,16*1+$xmm_store
@@ -2166,17 +2166,17 @@ $code.="
     movaps %xmm15,16*9+$xmm_store\n" if ($win64);
 $code.="
     mov 56($keyp), $inl  # extra_in_len
-    addq %rdx, $inl
+    addq 
     mov $adl, 0+$len_store
     mov $inl, 8+$len_store
-    mov %rdx, $inl
+    mov 
 
     vzeroupper
-    vmovdqa .Lchacha20_consts(%rip), $A0
+    vmovdqa .Lchacha20_consts( 
     vbroadcasti128 0*16($keyp), $B0
     vbroadcasti128 1*16($keyp), $C0
     vbroadcasti128 2*16($keyp), $D0
-    vpaddd .Lavx2_init(%rip), $D0, $D0
+    vpaddd .Lavx2_init( 
     cmp \$6*32, $inl
     jbe .Lseal_avx2_192
     cmp \$10*32, $inl
@@ -2193,9 +2193,9 @@ $code.="
     vmovdqa $C0, $C3
     vmovdqa $C0, $state2_store
     vmovdqa $D0, $D3
-    vpaddd .Lavx2_inc(%rip), $D3, $D2
-    vpaddd .Lavx2_inc(%rip), $D2, $D1
-    vpaddd .Lavx2_inc(%rip), $D1, $D0
+    vpaddd .Lavx2_inc( 
+    vpaddd .Lavx2_inc( 
+    vpaddd .Lavx2_inc( 
     vmovdqa $D0, $ctr0_store
     vmovdqa $D1, $ctr1_store
     vmovdqa $D2, $ctr2_store
@@ -2210,7 +2210,7 @@ $code.="
     vperm2i128 \$0x13, $C3, $D3, $C3
     vperm2i128 \$0x02, $A3, $B3, $D3
     vperm2i128 \$0x13, $A3, $B3, $A3
-    vpand .Lclamp(%rip), $D3, $D3
+    vpand .Lclamp( 
     vmovdqa $D3, $r_store
     mov $adl, $itr2
     call poly_hash_ad_internal
@@ -2463,8 +2463,8 @@ $code.="
     vmovdqa $B0, $B2
     vmovdqa $C0, $C1
     vmovdqa $C0, $C2
-    vpaddd .Lavx2_inc(%rip), $D0, $D1
-    vpaddd .Lavx2_inc(%rip), $D1, $D2
+    vpaddd .Lavx2_inc( 
+    vpaddd .Lavx2_inc( 
     vmovdqa $B0, $T1
     vmovdqa $C0, $T2
     vmovdqa $D0, $ctr0_store
@@ -2480,9 +2480,9 @@ $code.="
         &chacha_qr_avx2($A2,$B2,$C2,$D2,$T0,"right"); $code.="
         dec $acc0
     jne .Lseal_avx2_320_rounds
-    vpaddd .Lchacha20_consts(%rip), $A0, $A0
-    vpaddd .Lchacha20_consts(%rip), $A1, $A1
-    vpaddd .Lchacha20_consts(%rip), $A2, $A2
+    vpaddd .Lchacha20_consts( 
+    vpaddd .Lchacha20_consts( 
+    vpaddd .Lchacha20_consts( 
     vpaddd $T1, $B0, $B0
     vpaddd $T1, $B1, $B1
     vpaddd $T1, $B2, $B2
@@ -2494,7 +2494,7 @@ $code.="
     vpaddd $ctr2_store, $D2, $D2
     vperm2i128 \$0x02, $A0, $B0, $T0
     # Clamp and store the key
-    vpand .Lclamp(%rip), $T0, $T0
+    vpand .Lclamp( 
     vmovdqa $T0, $r_store
     # Stream for up to 320 bytes
     vperm2i128 \$0x13, $A0, $B0, $A0
@@ -2516,7 +2516,7 @@ $code.="
     vmovdqa $B0, $B2
     vmovdqa $C0, $C1
     vmovdqa $C0, $C2
-    vpaddd .Lavx2_inc(%rip), $D0, $D1
+    vpaddd .Lavx2_inc( 
     vmovdqa $D0, $T2
     vmovdqa $D1, $T3
     mov \$10, $acc0
@@ -2537,7 +2537,7 @@ $code.="
     vpaddd $T3, $D1, $D1
     vperm2i128 \$0x02, $A0, $B0, $T0
     # Clamp and store the key
-    vpand .Lclamp(%rip), $T0, $T0
+    vpand .Lclamp( 
     vmovdqa $T0, $r_store
     # Stream for up to 192 bytes
     vperm2i128 \$0x13, $A0, $B0, $A0

@@ -1,8 +1,8 @@
-//! Small safe helpers for common OS interactions.
-//!
-//! Third-party apps are restricted by the kernel regardless of which helper
-//! they call. File writes are limited by the kernel to a mounted writable
-//! `/disk`; this module does not expose device, network, or power operations.
+
+
+
+
+
 
 use alloc::string::String;
 use alloc::vec::Vec;
@@ -10,22 +10,22 @@ use eonos_rt::{Error, Result};
 
 const MAX_READ_FILE: usize = 1024 * 1024;
 
-/// Return milliseconds since boot.
+
 pub fn uptime_ms() -> u64 {
     eonos_rt::uptime_ms() as u64
 }
 
-/// Yield the process for at least the requested number of milliseconds.
+
 pub fn sleep_ms(milliseconds: u64) -> Result<()> {
     eonos_rt::sleep_ms(milliseconds.min(60_000) as usize)
 }
 
-/// Print UTF-8 text to the application's standard output.
+
 pub fn print(value: &str) -> Result<()> {
     eonos_rt::write_all(1, value.as_bytes())
 }
 
-/// Read a file up to one MiB.
+
 pub fn read_file(path: &str) -> Result<Vec<u8>> {
     let fd = eonos_rt::open(path, eonos_rt::O_RDONLY)?;
     let result = (|| {
@@ -42,14 +42,14 @@ pub fn read_file(path: &str) -> Result<Vec<u8>> {
     result
 }
 
-/// Create or replace a file under the mounted writable `/disk` filesystem.
-/// The kernel rejects writes to other paths, even when called directly through
-/// the runtime syscall API.
+
+
+
 pub fn write_file(path: &str, contents: &[u8]) -> Result<()> {
     write_file_with_flags(path, contents, eonos_rt::O_WRONLY | eonos_rt::O_CREAT | eonos_rt::O_TRUNC)
 }
 
-/// Create a file under `/disk` if needed and append bytes to its end.
+
 pub fn append_file(path: &str, contents: &[u8]) -> Result<()> {
     write_file_with_flags(path, contents, eonos_rt::O_WRONLY | eonos_rt::O_CREAT | eonos_rt::O_APPEND)
 }
@@ -62,14 +62,14 @@ fn write_file_with_flags(path: &str, contents: &[u8], flags: usize) -> Result<()
     close_result
 }
 
-/// Read a directory's newline-separated entries (up to the kernel's buffer limit).
+
 pub fn list_directory(path: &str) -> Result<String> {
     let mut buffer = [0u8; 4096];
     let count = eonos_rt::list_directory(path, &mut buffer)?;
     String::from_utf8(buffer[..count].to_vec()).map_err(|_| Error(22))
 }
 
-/// Snapshot basic physical-memory and kernel-heap counters.
+
 pub fn memory_info() -> Result<eonos_rt::MemoryInfo> {
     eonos_rt::memory_info()
 }

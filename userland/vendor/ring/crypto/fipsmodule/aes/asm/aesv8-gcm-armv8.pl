@@ -286,7 +286,7 @@ my $rk4d="d22";
 #
 $code.=<<___;
 .global aes_gcm_enc_kernel
-.type   aes_gcm_enc_kernel,%function
+.type   aes_gcm_enc_kernel, 
 .align  4
 aes_gcm_enc_kernel:
 	AARCH64_SIGN_LINK_REGISTER
@@ -841,13 +841,13 @@ aes_gcm_enc_kernel:
 	eor     $acc_mb, $acc_mb, $rk4v.16b                      // GHASH final-1 block - mid
 	eor     $acc_lb, $acc_lb, $rk3                           // GHASH final-1 block - low
 .Lenc_blocks_less_than_1:                                        // blocks left <= 1
-	and     $bit_length, $bit_length, #127                   // bit_length %= 128
+	and     $bit_length, $bit_length, #127                   // bit_length 
 	mvn     $rkN_l, xzr                                      // rkN_l = 0xffffffffffffffff
 	sub     $bit_length, $bit_length, #128                   // bit_length -= 128
 	neg     $bit_length, $bit_length                         // bit_length = 128 - #bits in input (in range [1,128])
 	ld1     { $rk0}, [$output_ptr]                           // load existing bytes where the possibly partial last block is to be stored
 	mvn     $rkN_h, xzr                                      // rkN_h = 0xffffffffffffffff
-	and     $bit_length, $bit_length, #127                   // bit_length %= 128
+	and     $bit_length, $bit_length, #127                   // bit_length 
 	lsr     $rkN_h, $rkN_h, $bit_length                      // rkN_h is mask for top 64b of last block
 	cmp     $bit_length, #64
 	csel    $input_l0, $rkN_l, $rkN_h, lt
@@ -913,7 +913,7 @@ my $t9d="d6";
 #
 $code.=<<___;
 .global aes_gcm_dec_kernel
-.type   aes_gcm_dec_kernel,%function
+.type   aes_gcm_dec_kernel, 
 .align  4
 aes_gcm_dec_kernel:
 	AARCH64_SIGN_LINK_REGISTER
@@ -1469,13 +1469,13 @@ aes_gcm_dec_kernel:
 	eor     $acc_mb, $acc_mb, $rk4v.16b                      // GHASH final-1 block - mid
 	eor     $output_h0, $output_h0, $rkN_h                   // AES final block - round N high
 .Ldec_blocks_less_than_1:                                        // blocks left <= 1
-	and     $bit_length, $bit_length, #127                   // bit_length %= 128
+	and     $bit_length, $bit_length, #127                   // bit_length 
 	mvn     $rkN_h, xzr                                      // rkN_h = 0xffffffffffffffff
 	sub     $bit_length, $bit_length, #128                   // bit_length -= 128
 	mvn     $rkN_l, xzr                                      // rkN_l = 0xffffffffffffffff
 	ldp     $end_input_ptr, $main_end_input_ptr, [$output_ptr] // load existing bytes we need to not overwrite
 	neg     $bit_length, $bit_length                         // bit_length = 128 - #bits in input (in range [1,128])
-	and     $bit_length, $bit_length, #127                   // bit_length %= 128
+	and     $bit_length, $bit_length, #127                   // bit_length 
 	lsr     $rkN_h, $rkN_h, $bit_length                      // rkN_h is mask for top 64b of last block
 	cmp     $bit_length, #64
 	csel    $ctr32x, $rkN_l, $rkN_h, lt

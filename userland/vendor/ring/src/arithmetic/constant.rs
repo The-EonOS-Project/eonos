@@ -9,7 +9,7 @@ const fn parse_digit(d: u8) -> u8 {
     }
 }
 
-// TODO: this would be nicer as a trait, but currently traits don't support const functions
+
 pub const fn limbs_from_hex<const LIMBS: usize>(hex: &str) -> [LeakyLimb; LIMBS] {
     let hex = hex.as_bytes();
     let mut limbs = [0; LIMBS];

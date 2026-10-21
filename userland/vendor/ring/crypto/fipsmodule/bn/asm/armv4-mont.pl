@@ -24,9 +24,9 @@
 # Montgomery multiplication for ARMv4.
 #
 # Performance improvement naturally varies among CPU implementations
-# and compilers. The code was observed to provide +65-35% improvement
+# and compilers. The code was observed to provide +65-35 
 # [depending on key length, less for longer keys] on ARM920T, and
-# +115-80% on Intel IXP425. This is compared to pre-bn_mul_mont code
+# +115-80 
 # base and compiler generated code with in-lined umull and even umlal
 # instructions. The latter means that this code didn't really have an
 # "advantage" of utilizing some "secret" instruction.
@@ -38,10 +38,10 @@
 # November 2013
 #
 # Add NEON code path, which handles lengths divisible by 8. RSA/DSA
-# performance improvement on Cortex-A8 is ~45-100% depending on key
-# length, more for longer keys. On Cortex-A15 the span is ~10-105%.
-# On Snapdragon S4 improvement was measured to vary from ~70% to
-# incredible ~380%, yes, 4.8x faster, for RSA4096 sign. But this is
+# performance improvement on Cortex-A8 is ~45-100 
+# length, more for longer keys. On Cortex-A15 the span is ~10-105 
+# On Snapdragon S4 improvement was measured to vary from ~70 
+# incredible ~380 
 # rather because original integer-only code seems to perform
 # suboptimally on S4. Situation on Cortex-A9 is unfortunately
 # different. It's being looked into, but the trouble is that
@@ -115,7 +115,7 @@ $code=<<___;
 #endif
 
 .global	bn_mul_mont_nohw
-.type	bn_mul_mont_nohw,%function
+.type	bn_mul_mont_nohw, 
 
 .align	5
 bn_mul_mont_nohw:
@@ -291,7 +291,7 @@ $code.=<<___;
 .fpu	neon
 
 .global	bn_mul8x_mont_neon
-.type	bn_mul8x_mont_neon,%function
+.type	bn_mul8x_mont_neon, 
 .align	5
 bn_mul8x_mont_neon:
 	mov	ip,sp

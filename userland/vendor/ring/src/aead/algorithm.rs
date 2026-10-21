@@ -1,16 +1,16 @@
-// Copyright 2015-2021 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use crate::{
     bb, cpu,
@@ -33,7 +33,7 @@ impl hkdf::KeyType for &'static Algorithm {
     }
 }
 
-/// An AEAD Algorithm.
+
 pub struct Algorithm {
     init: fn(key: &[u8], cpu_features: cpu::Features) -> Result<KeyInner, error::Unspecified>,
 
@@ -58,21 +58,21 @@ pub struct Algorithm {
 }
 
 impl Algorithm {
-    /// The length of the key.
+    
     #[inline(always)]
     pub fn key_len(&self) -> usize {
         self.key_len
     }
 
-    /// The length of a tag.
-    ///
-    /// See also `MAX_TAG_LEN`.
+    
+    
+    
     #[inline(always)]
     pub fn tag_len(&self) -> usize {
         TAG_LEN
     }
 
-    /// The length of the nonces.
+    
     #[inline(always)]
     pub fn nonce_len(&self) -> usize {
         NONCE_LEN
@@ -101,17 +101,17 @@ impl Algorithm {
         let Tag(calculated_tag) = (self.open)(key, nonce, aad, in_out, src, cpu_features)?;
 
         if bb::verify_slices_are_equal(calculated_tag.as_ref(), received_tag.as_ref()).is_err() {
-            // Zero out the plaintext so that it isn't accidentally leaked or used
-            // after verification fails. It would be safest if we could check the
-            // tag before decrypting, but some `open` implementations interleave
-            // authentication with decryption for performance.
+            
+            
+            
+            
             for b in &mut in_out[..ciphertext_len] {
                 *b = 0;
             }
             return Err(error::Unspecified);
         }
 
-        // `ciphertext_len` is also the plaintext length.
+        
         Ok(&mut in_out[..ciphertext_len])
     }
 
@@ -145,7 +145,7 @@ impl PartialEq for Algorithm {
 
 impl Eq for Algorithm {}
 
-/// AES-128 in GCM mode with 128-bit tags and 96 bit nonces.
+
 pub static AES_128_GCM: Algorithm = Algorithm {
     key_len: aes::AES_128_KEY_LEN,
     init: aes_gcm_init_128,
@@ -154,7 +154,7 @@ pub static AES_128_GCM: Algorithm = Algorithm {
     id: AlgorithmID::AES_128_GCM,
 };
 
-/// AES-256 in GCM mode with 128-bit tags and 96 bit nonces.
+
 pub static AES_256_GCM: Algorithm = Algorithm {
     key_len: aes::AES_256_KEY_LEN,
     init: aes_gcm_init_256,
@@ -214,11 +214,11 @@ pub(super) fn aes_gcm_open(
     aes_gcm::open(key, nonce, aad, in_out, src)
 }
 
-/// ChaCha20-Poly1305 as described in [RFC 8439].
-///
-/// The keys are 256 bits long and the nonces are 96 bits long.
-///
-/// [RFC 8439]: https://tools.ietf.org/html/rfc8439
+
+
+
+
+
 pub static CHACHA20_POLY1305: Algorithm = Algorithm {
     key_len: chacha20_poly1305::KEY_LEN,
     init: chacha20_poly1305_init,
@@ -227,7 +227,7 @@ pub static CHACHA20_POLY1305: Algorithm = Algorithm {
     id: AlgorithmID::CHACHA20_POLY1305,
 };
 
-/// Copies |key| into |ctx_buf|.
+
 fn chacha20_poly1305_init(
     key: &[u8],
     _cpu_features: cpu::Features,

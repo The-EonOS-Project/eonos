@@ -1,16 +1,16 @@
-// Copyright 2016 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 pub(crate) use self::features::Features;
 use core::mem::size_of;
@@ -39,7 +39,7 @@ macro_rules! impl_get_feature {
                 fn get_feature(&self) -> Option<$Name> {
                     const MASK: u32 = $Name::mask();
                     const STATICALLY_DETECTED: bool = (crate::cpu::CAPS_STATIC & MASK) == MASK;
-                    if STATICALLY_DETECTED { // TODO: `const`
+                    if STATICALLY_DETECTED { 
                         return Some($Name(self.cpu()));
                     }
 
@@ -65,9 +65,9 @@ macro_rules! impl_get_feature {
             #[cfg(any(all(target_arch = "aarch64", target_endian = "little"),
                      all(target_arch = "arm", target_endian = "little"),
                      target_arch = "x86", target_arch = "x86_64"))]
-            // Synthesized to ensure the dynamic flag set is always non-zero.
-            //
-            // Keep this at the end as it is never checked except during init.
+            
+            
+            
             Initialized,
         }
     }
@@ -131,9 +131,9 @@ pub(crate) fn features() -> Features {
 mod features {
     use crate::polyfill::NotSend;
 
-    /// A witness indicating that CPU features have been detected and cached.
-    ///
-    /// This is a zero-sized type so that it can be "stored" wherever convenient.
+    
+    
+    
     #[derive(Copy, Clone)]
     pub(crate) struct Features(NotSend);
 
@@ -150,8 +150,8 @@ mod features {
         if #[cfg(any(all(target_arch = "aarch64", target_endian = "little"), all(target_arch = "arm", target_endian = "little"),
                      target_arch = "x86", target_arch = "x86_64"))] {
             impl Features {
-                // SAFETY: This must only be called after CPU features have been written
-                // and synchronized.
+                
+                
                 pub(super) unsafe fn new_after_feature_flags_written_and_synced_unchecked() -> Self {
                     Self(NotSend::VALUE)
                 }

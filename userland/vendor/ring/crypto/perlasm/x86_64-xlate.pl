@@ -154,7 +154,7 @@ my %globals;
 	my $self = shift;
 	if ($gas) {
 	    if ($self->{op} eq "movz") {	# movz is pain...
-		sprintf "%s%s%s",$self->{op},$self->{sz},shift;
+		sprintf " 
 	    } elsif ($self->{op} =~ /^set/) {
 		"$self->{op}";
 	    } elsif ($self->{op} eq "ret") {
@@ -278,7 +278,7 @@ my %globals;
 	# in $self->{label}...
 	use integer;
 	$self->{label} =~ s/(?<![\w\$\.])(0x?[0-9a-f]+)/oct($1)/egi;
-	$self->{label} =~ s/\b([0-9]+\s*[\*\/\%]\s*[0-9]+)\b/eval($1)/eg;
+	$self->{label} =~ s/\b([0-9]+\s*[\*\/\ 
 
 	# Some assemblers insist on signed presentation of 32-bit
 	# offsets, but sign extension is a tricky business in perl...
@@ -288,7 +288,7 @@ my %globals;
 	    $self->{label} =~ s/\b([0-9]+)\b/$1>>0/eg;
 	}
 
-	# if base register is %rbp or %r13, see if it's possible to
+	# if base register is 
 	# flip base and index registers [for better performance]
 	if (!$self->{label} && $self->{index} && $self->{scale}==1 &&
 	    $self->{base} =~ /(rbp|r13)/) {
@@ -320,7 +320,7 @@ my %globals;
 	    ($mnemonic =~ /^vpbroadcast([qdwb])$/)	&& ($sz=$1)  ||
 	    ($mnemonic =~ /^v(?!perm)[a-z]+[fi]128$/)	&& ($sz="x");
 
-	    $self->{opmask}  =~ s/%(k[0-7])/$1/;
+	    $self->{opmask}  =~ s/ 
 
 	    if (defined($self->{index})) {
 		sprintf "%s[%s%s*%d%s]%s",$szmap{$sz},
@@ -338,14 +338,14 @@ my %globals;
 	}
     }
 }
-{ package register;	# pick up registers, which start with %.
+{ package register;	# pick up registers, which start with 
     sub re {
 	my	($class, $line, $opcode) = @_;
 	my	$self = {};
 	my	$ret;
 
 	# optional * ----vvv--- appears in indirect jmp/call
-	if ($$line =~ /^(\*?)%(\w+)((?:{[^}]+})*)/) {
+	if ($$line =~ /^(\*?) 
 	    bless $self,$class;
 	    $self->{asterisk} = $1;
 	    $self->{value} = $2;
@@ -376,7 +376,7 @@ my %globals;
 	if ($gas)	{ sprintf "%s%%%s%s",	$self->{asterisk},
 						$self->{value},
 						$self->{opmask}; }
-	else		{ $self->{opmask} =~ s/%(k[0-7])/$1/;
+	else		{ $self->{opmask} =~ s/ 
 			  $self->{value}.$self->{opmask}; }
     }
 }
@@ -511,7 +511,7 @@ my %globals;
 
     # Below constants are taken from "DWARF Expressions" section of the
     # DWARF specification, section is numbered 7.7 in versions 3 and 4.
-    my %DW_OP_simple = (	# no-arg operators, mapped directly
+    my 
 	deref	=> 0x06,	dup	=> 0x12,
 	drop	=> 0x13,	over	=> 0x14,
 	pick	=> 0x15,	swap	=> 0x16,
@@ -526,7 +526,7 @@ my %globals;
 	shra	=> 0x26,	xor	=> 0x27,
 	);
 
-    my %DW_OP_complex = (	# used in specific subroutines
+    my 
 	constu		=> 0x10,	# uleb128
 	consts		=> 0x11,	# sleb128
 	plus_uconst	=> 0x23,	# uleb128
@@ -542,7 +542,7 @@ my %globals;
     # Following constants are defined in x86_64 ABI supplement, for
     # example available at https://www.uclibc.org/docs/psABI-x86_64.pdf,
     # see section 3.7 "Stack Unwind Algorithm".
-    my %DW_reg_idx = (
+    my 
 	"%rax"=>0,  "%rdx"=>1,  "%rcx"=>2,  "%rbx"=>3,
 	"%rsi"=>4,  "%rdi"=>5,  "%rbp"=>6,  "%rsp"=>7,
 	"%r8" =>8,  "%r9" =>9,  "%r10"=>10, "%r11"=>11,
@@ -603,7 +603,7 @@ my %globals;
     sub reg {
 	my $val = shift;
 
-	return if ($val !~ m/^(%r\w+)(?:([\+\-])((?:0x)?[0-9a-f]+))?/);
+	return if ($val !~ m/^( 
 
 	my $reg = $DW_reg_idx{$1};
 	my $off = eval ("0 $2 $3");
@@ -619,9 +619,9 @@ my %globals;
 	my @ret;
 
 	foreach my $token (split(/,\s*/,$line)) {
-	    if ($token =~ /^%r/) {
+	    if ($token =~ /^ 
 		push @ret,reg($token);
-	    } elsif ($token =~ /((?:0x)?[0-9a-f]+)\((%r\w+)\)/) {
+	    } elsif ($token =~ /((?:0x)?[0-9a-f]+)\(( 
 		push @ret,reg("$2+$1");
 	    } elsif ($token =~ /(\w+):(\-?(?:0x)?[0-9a-f]+)(U?)/i) {
 		my $i = 1*eval($2);
@@ -669,7 +669,7 @@ my %globals;
 			&& do {	$cfa_rsp -= 1*eval($$line) if ($cfa_reg eq "%rsp");
 				last;
 			      };
-	    /def_cfa/	&& do {	if ($$line =~ /(%r\w+)\s*,\s*(.+)/) {
+	    /def_cfa/	&& do {	if ($$line =~ /( 
 				    $cfa_reg = $1;
 				    $cfa_rsp = -1*eval($2) if ($cfa_reg eq "%rsp");
 				}
@@ -757,15 +757,15 @@ my %globals;
     my $UWOP_SAVE_XMM128 = 8;
     my $UWOP_SAVE_XMM128_FAR = 9;
 
-    my %UWOP_REG_TO_NUMBER = ("%rax" => 0, "%rcx" => 1, "%rdx" => 2, "%rbx" => 3,
+    my 
 			      "%rsp" => 4, "%rbp" => 5, "%rsi" => 6, "%rdi" => 7,
 			      map(("%r$_" => $_), (8..15)));
-    my %UWOP_NUMBER_TO_REG = reverse %UWOP_REG_TO_NUMBER;
+    my 
 
     # The contents of the pdata and xdata sections so far.
     my ($xdata, $pdata) = ("", "");
 
-    my %info;
+    my 
 
     my $next_label = 0;
     my $current_label_func = "";
@@ -786,7 +786,7 @@ my %globals;
     }
 
     sub _check_in_proc {
-	die "Missing .seh_startproc directive" unless %info;
+	die "Missing .seh_startproc directive" unless 
     }
 
     sub _check_in_prologue {
@@ -795,7 +795,7 @@ my %globals;
     }
 
     sub _check_not_in_proc {
-	die "Missing .seh_endproc directive" if %info;
+	die "Missing .seh_endproc directive" if 
     }
 
     sub _startproc {
@@ -920,7 +920,7 @@ ____
 	    $xdata .= "\t.value\t0\n";
 	}
 
-	%info = ();
+	
 	return $end_label;
     }
 
@@ -940,7 +940,7 @@ ____
 		    last;
 		};
 		/^pushreg$/ && do {
-		    $$line =~ /^(%\w+)\s*$/ or die "could not parse .seh_$dir";
+		    $$line =~ /^( 
 		    my $reg_num = $UWOP_REG_TO_NUMBER{$1} or die "unknown register $1";
 		    _updating_fixed_allocation();
 		    $label = _add_unwind_code($UWOP_PUSH_NONVOL, $reg_num);
@@ -948,7 +948,7 @@ ____
 		};
 		/^stackalloc$/ && do {
 		    my $num = eval($$line);
-		    if ($num <= 0 || $num % 8 != 0) {
+		    if ($num <= 0 || $num 
 			die "invalid stack allocation: $num";
 		    }
 		    _updating_fixed_allocation();
@@ -970,10 +970,10 @@ ____
 		    if ($info{has_offset}) {
 			die "directives with with an offset must come after .seh_setframe.";
 		    }
-		    $$line =~ /(%\w+)\s*,\s*(.+)/ or die "could not parse .seh_$dir";
+		    $$line =~ /( 
 		    my $reg_num = $UWOP_REG_TO_NUMBER{$1} or die "unknown register $1";
 		    my $offset = eval($2);
-		    if ($offset < 0 || $offset % 16 != 0 || $offset > 240) {
+		    if ($offset < 0 || $offset 
 			die "invalid offset: $offset";
 		    }
 		    $info{frame_reg} = $reg_num;
@@ -982,10 +982,10 @@ ____
 		    last;
 		};
 		/^savereg$/ && do {
-		    $$line =~ /(%\w+)\s*,\s*(.+)/ or die "could not parse .seh_$dir";
+		    $$line =~ /( 
 		    my $reg_num = $UWOP_REG_TO_NUMBER{$1} or die "unknown register $1";
 		    my $offset = eval($2);
-		    if ($offset < 0 || $offset % 8 != 0) {
+		    if ($offset < 0 || $offset 
 			die "invalid offset: $offset";
 		    }
 		    if ($offset < 8 * 65536) {
@@ -997,10 +997,10 @@ ____
 		    last;
 		};
 		/^savexmm$/ && do {
-		    $$line =~ /%xmm(\d+)\s*,\s*(.+)/ or die "could not parse .seh_$dir";
+		    $$line =~ / 
 		    my $reg_num = $1;
 		    my $offset = eval($2);
-		    if ($offset < 0 || $offset % 16 != 0) {
+		    if ($offset < 0 || $offset 
 			die "invalid offset: $offset";
 		    }
 		    if ($offset < 16 * 65536) {
@@ -1341,14 +1341,14 @@ sub rex {
 my $movq = sub {	# elderly gas can't handle inter-register movq
   my $arg = shift;
   my @opcode=(0x66);
-    if ($arg =~ /%xmm([0-9]+),\s*%r(\w+)/) {
+    if ($arg =~ / 
 	my ($src,$dst)=($1,$2);
 	if ($dst !~ /[0-9]+/)	{ $dst = $regrm{"%e$dst"}; }
 	rex(\@opcode,$src,$dst,0x8);
 	push @opcode,0x0f,0x7e;
 	push @opcode,0xc0|(($src&7)<<3)|($dst&7);	# ModR/M
 	@opcode;
-    } elsif ($arg =~ /%r(\w+),\s*%xmm([0-9]+)/) {
+    } elsif ($arg =~ / 
 	my ($src,$dst)=($2,$1);
 	if ($dst !~ /[0-9]+/)	{ $dst = $regrm{"%e$dst"}; }
 	rex(\@opcode,$src,$dst,0x8);
@@ -1361,13 +1361,13 @@ my $movq = sub {	# elderly gas can't handle inter-register movq
 };
 
 my $pextrd = sub {
-    if (shift =~ /\$([0-9]+),\s*%xmm([0-9]+),\s*(%\w+)/) {
+    if (shift =~ /\$([0-9]+),\s* 
       my @opcode=(0x66);
 	my $imm=$1;
 	my $src=$2;
 	my $dst=$3;
-	if ($dst =~ /%r([0-9]+)d/)	{ $dst = $1; }
-	elsif ($dst =~ /%e/)		{ $dst = $regrm{$dst}; }
+	if ($dst =~ / 
+	elsif ($dst =~ / 
 	rex(\@opcode,$src,$dst);
 	push @opcode,0x0f,0x3a,0x16;
 	push @opcode,0xc0|(($src&7)<<3)|($dst&7);	# ModR/M
@@ -1379,13 +1379,13 @@ my $pextrd = sub {
 };
 
 my $pinsrd = sub {
-    if (shift =~ /\$([0-9]+),\s*(%\w+),\s*%xmm([0-9]+)/) {
+    if (shift =~ /\$([0-9]+),\s*( 
       my @opcode=(0x66);
 	my $imm=$1;
 	my $src=$2;
 	my $dst=$3;
-	if ($src =~ /%r([0-9]+)/)	{ $src = $1; }
-	elsif ($src =~ /%e/)		{ $src = $regrm{$src}; }
+	if ($src =~ / 
+	elsif ($src =~ / 
 	rex(\@opcode,$dst,$src);
 	push @opcode,0x0f,0x3a,0x22;
 	push @opcode,0xc0|(($dst&7)<<3)|($src&7);	# ModR/M
@@ -1397,7 +1397,7 @@ my $pinsrd = sub {
 };
 
 my $pshufb = sub {
-    if (shift =~ /%xmm([0-9]+),\s*%xmm([0-9]+)/) {
+    if (shift =~ / 
       my @opcode=(0x66);
 	rex(\@opcode,$2,$1);
 	push @opcode,0x0f,0x38,0x00;
@@ -1409,7 +1409,7 @@ my $pshufb = sub {
 };
 
 my $palignr = sub {
-    if (shift =~ /\$([0-9]+),\s*%xmm([0-9]+),\s*%xmm([0-9]+)/) {
+    if (shift =~ /\$([0-9]+),\s* 
       my @opcode=(0x66);
 	rex(\@opcode,$3,$2);
 	push @opcode,0x0f,0x3a,0x0f;
@@ -1422,7 +1422,7 @@ my $palignr = sub {
 };
 
 my $pclmulqdq = sub {
-    if (shift =~ /\$([x0-9a-f]+),\s*%xmm([0-9]+),\s*%xmm([0-9]+)/) {
+    if (shift =~ /\$([x0-9a-f]+),\s* 
       my @opcode=(0x66);
 	rex(\@opcode,$3,$2);
 	push @opcode,0x0f,0x3a,0x44;
@@ -1436,7 +1436,7 @@ my $pclmulqdq = sub {
 };
 
 my $rdrand = sub {
-    if (shift =~ /%[er](\w+)/) {
+    if (shift =~ / 
       my @opcode=();
       my $dst=$1;
 	if ($dst !~ /[0-9]+/) { $dst = $regrm{"%e$dst"}; }
@@ -1449,7 +1449,7 @@ my $rdrand = sub {
 };
 
 my $rdseed = sub {
-    if (shift =~ /%[er](\w+)/) {
+    if (shift =~ / 
       my @opcode=();
       my $dst=$1;
 	if ($dst !~ /[0-9]+/) { $dst = $regrm{"%e$dst"}; }
@@ -1477,7 +1477,7 @@ sub rxb {
 }
 
 my $vprotd = sub {
-    if (shift =~ /\$([x0-9a-f]+),\s*%xmm([0-9]+),\s*%xmm([0-9]+)/) {
+    if (shift =~ /\$([x0-9a-f]+),\s* 
       my @opcode=(0x8f);
 	rxb(\@opcode,$3,$2,-1,0x08);
 	push @opcode,0x78,0xc2;
@@ -1491,7 +1491,7 @@ my $vprotd = sub {
 };
 
 my $vprotq = sub {
-    if (shift =~ /\$([x0-9a-f]+),\s*%xmm([0-9]+),\s*%xmm([0-9]+)/) {
+    if (shift =~ /\$([x0-9a-f]+),\s* 
       my @opcode=(0x8f);
 	rxb(\@opcode,$3,$2,-1,0x08);
 	push @opcode,0x78,0xc3;
@@ -1526,14 +1526,14 @@ ___
 if ($nasm) {
     die "unknown target" unless ($win64);
     print <<___;
-\%ifidn __OUTPUT_FORMAT__, win64
+\ 
 default	rel
-\%define XMMWORD
-\%define YMMWORD
-\%define ZMMWORD
-\%define _CET_ENDBR
+\ 
+\ 
+\ 
+\ 
 
-\%include "ring_core_generated/prefix_symbols_nasm.inc"
+\ 
 ___
 } elsif ($masm) {
     print <<___;
@@ -1564,9 +1564,9 @@ sub process_line {
     $line =~ s|\R$||;           # Better chomp
 
     if ($nasm) {
-	$line =~ s|^#ifdef |%ifdef |;
-	$line =~ s|^#ifndef |%ifndef |;
-	$line =~ s|^#endif|%endif|;
+	$line =~ s|^#ifdef | 
+	$line =~ s|^#ifndef | 
+	$line =~ s|^#endif| 
 	$line =~ s|[#!].*$||;	# get rid of asm-style comments...
     } else {
 	# Get rid of asm-style comments but not preprocessor directives. The
@@ -1654,10 +1654,10 @@ if ($masm) {
     print "#endif\n";
 } elsif ($nasm) {
     print <<___;
-\%else
+\ 
 ; Work around https://bugzilla.nasm.us/show_bug.cgi?id=3392738
 ret
-\%endif
+\ 
 ___
 } else {
     die "unknown assembler";
@@ -1669,22 +1669,22 @@ close STDOUT or die "error closing STDOUT: $!";
 # Cross-reference x86_64 ABI "card"
 #
 # 		Unix		Win64
-# %rax		*		*
-# %rbx		-		-
-# %rcx		#4		#1
-# %rdx		#3		#2
-# %rsi		#2		-
-# %rdi		#1		-
-# %rbp		-		-
-# %rsp		-		-
-# %r8		#5		#3
-# %r9		#6		#4
-# %r10		*		*
-# %r11		*		*
-# %r12		-		-
-# %r13		-		-
-# %r14		-		-
-# %r15		-		-
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
 #
 # (*)	volatile register
 # (-)	preserved by callee
@@ -1692,16 +1692,16 @@ close STDOUT or die "error closing STDOUT: $!";
 #
 # In Unix terms top of stack is argument transfer area for arguments
 # which could not be accommodated in registers. Or in other words 7th
-# [integer] argument resides at 8(%rsp) upon function entry point.
-# 128 bytes above %rsp constitute a "red zone" which is not touched
+# [integer] argument resides at 8( 
+# 128 bytes above 
 # by signal handlers and can be used as temporal storage without
 # allocating a frame.
 #
 # In Win64 terms N*8 bytes on top of stack is argument transfer area,
 # which belongs to/can be overwritten by callee. N is the number of
 # arguments passed to callee, *but* not less than 4! This means that
-# upon function entry point 5th argument resides at 40(%rsp), as well
-# as that 32 bytes from 8(%rsp) can always be used as temporal
+# upon function entry point 5th argument resides at 40( 
+# as that 32 bytes from 8( 
 # storage [without allocating a frame]. One can actually argue that
 # one can assume a "red zone" above stack pointer under Win64 as well.
 # Point is that at apparently no occasion Windows kernel would alter
@@ -1749,23 +1749,23 @@ close STDOUT or die "error closing STDOUT: $!";
 #
 # .type	function,@function
 # function:
-#	movq	%rsp,%rax	# copy rsp to volatile register
-#	pushq	%r15		# save non-volatile registers
-#	pushq	%rbx
-#	pushq	%rbp
-#	movq	%rsp,%r11
-#	subq	%rdi,%r11	# prepare [variable] stack frame
-#	andq	$-64,%r11
-#	movq	%rax,0(%r11)	# check for exceptions
-#	movq	%r11,%rsp	# allocate [variable] stack frame
-#	movq	%rax,0(%rsp)	# save original rsp value
+#	movq	
+#	pushq	
+#	pushq	
+#	pushq	
+#	movq	
+#	subq	
+#	andq	$-64, 
+#	movq	
+#	movq	
+#	movq	
 # magic_point:
 #	...
-#	movq	0(%rsp),%rcx	# pull original rsp value
-#	movq	-24(%rcx),%rbp	# restore non-volatile registers
-#	movq	-16(%rcx),%rbx
-#	movq	-8(%rcx),%r15
-#	movq	%rcx,%rsp	# restore original rsp
+#	movq	0( 
+#	movq	-24( 
+#	movq	-16( 
+#	movq	-8( 
+#	movq	
 # magic_epilogue:
 #	ret
 # .size function,.-function

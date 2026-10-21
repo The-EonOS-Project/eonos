@@ -1,16 +1,16 @@
-// Copyright 2018-2024 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use super::{nonce::Nonce, overlapping, quic::Sample, NONCE_LEN};
 use crate::{
@@ -133,8 +133,8 @@ pub enum KeyBytes<'a> {
     AES_256(&'a [u8; AES_256_KEY_LEN]),
 }
 
-// `Counter` is `ffi::Counter` as its representation is dictated by its use in
-// the FFI.
+
+
 impl Counter {
     pub fn one(nonce: Nonce) -> Self {
         let mut value = [0u8; BLOCK_LEN];
@@ -159,9 +159,9 @@ impl Counter {
     }
 }
 
-/// The IV for a single block encryption.
-///
-/// Intentionally not `Clone` to ensure each is used only once.
+
+
+
 pub struct Iv(Block);
 
 impl From<Counter> for Iv {
@@ -199,7 +199,7 @@ fn encrypt_iv_xor_block_using_encrypt_block(
 
 #[allow(dead_code)]
 fn encrypt_iv_xor_block_using_ctr32(key: &impl EncryptCtr32, iv: Iv, mut block: Block) -> Block {
-    let mut ctr = Counter(iv.0); // This is OK because we're only encrypting one block.
+    let mut ctr = Counter(iv.0); 
     key.ctr32_encrypt_within(block.as_mut().into(), &mut ctr);
     block
 }
@@ -237,8 +237,8 @@ mod tests {
     }
 }
 
-// These AES-GCM-specific tests are here instead of in `aes_gcm` because
-// `Counter`'s API isn't visible (enough) to aes_gcm.
+
+
 #[cfg(test)]
 mod aes_gcm_tests {
     use super::{super::aes_gcm::MAX_IN_OUT_LEN, *};
@@ -273,8 +273,8 @@ mod aes_gcm_tests {
         assert_eq!(ctr32(&ctr), &[0, 0, 0, 2]);
         ctr.increment_by_less_safe(blocks);
 
-        // `MAX_IN_OUT_LEN` is less on 32-bit targets, so we don't even get
-        // close to wrapping, but run the tests on them anyway.
+        
+        
         #[cfg(target_pointer_width = "64")]
         assert_eq!(ctr32(&ctr), expected_final_counter);
 

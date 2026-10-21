@@ -1,29 +1,29 @@
-//! `SYSCALL`/`SYSRET`: the fast path a user-mode thread uses to trap
-//! into the kernel and back, plus `enter_user_mode`, the one-way door
-//! from ring 0 into ring 3 that something has to walk through first.
-//!
-//! `SYSCALL` is deliberately minimal in hardware: it saves RIP in RCX
-//! and RFLAGS in R11, loads CS/SS from `STAR` and RIP from `LSTAR`, and
-//! masks RFLAGS with `SFMASK` -- and that's it. Unlike a hardware
-//! interrupt/exception (which, on a ring 3 -> ring 0 transition, also
-//! switches to the stack in `TSS.rsp0` automatically), `SYSCALL` does
-//! *not* touch RSP at all: the entry stub is still running on whatever
-//! stack the user thread had. The stub's first job is always to get off
-//! that stack before doing anything else, using `gdt::TSS_RSP0` -- the
-//! same "top of this thread's kernel stack" value the scheduler already
-//! maintains for the hardware path -- to find a safe one.
-//!
-//! Self-test: the test maps a couple of user-accessible pages straight
-//! into the kernel's own address space, drops a dedicated thread into
-//! ring 3 to run a few hand-assembled instructions there, and checks
-//! that the `syscall` those instructions issue makes it back into the
-//! kernel with the right argument. (Real processes, with their own
-//! address spaces, live in `process.rs`.)
-//!
-//! System calls follow the Linux x86-64 convention -- number in RAX,
-//! arguments in RDI/RSI/RDX/R10/R8/R9, result (or a negative errno) in
-//! RAX -- and reuse Linux's numbers for the calls that exist, so
-//! ordinary tools and libcs have a chance of working later.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #![allow(dead_code)]
 
@@ -60,24 +60,24 @@ unsafe fn wrmsr(msr: u32, value: u64) {
     );
 }
 
-/// Register frame `syscall_entry` builds on the kernel stack before
-/// calling `syscall_dispatch`, lowest address first (i.e. in the order
-/// the entry stub pushes them, read back to front).
+
+
+
 #[repr(C)]
 pub struct SyscallFrame {
-    /// Syscall number in, return value out.
+    
     pub rax: u64,
     pub rdi: u64,
     pub rsi: u64,
     pub rdx: u64,
-    /// 4th argument. Not RCX -- `syscall` clobbers RCX with the return
-    /// RIP, so the calling convention moves that argument to R10.
+    
+    
     pub r10: u64,
     pub r8: u64,
     pub r9: u64,
-    /// Saved by the CPU into RCX; restored from here before `sysretq`.
+    
     pub rip: u64,
-    /// Saved by the CPU into R11; restored from here before `sysretq`.
+    
     pub rflags: u64,
     pub user_rsp: u64,
 }
@@ -170,31 +170,31 @@ enter_user_mode_asm:
 "#
 );
 
-/// Wire up `SYSCALL`/`SYSRET`. Call once, after `gdt::init` (needs
-/// `USER_CS`/`USER_DS` to already be in the GDT) and before any thread
-/// might execute a `syscall`.
+
+
+
 pub fn init() {
     unsafe {
         let efer = rdmsr(MSR_EFER);
         wrmsr(MSR_EFER, efer | EFER_SCE);
 
-        // STAR[47:32]: SYSCALL loads CS from here (RPL forced 0) and SS
-        // from here+8 -- must be the kernel code selector, immediately
-        // followed by the kernel data selector.
-        //
-        // STAR[63:48]: SYSRETQ loads SS from here+8 and CS from here+16
-        // (RPL forced 3) -- so this must be 8 less than USER_DS, which
-        // is exactly why gdt.rs lays USER_DS/USER_CS out back-to-back.
+        
+        
+        
+        
+        
+        
+        
         let syscall_base = gdt::KERNEL_CS as u64;
         let sysret_base = gdt::USER_DS as u64 - 8;
         wrmsr(MSR_STAR, (sysret_base << 48) | (syscall_base << 32));
 
         wrmsr(MSR_LSTAR, syscall_entry as *const () as usize as u64);
 
-        // Cleared from RFLAGS on entry, before the stub has a valid
-        // stack: IF (so the stub can't be preempted mid-switch), TF and
-        // DF (so a stray debug/string-op assumption from user mode
-        // can't follow it in).
+        
+        
+        
+        
         wrmsr(MSR_SFMASK, (1 << 8) | (1 << 9) | (1 << 10));
     }
 
@@ -208,7 +208,7 @@ pub fn init() {
     );
 }
 
-// System call numbers (Linux x86-64 numbering for the ones Linux has).
+
 pub const SYS_READ: u64 = 0;
 pub const SYS_WRITE: u64 = 1;
 pub const SYS_SCHED_YIELD: u64 = 24;
@@ -219,16 +219,16 @@ pub const SYS_OPEN: u64 = 2;
 pub const SYS_CLOSE: u64 = 3;
 pub const SYS_KILL: u64 = 62;
 
-// EonOS-specific utilities used by the shell. File access itself uses
-// open/read/write/close; list/read-by-path remain compatibility helpers.
+
+
 pub const SYS_LIST_FILES: u64 = 9001;
 pub const SYS_READ_FILE: u64 = 9002;
-/// Milliseconds since boot, per `pit::uptime_ms()`. Backs the shell's
-/// `uptime` command; Linux has no equivalent single-call primitive
-/// (it's normally read out of /proc), so this gets an EonOS-specific
-/// number like the two above rather than trying to match a real one.
+
+
+
+
 pub const SYS_UPTIME_MS: u64 = 9003;
-/// Seconds since 1970-01-01 UTC, or zero when the RTC is unavailable.
+
 pub const SYS_WALL_TIME: u64 = 9045;
 pub const SYS_SLEEP_MS: u64 = 9004;
 pub const SYS_EXEC: u64 = 9005;
@@ -237,12 +237,12 @@ pub const SYS_MKDIR: u64 = 9007;
 pub const SYS_REMOVE: u64 = 9008;
 pub const SYS_SYNC: u64 = 9009;
 pub const SYS_LIST_BLOCK_DEVICES: u64 = 9010;
-/// Intentionally enter the kernel panic handler (exposed by the shell's
-/// `panic` command for testing the panic screen and logging path).
+
+
 pub const SYS_PANIC: u64 = 9011;
-/// Mount a FAT32 block device at a VFS path; arguments are NUL-terminated strings.
+
 pub const SYS_MOUNT: u64 = 9012;
-/// Allocate and free process-owned writable pages for the userspace heap.
+
 pub const SYS_ALLOC_PAGES: u64 = 9013;
 pub const SYS_FREE_PAGES: u64 = 9014;
 pub const SYS_CHDIR: u64 = 9015;
@@ -251,17 +251,17 @@ pub const SYS_LIST_DIRECTORY: u64 = 9017;
 pub const SYS_EXEC_IO: u64 = 9018;
 pub const SYS_PIPE: u64 = 9019;
 pub const SYS_MOUSE_STATE: u64 = 9020;
-/// Era's bounded user-mode drawing API.
+
 pub const SYS_ERA_GRAPHICS: u64 = 9021;
-/// Copy physical-frame and kernel-heap statistics into a userspace buffer.
+
 pub const SYS_MEMORY_INFO: u64 = 9022;
-/// Flush storage and request a system-wide restart or ACPI soft-off.
+
 pub const SYS_POWER_CONTROL: u64 = 9023;
 pub const SYS_IS_MOUNTPOINT: u64 = 9024;
 pub const SYS_NET_INFO: u64 = 9025;
 pub const SYS_NET_SEND: u64 = 9026;
 pub const SYS_NET_RECEIVE: u64 = 9027;
-/// Copy the active VFS mount table into a caller-provided buffer.
+
 pub const SYS_LIST_MOUNTS: u64 = 9028;
 pub const SYS_NET_DHCP: u64 = 9029;
 pub const SYS_NET_CONFIG: u64 = 9030;
@@ -274,13 +274,13 @@ pub const SYS_TCP_SEND: u64 = 9042;
 pub const SYS_TCP_RECEIVE: u64 = 9043;
 pub const SYS_TCP_CLOSE: u64 = 9044;
 pub const SYS_SECURE_RANDOM: u64 = 9046;
-/// Read one focused keyboard edge event into a user buffer (0 if none).
+
 pub const SYS_KEYBOARD_EVENT: u64 = 9035;
-/// Claim or release keyboard-event focus (operation: 1 claim, 0 release).
+
 pub const SYS_KEYBOARD_FOCUS: u64 = 9036;
-/// Seek an open file descriptor (fd, signed offset, SEEK_SET/CUR/END).
+
 pub const SYS_SEEK: u64 = 9037;
-/// Read currently buffered pipe bytes without waiting for a writer.
+
 pub const SYS_PIPE_READ_AVAILABLE: u64 = 9038;
 pub const SYS_PIPE_WRITE_AVAILABLE: u64 = 9039;
 pub const SYS_EXEC_APP_IO: u64 = 9040;
@@ -386,8 +386,8 @@ const O_CREAT: u64 = 0x40;
 const O_TRUNC: u64 = 0x200;
 const O_APPEND: u64 = 0x400;
 
-/// Install a fresh process's standard streams. Processes currently start
-/// independently, so there is no parent descriptor inheritance yet.
+
+
 pub fn init_process_files(pid: u64, parent: u64, stdin_fd: Option<u64>, stdout_fd: Option<u64>) {
     let mut files = OPEN_FILES.lock();
     files.retain(|file| file.pid != pid);
@@ -454,17 +454,17 @@ pub fn init_process_files(pid: u64, parent: u64, stdin_fd: Option<u64>, stdout_f
     }
 }
 
-/// Encode a positive errno as the negative value a syscall returns.
+
 const fn errno(e: i64) -> u64 {
     (-e) as u64
 }
 
-/// Longest run of bytes a single `write` will take; longer requests are
-/// short-written (callers loop, exactly as with Linux).
+
+
 const MAX_WRITE: usize = 4096;
 
-/// Put raw process output on the serial port and the screen, without
-/// the log decorations `klog!` adds.
+
+
 fn console_write(bytes: &[u8]) {
     let text = alloc::string::String::from_utf8_lossy(bytes);
     {
@@ -476,10 +476,10 @@ fn console_write(bytes: &[u8]) {
     }
 }
 
-/// How many previous lines `read_line` remembers for up/down-arrow
-/// recall. Bounded so a long session doesn't grow this forever; old
-/// entries are dropped, same trade-off as the PS/2 driver's own ring
-/// buffer.
+
+
+
+
 const HISTORY_CAP: usize = 32;
 
 static HISTORY: sync::IrqMutex<alloc::collections::VecDeque<alloc::vec::Vec<u8>>> =
@@ -491,9 +491,9 @@ static CTRL_C_PENDING: AtomicBool = AtomicBool::new(false);
 static TERMINAL_READER: AtomicBool = AtomicBool::new(false);
 static URANDOM_STATE: AtomicU64 = AtomicU64::new(0);
 
-/// Get one pseudorandom word, preferring RDRAND when the CPU advertises it.
-/// The timing-seeded fallback is useful for non-cryptographic random data,
-/// but is not a cryptographic random number generator.
+
+
+
 fn urandom_word() -> u64 {
     if core::arch::x86_64::__cpuid(1).ecx & (1 << 30) != 0 {
         for _ in 0..10 {
@@ -543,11 +543,11 @@ fn fill_urandom(out: &mut [u8]) {
     }
 }
 
-/// Next raw input byte from whichever source has one, blocking
-/// (via yield, not a real wait queue) until one shows up. PS/2 and
-/// serial both just fill a byte queue from their own IRQ handlers, so
-/// polling either in turn is enough -- no reason to prefer one over
-/// the other beyond "whichever has something waiting first".
+
+
+
+
+
 fn next_byte() -> u8 {
     loop {
         if let Some(byte) = DEFERRED_INPUT.lock().pop_front() {
@@ -567,15 +567,15 @@ fn next_byte() -> u8 {
     }
 }
 
-/// Decode a `\x1b[...` escape sequence (as PS/2 arrow/nav keys are
-/// encoded into by `drivers::ps2::push_escape`, and as a real terminal
-/// emulator would send them over serial too) into one of a small fixed
-/// set of edit actions. Called right after the ESC byte itself is
-/// consumed. Reads (and blocks on) further bytes as needed -- safe
-/// because a `\x1b` this driver produces is always immediately followed
-/// by the rest of its sequence; a lone stray ESC from a real keyboard's
-/// Esc key will just stall until another byte arrives, same as it would
-/// on a real tty waiting to see if it's the start of a sequence.
+
+
+
+
+
+
+
+
+
 enum EditAction {
     Up,
     Down,
@@ -599,19 +599,19 @@ fn decode_escape() -> EditAction {
         b'H' => EditAction::Home,
         b'F' => EditAction::End,
         b'3' => {
-            // Delete is "\x1b[3~" -- a three-byte final sequence rather
-            // than one letter, so it needs an extra byte consumed.
-            let _ = next_byte(); // expected '~'
+            
+            
+            let _ = next_byte(); 
             EditAction::Delete
         }
         _ => EditAction::Unknown,
     }
 }
 
-/// Erase the currently-displayed line on screen and replace both the
-/// buffer and the terminal display with `new_line`, cursor at the end.
-/// Used for history recall, where the whole line changes at once
-/// rather than one character at a time.
+
+
+
+
 fn replace_line(line: &mut alloc::vec::Vec<u8>, cursor: &mut usize, new_line: alloc::vec::Vec<u8>) {
     cursor_left(*cursor);
     for _ in 0..line.len() {
@@ -623,13 +623,13 @@ fn replace_line(line: &mut alloc::vec::Vec<u8>, cursor: &mut usize, new_line: al
     *cursor = line.len();
 }
 
-/// Move the terminal cursor left `n` cells without touching what's
-/// drawn there, via the standard `CSI n D` sequence (`console.rs`
-/// handles it; a real serial terminal understands it natively too).
-/// Distinct from sending literal `0x08` bytes, which both this
-/// console and real terminals treat as destructive backspace -- correct
-/// for deleting a character, wrong for merely repositioning over
-/// content that must stay on screen (redraws, arrow-key movement).
+
+
+
+
+
+
+
 fn cursor_left(n: usize) {
     if n == 0 {
         return;
@@ -641,9 +641,9 @@ fn cursor_left(n: usize) {
     console_write(&seq);
 }
 
-/// Minimal integer-to-decimal-ASCII, since `core::fmt` formatting isn't
-/// worth pulling into this hot little path. `n` is always small here
-/// (line lengths), so no need for anything fancier.
+
+
+
 fn itoa(mut n: usize) -> alloc::string::String {
     if n == 0 {
         return alloc::string::String::from("0");
@@ -657,14 +657,14 @@ fn itoa(mut n: usize) -> alloc::string::String {
     alloc::string::String::from_utf8(digits).unwrap()
 }
 
-/// Redraw the visible line from `from` (a byte index into `line`) to
-/// its end, then park the cursor back at `cursor`. Used whenever an
-/// edit touches anything before the end of the line -- a plain append
-/// or trailing backspace doesn't need this and stays on the cheaper
-/// path in `read_line` itself.
+
+
+
+
+
 fn redraw_tail(line: &[u8], from: usize, cursor: usize) {
     console_write(&line[from..]);
-    console_write(b" "); // erase whatever character used to trail here
+    console_write(b" "); 
     cursor_left(line.len() - cursor + 1);
 }
 
@@ -787,29 +787,29 @@ fn complete_line(line: &mut alloc::vec::Vec<u8>, cursor: &mut usize, max: usize)
     }
 }
 
-/// Read one line of input for `sys_read(0, ...)`.
-///
-/// Input comes from the PS/2 keyboard (`drivers::ps2`), a USB HID boot
-/// keyboard (`drivers::usb::xhci`), or the
-/// serial port (COM1 -- in QEMU, typically `-serial stdio`, i.e. the
-/// host terminal); both are polled so either can drive the shell.
-/// This does canonical-mode editing in the kernel -- echoing bytes
-/// back, backspace/delete, left/right cursor movement, and up/down
-/// history recall via ANSI escape sequences -- the same job a real
-/// tty line discipline does, just smaller.
-///
-/// Polls rather than waiting on an IRQ: both input sources just fill a
-/// buffer in their own interrupt handlers, so a bare read-and-retry
-/// loop (yielding between attempts so it doesn't starve other threads)
-/// is the simplest way to consume either. Returns at most `max` bytes,
-/// including the trailing `\n`.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn read_line(max: usize) -> alloc::vec::Vec<u8> {
     let mut line: alloc::vec::Vec<u8> = alloc::vec::Vec::new();
     if max == 0 {
         return line;
     }
-    let mut cursor = 0usize; // byte index into `line`; can be < line.len()
-    let mut history_pos: Option<usize> = None; // index into HISTORY while recalling
+    let mut cursor = 0usize; 
+    let mut history_pos: Option<usize> = None; 
 
     loop {
         let byte = next_byte();
@@ -881,7 +881,7 @@ fn read_line(max: usize) -> alloc::vec::Vec<u8> {
                     EditAction::Down => {
                         let history = HISTORY.lock();
                         match history_pos {
-                            None => {} // already at the blank line, nothing newer
+                            None => {} 
                             Some(p) if p + 1 < history.len() => {
                                 let next_pos = p + 1;
                                 history_pos = Some(next_pos);
@@ -901,10 +901,10 @@ fn read_line(max: usize) -> alloc::vec::Vec<u8> {
             }
             b'\t' => complete_line(&mut line, &mut cursor, max),
             0x08 | 0x7F => {
-                // Backspace/DEL: remove the character before the
-                // cursor, if any. A trailing backspace (cursor at the
-                // end) is the common case and stays cheap; editing
-                // mid-line requires reflowing everything after it.
+                
+                
+                
+                
                 if cursor > 0 {
                     cursor -= 1;
                     line.remove(cursor);
@@ -921,10 +921,10 @@ fn read_line(max: usize) -> alloc::vec::Vec<u8> {
                     } else {
                         line.insert(cursor, b);
                         cursor += 1;
-                        // Redraw from the inserted character onward (not
-                        // from `cursor` alone) so it's drawn exactly
-                        // once, then walk the terminal cursor back to
-                        // just after it.
+                        
+                        
+                        
+                        
                         console_write(&line[cursor - 1..]);
                         for _ in 0..(line.len() - cursor) {
                             console_write(b"\x08");
@@ -935,9 +935,9 @@ fn read_line(max: usize) -> alloc::vec::Vec<u8> {
         }
     }
 
-    // Record non-empty, non-history-recalled lines for future recall.
-    // (The trailing '\n' is stripped for storage and reattached to
-    // whatever's returned to the caller as usual.)
+    
+    
+    
     if line.len() > 1 {
         let mut h = HISTORY.lock();
         let stored = line[..line.len() - 1].to_vec();
@@ -968,8 +968,8 @@ fn sys_read(fd: u64, buf: u64, len: u64) -> u64 {
         }
         file.kind
     };
-    // Check the full destination before reading a file or consuming a
-    // console line. copy_to_user checks it again when it performs the copy.
+    
+    
     if !vmm::validate_user_range(buf, n, true) {
         return errno(EFAULT);
     }
@@ -1243,7 +1243,7 @@ fn sys_close(fd: u64) -> u64 {
     0
 }
 
-/// Drop a process's file descriptors as part of process teardown.
+
 pub fn close_process_files(pid: u64) {
     let mut pipe_refs = alloc::vec::Vec::new();
     OPEN_FILES.lock().retain(|file| {
@@ -1716,9 +1716,9 @@ fn sys_era_graphics(operation: u64, a1: u64, a2: u64, a3: u64, a4: u64, a5: u64)
             let mut pixels = alloc::vec::Vec::new();
             if pixels.try_reserve_exact(pixel_count).is_err() { return errno(ENOMEM); }
             pixels.resize(pixel_count, 0);
-            // The API accepts packed native-endian u32 pixels. Copy directly
-            // into their final allocation instead of allocating a byte buffer
-            // and converting every pixel into a second allocation each frame.
+            
+            
+            
             let pixel_bytes = unsafe {
                 core::slice::from_raw_parts_mut(pixels.as_mut_ptr().cast::<u8>(), byte_len)
             };
@@ -2198,8 +2198,8 @@ fn sys_waitpid(pid: u64, status_ptr: u64, options: u64) -> u64 {
     if options & !WNOHANG != 0 {
         return errno(EINVAL);
     }
-    // Reaping is destructive, so reject a bad status pointer before waiting
-    // for or removing the child's exit status.
+    
+    
     if status_ptr != 0 && !vmm::validate_user_range(status_ptr, 4, true) {
         return errno(EFAULT);
     }
@@ -2253,7 +2253,7 @@ impl Drop for ForegroundWaitGuard {
     }
 }
 
-/// Poll terminal input while a foreground process is running.
+
 fn try_terminal_byte() -> Option<u8> {
     crate::drivers::usb::xhci::poll();
     crate::drivers::ps2::try_read_byte()
@@ -2261,7 +2261,7 @@ fn try_terminal_byte() -> Option<u8> {
         .or_else(|| crate::serial::SERIAL1.lock().try_read_byte())
 }
 
-/// Longest path or argument string accepted by user-facing syscalls.
+
 const MAX_NAME: usize = 255;
 
 fn sys_list_files(buf: u64, len: u64) -> u64 {
@@ -2476,8 +2476,8 @@ fn sys_write(fd: u64, buf: u64, len: u64) -> u64 {
     if kind != FdKind::File {
         return errno(EBADF);
     }
-    // Serialize append's size lookup and write against other descriptor
-    // writes so concurrent appends cannot select the same offset.
+    
+    
     let mut files = OPEN_FILES.lock();
     let Some(file) = files.iter_mut().find(|f| f.pid == pid && f.fd == fd) else {
         return errno(EBADF);
@@ -2516,17 +2516,17 @@ fn fs_errno(error: crate::vfs::FsError) -> u64 {
 
 #[no_mangle]
 extern "C" fn syscall_dispatch(frame: &mut SyscallFrame) {
-    // `SFMASK` cleared IF on entry because the stub had no stack to
-    // trust. The frame now lives on this thread's own kernel stack, so
-    // interrupts (and with them preemption) can safely come back on:
-    // a syscall may take as long as it likes without stalling the timer.
+    
+    
+    
+    
     crate::idt::enable_interrupts();
 
-    // Third-party applications use pipes and the bounded Era drawing protocol.
-    // File writes are limited to a mounted writable /disk in sys_open; hardware,
-    // global input focus, power, mounts, and kernel control stay out of their
-    // capability set. Policy is enforced at the syscall boundary, so a crafted
-    // ELF cannot bypass the SDK restrictions.
+    
+    
+    
+    
+    
     let pid = scheduler::current_id();
     if process::is_sandboxed(pid)
         && matches!(
@@ -2634,14 +2634,14 @@ extern "C" fn syscall_dispatch(frame: &mut SyscallFrame) {
             frame.rax = 0;
         }
         SYS_GETPID => frame.rax = scheduler::current_id(),
-        // Never returns: records the status, ends the thread, and the
-        // scheduler frees the process's address space once it's off the CPU.
+        
+        
         SYS_EXIT => process::exit_current((frame.rdi & 0xff) as i64),
         TEST_SYSCALL_NUM => {
             TEST_ARG.store(frame.rdi, Ordering::SeqCst);
             TEST_DONE.store(true, Ordering::SeqCst);
-            // Nothing sensible to sysret to for the self-test's
-            // throwaway thread -- tear it down here instead.
+            
+            
             scheduler::exit();
         }
         other => {
@@ -2657,9 +2657,9 @@ extern "C" fn syscall_dispatch(frame: &mut SyscallFrame) {
     }
 }
 
-/// Drop from ring 0 into ring 3 at `entry`, running on `user_rsp`. Never
-/// returns to the caller: either the user code eventually `syscall`s
-/// into a handler that exits the thread, or (self-test only) it spins.
+
+
+
 pub fn enter_user_mode(entry: u64, user_rsp: u64) -> ! {
     unsafe {
         enter_user_mode_asm(
@@ -2671,9 +2671,9 @@ pub fn enter_user_mode(entry: u64, user_rsp: u64) -> ! {
     }
 }
 
-// ---------------------------------------------------------------------
-// Self-test
-// ---------------------------------------------------------------------
+
+
+
 
 const TEST_SYSCALL_NUM: u64 = 0x42;
 const TEST_MAGIC: u64 = 0xABCD_1234_DEAD_BEEF;
@@ -2685,22 +2685,22 @@ const USER_CODE_VIRT: u64 = 0x0000_0000_0040_0000;
 const USER_STACK_TOP_VIRT: u64 = 0x0000_0000_0060_0000;
 const USER_STACK_PAGE_VIRT: u64 = USER_STACK_TOP_VIRT - pmm::PAGE_SIZE;
 
-/// Hand-assembled, position-independent (no absolute addresses) machine
-/// code for the self-test's "user program":
-///
-/// ```asm
-/// mov rax, 0x42                       ; TEST_SYSCALL_NUM
-/// movabs rdi, 0xABCD1234DEADBEEF       ; TEST_MAGIC, passed as arg0
-/// syscall
-/// 1: jmp 1b                           ; unreachable: the handler above
-///                                      ; never sysret's back to us
-/// ```
+
+
+
+
+
+
+
+
+
+
 #[rustfmt::skip]
 const USER_TEST_PROGRAM: [u8; 24] = [
-    0x48, 0xB8, 0x42, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // mov rax, 0x42
-    0x48, 0xBF, 0xEF, 0xBE, 0xAD, 0xDE, 0x34, 0x12, 0xCD, 0xAB, // movabs rdi, 0xABCD1234DEADBEEF
-    0x0F, 0x05,                                                 // syscall
-    0xEB, 0xFE,                                                 // jmp $
+    0x48, 0xB8, 0x42, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+    0x48, 0xBF, 0xEF, 0xBE, 0xAD, 0xDE, 0x34, 0x12, 0xCD, 0xAB, 
+    0x0F, 0x05,                                                 
+    0xEB, 0xFE,                                                 
 ];
 
 fn user_test_thread() {
@@ -2750,8 +2750,8 @@ pub fn self_test() {
         scheduler::yield_now();
     }
 
-    // Let the test thread actually get reaped before freeing the pages
-    // it was running on top of.
+    
+    
     scheduler::sleep_ms(20);
 
     let code_phys = vmm::translate(USER_CODE_VIRT);

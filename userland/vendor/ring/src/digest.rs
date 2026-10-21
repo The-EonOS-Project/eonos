@@ -1,22 +1,22 @@
-// Copyright 2015-2019 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-//! SHA-2 and the legacy SHA-1 digest algorithm.
-//!
-//! If all the data is available in a single contiguous slice then the `digest`
-//! function should be used. Otherwise, the digest can be calculated in
-//! multiple steps using `Context`.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use self::{
     dynstate::DynState,
@@ -39,12 +39,12 @@ mod sha2;
 pub(crate) struct BlockContext {
     state: DynState,
 
-    // Note that SHA-512 has a 128-bit input bit counter, but this
-    // implementation only supports up to 2^64-1 input bits for all algorithms,
-    // so a 64-bit counter is more than sufficient.
+    
+    
+    
     completed_bytes: u64,
 
-    /// The context's algorithm.
+    
     pub algorithm: &'static Algorithm,
 }
 
@@ -57,25 +57,25 @@ impl BlockContext {
         }
     }
 
-    /// Processes all the full blocks in `input`, returning the partial block
-    /// at the end, which may be empty.
+    
+    
     pub(crate) fn update<'i>(&mut self, input: &'i [u8], cpu_features: cpu::Features) -> &'i [u8] {
         let (completed_bytes, leftover) = self.block_data_order(input, cpu_features);
-        // Using saturated addition here allows `update` to be infallible and
-        // panic-free. If we were to reach the maximum value here then `finish`
-        // will detect that we processed too much data when it converts this to
-        // a bit length.
+        
+        
+        
+        
         self.completed_bytes = self
             .completed_bytes
             .saturating_add(polyfill::u64_from_usize(completed_bytes));
         leftover
     }
 
-    // On input, `block[..num_pending]` is the (possibly-empty) last *partial*
-    // chunk of input. It *must* be partial; that is, it is required that
-    // `num_pending < self.algorithm.block_len`.
-    //
-    // `block` may be arbitrarily overwritten.
+    
+    
+    
+    
+    
     pub(crate) fn try_finish(
         mut self,
         block: &mut [u8; MAX_BLOCK_LEN],
@@ -86,7 +86,7 @@ impl BlockContext {
             .completed_bytes
             .checked_add(polyfill::u64_from_usize(num_pending))
             .ok_or_else(|| {
-                // Choosing self.completed_bytes here is lossy & somewhat arbitrary.
+                
                 InputTooLongError::new(self.completed_bytes)
             })
             .and_then(BitLength::from_byte_len)
@@ -100,7 +100,7 @@ impl BlockContext {
                 *separator = 0x80;
                 padding
             }
-            // Precondition violated.
+            
             unreachable => {
                 return Err(FinishError::pending_not_a_partial_block(
                     unreachable.as_deref(),
@@ -117,8 +117,8 @@ impl BlockContext {
                 padding.fill(0);
                 let (completed_bytes, leftover) = self.block_data_order(block, cpu_features);
                 debug_assert_eq!((completed_bytes, leftover.len()), (block_len, 0));
-                // We don't increase |self.completed_bytes| because the padding
-                // isn't data, and so it isn't included in the data length.
+                
+                
                 &mut block[..]
             }
         };
@@ -166,35 +166,35 @@ impl FinishError {
     }
 }
 
-/// A context for multi-step (Init-Update-Finish) digest calculations.
-///
-/// # Examples
-///
-/// ```
-/// use ring::digest;
-///
-/// let one_shot = digest::digest(&digest::SHA384, b"hello, world");
-///
-/// let mut ctx = digest::Context::new(&digest::SHA384);
-/// ctx.update(b"hello");
-/// ctx.update(b", ");
-/// ctx.update(b"world");
-/// let multi_part = ctx.finish();
-///
-/// assert_eq!(&one_shot.as_ref(), &multi_part.as_ref());
-/// ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #[derive(Clone)]
 pub struct Context {
     block: BlockContext,
-    // TODO: More explicitly force 64-bit alignment for |pending|.
+    
     pending: [u8; MAX_BLOCK_LEN],
 
-    // Invariant: `self.num_pending < self.block.algorithm.block_len`.
+    
     num_pending: usize,
 }
 
 impl Context {
-    /// Constructs a new context.
+    
     pub fn new(algorithm: &'static Algorithm) -> Self {
         Self {
             block: BlockContext::new(algorithm),
@@ -211,7 +211,7 @@ impl Context {
         }
     }
 
-    /// Updates the digest with all the data in `data`.
+    
     pub fn update(&mut self, data: &[u8]) {
         let cpu_features = cpu::features();
 
@@ -224,7 +224,7 @@ impl Context {
             let buffer_to_fill = match buffer.get_mut(self.num_pending..) {
                 Some(buffer_to_fill) => buffer_to_fill,
                 None => {
-                    // Impossible because of the invariant.
+                    
                     unreachable!();
                 }
             };
@@ -240,7 +240,7 @@ impl Context {
                 }
                 None => {
                     self.num_pending += data.len();
-                    // If `data` isn't enough to complete a block, buffer it and stop.
+                    
                     debug_assert!(self.num_pending < block_len);
                     return;
                 }
@@ -253,10 +253,10 @@ impl Context {
         debug_assert!(self.num_pending < block_len);
     }
 
-    /// Finalizes the digest calculation and returns the digest value.
-    ///
-    /// `finish` consumes the context so it cannot be (mis-)used after `finish`
-    /// has been called.
+    
+    
+    
+    
     pub fn finish(self) -> Digest {
         let cpu = cpu::features();
         self.try_finish(cpu)
@@ -273,20 +273,20 @@ impl Context {
             .map_err(|err| match err {
                 FinishError::InputTooLong(i) => i,
                 FinishError::PendingNotAPartialBlock(_) => {
-                    // Due to invariant.
+                    
                     unreachable!()
                 }
             })
     }
 
-    /// The algorithm that this context is using.
+    
     #[inline(always)]
     pub fn algorithm(&self) -> &'static Algorithm {
         self.block.algorithm
     }
 }
 
-/// Returns the digest of `data` using the given digest algorithm.
+
 pub fn digest(algorithm: &'static Algorithm, data: &[u8]) -> Digest {
     let cpu = cpu::features();
     Digest::compute_from(algorithm, data, cpu)
@@ -294,9 +294,9 @@ pub fn digest(algorithm: &'static Algorithm, data: &[u8]) -> Digest {
         .unwrap()
 }
 
-/// A calculated digest value.
-///
-/// Use [`Self::as_ref`] to get the value as a `&[u8]`.
+
+
+
 #[derive(Clone, Copy)]
 pub struct Digest {
     value: Output,
@@ -314,7 +314,7 @@ impl Digest {
         ctx.try_finish(cpu)
     }
 
-    /// The algorithm that was used to calculate the digest value.
+    
     #[inline(always)]
     pub fn algorithm(&self) -> &'static Algorithm {
         self.algorithm
@@ -335,15 +335,15 @@ impl core::fmt::Debug for Digest {
     }
 }
 
-/// A digest algorithm.
+
 pub struct Algorithm {
     output_len: OutputLen,
     chaining_len: usize,
     block_len: BlockLen,
 
-    /// `block_data_order` processes all the full blocks of data in `data`. It
-    /// returns the number of bytes processed and the unprocessed data, which
-    /// is guaranteed to be less than `block_len` bytes long.
+    
+    
+    
     block_data_order: for<'d> fn(
         state: &mut DynState,
         data: &'d [u8],
@@ -375,31 +375,31 @@ impl Eq for Algorithm {}
 derive_debug_via_id!(Algorithm);
 
 impl Algorithm {
-    /// The internal block length.
+    
     pub fn block_len(&self) -> usize {
         self.block_len.into()
     }
 
-    /// The size of the chaining value of the digest function, in bytes.
-    ///
-    /// For non-truncated algorithms (SHA-1, SHA-256, SHA-512), this is equal
-    /// to [`Self::output_len()`]. For truncated algorithms (e.g. SHA-384,
-    /// SHA-512/256), this is equal to the length before truncation. This is
-    /// mostly helpful for determining the size of an HMAC key that is
-    /// appropriate for the digest algorithm.
+    
+    
+    
+    
+    
+    
+    
     pub fn chaining_len(&self) -> usize {
         self.chaining_len
     }
 
-    /// The length of a finalized digest.
+    
     pub fn output_len(&self) -> usize {
         self.output_len.into()
     }
 }
 
-/// SHA-1 as specified in [FIPS 180-4]. Deprecated.
-///
-/// [FIPS 180-4]: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
+
+
+
 pub static SHA1_FOR_LEGACY_USE_ONLY: Algorithm = Algorithm {
     output_len: sha1::OUTPUT_LEN,
     chaining_len: sha1::CHAINING_LEN,
@@ -418,9 +418,9 @@ pub static SHA1_FOR_LEGACY_USE_ONLY: Algorithm = Algorithm {
     id: AlgorithmID::SHA1,
 };
 
-/// SHA-256 as specified in [FIPS 180-4].
-///
-/// [FIPS 180-4]: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
+
+
+
 pub static SHA256: Algorithm = Algorithm {
     output_len: OutputLen::_256,
     chaining_len: SHA256_OUTPUT_LEN,
@@ -439,9 +439,9 @@ pub static SHA256: Algorithm = Algorithm {
     id: AlgorithmID::SHA256,
 };
 
-/// SHA-384 as specified in [FIPS 180-4].
-///
-/// [FIPS 180-4]: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
+
+
+
 pub static SHA384: Algorithm = Algorithm {
     output_len: OutputLen::_384,
     chaining_len: SHA512_OUTPUT_LEN,
@@ -460,9 +460,9 @@ pub static SHA384: Algorithm = Algorithm {
     id: AlgorithmID::SHA384,
 };
 
-/// SHA-512 as specified in [FIPS 180-4].
-///
-/// [FIPS 180-4]: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
+
+
+
 pub static SHA512: Algorithm = Algorithm {
     output_len: OutputLen::_512,
     chaining_len: SHA512_OUTPUT_LEN,
@@ -481,13 +481,13 @@ pub static SHA512: Algorithm = Algorithm {
     id: AlgorithmID::SHA512,
 };
 
-/// SHA-512/256 as specified in [FIPS 180-4].
-///
-/// This is *not* the same as just truncating the output of SHA-512, as
-/// SHA-512/256 has its own initial state distinct from SHA-512's initial
-/// state.
-///
-/// [FIPS 180-4]: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
+
+
+
+
+
+
+
 pub static SHA512_256: Algorithm = Algorithm {
     output_len: OutputLen::_256,
     chaining_len: SHA512_OUTPUT_LEN,
@@ -509,16 +509,16 @@ pub static SHA512_256: Algorithm = Algorithm {
 #[derive(Clone, Copy)]
 struct Output([u8; MAX_OUTPUT_LEN]);
 
-/// The maximum block length ([`Algorithm::block_len()`]) of all the algorithms
-/// in this module.
+
+
 pub const MAX_BLOCK_LEN: usize = BlockLen::MAX.into();
 
-/// The maximum output length ([`Algorithm::output_len()`]) of all the
-/// algorithms in this module.
+
+
 pub const MAX_OUTPUT_LEN: usize = OutputLen::MAX.into();
 
-/// The maximum chaining length ([`Algorithm::chaining_len()`]) of all the
-/// algorithms in this module.
+
+
 pub const MAX_CHAINING_LEN: usize = MAX_OUTPUT_LEN;
 
 #[inline]
@@ -538,25 +538,25 @@ where
     output
 }
 
-/// The length of the output of SHA-1, in bytes.
+
 pub const SHA1_OUTPUT_LEN: usize = sha1::OUTPUT_LEN.into();
 
-/// The length of the output of SHA-256, in bytes.
+
 pub const SHA256_OUTPUT_LEN: usize = OutputLen::_256.into();
 
-/// The length of the output of SHA-384, in bytes.
+
 pub const SHA384_OUTPUT_LEN: usize = OutputLen::_384.into();
 
-/// The length of the output of SHA-512, in bytes.
+
 pub const SHA512_OUTPUT_LEN: usize = OutputLen::_512.into();
 
-/// The length of the output of SHA-512/256, in bytes.
+
 pub const SHA512_256_OUTPUT_LEN: usize = OutputLen::_256.into();
 
 #[derive(Clone, Copy)]
 enum BlockLen {
     _512 = 512 / 8,
-    _1024 = 1024 / 8, // MAX
+    _1024 = 1024 / 8, 
 }
 
 impl BlockLen {
@@ -587,7 +587,7 @@ enum OutputLen {
     _160 = 160 / 8,
     _256 = 256 / 8,
     _384 = 384 / 8,
-    _512 = 512 / 8, // MAX
+    _512 = 512 / 8, 
 }
 
 impl OutputLen {
@@ -636,14 +636,14 @@ mod tests {
             let mut context = nearly_full_context(alg);
             let next_input = vec![0u8; alg.block_len() - 1];
             context.update(&next_input);
-            let _ = context.finish(); // no panic
+            let _ = context.finish(); 
         }
 
         fn too_long_input_test_block(alg: &'static digest::Algorithm) {
             let mut context = nearly_full_context(alg);
             let next_input = vec![0u8; alg.block_len()];
             context.update(&next_input);
-            let _ = context.finish(); // should panic
+            let _ = context.finish(); 
         }
 
         fn too_long_input_test_byte(alg: &'static digest::Algorithm) {
@@ -651,13 +651,13 @@ mod tests {
             let next_input = vec![0u8; alg.block_len() - 1];
             context.update(&next_input);
             context.update(&[0]);
-            let _ = context.finish(); // should panic
+            let _ = context.finish(); 
         }
 
         fn nearly_full_context(alg: &'static digest::Algorithm) -> digest::Context {
-            // All implementations currently support up to 2^64-1 bits
-            // of input; according to the spec, SHA-384 and SHA-512
-            // support up to 2^128-1, but that's not implemented yet.
+            
+            
+            
             let max_bytes = 1u64 << (64 - 3);
             let max_blocks = max_bytes / u64_from_usize(alg.block_len());
             let completed_bytes = (max_blocks - 1) * u64_from_usize(alg.block_len());

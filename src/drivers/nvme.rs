@@ -1,5 +1,5 @@
-//! Minimal polling NVMe PCI driver, restricted to 512-byte logical blocks.
-//! Sector writes and namespace flushes back persistent FAT32 volumes.
+
+
 
 use crate::block::{BlockDevice, BlockError};
 use crate::fat32::SECTOR_SIZE;
@@ -313,7 +313,7 @@ fn controller(base: u64) -> Option<(Arc<Shared>, alloc::vec::Vec<(u32, u64)>)> {
         );
         core::ptr::write_volatile(mm.add(0x28).cast::<u64>(), asq.phys);
         core::ptr::write_volatile(mm.add(0x30).cast::<u64>(), acq.phys);
-        // CSS=0 selects the NVM command set; IOSQES=6 and IOCQES=4.
+        
         core::ptr::write_volatile(cc, (6 << 16) | (4 << 20) | 1);
     }
     if !wait_ready(csts, true) {
@@ -358,8 +358,8 @@ fn controller(base: u64) -> Option<(Arc<Shared>, alloc::vec::Vec<(u32, u64)>)> {
         );
         return None;
     }
-    // Request one submission queue and one completion queue before creating
-    // the I/O queues (the NVMe controller starts with admin queues only).
+    
+    
     let queue_count = Entry {
         opcode: 9,
         cdw: [7, 0, 0, 0, 0, 0],
@@ -380,7 +380,7 @@ fn controller(base: u64) -> Option<(Arc<Shared>, alloc::vec::Vec<(u32, u64)>)> {
     let io_sq_phys = io_sq.phys;
     let io_cq_phys = io_cq.phys;
     let db1 = unsafe { mm.add(0x1000 + 2 * stride).cast::<u32>() };
-    // CDW10 encodes QID in bits 15:0 and zero-based QSIZE in bits 31:16.
+    
     let create_cq = Entry {
         opcode: 5,
         prp1: io_cq_phys,
@@ -412,8 +412,8 @@ fn controller(base: u64) -> Option<(Arc<Shared>, alloc::vec::Vec<(u32, u64)>)> {
         qid: 1,
         csts,
     };
-    // Probe active namespaces and expose only the 512-byte LBA format this
-    // block layer currently supports.
+    
+    
     let Some(nsdata) = dma() else {
         crate::log_fail!("NVMe", "Init", "No DMA memory for namespace Identify data");
         return None;

@@ -1,4 +1,4 @@
-//! CMOS real-time clock support. EonOS treats the hardware RTC as UTC.
+
 
 use core::sync::atomic::{AtomicU64, Ordering};
 
@@ -47,15 +47,15 @@ fn read_register(register: u8) -> u8 {
 }
 
 fn snapshot() -> Option<DateTime> {
-    // CMOS index/data access is shared state. Keep an IRQ from changing the
-    // selected register between the index and data operations.
+    
+    
     let flags: u64;
     unsafe {
         core::arch::asm!("pushfq", "pop {}", "cli", out(reg) flags, options(nomem));
     }
     let result = (|| {
-        // Avoid sampling while the RTC is updating, then require two matching
-        // samples so rollover cannot produce a mixed date/time.
+        
+        
         for _ in 0..8 {
             if read_register(STATUS_A) & 0x80 != 0 {
                 continue;
@@ -176,7 +176,7 @@ fn to_unix_seconds(date: DateTime) -> u64 {
     days * 86_400 + date.hour as u64 * 3_600 + date.minute as u64 * 60 + date.second as u64
 }
 
-/// Read the RTC once and anchor it to the monotonic PIT clock.
+
 pub fn init() {
     match snapshot() {
         Some(date) if date.year >= 1970 => {
@@ -202,7 +202,7 @@ pub fn init() {
     }
 }
 
-/// Current Unix time in seconds, or None if the RTC was unavailable at boot.
+
 pub fn unix_seconds() -> Option<u64> {
     let base = BASE_UNIX_SECONDS.load(Ordering::Acquire);
     if base == 0 {

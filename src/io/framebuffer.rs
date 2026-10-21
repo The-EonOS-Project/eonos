@@ -19,9 +19,9 @@ unsafe impl Send for FbInfo {}
 
 pub static FRAMEBUFFER: Mutex<Option<FbInfo>> = Mutex::new(None);
 
-/// Replace the bootloader framebuffer with the backing memory managed by a
-/// native display driver. Existing renderer users keep the same framebuffer
-/// interface and begin presenting through the driver's flush path.
+
+
+
 pub fn use_gpu_backing(addr: *mut u8, width: u64, height: u64, pitch: u64) {
     *FRAMEBUFFER.lock() = Some(FbInfo {
         addr,
@@ -99,8 +99,8 @@ pub fn self_test() {
             row = row.add(fb.pitch as usize);
         }
 
-        // A diagnostic must not leave its test pattern on the user's
-        // framebuffer. Restore the original RGB bytes immediately.
+        
+        
         row = fb.addr;
         for y in 0..8 {
             let mut ptr = row;
@@ -129,11 +129,11 @@ unsafe fn rdtsc() -> u64 {
     ((hi as u64) << 32) | lo as u64
 }
 
-/// Time-stamp-counter cycles spent on a burst of pixel writes, purely as
-/// a relative before/after signal for the framebuffer's memory type
-/// (see `vmm::configure_pat`/`vmm::KERNEL_WC`). Not a calibrated
-/// wall-clock measurement — just compare the two numbers this logs
-/// during boot (pre-VMM vs. post-VMM) against each other.
+
+
+
+
+
 pub fn bench(label: &str) {
     let guard = FRAMEBUFFER.lock();
     let Some(fb) = guard.as_ref() else {
@@ -163,16 +163,16 @@ pub fn bench(label: &str) {
     }
     const N: usize = 4096;
 
-    // A row well below the self-test block and comfortably inside the
-    // screen even on tiny resolutions, so this never touches memory
-    // outside the framebuffer.
+    
+    
+    
     let y0 = 16.min(height.saturating_sub(1));
     let writes = N.min(height.saturating_sub(y0).saturating_mul(width));
     let mut original = [0u32; N];
 
     unsafe {
-        // Save the pixels before timing so both the benchmark and its
-        // cleanup leave the displayed image unchanged.
+        
+        
         let mut offset = y0 * fb.pitch as usize;
         let mut x = 0usize;
         for i in 0..writes {
@@ -232,10 +232,10 @@ pub fn bench(label: &str) {
             cycles / writes.max(1) as u64
         );
 
-        // The renderer copies contiguous rows from its cached shadow image.
-        // Measure that path separately from the scalar volatile writes above;
-        // the latter is useful for comparing memory types but is not a good
-        // estimate of normal console rendering throughput.
+        
+        
+        
+        
         if bytes_per_pixel == 4 {
             core::arch::asm!("sfence", options(nostack, preserves_flags));
             let start = rdtsc();

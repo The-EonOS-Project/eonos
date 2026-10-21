@@ -31,11 +31,11 @@
 #
 #		gcc 3.4.x(*)	assembler
 #
-# P4		28.6		14.0		+100%
-# Opteron	19.3		7.7		+150%
-# Core2		17.8		8.1(**)		+120%
-# Atom		31.6		16.8		+88%
-# VIA Nano	21.8		10.1		+115%
+# P4		28.6		14.0		+100 
+# Opteron	19.3		7.7		+150 
+# Core2		17.8		8.1(**)		+120 
+# Atom		31.6		16.8		+88 
+# VIA Nano	21.8		10.1		+115 
 #
 # (*)	comparison is not completely fair, because C results are
 #	for vanilla "256B" implementation, while assembler results
@@ -70,14 +70,14 @@
 # longer. A CPU with higher pclmulqdq issue rate would also benefit
 # from higher aggregate factor...
 #
-# Westmere	1.78(+13%)
-# Sandy Bridge	1.80(+8%)
-# Ivy Bridge	1.80(+7%)
-# Haswell	0.55(+93%) (if system doesn't support AVX)
-# Broadwell	0.45(+110%)(if system doesn't support AVX)
-# Skylake	0.44(+110%)(if system doesn't support AVX)
-# Bulldozer	1.49(+27%)
-# Silvermont	2.88(+13%)
+# Westmere	1.78(+13 
+# Sandy Bridge	1.80(+8 
+# Ivy Bridge	1.80(+7 
+# Haswell	0.55(+93 
+# Broadwell	0.45(+110 
+# Skylake	0.44(+110 
+# Bulldozer	1.49(+27 
+# Silvermont	2.88(+13 
 # Knights L	2.12(-)    (if system doesn't support AVX)
 # Goldmont	1.08(+24%)
 
@@ -214,10 +214,10 @@ gcm_init_clmul:
 .L_init_clmul:
 ___
 $code.=<<___ if ($win64);
-	sub	\$0x18,%rsp
+	sub	\$0x18, 
 .seh_stackalloc	0x18
-	movaps	%xmm6,(%rsp)
-.seh_savexmm	%xmm6, 0
+	movaps	
+.seh_savexmm	
 .seh_endprologue
 ___
 $code.=<<___;
@@ -235,7 +235,7 @@ $code.=<<___;
 	por		$T1,$Hkey		# H<<=1
 
 	# magic reduction
-	pand		.L0x1c2_polynomial(%rip),$T3
+	pand		.L0x1c2_polynomial( 
 	pxor		$T3,$Hkey		# if(carry) H^=0x1c2_polynomial
 
 	# calculate H^2
@@ -275,8 +275,8 @@ $code.=<<___;
 ___
 }
 $code.=<<___ if ($win64);
-	movaps	(%rsp),%xmm6
-	lea	0x18(%rsp),%rsp
+	movaps	( 
+	lea	0x18( 
 ___
 $code.=<<___;
 	ret
@@ -302,33 +302,33 @@ gcm_ghash_clmul:
 .L_ghash_clmul:
 ___
 $code.=<<___ if ($win64);
-	lea	-0x88(%rsp),%rax
-	lea	-0x20(%rax),%rsp
+	lea	-0x88( 
+	lea	-0x20( 
 .seh_stackalloc	0x20+0x88
-	movaps	%xmm6,-0x20(%rax)
-.seh_savexmm	%xmm6, 0x20-0x20
-	movaps	%xmm7,-0x10(%rax)
-.seh_savexmm	%xmm7, 0x20-0x10
-	movaps	%xmm8,0(%rax)
-.seh_savexmm	%xmm8, 0x20+0
-	movaps	%xmm9,0x10(%rax)
-.seh_savexmm	%xmm9, 0x20+0x10
-	movaps	%xmm10,0x20(%rax)
-.seh_savexmm	%xmm10, 0x20+0x20
-	movaps	%xmm11,0x30(%rax)
-.seh_savexmm	%xmm11, 0x20+0x30
-	movaps	%xmm12,0x40(%rax)
-.seh_savexmm	%xmm12, 0x20+0x40
-	movaps	%xmm13,0x50(%rax)
-.seh_savexmm	%xmm13, 0x20+0x50
-	movaps	%xmm14,0x60(%rax)
-.seh_savexmm	%xmm14, 0x20+0x60
-	movaps	%xmm15,0x70(%rax)
-.seh_savexmm	%xmm15, 0x20+0x70
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
 .seh_endprologue
 ___
 $code.=<<___;
-	movdqa		.Lbswap_mask(%rip),$T3
+	movdqa		.Lbswap_mask( 
 
 	movdqu		($Xip),$Xi
 	movdqu		($Htbl),$Hkey
@@ -348,7 +348,7 @@ $code.=<<___;
 	jb		.Lskip4x
 
 	sub		\$0x30,$len
-	mov		\$0xA040608020C0E000,%rax	# ((7..0)·0xE0)&0xff
+	mov		\$0xA040608020C0E000, 
 	movdqu		0x30($Htbl),$Hkey3
 	movdqu		0x40($Htbl),$Hkey4
 
@@ -428,9 +428,9 @@ $code.=<<___;
 	pslldq		\$8,$T1
 	psrldq		\$8,$T2			#
 	pxor		$T1,$Xi
-	movdqa		.L7_mask(%rip),$T1
+	movdqa		.L7_mask( 
 	pxor		$T2,$Xhi		#
-	movq		%rax,$T2
+	movq		
 
 	pand		$Xi,$T1			# 1st phase
 	pshufb		$T1,$T2			#
@@ -636,17 +636,17 @@ $code.=<<___;
 	movdqu		$Xi,($Xip)
 ___
 $code.=<<___ if ($win64);
-	movaps	(%rsp),%xmm6
-	movaps	0x10(%rsp),%xmm7
-	movaps	0x20(%rsp),%xmm8
-	movaps	0x30(%rsp),%xmm9
-	movaps	0x40(%rsp),%xmm10
-	movaps	0x50(%rsp),%xmm11
-	movaps	0x60(%rsp),%xmm12
-	movaps	0x70(%rsp),%xmm13
-	movaps	0x80(%rsp),%xmm14
-	movaps	0x90(%rsp),%xmm15
-	lea	0xa8(%rsp),%rsp
+	movaps	( 
+	movaps	0x10( 
+	movaps	0x20( 
+	movaps	0x30( 
+	movaps	0x40( 
+	movaps	0x50( 
+	movaps	0x60( 
+	movaps	0x70( 
+	movaps	0x80( 
+	movaps	0x90( 
+	lea	0xa8( 
 ___
 $code.=<<___;
 	ret
@@ -670,10 +670,10 @@ my ($Htbl,$Xip)=@_4args;
 my $HK="%xmm6";
 
 $code.=<<___ if ($win64);
-	sub	\$0x18,%rsp
+	sub	\$0x18, 
 .seh_stackalloc	0x18
-	movaps	%xmm6,(%rsp)
-.seh_savexmm	%xmm6, 0
+	movaps	
+.seh_savexmm	
 .seh_endprologue
 ___
 $code.=<<___;
@@ -692,13 +692,13 @@ $code.=<<___;
 	vpor		$T1,$Hkey,$Hkey		# H<<=1
 
 	# magic reduction
-	vpand		.L0x1c2_polynomial(%rip),$T3,$T3
+	vpand		.L0x1c2_polynomial( 
 	vpxor		$T3,$Hkey,$Hkey		# if(carry) H^=0x1c2_polynomial
 
 	vpunpckhqdq	$Hkey,$Hkey,$HK
 	vmovdqa		$Hkey,$Xi
 	vpxor		$Hkey,$HK,$HK
-	mov		\$4,%r10		# up to H^8
+	mov		\$4, 
 	jmp		.Linit_start_avx
 ___
 
@@ -778,7 +778,7 @@ $code.=<<___;
 	vpxor		$Xi,$T2,$T2		# Karatsuba pre-processing
 	vmovdqu		$Xi,0x10($Htbl)		# save H^2,4,6,8
 	lea		0x30($Htbl),$Htbl
-	sub		\$1,%r10
+	sub		\$1, 
 	jnz		.Linit_loop_avx
 
 	vpalignr	\$8,$T2,$T1,$T3		# last "salt" is flipped
@@ -787,8 +787,8 @@ $code.=<<___;
 	vzeroupper
 ___
 $code.=<<___ if ($win64);
-	movaps	(%rsp),%xmm6
-	lea	0x18(%rsp),%rsp
+	movaps	( 
+	lea	0x18( 
 ___
 $code.=<<___;
 	ret
@@ -820,38 +820,38 @@ my ($Xlo,$Xhi,$Xmi,
     $Xi,$Xo,$Tred,$bswap,$Ii,$Ij) = map("%xmm$_",(0..15));
 
 $code.=<<___ if ($win64);
-	lea	-0x88(%rsp),%rax
-	lea	-0x20(%rax),%rsp
+	lea	-0x88( 
+	lea	-0x20( 
 .seh_stackalloc	0x20+0x88
-	movaps	%xmm6,-0x20(%rax)
-.seh_savexmm	%xmm6, 0x20-0x20
-	movaps	%xmm7,-0x10(%rax)
-.seh_savexmm	%xmm7, 0x20-0x10
-	movaps	%xmm8,0(%rax)
-.seh_savexmm	%xmm8, 0x20+0
-	movaps	%xmm9,0x10(%rax)
-.seh_savexmm	%xmm9, 0x20+0x10
-	movaps	%xmm10,0x20(%rax)
-.seh_savexmm	%xmm10, 0x20+0x20
-	movaps	%xmm11,0x30(%rax)
-.seh_savexmm	%xmm11, 0x20+0x30
-	movaps	%xmm12,0x40(%rax)
-.seh_savexmm	%xmm12, 0x20+0x40
-	movaps	%xmm13,0x50(%rax)
-.seh_savexmm	%xmm13, 0x20+0x50
-	movaps	%xmm14,0x60(%rax)
-.seh_savexmm	%xmm14, 0x20+0x60
-	movaps	%xmm15,0x70(%rax)
-.seh_savexmm	%xmm15, 0x20+0x70
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
+	movaps	
+.seh_savexmm	
 .seh_endprologue
 ___
 $code.=<<___;
 	vzeroupper
 
 	vmovdqu		($Xip),$Xi		# load $Xi
-	lea		.L0x1c2_polynomial(%rip),%r10
+	lea		.L0x1c2_polynomial( 
 	lea		0x40($Htbl),$Htbl	# size optimization
-	vmovdqu		.Lbswap_mask(%rip),$bswap
+	vmovdqu		.Lbswap_mask( 
 	vpshufb		$bswap,$Xi,$Xi
 	cmp		\$0x80,$len
 	jb		.Lshort_avx
@@ -1013,7 +1013,7 @@ $code.=<<___;
 	 vpxor		$Zmi,$Xmi,$Xmi
 
 	  vmovdqu	0x30($inp),$Ii		# I[3]
-	vpclmulqdq	\$0x10,(%r10),$Xi,$Xi
+	vpclmulqdq	\$0x10,( 
 	 vpclmulqdq	\$0x00,$Hkey,$Ij,$Zlo
 	  vpshufb	$bswap,$Ii,$Ii
 	 vpxor		$Xlo,$Zlo,$Zlo
@@ -1046,7 +1046,7 @@ $code.=<<___;
 	 vpxor		$Xlo,$Zlo,$Zlo
 	 vpclmulqdq	\$0x11,$Hkey,$Ij,$Zhi
 	  vmovdqu	0x90-0x40($Htbl),$Hkey	# $Hkey^7
-	vpclmulqdq	\$0x10,(%r10),$Xi,$Xi
+	vpclmulqdq	\$0x10,( 
 	vxorps		$Xo,$Tred,$Tred
 	 vpunpckhqdq	$Ii,$Ii,$T2
 	 vpxor		$Xhi,$Zhi,$Zhi
@@ -1188,7 +1188,7 @@ $code.=<<___;
 	vpxor		$Xmi,$Zmi,$Zmi
 	vpclmulqdq	\$0x00,$HK,$T1,$Xmi
 
-	vmovdqu		(%r10),$Tred
+	vmovdqu		( 
 
 	vpxor		$Xlo,$Zlo,$Xi
 	vpxor		$Xhi,$Zhi,$Xo
@@ -1218,17 +1218,17 @@ $code.=<<___;
 	vzeroupper
 ___
 $code.=<<___ if ($win64);
-	movaps	(%rsp),%xmm6
-	movaps	0x10(%rsp),%xmm7
-	movaps	0x20(%rsp),%xmm8
-	movaps	0x30(%rsp),%xmm9
-	movaps	0x40(%rsp),%xmm10
-	movaps	0x50(%rsp),%xmm11
-	movaps	0x60(%rsp),%xmm12
-	movaps	0x70(%rsp),%xmm13
-	movaps	0x80(%rsp),%xmm14
-	movaps	0x90(%rsp),%xmm15
-	lea	0xa8(%rsp),%rsp
+	movaps	( 
+	movaps	0x10( 
+	movaps	0x20( 
+	movaps	0x30( 
+	movaps	0x40( 
+	movaps	0x50( 
+	movaps	0x60( 
+	movaps	0x70( 
+	movaps	0x80( 
+	movaps	0x90( 
+	lea	0xa8( 
 ___
 $code.=<<___;
 	ret

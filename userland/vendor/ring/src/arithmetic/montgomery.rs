@@ -1,45 +1,45 @@
-// Copyright 2017-2025 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 pub use super::n0::N0;
 use super::{inout::AliasingSlices3, LimbSliceError, MIN_LIMBS};
 use crate::cpu;
 use cfg_if::cfg_if;
 
-// Indicates that the element is not encoded; there is no *R* factor
-// that needs to be canceled out.
+
+
 #[derive(Copy, Clone)]
 pub enum Unencoded {}
 
-// Indicates that the element is encoded; the value has one *R*
-// factor that needs to be canceled out.
+
+
 #[derive(Copy, Clone)]
 pub enum R {}
 
-// Indicates the element is encoded three times; the value has three
-// *R* factors that need to be canceled out.
+
+
 #[allow(clippy::upper_case_acronyms)]
 #[derive(Copy, Clone)]
 pub enum RRR {}
 
-// Indicates the element is encoded twice; the value has two *R*
-// factors that need to be canceled out.
+
+
 #[derive(Copy, Clone)]
 pub enum RR {}
 
-// Indicates the element is inversely encoded; the value has one
-// 1/*R* factor that needs to be canceled out.
+
+
 #[derive(Copy, Clone)]
 pub enum RInverse {}
 
@@ -51,7 +51,7 @@ impl Encoding for R {}
 impl Encoding for Unencoded {}
 impl Encoding for RInverse {}
 
-/// The encoding of the result of a reduction.
+
 pub trait ReductionEncoding {
     type Output: Encoding;
 }
@@ -70,7 +70,7 @@ impl ReductionEncoding for Unencoded {
     type Output = RInverse;
 }
 
-/// The encoding of the result of a multiplication.
+
 pub trait ProductEncoding {
     type Output: Encoding;
 }
@@ -94,12 +94,12 @@ where
     type Output = <<E as ReductionEncoding>::Output as ReductionEncoding>::Output;
 }
 
-// XXX: Rust doesn't allow overlapping impls,
-// TODO (if/when Rust allows it):
-// impl<E1, E2: ReductionEncoding> ProductEncoding for
-//         (E1, E2) {
-//     type Output = <(E2, E1) as ProductEncoding>::Output;
-// }
+
+
+
+
+
+
 impl ProductEncoding for (RR, Unencoded) {
     type Output = <(Unencoded, RR) as ProductEncoding>::Output;
 }
@@ -121,7 +121,7 @@ pub(super) fn limbs_mul_mont(
     n0: &N0,
     cpu: cpu::Features,
 ) -> Result<(), LimbSliceError> {
-    const MOD_FALLBACK: usize = 1; // No restriction.
+    const MOD_FALLBACK: usize = 1; 
     cfg_if! {
         if #[cfg(all(target_arch = "aarch64", target_endian = "little"))] {
             let _: cpu::Features = cpu;
@@ -147,21 +147,21 @@ pub(super) fn limbs_mul_mont(
                     });
                 }
             }
-            // The ARM version of `bn_mul_mont_nohw` has a minimum of 2.
+            
             const _MIN_LIMBS_AT_LEAST_2: () = assert!(MIN_LIMBS >= 2);
             bn_mul_mont_ffi!(in_out, n, n0, (), unsafe {
                 (MIN_LIMBS, MOD_FALLBACK, ()) => bn_mul_mont_nohw
             })
         } else if #[cfg(target_arch = "x86")] {
             use crate::{cpu::GetFeature as _, cpu::intel::Sse2};
-            // The X86 implementation of `bn_mul_mont` has a minimum of 4.
+            
             const _MIN_LIMBS_AT_LEAST_4: () = assert!(MIN_LIMBS >= 4);
             if let Some(cpu) = cpu.get_feature() {
                 bn_mul_mont_ffi!(in_out, n, n0, cpu, unsafe {
                     (MIN_LIMBS, MOD_FALLBACK, Sse2) => bn_mul_mont
                 })
             } else {
-                // This isn't really an FFI call; it's defined below.
+                
                 unsafe {
                     super::ffi::bn_mul_mont_ffi::<(), {MIN_LIMBS}, 1>(in_out, n, n0, (),
                     bn_mul_mont_fallback)
@@ -179,9 +179,9 @@ pub(super) fn limbs_mul_mont(
                 (MIN_LIMBS, MOD_FALLBACK, ()) => bn_mul_mont_nohw
             })
         } else {
-            // Use the fallback implementation implemented below through the
-            // FFI wrapper defined below, so that Rust and C code both go
-            // through `bn_mul_mont`.
+            
+            
+            
             bn_mul_mont_ffi!(in_out, n, n0, cpu, unsafe {
                 (MIN_LIMBS, MOD_FALLBACK, cpu::Features) => bn_mul_mont
             })
@@ -195,7 +195,7 @@ cfg_if! {
             all(target_arch = "arm", target_endian = "little"),
             target_arch = "x86_64")))] {
 
-        // TODO: Stop calling this from C and un-export it.
+        
         #[cfg(not(target_arch = "x86"))]
         prefixed_export! {
             unsafe extern "C" fn bn_mul_mont(
@@ -224,11 +224,11 @@ cfg_if! {
 
             let num_limbs = num_limbs.get();
 
-            // The mutable pointer `r` may alias `a` and/or `b`, so the lifetimes of
-            // any slices for `a` or `b` must not overlap with the lifetime of any
-            // mutable for `r`.
+            
+            
+            
 
-            // Nothing aliases `n`
+            
             let n = unsafe { core::slice::from_raw_parts(n, num_limbs) };
 
             let mut tmp = [0; 2 * MAX_LIMBS];
@@ -244,8 +244,8 @@ cfg_if! {
     }
 }
 
-// `bigint` needs then when the `alloc` feature is enabled. `bn_mul_mont` above needs this when
-// we are using the platforms for which we don't have `bn_mul_mont` in assembly.
+
+
 #[cfg(any(
     feature = "alloc",
     not(any(
@@ -307,12 +307,12 @@ fn limbs_mul(r: &mut [Limb], a: &[Limb], b: &[Limb]) {
     ))
 ))]
 prefixed_extern! {
-    // `r` must not alias `a`
+    
     #[must_use]
     fn limbs_mul_add_limb(r: *mut Limb, a: *const Limb, b: Limb, num_limbs: c::size_t) -> Limb;
 }
 
-/// r = r**2
+
 pub(super) fn limbs_square_mont(
     r: &mut [Limb],
     n: &[Limb],
@@ -347,7 +347,7 @@ mod tests {
     use crate::limb::Limb;
 
     #[test]
-    // TODO: wasm
+    
     fn test_mul_add_words() {
         const ZERO: Limb = 0;
         const MAX: Limb = ZERO.wrapping_sub(1);
@@ -370,7 +370,7 @@ mod tests {
                 r.copy_from_slice(r_input);
                 r
             };
-            assert_eq!(r.len(), a.len()); // Sanity check
+            assert_eq!(r.len(), a.len()); 
             let actual_retval =
                 unsafe { limbs_mul_add_limb(r.as_mut_ptr(), a.as_ptr(), *w, a.len()) };
             assert_eq!(&r, expected_r, "{}: {:x?} != {:x?}", i, r, expected_r);

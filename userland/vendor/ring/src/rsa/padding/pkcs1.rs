@@ -1,26 +1,26 @@
-// Copyright 2015-2016 Brian Smith.
-//
-// Permission to use, copy, modify, and/or distribute this software for any
-// purpose with or without fee is hereby granted, provided that the above
-// copyright notice and this permission notice appear in all copies.
-//
-// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-// CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 use super::{super::PUBLIC_KEY_PUBLIC_MODULUS_MAX_LEN, Padding, RsaEncoding, Verification};
 use crate::{bits, digest, error, io::der, rand};
 
-/// PKCS#1 1.5 padding as described in [RFC 3447 Section 8.2].
-///
-/// See "`RSA_PSS_*` Details\" in `ring::signature`'s module-level
-/// documentation for more details.
-///
-/// [RFC 3447 Section 8.2]: https://tools.ietf.org/html/rfc3447#section-8.2
+
+
+
+
+
+
 #[derive(Debug)]
 pub struct PKCS1 {
     digest_alg: &'static digest::Algorithm,
@@ -55,8 +55,8 @@ impl Verification for PKCS1 {
         m: &mut untrusted::Reader,
         mod_bits: bits::BitLength,
     ) -> Result<(), error::Unspecified> {
-        // `mod_bits.as_usize_bytes_rounded_up() <=
-        //      PUBLIC_KEY_PUBLIC_MODULUS_MAX_LEN` is ensured by `verify_rsa_()`.
+        
+        
         let mut calculated = [0u8; PUBLIC_KEY_PUBLIC_MODULUS_MAX_LEN];
         let calculated = &mut calculated[..mod_bits.as_usize_bytes_rounded_up()];
         pkcs1_encode(self, m_hash, calculated);
@@ -67,17 +67,17 @@ impl Verification for PKCS1 {
     }
 }
 
-// Implement padding procedure per EMSA-PKCS1-v1_5,
-// https://tools.ietf.org/html/rfc3447#section-9.2. This is used by both
-// verification and signing so it needs to be able to handle moduli of the
-// minimum and maximum sizes for both operations.
+
+
+
+
 fn pkcs1_encode(pkcs1: &PKCS1, m_hash: digest::Digest, m_out: &mut [u8]) {
     let em = m_out;
 
     let digest_len = pkcs1.digestinfo_prefix.len() + pkcs1.digest_alg.output_len();
 
-    // The specification requires at least 8 bytes of padding. Since we
-    // disallow keys smaller than 1024 bits, this should always be true.
+    
+    
     assert!(em.len() >= digest_len + 11);
     let pad_len = em.len() - digest_len - 3;
     em[0] = 0;
@@ -103,10 +103,10 @@ macro_rules! rsa_pkcs1_padding {
     };
 }
 
-// Intentionally not exposed except internally for signature verification. At a
-// minimum, we'd need to create test vectors for signing with it, which we
-// don't currently have. But, it's a bad idea to use SHA-1 anyway, so perhaps
-// we just won't ever expose it.
+
+
+
+
 rsa_pkcs1_padding!(
     pub(in super::super) RSA_PKCS1_SHA1_FOR_LEGACY_USE_ONLY,
     &digest::SHA1_FOR_LEGACY_USE_ONLY,

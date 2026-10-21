@@ -10,7 +10,7 @@ typedef uint8_t fiat_uint1;
 typedef int8_t fiat_int1;
 
 static __inline__ uint64_t fiat_value_barrier_u64(uint64_t a) {
-  __asm__("" : "+r"(a) : /* no inputs */);
+  __asm__("" : "+r"(a) : );
   return a;
 }
 
@@ -20,23 +20,23 @@ static inline void fe4_mul(fe4 out, const fe4 x, const fe4 y) { fiat_curve25519_
 __attribute__((target("adx,bmi2")))
 static inline void fe4_sq(fe4 out, const fe4 x) { fiat_curve25519_adx_square(out, x); }
 
-/*
- * The function fiat_mulx_u64 is a multiplication, returning the full double-width result.
- *
- * Postconditions:
- *   out1 = (arg1 * arg2) mod 2^64
- *   out2 = ⌊arg1 * arg2 / 2^64⌋
- *
- * Input Bounds:
- *   arg1: [0x0 ~> 0xffffffffffffffff]
- *   arg2: [0x0 ~> 0xffffffffffffffff]
- * Output Bounds:
- *   out1: [0x0 ~> 0xffffffffffffffff]
- *   out2: [0x0 ~> 0xffffffffffffffff]
- */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 __attribute__((target("adx,bmi2")))
 static inline void fiat_mulx_u64(uint64_t* out1, uint64_t* out2, uint64_t arg1, uint64_t arg2) {
-// NOTE: edited after generation
+
 #if defined(_M_X64)
   unsigned long long t;
   *out1 = _umul128(arg1, arg2, &t);
@@ -51,24 +51,24 @@ static inline void fiat_mulx_u64(uint64_t* out1, uint64_t* out2, uint64_t arg1, 
 #endif
 }
 
-/*
- * The function fiat_addcarryx_u64 is an addition with carry.
- *
- * Postconditions:
- *   out1 = (arg1 + arg2 + arg3) mod 2^64
- *   out2 = ⌊(arg1 + arg2 + arg3) / 2^64⌋
- *
- * Input Bounds:
- *   arg1: [0x0 ~> 0x1]
- *   arg2: [0x0 ~> 0xffffffffffffffff]
- *   arg3: [0x0 ~> 0xffffffffffffffff]
- * Output Bounds:
- *   out1: [0x0 ~> 0xffffffffffffffff]
- *   out2: [0x0 ~> 0x1]
- */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 __attribute__((target("adx,bmi2")))
 static inline void fiat_addcarryx_u64(uint64_t* out1, fiat_uint1* out2, fiat_uint1 arg1, uint64_t arg2, uint64_t arg3) {
-// NOTE: edited after generation
+
 #if defined(__has_builtin)
 #  if __has_builtin(__builtin_ia32_addcarryx_u64)
 #    define addcarry64 __builtin_ia32_addcarryx_u64
@@ -93,21 +93,21 @@ static inline void fiat_addcarryx_u64(uint64_t* out1, fiat_uint1* out2, fiat_uin
 #undef addcarry64
 }
 
-/*
- * The function fiat_subborrowx_u64 is a subtraction with borrow.
- *
- * Postconditions:
- *   out1 = (-arg1 + arg2 + -arg3) mod 2^64
- *   out2 = -⌊(-arg1 + arg2 + -arg3) / 2^64⌋
- *
- * Input Bounds:
- *   arg1: [0x0 ~> 0x1]
- *   arg2: [0x0 ~> 0xffffffffffffffff]
- *   arg3: [0x0 ~> 0xffffffffffffffff]
- * Output Bounds:
- *   out1: [0x0 ~> 0xffffffffffffffff]
- *   out2: [0x0 ~> 0x1]
- */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 __attribute__((target("adx,bmi2")))
 static inline void fiat_subborrowx_u64(uint64_t* out1, fiat_uint1* out2, fiat_uint1 arg1, uint64_t arg2, uint64_t arg3) {
 #if defined(__has_builtin)
@@ -121,7 +121,7 @@ static inline void fiat_subborrowx_u64(uint64_t* out1, fiat_uint1* out2, fiat_ui
   *out1 = t;
 #elif defined(_M_X64)
   long long unsigned int t;
-  *out2 = _subborrow_u64(arg1, arg2, arg3, &t); // NOTE: edited after generation
+  *out2 = _subborrow_u64(arg1, arg2, arg3, &t); 
   *out1 = t;
 #else
   *out1 = arg2 - arg3 - arg1;
@@ -130,19 +130,19 @@ static inline void fiat_subborrowx_u64(uint64_t* out1, fiat_uint1* out2, fiat_ui
 #undef subborrow64
 }
 
-/*
- * The function fiat_cmovznz_u64 is a single-word conditional move.
- *
- * Postconditions:
- *   out1 = (if arg1 = 0 then arg2 else arg3)
- *
- * Input Bounds:
- *   arg1: [0x0 ~> 0x1]
- *   arg2: [0x0 ~> 0xffffffffffffffff]
- *   arg3: [0x0 ~> 0xffffffffffffffff]
- * Output Bounds:
- *   out1: [0x0 ~> 0xffffffffffffffff]
- */
+
+
+
+
+
+
+
+
+
+
+
+
+
 __attribute__((target("adx,bmi2")))
 static inline void fiat_cmovznz_u64(uint64_t* out1, fiat_uint1 arg1, uint64_t arg2, uint64_t arg3) {
   fiat_uint1 x1;
@@ -154,13 +154,13 @@ static inline void fiat_cmovznz_u64(uint64_t* out1, fiat_uint1 arg1, uint64_t ar
   *out1 = x3;
 }
 
-/*
- * Input Bounds:
- *   arg1: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
- *   arg2: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
- * Output Bounds:
- *   out1: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
- */
+
+
+
+
+
+
+
 __attribute__((target("adx,bmi2")))
 static void fe4_add(uint64_t out1[4], const uint64_t arg1[4], const uint64_t arg2[4]) {
   uint64_t x1;
@@ -187,12 +187,12 @@ static void fe4_add(uint64_t out1[4], const uint64_t arg1[4], const uint64_t arg
   fiat_addcarryx_u64(&x3, &x4, x2, (arg1[1]), (arg2[1]));
   fiat_addcarryx_u64(&x5, &x6, x4, (arg1[2]), (arg2[2]));
   fiat_addcarryx_u64(&x7, &x8, x6, (arg1[3]), (arg2[3]));
-  fiat_cmovznz_u64(&x9, x8, 0x0, UINT8_C(0x26)); // NOTE: clang 14 for Zen 2 uses sbb, and
+  fiat_cmovznz_u64(&x9, x8, 0x0, UINT8_C(0x26)); 
   fiat_addcarryx_u64(&x10, &x11, 0x0, x1, x9);
   fiat_addcarryx_u64(&x12, &x13, x11, x3, 0x0);
   fiat_addcarryx_u64(&x14, &x15, x13, x5, 0x0);
   fiat_addcarryx_u64(&x16, &x17, x15, x7, 0x0);
-  fiat_cmovznz_u64(&x18, x17, 0x0, UINT8_C(0x26)); // NOTE: clang 14 for Zen 2 uses sbb, and
+  fiat_cmovznz_u64(&x18, x17, 0x0, UINT8_C(0x26)); 
   fiat_addcarryx_u64(&x19, &x20, 0x0, x10, x18);
   out1[0] = x19;
   out1[1] = x12;
@@ -200,13 +200,13 @@ static void fe4_add(uint64_t out1[4], const uint64_t arg1[4], const uint64_t arg
   out1[3] = x16;
 }
 
-/*
- * Input Bounds:
- *   arg1: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
- *   arg2: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
- * Output Bounds:
- *   out1: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
- */
+
+
+
+
+
+
+
 __attribute__((target("adx,bmi2")))
 static void fe4_sub(uint64_t out1[4], const uint64_t arg1[4], const uint64_t arg2[4]) {
   uint64_t x1;
@@ -241,12 +241,12 @@ static void fe4_sub(uint64_t out1[4], const uint64_t arg1[4], const uint64_t arg
   fiat_subborrowx_u64(&x8, &x9, x6, (arg1[2]), x7);
   x10 = (arg2[3]);
   fiat_subborrowx_u64(&x11, &x12, x9, (arg1[3]), x10);
-  fiat_cmovznz_u64(&x13, x12, 0x0, UINT8_C(0x26)); // NOTE: clang 14 for Zen 2 uses sbb, and
+  fiat_cmovznz_u64(&x13, x12, 0x0, UINT8_C(0x26)); 
   fiat_subborrowx_u64(&x14, &x15, 0x0, x2, x13);
   fiat_subborrowx_u64(&x16, &x17, x15, x5, 0x0);
   fiat_subborrowx_u64(&x18, &x19, x17, x8, 0x0);
   fiat_subborrowx_u64(&x20, &x21, x19, x11, 0x0);
-  fiat_cmovznz_u64(&x22, x21, 0x0, UINT8_C(0x26)); // NOTE: clang 14 for Zen 2 uses sbb, and
+  fiat_cmovznz_u64(&x22, x21, 0x0, UINT8_C(0x26)); 
   fiat_subborrowx_u64(&x23, &x24, 0x0, x14, x22);
   out1[0] = x23;
   out1[1] = x16;
@@ -254,13 +254,13 @@ static void fe4_sub(uint64_t out1[4], const uint64_t arg1[4], const uint64_t arg
   out1[3] = x20;
 }
 
-/*
- * Input Bounds:
- *   arg1: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
- *   arg2: [0x0 ~> 0x3ffffffffffffff] // NOTE: this is not any uint64!
- * Output Bounds:
- *   out1: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
- */
+
+
+
+
+
+
+
 __attribute__((target("adx,bmi2")))
 static void fe4_scmul(uint64_t out1[4], const uint64_t arg1[4], uint64_t arg2) {
   uint64_t x1;
@@ -302,7 +302,7 @@ static void fe4_scmul(uint64_t out1[4], const uint64_t arg1[4], uint64_t arg2) {
   fiat_addcarryx_u64(&x19, &x20, x18, x5, 0x0);
   fiat_addcarryx_u64(&x21, &x22, x20, x9, 0x0);
   fiat_addcarryx_u64(&x23, &x24, x22, x13, 0x0);
-  fiat_cmovznz_u64(&x25, x24, 0x0, UINT8_C(0x26)); // NOTE: clang 14 for Zen 2 uses sbb, and
+  fiat_cmovznz_u64(&x25, x24, 0x0, UINT8_C(0x26)); 
   fiat_addcarryx_u64(&x26, &x27, 0x0, x17, x25);
   out1[0] = x26;
   out1[1] = x19;
@@ -310,12 +310,12 @@ static void fe4_scmul(uint64_t out1[4], const uint64_t arg1[4], uint64_t arg2) {
   out1[3] = x23;
 }
 
-/*
- * Input Bounds:
- *   arg1: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
- * Output Bounds:
- *   out1: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
- */
+
+
+
+
+
+
 __attribute__((target("adx,bmi2")))
 static void fe4_canon(uint64_t out1[4], const uint64_t arg1[4]) {
   uint64_t x1;
@@ -364,15 +364,15 @@ static void fe4_canon(uint64_t out1[4], const uint64_t arg1[4]) {
   out1[3] = x24;
 }
 
-/*
- * Input Bounds:
- *   arg1: [0x0 ~> 0x1]
- *   arg2: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
- *   arg3: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
- * Output Bounds:
- *   out1: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
- *   out2: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
- */
+
+
+
+
+
+
+
+
+
 __attribute__((target("adx,bmi2")))
 static void fe4_cswap(uint64_t out1[4], uint64_t out2[4], fiat_uint1 arg1, const uint64_t arg2[4], const uint64_t arg3[4]) {
   uint64_t x1;
@@ -383,7 +383,7 @@ static void fe4_cswap(uint64_t out1[4], uint64_t out2[4], fiat_uint1 arg1, const
   uint64_t x6;
   uint64_t x7;
   uint64_t x8;
-  // NOTE: clang 14 for Zen 2 uses YMM registers
+  
   fiat_cmovznz_u64(&x1, arg1, (arg2[0]), (arg3[0]));
   fiat_cmovznz_u64(&x2, arg1, (arg2[1]), (arg3[1]));
   fiat_cmovznz_u64(&x3, arg1, (arg2[2]), (arg3[2]));
@@ -402,10 +402,10 @@ static void fe4_cswap(uint64_t out1[4], uint64_t out2[4], fiat_uint1 arg1, const
   out2[3] = x8;
 }
 
-// The following functions are adaped from crypto/curve25519/curve25519.c
-// It would be desirable to share the code, but with the current field
-// implementations both 4-limb and 5-limb versions of the curve-level code need
-// to be included in builds targetting an unknown variant of x86_64.
+
+
+
+
 
 __attribute__((target("adx,bmi2")))
 static void fe4_invert(fe4 out, const fe4 z) {
@@ -466,7 +466,7 @@ static void fe4_invert(fe4 out, const fe4 z) {
   fe4_mul(out, t1, t0);
 }
 
-RING_NOINLINE // https://github.com/rust-lang/rust/issues/116573
+RING_NOINLINE 
 __attribute__((target("adx,bmi2")))
 void x25519_scalar_mult_adx(uint8_t out[32], const uint8_t scalar[32],
                             const uint8_t point[32]) {
@@ -476,23 +476,23 @@ void x25519_scalar_mult_adx(uint8_t out[32], const uint8_t scalar[32],
   e[31] &= 127;
   e[31] |= 64;
 
-  // The following implementation was transcribed to Coq and proven to
-  // correspond to unary scalar multiplication in affine coordinates given that
-  // x1 != 0 is the x coordinate of some point on the curve. It was also checked
-  // in Coq that doing a ladderstep with x1 = x3 = 0 gives z2' = z3' = 0, and z2
-  // = z3 = 0 gives z2' = z3' = 0. The statement was quantified over the
-  // underlying field, so it applies to Curve25519 itself and the quadratic
-  // twist of Curve25519. It was not proven in Coq that prime-field arithmetic
-  // correctly simulates extension-field arithmetic on prime-field values.
-  // The decoding of the byte array representation of e was not considered.
-  // Specification of Montgomery curves in affine coordinates:
-  // <https://github.com/mit-plv/fiat-crypto/blob/2456d821825521f7e03e65882cc3521795b0320f/src/Spec/MontgomeryCurve.v#L27>
-  // Proof that these form a group that is isomorphic to a Weierstrass curve:
-  // <https://github.com/mit-plv/fiat-crypto/blob/2456d821825521f7e03e65882cc3521795b0320f/src/Curves/Montgomery/AffineProofs.v#L35>
-  // Coq transcription and correctness proof of the loop (where scalarbits=255):
-  // <https://github.com/mit-plv/fiat-crypto/blob/2456d821825521f7e03e65882cc3521795b0320f/src/Curves/Montgomery/XZ.v#L118>
-  // <https://github.com/mit-plv/fiat-crypto/blob/2456d821825521f7e03e65882cc3521795b0320f/src/Curves/Montgomery/XZProofs.v#L278>
-  // preconditions: 0 <= e < 2^255 (not necessarily e < order), fe_invert(0) = 0
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   fe4 x1, x2 = {1}, z2 = {0}, x3, z3 = {1}, tmp0, tmp1;
   OPENSSL_memcpy(x1, point, sizeof(fe4));
   x1[3] &= (uint64_t)(-1)>>1;
@@ -501,22 +501,22 @@ void x25519_scalar_mult_adx(uint8_t out[32], const uint8_t scalar[32],
   unsigned swap = 0;
   int pos;
   for (pos = 254; pos >= 0; --pos) {
-    // loop invariant as of right before the test, for the case where x1 != 0:
-    //   pos >= -1; if z2 = 0 then x2 is nonzero; if z3 = 0 then x3 is nonzero
-    //   let r := e >> (pos+1) in the following equalities of projective points:
-    //   to_xz (r*P)     === if swap then (x3, z3) else (x2, z2)
-    //   to_xz ((r+1)*P) === if swap then (x2, z2) else (x3, z3)
-    //   x1 is the nonzero x coordinate of the nonzero point (r*P-(r+1)*P)
+    
+    
+    
+    
+    
+    
     unsigned b = 1 & (e[pos / 8] >> (pos & 7));
     swap ^= b;
     fe4_cswap(x2, x3, swap, x2, x3);
     fe4_cswap(z2, z3, swap, z2, z3);
     swap = b;
-    // Coq transcription of ladderstep formula (called from transcribed loop):
-    // <https://github.com/mit-plv/fiat-crypto/blob/2456d821825521f7e03e65882cc3521795b0320f/src/Curves/Montgomery/XZ.v#L89>
-    // <https://github.com/mit-plv/fiat-crypto/blob/2456d821825521f7e03e65882cc3521795b0320f/src/Curves/Montgomery/XZProofs.v#L131>
-    // x1 != 0 <https://github.com/mit-plv/fiat-crypto/blob/2456d821825521f7e03e65882cc3521795b0320f/src/Curves/Montgomery/XZProofs.v#L217>
-    // x1  = 0 <https://github.com/mit-plv/fiat-crypto/blob/2456d821825521f7e03e65882cc3521795b0320f/src/Curves/Montgomery/XZProofs.v#L147>
+    
+    
+    
+    
+    
     fe4_sub(tmp0, x3, z3);
     fe4_sub(tmp1, x2, z2);
     fe4_add(x2, x2, z2);
@@ -536,7 +536,7 @@ void x25519_scalar_mult_adx(uint8_t out[32], const uint8_t scalar[32],
     fe4_mul(z3, x1, z2);
     fe4_mul(z2, tmp1, tmp0);
   }
-  // here pos=-1, so r=e, so to_xz (e*P) === if swap then (x3, z3) else (x2, z2)
+  
   fe4_cswap(x2, x3, swap, x2, x3);
   fe4_cswap(z2, z3, swap, z2, z3);
 
@@ -561,8 +561,8 @@ typedef struct {
 
 __attribute__((target("adx,bmi2")))
 static void inline_x25519_ge_dbl_4(ge_p3_4 *r, const ge_p3_4 *p, bool skip_t) {
-  // Transcribed from a Coq function proven against affine coordinates.
-  // https://github.com/mit-plv/fiat-crypto/blob/9943ba9e7d8f3e1c0054b2c94a5edca46ea73ef8/src/Curves/Edwards/XYZT/Basic.v#L136-L165
+  
+  
   fe4 trX, trZ, trT, t0, cX, cY, cZ, cT;
   fe4_sq(trX, p->X);
   fe4_sq(trZ, p->Y);
@@ -583,12 +583,12 @@ static void inline_x25519_ge_dbl_4(ge_p3_4 *r, const ge_p3_4 *p, bool skip_t) {
 }
 
 __attribute__((target("adx,bmi2")))
-__attribute__((always_inline)) // 4% speedup with clang14 and zen2
+__attribute__((always_inline)) 
 static inline void
 ge_p3_add_p3_precomp_4(ge_p3_4 *r, const ge_p3_4 *p, const ge_precomp_4 *q) {
   fe4 A, B, C, YplusX, YminusX, D, X3, Y3, Z3, T3;
-  // Transcribed from a Coq function proven against affine coordinates.
-  // https://github.com/mit-plv/fiat-crypto/blob/a36568d1d73aff5d7accc79fd28be672882f9c17/src/Curves/Edwards/XYZT/Precomputed.v#L38-L56
+  
+  
   fe4_add(YplusX, p->Y, p->X);
   fe4_sub(YminusX, p->Y, p->X);
   fe4_mul(A, YplusX, q->yplusx);
@@ -605,7 +605,7 @@ ge_p3_add_p3_precomp_4(ge_p3_4 *r, const ge_p3_4 *p, const ge_precomp_4 *q) {
   fe4_mul(r->T, X3, Y3);
 }
 
-__attribute__((always_inline)) // 25% speedup with clang14 and zen2
+__attribute__((always_inline)) 
 static inline void table_select_4(ge_precomp_4 *t, const int pos,
                                   const signed char b) {
   uint8_t bnegative = constant_time_msb_w(b);
@@ -614,7 +614,7 @@ static inline void table_select_4(ge_precomp_4 *t, const int pos,
   uint8_t t_bytes[3][32] = {
       {constant_time_is_zero_w(b) & 1}, {constant_time_is_zero_w(b) & 1}, {0}};
 #if defined(__clang__)
-  __asm__("" : "+m" (t_bytes) : /*no inputs*/);
+  __asm__("" : "+m" (t_bytes) : );
 #endif
   OPENSSL_STATIC_ASSERT(sizeof(t_bytes) == sizeof(k25519Precomp[pos][0]), "");
   for (int i = 0; i < 8; i++) {
@@ -625,7 +625,7 @@ static inline void table_select_4(ge_precomp_4 *t, const int pos,
 
   OPENSSL_STATIC_ASSERT(sizeof(t_bytes) == sizeof(ge_precomp_4), "");
 
-  // fe4 uses saturated 64-bit limbs, so converting from bytes is just a copy.
+  
   OPENSSL_memcpy(t, t_bytes, sizeof(ge_precomp_4));
 
   fe4 xy2d_neg = {0};
@@ -637,13 +637,13 @@ static inline void table_select_4(ge_precomp_4 *t, const int pos,
   constant_time_conditional_memcpy(t->xy2d, xy2d_neg, sizeof(fe4), bnegative);
 }
 
-// h = a * B
-// where a = a[0]+256*a[1]+...+256^31 a[31]
-// B is the Ed25519 base point (x,4/5) with x positive.
-//
-// Preconditions:
-//   a[31] <= 127
-RING_NOINLINE // https://github.com/rust-lang/rust/issues/116573
+
+
+
+
+
+
+RING_NOINLINE 
 __attribute__((target("adx,bmi2")))
 void x25519_ge_scalarmult_base_adx(uint8_t h[4][32], const uint8_t a[32]) {
   signed char e[64];
@@ -653,8 +653,8 @@ void x25519_ge_scalarmult_base_adx(uint8_t h[4][32], const uint8_t a[32]) {
     e[2 * i + 0] = (a[i] >> 0) & 15;
     e[2 * i + 1] = (a[i] >> 4) & 15;
   }
-  // each e[i] is between 0 and 15
-  // e[63] is between 0 and 7
+  
+  
 
   carry = 0;
   for (unsigned i = 0; i < 63; ++i) {
@@ -664,7 +664,7 @@ void x25519_ge_scalarmult_base_adx(uint8_t h[4][32], const uint8_t a[32]) {
     e[i] -= carry << 4;
   }
   e[63] += carry;
-  // each e[i] is between -8 and 8
+  
 
   ge_p3_4 r = {{0}, {1}, {1}, {0}};
   for (unsigned i = 1; i < 64; i += 2) {
@@ -673,10 +673,10 @@ void x25519_ge_scalarmult_base_adx(uint8_t h[4][32], const uint8_t a[32]) {
     ge_p3_add_p3_precomp_4(&r, &r, &t);
   }
 
-  inline_x25519_ge_dbl_4(&r, &r, /*skip_t=*/true);
-  inline_x25519_ge_dbl_4(&r, &r, /*skip_t=*/true);
-  inline_x25519_ge_dbl_4(&r, &r, /*skip_t=*/true);
-  inline_x25519_ge_dbl_4(&r, &r, /*skip_t=*/false);
+  inline_x25519_ge_dbl_4(&r, &r, true);
+  inline_x25519_ge_dbl_4(&r, &r, true);
+  inline_x25519_ge_dbl_4(&r, &r, true);
+  inline_x25519_ge_dbl_4(&r, &r, false);
 
   for (unsigned i = 0; i < 64; i += 2) {
     ge_precomp_4 t;
@@ -684,8 +684,8 @@ void x25519_ge_scalarmult_base_adx(uint8_t h[4][32], const uint8_t a[32]) {
     ge_p3_add_p3_precomp_4(&r, &r, &t);
   }
 
-  // fe4 uses saturated 64-bit limbs, so converting to bytes is just a copy.
-  // Satisfy stated precondition of fiat_25519_from_bytes; tests pass either way
+  
+  
   fe4_canon(r.X, r.X);
   fe4_canon(r.Y, r.Y);
   fe4_canon(r.Z, r.Z);

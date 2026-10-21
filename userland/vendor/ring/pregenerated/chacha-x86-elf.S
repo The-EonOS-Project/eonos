@@ -1,5 +1,5 @@
-// This file is generated from a similarly-named Perl script in the BoringSSL
-// source tree. Do not edit by hand.
+
+
 
 #include <ring-core/asm_base.h>
 
@@ -598,4 +598,4 @@ ChaCha20_ctr32_ssse3:
 .byte	44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32
 .byte	60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111
 .byte	114,103,62,0
-#endif  // !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86) && defined(__ELF__)
+#endif  

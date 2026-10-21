@@ -1,5 +1,5 @@
-// This file is generated from a similarly-named Perl script in the BoringSSL
-// source tree. Do not edit by hand.
+
+
 
 #include <ring-core/asm_base.h>
 
@@ -8,7 +8,7 @@
 
 .align	5
 .Lsigma:
-.quad	0x3320646e61707865,0x6b20657479622d32		// endian-neutral
+.quad	0x3320646e61707865,0x6b20657479622d32		
 .Lone:
 .long	1,0,0,0
 .byte	67,104,97,67,104,97,50,48,32,102,111,114,32,65,82,77,118,56,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
@@ -34,10 +34,10 @@ ChaCha20_ctr32_nohw:
 	stp	x27,x28,[sp,#80]
 	sub	sp,sp,#64
 
-	ldp	x22,x23,[x5]		// load sigma
-	ldp	x24,x25,[x3]		// load key
+	ldp	x22,x23,[x5]		
+	ldp	x24,x25,[x3]		
 	ldp	x26,x27,[x3,#16]
-	ldp	x28,x30,[x4]		// load counter
+	ldp	x28,x30,[x4]		
 #ifdef	__AARCH64EB__
 	ror	x24,x24,#32
 	ror	x25,x25,#32
@@ -48,7 +48,7 @@ ChaCha20_ctr32_nohw:
 #endif
 
 .Loop_outer:
-	mov	w5,w22			// unpack key block
+	mov	w5,w22			
 	lsr	x6,x22,#32
 	mov	w7,w23
 	lsr	x8,x23,#32
@@ -167,7 +167,7 @@ ChaCha20_ctr32_nohw:
 	ror	w9,w9,#25
 	cbnz	x4,.Loop
 
-	add	w5,w5,w22		// accumulate key block
+	add	w5,w5,w22		
 	add	x6,x6,x22,lsr#32
 	add	w7,w7,w23
 	add	x8,x8,x23,lsr#32
@@ -186,9 +186,9 @@ ChaCha20_ctr32_nohw:
 
 	b.lo	.Ltail
 
-	add	x5,x5,x6,lsl#32	// pack
+	add	x5,x5,x6,lsl#32	
 	add	x7,x7,x8,lsl#32
-	ldp	x6,x8,[x1,#0]		// load input
+	ldp	x6,x8,[x1,#0]		
 	add	x9,x9,x10,lsl#32
 	add	x11,x11,x12,lsl#32
 	ldp	x10,x12,[x1,#16]
@@ -218,8 +218,8 @@ ChaCha20_ctr32_nohw:
 	eor	x17,x17,x19
 	eor	x20,x20,x21
 
-	stp	x5,x7,[x0,#0]		// store output
-	add	x28,x28,#1			// increment counter
+	stp	x5,x7,[x0,#0]		
+	add	x28,x28,#1			
 	stp	x9,x11,[x0,#16]
 	stp	x13,x15,[x0,#32]
 	stp	x17,x20,[x0,#48]
@@ -247,7 +247,7 @@ ChaCha20_ctr32_nohw:
 	add	x4,sp,x2
 	neg	x2,x2
 
-	add	x5,x5,x6,lsl#32	// pack
+	add	x5,x5,x6,lsl#32	
 	add	x7,x7,x8,lsl#32
 	add	x9,x9,x10,lsl#32
 	add	x11,x11,x12,lsl#32
@@ -315,12 +315,12 @@ ChaCha20_ctr32_neon:
 
 	sub	sp,sp,#64
 
-	ldp	x22,x23,[x5]		// load sigma
+	ldp	x22,x23,[x5]		
 	ld1	{v24.4s},[x5],#16
-	ldp	x24,x25,[x3]		// load key
+	ldp	x24,x25,[x3]		
 	ldp	x26,x27,[x3,#16]
 	ld1	{v25.4s,v26.4s},[x3]
-	ldp	x28,x30,[x4]		// load counter
+	ldp	x28,x30,[x4]		
 	ld1	{v27.4s},[x4]
 	ld1	{v31.4s},[x5]
 #ifdef	__AARCH64EB__
@@ -332,13 +332,13 @@ ChaCha20_ctr32_neon:
 	ror	x28,x28,#32
 	ror	x30,x30,#32
 #endif
-	add	v27.4s,v27.4s,v31.4s		// += 1
+	add	v27.4s,v27.4s,v31.4s		
 	add	v28.4s,v27.4s,v31.4s
 	add	v29.4s,v28.4s,v31.4s
-	shl	v31.4s,v31.4s,#2			// 1 -> 4
+	shl	v31.4s,v31.4s,#2			
 
 .Loop_outer_neon:
-	mov	w5,w22			// unpack key block
+	mov	w5,w22			
 	lsr	x6,x22,#32
 	mov	v0.16b,v24.16b
 	mov	w7,w23
@@ -577,7 +577,7 @@ ChaCha20_ctr32_neon:
 	ext	v17.16b,v17.16b,v17.16b,#12
 	cbnz	x4,.Loop_neon
 
-	add	w5,w5,w22		// accumulate key block
+	add	w5,w5,w22		
 	add	v0.4s,v0.4s,v24.4s
 	add	x6,x6,x22,lsr#32
 	add	v4.4s,v4.4s,v24.4s
@@ -608,9 +608,9 @@ ChaCha20_ctr32_neon:
 
 	b.lo	.Ltail_neon
 
-	add	x5,x5,x6,lsl#32	// pack
+	add	x5,x5,x6,lsl#32	
 	add	x7,x7,x8,lsl#32
-	ldp	x6,x8,[x1,#0]		// load input
+	ldp	x6,x8,[x1,#0]		
 	add	x9,x9,x10,lsl#32
 	add	x11,x11,x12,lsl#32
 	ldp	x10,x12,[x1,#16]
@@ -646,10 +646,10 @@ ChaCha20_ctr32_neon:
 	eor	v3.16b,v3.16b,v23.16b
 	ld1	{v20.16b,v21.16b,v22.16b,v23.16b},[x1],#64
 
-	stp	x5,x7,[x0,#0]		// store output
-	add	x28,x28,#4			// increment counter
+	stp	x5,x7,[x0,#0]		
+	add	x28,x28,#4			
 	stp	x9,x11,[x0,#16]
-	add	v27.4s,v27.4s,v31.4s		// += 4
+	add	v27.4s,v27.4s,v31.4s		
 	stp	x13,x15,[x0,#32]
 	add	v28.4s,v28.4s,v31.4s
 	stp	x17,x20,[x0,#48]
@@ -688,9 +688,9 @@ ChaCha20_ctr32_neon:
 	cmp	x2,#64
 	b.lo	.Less_than_64
 
-	add	x5,x5,x6,lsl#32	// pack
+	add	x5,x5,x6,lsl#32	
 	add	x7,x7,x8,lsl#32
-	ldp	x6,x8,[x1,#0]		// load input
+	ldp	x6,x8,[x1,#0]		
 	add	x9,x9,x10,lsl#32
 	add	x11,x11,x12,lsl#32
 	ldp	x10,x12,[x1,#16]
@@ -720,8 +720,8 @@ ChaCha20_ctr32_neon:
 	eor	x17,x17,x19
 	eor	x20,x20,x21
 
-	stp	x5,x7,[x0,#0]		// store output
-	add	x28,x28,#4			// increment counter
+	stp	x5,x7,[x0,#0]		
+	add	x28,x28,#4			
 	stp	x9,x11,[x0,#16]
 	stp	x13,x15,[x0,#32]
 	stp	x17,x20,[x0,#48]
@@ -811,12 +811,12 @@ ChaCha20_512_neon:
 .L512_or_more_neon:
 	sub	sp,sp,#128+64
 
-	ldp	x22,x23,[x5]		// load sigma
+	ldp	x22,x23,[x5]		
 	ld1	{v24.4s},[x5],#16
-	ldp	x24,x25,[x3]		// load key
+	ldp	x24,x25,[x3]		
 	ldp	x26,x27,[x3,#16]
 	ld1	{v25.4s,v26.4s},[x3]
-	ldp	x28,x30,[x4]		// load counter
+	ldp	x28,x30,[x4]		
 	ld1	{v27.4s},[x4]
 	ld1	{v31.4s},[x5]
 #ifdef	__AARCH64EB__
@@ -828,21 +828,21 @@ ChaCha20_512_neon:
 	ror	x28,x28,#32
 	ror	x30,x30,#32
 #endif
-	add	v27.4s,v27.4s,v31.4s		// += 1
-	stp	q24,q25,[sp,#0]		// off-load key block, invariant part
-	add	v27.4s,v27.4s,v31.4s		// not typo
+	add	v27.4s,v27.4s,v31.4s		
+	stp	q24,q25,[sp,#0]		
+	add	v27.4s,v27.4s,v31.4s		
 	str	q26,[sp,#32]
 	add	v28.4s,v27.4s,v31.4s
 	add	v29.4s,v28.4s,v31.4s
 	add	v30.4s,v29.4s,v31.4s
-	shl	v31.4s,v31.4s,#2			// 1 -> 4
+	shl	v31.4s,v31.4s,#2			
 
-	stp	d8,d9,[sp,#128+0]		// meet ABI requirements
+	stp	d8,d9,[sp,#128+0]		
 	stp	d10,d11,[sp,#128+16]
 	stp	d12,d13,[sp,#128+32]
 	stp	d14,d15,[sp,#128+48]
 
-	sub	x2,x2,#512			// not typo
+	sub	x2,x2,#512			
 
 .Loop_outer_512_neon:
 	mov	v0.16b,v24.16b
@@ -852,7 +852,7 @@ ChaCha20_512_neon:
 	mov	v16.16b,v24.16b
 	mov	v20.16b,v24.16b
 	mov	v1.16b,v25.16b
-	mov	w5,w22			// unpack key block
+	mov	w5,w22			
 	mov	v5.16b,v25.16b
 	lsr	x6,x22,#32
 	mov	v9.16b,v25.16b
@@ -875,16 +875,16 @@ ChaCha20_512_neon:
 	mov	w15,w27
 	mov	v6.16b,v26.16b
 	lsr	x16,x27,#32
-	add	v19.4s,v3.4s,v31.4s			// +4
+	add	v19.4s,v3.4s,v31.4s			
 	mov	w17,w28
-	add	v23.4s,v7.4s,v31.4s			// +4
+	add	v23.4s,v7.4s,v31.4s			
 	lsr	x19,x28,#32
 	mov	v10.16b,v26.16b
 	mov	w20,w30
 	mov	v14.16b,v26.16b
 	lsr	x21,x30,#32
 	mov	v18.16b,v26.16b
-	stp	q27,q28,[sp,#48]		// off-load key block, variable part
+	stp	q27,q28,[sp,#48]		
 	mov	v22.16b,v26.16b
 	str	q29,[sp,#80]
 
@@ -1302,7 +1302,7 @@ ChaCha20_512_neon:
 	ext	v21.16b,v21.16b,v21.16b,#12
 	cbnz	x4,.Loop_upper_neon
 
-	add	w5,w5,w22		// accumulate key block
+	add	w5,w5,w22		
 	add	x6,x6,x22,lsr#32
 	add	w7,w7,w23
 	add	x8,x8,x23,lsr#32
@@ -1319,9 +1319,9 @@ ChaCha20_512_neon:
 	add	w20,w20,w30
 	add	x21,x21,x30,lsr#32
 
-	add	x5,x5,x6,lsl#32	// pack
+	add	x5,x5,x6,lsl#32	
 	add	x7,x7,x8,lsl#32
-	ldp	x6,x8,[x1,#0]		// load input
+	ldp	x6,x8,[x1,#0]		
 	add	x9,x9,x10,lsl#32
 	add	x11,x11,x12,lsl#32
 	ldp	x10,x12,[x1,#16]
@@ -1351,9 +1351,9 @@ ChaCha20_512_neon:
 	eor	x17,x17,x19
 	eor	x20,x20,x21
 
-	stp	x5,x7,[x0,#0]		// store output
-	add	x28,x28,#1			// increment counter
-	mov	w5,w22			// unpack key block
+	stp	x5,x7,[x0,#0]		
+	add	x28,x28,#1			
+	mov	w5,w22			
 	lsr	x6,x22,#32
 	stp	x9,x11,[x0,#16]
 	mov	w7,w23
@@ -1787,7 +1787,7 @@ ChaCha20_512_neon:
 	ext	v21.16b,v21.16b,v21.16b,#12
 	cbnz	x4,.Loop_lower_neon
 
-	add	w5,w5,w22		// accumulate key block
+	add	w5,w5,w22		
 	ldp	q24,q25,[sp,#0]
 	add	x6,x6,x22,lsr#32
 	ldp	q26,q27,[sp,#32]
@@ -1818,12 +1818,12 @@ ChaCha20_512_neon:
 	add	w20,w20,w30
 	add	v22.4s,v22.4s,v26.4s
 	add	x21,x21,x30,lsr#32
-	add	v19.4s,v19.4s,v31.4s			// +4
-	add	x5,x5,x6,lsl#32	// pack
-	add	v23.4s,v23.4s,v31.4s			// +4
+	add	v19.4s,v19.4s,v31.4s			
+	add	x5,x5,x6,lsl#32	
+	add	v23.4s,v23.4s,v31.4s			
 	add	x7,x7,x8,lsl#32
 	add	v3.4s,v3.4s,v27.4s
-	ldp	x6,x8,[x1,#0]		// load input
+	ldp	x6,x8,[x1,#0]		
 	add	v7.4s,v7.4s,v28.4s
 	add	x9,x9,x10,lsl#32
 	add	v11.4s,v11.4s,v29.4s
@@ -1871,8 +1871,8 @@ ChaCha20_512_neon:
 	eor	v3.16b,v3.16b,v27.16b
 	ld1	{v24.16b,v25.16b,v26.16b,v27.16b},[x1],#64
 
-	stp	x5,x7,[x0,#0]		// store output
-	add	x28,x28,#7			// increment counter
+	stp	x5,x7,[x0,#0]		
+	add	x28,x28,#7			
 	stp	x9,x11,[x0,#16]
 	stp	x13,x15,[x0,#32]
 	stp	x17,x20,[x0,#48]
@@ -1909,14 +1909,14 @@ ChaCha20_512_neon:
 	eor	v19.16b,v19.16b,v11.16b
 	st1	{v16.16b,v17.16b,v18.16b,v19.16b},[x0],#64
 
-	shl	v0.4s,v31.4s,#1			// 4 -> 8
+	shl	v0.4s,v31.4s,#1			
 	eor	v20.16b,v20.16b,v12.16b
 	eor	v21.16b,v21.16b,v13.16b
 	eor	v22.16b,v22.16b,v14.16b
 	eor	v23.16b,v23.16b,v15.16b
 	st1	{v20.16b,v21.16b,v22.16b,v23.16b},[x0],#64
 
-	add	v27.4s,v27.4s,v0.4s			// += 8
+	add	v27.4s,v27.4s,v0.4s			
 	add	v28.4s,v28.4s,v0.4s
 	add	v29.4s,v29.4s,v0.4s
 	add	v30.4s,v30.4s,v0.4s
@@ -1924,21 +1924,21 @@ ChaCha20_512_neon:
 	b.hs	.Loop_outer_512_neon
 
 	adds	x2,x2,#512
-	ushr	v0.4s,v31.4s,#2			// 4 -> 1
+	ushr	v0.4s,v31.4s,#2			
 
-	ldp	d8,d9,[sp,#128+0]		// meet ABI requirements
+	ldp	d8,d9,[sp,#128+0]		
 	ldp	d10,d11,[sp,#128+16]
 	ldp	d12,d13,[sp,#128+32]
 	ldp	d14,d15,[sp,#128+48]
 
-	stp	q24,q31,[sp,#0]		// wipe off-load area
+	stp	q24,q31,[sp,#0]		
 	stp	q24,q31,[sp,#32]
 	stp	q24,q31,[sp,#64]
 
 	b.eq	.Ldone_512_neon
 
 	cmp	x2,#192
-	sub	v27.4s,v27.4s,v0.4s			// -= 1
+	sub	v27.4s,v27.4s,v0.4s			
 	sub	v28.4s,v28.4s,v0.4s
 	sub	v29.4s,v29.4s,v0.4s
 	add	sp,sp,#128
@@ -1963,4 +1963,4 @@ ChaCha20_512_neon:
 	AARCH64_VALIDATE_LINK_REGISTER
 	ret
 .size	ChaCha20_512_neon,.-ChaCha20_512_neon
-#endif  // !OPENSSL_NO_ASM && defined(OPENSSL_AARCH64) && defined(__ELF__)
+#endif  

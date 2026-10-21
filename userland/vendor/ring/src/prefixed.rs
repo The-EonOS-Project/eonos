@@ -1,4 +1,4 @@
-// Keep in sync with `core_name_and_version` in build.rs.
+
 macro_rules! core_name_and_version {
     () => {
         concat!(
@@ -10,12 +10,12 @@ macro_rules! core_name_and_version {
             "_",
             env!("CARGO_PKG_VERSION_PATCH"),
             "_",
-            env!("CARGO_PKG_VERSION_PRE"), // Often empty
+            env!("CARGO_PKG_VERSION_PRE"), 
         )
     };
 }
 
-// Keep in sync with `prefix` in build.rs.
+
 macro_rules! prefix {
     ( ) => {
         concat!(core_name_and_version!(), "_")
@@ -23,7 +23,7 @@ macro_rules! prefix {
 }
 
 macro_rules! prefixed_extern {
-    // Functions.
+    
     {
         $(
             $( #[$meta:meta] )*
@@ -46,7 +46,7 @@ macro_rules! prefixed_extern {
         }
     };
 
-    // A `static` global variable.
+    
     {
         $( #[$meta:meta] )*
         $vis:vis static $name:ident: $typ:ty;
@@ -63,7 +63,7 @@ macro_rules! prefixed_extern {
         }
     };
 
-    // A `static mut` global variable.
+    
     {
         $( #[$meta:meta] )*
         $vis:vis static mut $name:ident: $typ:ty;
@@ -89,7 +89,7 @@ macro_rules! prefixed_extern {
     target_arch = "x86_64"
 )))]
 macro_rules! prefixed_export {
-    // A function.
+    
     {
         $( #[$meta:meta] )*
         $vis:vis unsafe extern "C"

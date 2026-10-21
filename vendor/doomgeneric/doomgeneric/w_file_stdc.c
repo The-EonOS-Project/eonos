@@ -1,20 +1,20 @@
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 2005-2014 Simon Howard
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// DESCRIPTION:
-//	WAD I/O functions.
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include <stdio.h>
 
@@ -42,7 +42,7 @@ static wad_file_t *W_StdC_OpenFile(char *path)
         return NULL;
     }
 
-    // Create a new stdc_wad_file_t to hold the file handle.
+    
 
     result = Z_Malloc(sizeof(stdc_wad_file_t), PU_STATIC, 0);
     result->wad.file_class = &stdc_wad_file;
@@ -63,8 +63,8 @@ static void W_StdC_CloseFile(wad_file_t *wad)
     Z_Free(stdc_wad);
 }
 
-// Read data from the specified position in the file into the 
-// provided buffer.  Returns the number of bytes read.
+
+
 
 size_t W_StdC_Read(wad_file_t *wad, unsigned int offset,
                    void *buffer, size_t buffer_len)
@@ -74,11 +74,11 @@ size_t W_StdC_Read(wad_file_t *wad, unsigned int offset,
 
     stdc_wad = (stdc_wad_file_t *) wad;
 
-    // Jump to the specified position in the file.
+    
 
     fseek(stdc_wad->fstream, offset, SEEK_SET);
 
-    // Read into the buffer.
+    
 
     result = fread(buffer, 1, buffer_len, stdc_wad->fstream);
 

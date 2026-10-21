@@ -1,20 +1,20 @@
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 2005-2014 Simon Howard
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// DESCRIPTION:
-//	Plats (i.e. elevator platforms) code, raising/lowering.
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #include <stdio.h>
 
@@ -27,11 +27,11 @@
 
 #include "s_sound.h"
 
-// State.
+
 #include "doomstat.h"
 #include "r_state.h"
 
-// Data.
+
 #include "sounds.h"
 
 
@@ -39,9 +39,9 @@ plat_t*		activeplats[MAXPLATS];
 
 
 
-//
-// Move a plat up and down
-//
+
+
+
 void T_PlatRaise(plat_t* plat)
 {
     result_e	res;
@@ -121,10 +121,10 @@ void T_PlatRaise(plat_t* plat)
 }
 
 
-//
-// Do Platforms
-//  "amount" is only used for SOME platforms.
-//
+
+
+
+
 int
 EV_DoPlat
 ( line_t*	line,
@@ -140,7 +140,7 @@ EV_DoPlat
     rtn = 0;
 
     
-    //	Activate all <type> plats that are in_stasis
+    
     switch(type)
     {
       case perpetualRaise:
@@ -158,7 +158,7 @@ EV_DoPlat
 	if (sec->specialdata)
 	    continue;
 	
-	// Find lowest & highest floors around sector
+	
 	rtn = 1;
 	plat = Z_Malloc( sizeof(*plat), PU_LEVSPEC, 0);
 	P_AddThinker(&plat->thinker);
@@ -178,7 +178,7 @@ EV_DoPlat
 	    plat->high = P_FindNextHighestFloor(sec,sec->floorheight);
 	    plat->wait = 0;
 	    plat->status = up;
-	    // NO MORE DAMAGE, IF APPLICABLE
+	    
 	    sec->special = 0;		
 
 	    S_StartSound(&sec->soundorg,sfx_stnmov);

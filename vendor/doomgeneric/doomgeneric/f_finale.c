@@ -1,26 +1,26 @@
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 2005-2014 Simon Howard
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// DESCRIPTION:
-//	Game completion, final screen animation.
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #include <stdio.h>
 #include <ctype.h>
 
-// Functions.
+
 #include "deh_main.h"
 #include "i_system.h"
 #include "i_swap.h"
@@ -29,7 +29,7 @@
 #include "w_wad.h"
 #include "s_sound.h"
 
-// Data.
+
 #include "d_main.h"
 #include "dstrings.h"
 #include "sounds.h"
@@ -44,12 +44,12 @@ typedef enum
     F_STAGE_CAST,
 } finalestage_t;
 
-// ?
-//#include "doomstat.h"
-//#include "r_local.h"
-//#include "f_finale.h"
 
-// Stage of animation:
+
+
+
+
+
 finalestage_t finalestage;
 
 unsigned int finalecount;
@@ -102,9 +102,9 @@ void	F_CastTicker (void);
 boolean F_CastResponder (event_t *ev);
 void	F_CastDrawer (void);
 
-//
-// F_StartFinale
-//
+
+
+
 void F_StartFinale (void)
 {
     size_t i;
@@ -123,13 +123,13 @@ void F_StartFinale (void)
         S_ChangeMusic(mus_read_m, true);
     }
 
-    // Find the right screen and set the text and background
+    
 
     for (i=0; i<arrlen(textscreens); ++i)
     {
         textscreen_t *screen = &textscreens[i];
 
-        // Hack for Chex Quest
+        
 
         if (gameversion == exe_chex && screen->mission == doom)
         {
@@ -145,7 +145,7 @@ void F_StartFinale (void)
         }
     }
 
-    // Do dehacked substitutions of strings
+    
   
     finaletext = DEH_String(finaletext);
     finaleflat = DEH_String(finaleflat);
@@ -166,18 +166,18 @@ boolean F_Responder (event_t *event)
 }
 
 
-//
-// F_Ticker
-//
+
+
+
 void F_Ticker (void)
 {
     size_t		i;
     
-    // check for skipping
+    
     if ( (gamemode == commercial)
       && ( finalecount > 50) )
     {
-      // go on to the next level
+      
       for (i=0 ; i<MAXPLAYERS ; i++)
 	if (players[i].cmd.buttons)
 	  break;
@@ -191,7 +191,7 @@ void F_Ticker (void)
       }
     }
     
-    // advance animation
+    
     finalecount++;
 	
     if (finalestage == F_STAGE_CAST)
@@ -208,7 +208,7 @@ void F_Ticker (void)
     {
 	finalecount = 0;
 	finalestage = F_STAGE_ARTSCREEN;
-	wipegamestate = -1;		// force a wipe
+	wipegamestate = -1;		
 	if (gameepisode == 3)
 	    S_StartMusic (mus_bunny);
     }
@@ -216,9 +216,9 @@ void F_Ticker (void)
 
 
 
-//
-// F_TextWrite
-//
+
+
+
 
 #include "hu_stuff.h"
 extern	patch_t *hu_font[HU_FONTSIZE];
@@ -236,7 +236,7 @@ void F_TextWrite (void)
     int		cx;
     int		cy;
     
-    // erase the entire screen to a tiled background
+    
     src = W_CacheLumpName ( finaleflat , PU_CACHE);
     dest = I_VideoBuffer;
 	
@@ -256,7 +256,7 @@ void F_TextWrite (void)
 
     V_MarkRect (0, 0, SCREENWIDTH, SCREENHEIGHT);
     
-    // draw some of the text onto the screen
+    
     cx = 10;
     cy = 10;
     ch = finaletext;
@@ -292,11 +292,11 @@ void F_TextWrite (void)
 	
 }
 
-//
-// Final DOOM 2 animation
-// Casting by id Software.
-//   in order of appearance
-//
+
+
+
+
+
 typedef struct
 {
     char		*name;
@@ -334,12 +334,12 @@ int		castonmelee;
 boolean		castattacking;
 
 
-//
-// F_StartCast
-//
+
+
+
 void F_StartCast (void)
 {
-    wipegamestate = -1;		// force a screen wipe
+    wipegamestate = -1;		
     castnum = 0;
     caststate = &states[mobjinfo[castorder[castnum].type].seestate];
     casttics = caststate->tics;
@@ -352,20 +352,20 @@ void F_StartCast (void)
 }
 
 
-//
-// F_CastTicker
-//
+
+
+
 void F_CastTicker (void)
 {
     int		st;
     int		sfx;
 	
     if (--casttics > 0)
-	return;			// not time to change state yet
+	return;			
 		
     if (caststate->tics == -1 || caststate->nextstate == S_NULL)
     {
-	// switch from deathstate to next monster
+	
 	castnum++;
 	castdeath = false;
 	if (castorder[castnum].name == NULL)
@@ -377,14 +377,14 @@ void F_CastTicker (void)
     }
     else
     {
-	// just advance to next state in animation
+	
 	if (caststate == &states[S_PLAY_ATK1])
-	    goto stopattack;	// Oh, gross hack!
+	    goto stopattack;	
 	st = caststate->nextstate;
 	caststate = &states[st];
 	castframes++;
 	
-	// sound hacks....
+	
 	switch (st)
 	{
 	  case S_PLAY_ATK1:	sfx = sfx_dshtgn; break;
@@ -422,7 +422,7 @@ void F_CastTicker (void)
 	
     if (castframes == 12)
     {
-	// go into attack frame
+	
 	castattacking = true;
 	if (castonmelee)
 	    caststate=&states[mobjinfo[castorder[castnum].type].meleestate];
@@ -458,9 +458,9 @@ void F_CastTicker (void)
 }
 
 
-//
-// F_CastResponder
-//
+
+
+
 
 boolean F_CastResponder (event_t* ev)
 {
@@ -468,9 +468,9 @@ boolean F_CastResponder (event_t* ev)
 	return false;
 		
     if (castdeath)
-	return true;			// already in dying frames
+	return true;			
 		
-    // go into death frame
+    
     castdeath = true;
     caststate = &states[mobjinfo[castorder[castnum].type].deathstate];
     casttics = caststate->tics;
@@ -491,7 +491,7 @@ void F_CastPrint (char* text)
     int		w;
     int		width;
     
-    // find width
+    
     ch = text;
     width = 0;
 	
@@ -511,7 +511,7 @@ void F_CastPrint (char* text)
 	width += w;
     }
     
-    // draw it
+    
     cx = 160-width/2;
     ch = text;
     while (ch)
@@ -534,9 +534,9 @@ void F_CastPrint (char* text)
 }
 
 
-//
-// F_CastDrawer
-//
+
+
+
 
 void F_CastDrawer (void)
 {
@@ -546,12 +546,12 @@ void F_CastDrawer (void)
     boolean		flip;
     patch_t*		patch;
     
-    // erase the entire screen to a background
+    
     V_DrawPatch (0, 0, W_CacheLumpName (DEH_String("BOSSBACK"), PU_CACHE));
 
     F_CastPrint (DEH_String(castorder[castnum].name));
     
-    // draw the current frame in the middle of the screen
+    
     sprdef = &sprites[caststate->sprite];
     sprframe = &sprdef->spriteframes[ caststate->frame & FF_FRAMEMASK];
     lump = sprframe->lump[0];
@@ -565,9 +565,9 @@ void F_CastDrawer (void)
 }
 
 
-//
-// F_DrawPatchCol
-//
+
+
+
 void
 F_DrawPatchCol
 ( int		x,
@@ -583,7 +583,7 @@ F_DrawPatchCol
     column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
     desttop = I_VideoBuffer + x;
 
-    // step through the posts in a column
+    
     while (column->topdelta != 0xff )
     {
 	source = (byte *)column + 3;
@@ -600,9 +600,9 @@ F_DrawPatchCol
 }
 
 
-//
-// F_BunnyScroll
-//
+
+
+
 void F_BunnyScroll (void)
 {
     signed int  scrolled;
@@ -696,9 +696,9 @@ static void F_ArtScreenDrawer(void)
     }
 }
 
-//
-// F_Drawer
-//
+
+
+
 void F_Drawer (void)
 {
     switch (finalestage)

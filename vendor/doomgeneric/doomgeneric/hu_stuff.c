@@ -1,19 +1,19 @@
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 2005-2014 Simon Howard
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// DESCRIPTION:  Heads-up displays
-//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #include <ctype.h>
@@ -37,13 +37,13 @@
 
 #include "doomstat.h"
 
-// Data.
+
 #include "dstrings.h"
 #include "sounds.h"
 
-//
-// Locally used constants, shortcuts.
-//
+
+
+
 #define HU_TITLE	(mapnames[(gameepisode-1)*9+gamemap-1])
 #define HU_TITLE2	(mapnames_commercial[gamemap-1])
 #define HU_TITLEP	(mapnames_commercial[gamemap-1 + 32])
@@ -83,7 +83,7 @@ char*	player_names[] =
     HUSTR_PLRRED
 };
 
-char			chat_char; // remove later.
+char			chat_char; 
 static player_t*	plr;
 patch_t*		hu_font[HU_FONTSIZE];
 static hu_textline_t	w_title;
@@ -104,12 +104,12 @@ extern int		showMessages;
 
 static boolean		headsupactive = false;
 
-//
-// Builtin map names.
-// The actual names can be found in DStrings.h.
-//
 
-char*	mapnames[] =	// DOOM shareware/registered/retail (Ultimate) names.
+
+
+
+
+char*	mapnames[] =	
 {
 
     HUSTR_E1M1,
@@ -163,15 +163,15 @@ char*	mapnames[] =	// DOOM shareware/registered/retail (Ultimate) names.
     "NEWLEVEL"
 };
 
-// List of names for levels in commercial IWADs
-// (doom2.wad, plutonia.wad, tnt.wad).  These are stored in a
-// single large array; WADs like pl2.wad have a MAP33, and rely on
-// the layout in the Vanilla executable, where it is possible to
-// overflow the end of one array into the next.
+
+
+
+
+
 
 char *mapnames_commercial[] =
 {
-    // DOOM 2 map names.
+    
 
     HUSTR_1,
     HUSTR_2,
@@ -208,7 +208,7 @@ char *mapnames_commercial[] =
     HUSTR_31,
     HUSTR_32,
 
-    // Plutonia WAD map names.
+    
 
     PHUSTR_1,
     PHUSTR_2,
@@ -245,7 +245,7 @@ char *mapnames_commercial[] =
     PHUSTR_31,
     PHUSTR_32,
     
-    // TNT WAD map names.
+    
 
     THUSTR_1,
     THUSTR_2,
@@ -290,7 +290,7 @@ void HU_Init(void)
     int		j;
     char	buffer[9];
 
-    // load the heads-up font
+    
     j = HU_FONTSTART;
     for (i=0;i<HU_FONTSIZE;i++)
     {
@@ -320,13 +320,13 @@ void HU_Start(void)
     message_nottobefuckedwith = false;
     chat_on = false;
 
-    // create the message widget
+    
     HUlib_initSText(&w_message,
 		    HU_MSGX, HU_MSGY, HU_MSGHEIGHT,
 		    hu_font,
 		    HU_FONTSTART, &message_on);
 
-    // create the map title widget
+    
     HUlib_initTextLine(&w_title,
 		       HU_TITLEX, HU_TITLEY,
 		       hu_font,
@@ -351,28 +351,28 @@ void HU_Start(void)
          break;
     }
 
-    // Chex.exe always uses the episode 1 level title
-    // eg. E2M1 gives the title for E1M1
+    
+    
 
     if (gameversion == exe_chex)
     {
         s = HU_TITLE_CHEX;
     }
 
-    // dehacked substitution to get modified level name
+    
 
     s = DEH_String(s);
     
     while (*s)
 	HUlib_addCharToTextLine(&w_title, *(s++));
 
-    // create the chat widget
+    
     HUlib_initIText(&w_chat,
 		    HU_INPUTX, HU_INPUTY,
 		    hu_font,
 		    HU_FONTSTART, &chat_on);
 
-    // create the inputbuffer widgets
+    
     for (i=0 ; i<MAXPLAYERS ; i++)
 	HUlib_initIText(&w_inputbuffer[i], 0, 0, 0, 0, &always_off);
 
@@ -405,7 +405,7 @@ void HU_Ticker(void)
     int i, rc;
     char c;
 
-    // tick down message counter if message is up
+    
     if (message_counter && !--message_counter)
     {
 	message_on = false;
@@ -415,7 +415,7 @@ void HU_Ticker(void)
     if (showMessages || message_dontfuckwithme)
     {
 
-	// display message if necessary
+	
 	if ((plr->message && !message_nottobefuckedwith)
 	    || (plr->message && message_dontfuckwithme))
 	{
@@ -427,9 +427,9 @@ void HU_Ticker(void)
 	    message_dontfuckwithme = 0;
 	}
 
-    } // else message_on = false;
+    } 
 
-    // check for incoming chat characters
+    
     if (netgame)
     {
 	for (i=0 ; i<MAXPLAYERS; i++)
@@ -586,24 +586,24 @@ boolean HU_Responder(event_t *ev)
     }
     else
     {
-	// send a macro
+	
 	if (altdown)
 	{
 	    c = ev->data1 - '0';
 	    if (c > 9)
 		return false;
-	    // fprintf(stderr, "got here\n");
+	    
 	    macromessage = chat_macros[c];
 	    
-	    // kill last message with a '\n'
-	    HU_queueChatChar(KEY_ENTER); // DEBUG!!!
 	    
-	    // send the macro message
+	    HU_queueChatChar(KEY_ENTER); 
+	    
+	    
 	    while (*macromessage)
 		HU_queueChatChar(*macromessage++);
 	    HU_queueChatChar(KEY_ENTER);
 	    
-            // leave chat mode and notify that it was sent
+            
             chat_on = false;
             M_StringCopy(lastmessage, chat_macros[c], sizeof(lastmessage));
             plr->message = lastmessage;
@@ -616,11 +616,11 @@ boolean HU_Responder(event_t *ev)
 	    eatkey = HUlib_keyInIText(&w_chat, c);
 	    if (eatkey)
 	    {
-		// static unsigned char buf[20]; // DEBUG
+		
 		HU_queueChatChar(c);
 		
-		// M_snprintf(buf, sizeof(buf), "KEY: %d => %d", ev->data1, c);
-		//        plr->message = buf;
+		
+		
 	    }
 	    if (c == KEY_ENTER)
 	    {

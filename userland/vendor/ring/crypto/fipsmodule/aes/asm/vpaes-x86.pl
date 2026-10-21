@@ -55,8 +55,8 @@
 # (**)	"Core 2" refers to initial 65nm design, a.k.a. Conroe.
 #
 # (***)	Less impressive improvement on Core 2 and Atom is due to slow
-#	pshufb,	yet it's respectable +28%/64%  improvement on Core 2
-#	and +15% on Atom (as implied, over "hyper-threading-safe"
+#	pshufb,	yet it's respectable +28 
+#	and +15 
 #	code path).
 #
 #						<appro@openssl.org>
@@ -335,9 +335,9 @@ $k_deskew=0x180;	# deskew tables: inverts the sbox's "skew"
 ##  .aes_schedule_mangle_last
 ##
 ##  Mangler for last round of key schedule
-##  Mangles %xmm0
-##    when encrypting, outputs out(%xmm0) ^ 63
-##    when decrypting, outputs unskew(%xmm0)
+##  Mangles 
+##    when encrypting, outputs out( 
+##    when decrypting, outputs unskew( 
 ##
 ##  Always called right before return... jumps to cleanup and exits
 ##
@@ -374,20 +374,20 @@ $k_deskew=0x180;	# deskew tables: inverts the sbox's "skew"
 ##
 ##  .aes_schedule_round
 ##
-##  Runs one main round of the key schedule on %xmm0, %xmm7
+##  Runs one main round of the key schedule on 
 ##
-##  Specifically, runs subbytes on the high dword of %xmm0
+##  Specifically, runs subbytes on the high dword of 
 ##  then rotates it by one byte and xors into the low dword of
-##  %xmm7.
+##  
 ##
-##  Adds rcon from low byte of %xmm8, then rotates %xmm8 for
+##  Adds rcon from low byte of 
 ##  next rcon.
 ##
-##  Smears the dwords of %xmm7 by xoring the low into the
+##  Smears the dwords of 
 ##  second low, result into third, result into highest.
 ##
-##  Returns results in %xmm7 = %xmm0.
-##  Clobbers %xmm1-%xmm5.
+##  Returns results in 
+##  Clobbers 
 ##
 &function_begin_B("_vpaes_schedule_round");
 	# extract rcon from xmm8
@@ -452,10 +452,10 @@ $k_deskew=0x180;	# deskew tables: inverts the sbox's "skew"
 ##
 ##  .aes_schedule_transform
 ##
-##  Linear-transform %xmm0 according to tables at (%ebx)
+##  Linear-transform 
 ##
-##  Output in %xmm0
-##  Clobbers %xmm1, %xmm2
+##  Output in 
+##  Clobbers 
 ##
 &function_begin_B("_vpaes_schedule_transform");
 	&movdqa	("xmm2",&QWP($k_s0F,$const));
@@ -489,8 +489,8 @@ $k_deskew=0x180;	# deskew tables: inverts the sbox's "skew"
 ##    apply shiftrows transform
 ##
 ##
-##  Writes out to (%edx), and increments or decrements it
-##  Keeps track of round number mod 4 in %ecx
+##  Writes out to ( 
+##  Keeps track of round number mod 4 in 
 ##  Preserves xmm0
 ##  Clobbers xmm1-xmm5
 ##
