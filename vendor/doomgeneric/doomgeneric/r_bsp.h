@@ -1,26 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __R_BSP__
 #define __R_BSP__
-
-
 
 extern seg_t*		curline;
 extern side_t*		sidedef;
@@ -32,7 +11,6 @@ extern int		rw_x;
 extern int		rw_stopx;
 
 extern boolean		segtextured;
-
 
 extern boolean		markfloor;		
 extern boolean		markceiling;
@@ -46,16 +24,11 @@ extern lighttable_t**	hscalelight;
 extern lighttable_t**	vscalelight;
 extern lighttable_t**	dscalelight;
 
-
 typedef void (*drawfunc_t) (int start, int stop);
-
-
 
 void R_ClearClipSegs (void);
 void R_ClearDrawSegs (void);
 
-
 void R_RenderBSPNode (int bspnum);
-
 
 #endif

@@ -1,28 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __DOOMKEYS__
 #define __DOOMKEYS__
-
-
-
-
-
 
 #define KEY_RIGHTARROW	0xae
 #define KEY_LEFTARROW	0xac
@@ -59,8 +36,6 @@
 #define KEY_RALT	(0x80+0x38)
 
 #define KEY_LALT	KEY_RALT
-
-
 
 #define KEY_CAPSLOCK    (0x80+0x3a)
 #define KEY_NUMLOCK     (0x80+0x45)

@@ -1,20 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __SHA1_H__
 #define __SHA1_H__
 

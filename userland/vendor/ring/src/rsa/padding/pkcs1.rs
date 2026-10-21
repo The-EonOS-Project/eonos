@@ -1,25 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{super::PUBLIC_KEY_PUBLIC_MODULUS_MAX_LEN, Padding, RsaEncoding, Verification};
 use crate::{bits, digest, error, io::der, rand};
-
-
-
-
-
-
 
 #[derive(Debug)]
 pub struct PKCS1 {
@@ -55,8 +35,7 @@ impl Verification for PKCS1 {
         m: &mut untrusted::Reader,
         mod_bits: bits::BitLength,
     ) -> Result<(), error::Unspecified> {
-        
-        
+
         let mut calculated = [0u8; PUBLIC_KEY_PUBLIC_MODULUS_MAX_LEN];
         let calculated = &mut calculated[..mod_bits.as_usize_bytes_rounded_up()];
         pkcs1_encode(self, m_hash, calculated);
@@ -67,17 +46,11 @@ impl Verification for PKCS1 {
     }
 }
 
-
-
-
-
 fn pkcs1_encode(pkcs1: &PKCS1, m_hash: digest::Digest, m_out: &mut [u8]) {
     let em = m_out;
 
     let digest_len = pkcs1.digestinfo_prefix.len() + pkcs1.digest_alg.output_len();
 
-    
-    
     assert!(em.len() >= digest_len + 11);
     let pad_len = em.len() - digest_len - 3;
     em[0] = 0;
@@ -102,10 +75,6 @@ macro_rules! rsa_pkcs1_padding {
         };
     };
 }
-
-
-
-
 
 rsa_pkcs1_padding!(
     pub(in super::super) RSA_PKCS1_SHA1_FOR_LEGACY_USE_ONLY,

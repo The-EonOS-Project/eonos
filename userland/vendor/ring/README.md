@@ -6,7 +6,6 @@ DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN
 AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-
 Most of the C and assembly language code in *ring* comes from BoringSSL. 
 BoringSSL is a fork of OpenSSL. This quote from the BoringSSL README.md 
 discouraging you from using it applies to this project:
@@ -20,13 +19,11 @@ This project was originally shared on GitHub in 2015 as an experiment. It was
 put on crates.io shortly to help other people with their experiments. It is an
 experiment.
 
-
 Side Channels
 -------------
 
 See [SIDE-CHANNELS.md](SIDE-CHANNELS.md) for important information regarding
 the limitations of the side channel mitigations in this project.
-
 
 Toolchains & Targets
 --------------------
@@ -36,7 +33,6 @@ that aren't supported by other projects, especially BoringSSL. The further you
 are from using the same version of Clang that Chrome uses, the more weary you
 should be.
 
-
 Bug Reporting
 -------------
 
@@ -44,8 +40,6 @@ For security vulnerabilities, see https://github.com/briansmith/ring/security/po
 
 Please report bugs that aren't security vulnerabilities either as pull requests or as issues in
 [the issue tracker](https://github.com/briansmith/ring/issues).
-
-
 
 Release Notes
 -------------

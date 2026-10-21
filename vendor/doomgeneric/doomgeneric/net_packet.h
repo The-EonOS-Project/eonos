@@ -1,20 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef NET_PACKET_H
 #define NET_PACKET_H
 

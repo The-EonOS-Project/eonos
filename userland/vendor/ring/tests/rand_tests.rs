@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![allow(missing_docs)]
 
 use ring::rand::{self, SecureRandom as _};
@@ -29,9 +15,6 @@ fn test_system_random_lengths() {
     const LINUX_LIMIT: usize = 256;
     const WEB_LIMIT: usize = 65536;
 
-    
-    
-    
     let lengths = [
         0,
         1,
@@ -58,9 +41,6 @@ fn test_system_random_lengths() {
         let rng = rand::SystemRandom::new();
         assert!(rng.fill(&mut buf).is_ok());
 
-        
-        
-        
         if *len >= 96 {
             assert!(buf.iter().any(|x| *x != 0));
         }

@@ -1,10 +1,6 @@
-
-
 use core::sync::atomic::{AtomicBool, Ordering};
 
 static APIC_ROUTING: AtomicBool = AtomicBool::new(false);
-
-
 
 pub fn use_apic() {
     APIC_ROUTING.store(true, Ordering::Release);

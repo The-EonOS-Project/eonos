@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86_64) && defined(__ELF__)
@@ -249,8 +246,6 @@ _CET_ENDBR
 	cmpq	$1,%rdx
 	jne	.Lctr32_bulk
 
-
-
 	movups	(%r8),%xmm2
 	movups	(%rdi),%xmm3
 	movl	240(%rcx),%edx
@@ -281,9 +276,6 @@ _CET_ENDBR
 .cfi_offset	%rbp,-16
 	subq	$128,%rsp
 	andq	$-16,%rsp
-
-
-
 
 	movdqu	(%r8),%xmm2
 	movdqu	(%rcx),%xmm0
@@ -489,7 +481,6 @@ _CET_ENDBR
 .byte	102,68,15,56,220,200
 	movups	192-128(%rcx),%xmm0
 
-
 .byte	102,15,56,220,209
 .byte	102,15,56,220,217
 .byte	102,15,56,220,225
@@ -581,12 +572,10 @@ _CET_ENDBR
 
 .Lctr32_tail:
 
-
 	leaq	16(%rcx),%rcx
 	cmpq	$4,%rdx
 	jb	.Lctr32_loop3
 	je	.Lctr32_loop4
-
 
 	shll	$4,%eax
 	movdqa	96(%rsp),%xmm8
@@ -739,13 +728,11 @@ _CET_ENDBR
 	subq	$8,%rsp
 .cfi_adjust_cfa_offset	8
 
-
 	movups	(%rdi),%xmm0
 	xorps	%xmm4,%xmm4
 	leaq	16(%rdx),%rax
 	cmpl	$256,%esi
 	je	.L14rounds
-
 
 	cmpl	$128,%esi
 	jne	.Lbad_keybits
@@ -778,8 +765,6 @@ _CET_ENDBR
 	movl	%esi,80(%rax)
 	xorl	%eax,%eax
 	jmp	.Lenc_key_ret
-
-
 
 .align	16
 .L14rounds:
@@ -834,7 +819,6 @@ _CET_ENDBR
 .cfi_adjust_cfa_offset	-8
 	ret
 .cfi_endproc	
-
 
 .align	16
 .Lkey_expansion_128:
@@ -895,7 +879,6 @@ _CET_ENDBR
 #endif
 	subq	$8,%rsp
 .cfi_adjust_cfa_offset	8
-
 
 	movups	(%rdi),%xmm0
 	xorps	%xmm4,%xmm4
@@ -971,8 +954,6 @@ _CET_ENDBR
 	movl	%esi,96(%rax)
 	xorl	%eax,%eax
 	jmp	.Lenc_key_ret_alt
-
-
 
 .align	16
 .L14rounds_alt:

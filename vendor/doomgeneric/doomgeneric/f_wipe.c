@@ -1,21 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <string.h>
 
 #include "z_zone.h"
@@ -27,17 +9,11 @@
 
 #include "f_wipe.h"
 
-
-
-
-
-
 static boolean	go = 0;
 
 static byte*	wipe_scr_start;
 static byte*	wipe_scr_end;
 static byte*	wipe_scr;
-
 
 void
 wipe_shittyColMajorXform
@@ -85,7 +61,7 @@ wipe_doColorXForm
     changed = false;
     w = wipe_scr;
     e = wipe_scr_end;
-    
+
     while (w!=wipe_scr+width*height)
     {
 	if (*w != *e)
@@ -126,7 +102,6 @@ wipe_exitColorXForm
     return 0;
 }
 
-
 static int*	y;
 
 int
@@ -136,17 +111,12 @@ wipe_initMelt
   int	ticks )
 {
     int i, r;
-    
-    
+
     memcpy(wipe_scr, wipe_scr_start, width*height);
-    
-    
-    
+
     wipe_shittyColMajorXform((short*)wipe_scr_start, width/2, height);
     wipe_shittyColMajorXform((short*)wipe_scr_end, width/2, height);
-    
-    
-    
+
     y = (int *) Z_Malloc(width*sizeof(int), PU_STATIC, 0);
     y[0] = -(M_Random()%16);
     for (i=1;i<width;i++)
@@ -170,7 +140,7 @@ wipe_doMelt
     int		j;
     int		dy;
     int		idx;
-    
+
     short*	s;
     short*	d;
     boolean	done = true;
@@ -268,21 +238,17 @@ wipe_ScreenWipe
 	wipe_initMelt, wipe_doMelt, wipe_exitMelt
     };
 
-    
     if (!go)
     {
 	go = 1;
-	
+
 	wipe_scr = I_VideoBuffer;
 	(*wipes[wipeno*3])(width, height, ticks);
     }
 
-    
     V_MarkRect(0, 0, width, height);
     rc = (*wipes[wipeno*3+1])(width, height, ticks);
-    
 
-    
     if (rc)
     {
 	go = 0;

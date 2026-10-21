@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{
     elem::{binary_op, binary_op_assign},
     elem_sqr_mul, elem_sqr_mul_acc, PublicModulus, *,
@@ -49,12 +35,6 @@ pub static PRIVATE_KEY_OPS: PrivateKeyOps = PrivateKeyOps {
 };
 
 fn p384_elem_inv_squared(q: &Modulus<Q>, a: &Elem<R>) -> Elem<R> {
-    
-    
-    
-    
-    
-    
 
     #[inline]
     fn sqr_mul(q: &Modulus<Q>, a: &Elem<R>, squarings: LeakyWord, b: &Elem<R>) -> Elem<R> {
@@ -78,7 +58,6 @@ fn p384_elem_inv_squared(q: &Modulus<Q>, a: &Elem<R>) -> Elem<R> {
 
     let ffffffffffffffffffffffffffffff = sqr_mul(q, &fffffffffffffff, 60, &fffffffffffffff);
 
-    
     let mut acc = sqr_mul(
         q,
         &ffffffffffffffffffffffffffffff,
@@ -86,19 +65,13 @@ fn p384_elem_inv_squared(q: &Modulus<Q>, a: &Elem<R>) -> Elem<R> {
         &ffffffffffffffffffffffffffffff,
     );
 
-    
     sqr_mul_acc(q, &mut acc, 15, &fff_111);
 
-    
     sqr_mul_acc(q, &mut acc, 1 + 30, &fffffff_11);
     sqr_mul_acc(q, &mut acc, 2, &b_11);
 
-    
-    
     sqr_mul_acc(q, &mut acc, 64 + 30, &fffffff_11);
 
-    
-    
     q.elem_square(&mut acc);
     q.elem_square(&mut acc);
 
@@ -106,7 +79,7 @@ fn p384_elem_inv_squared(q: &Modulus<Q>, a: &Elem<R>) -> Elem<R> {
 }
 
 fn p384_point_mul_base_impl(a: &Scalar, cpu: cpu::Features) -> Point {
-    
+
     let generator = (Elem::from(&GENERATOR.0), Elem::from(&GENERATOR.1));
     PRIVATE_KEY_OPS.point_mul(a, &generator, cpu)
 }
@@ -129,7 +102,6 @@ pub static PUBLIC_SCALAR_OPS: PublicScalarOps = PublicScalarOps {
 
     q_minus_n: PublicElem::from_hex("389cb27e0bc8d21fa7e5f24cb74f58851313e696333ad68c"),
 
-    
     scalar_inv_to_mont_vartime: |s, cpu| PRIVATE_SCALAR_OPS.scalar_inv_to_mont(s, cpu),
 };
 
@@ -141,15 +113,6 @@ pub static PRIVATE_SCALAR_OPS: PrivateScalarOps = PrivateScalarOps {
 };
 
 fn p384_scalar_inv_to_mont(a: Scalar<R>, _cpu: cpu::Features) -> Scalar<R> {
-    
-    
-    
-    
-    
-    
-    
-    
-    
 
     fn mul(a: &Scalar<R>, b: &Scalar<R>) -> Scalar<R> {
         binary_op(p384_scalar_mul_mont, a, b)
@@ -163,7 +126,6 @@ fn p384_scalar_inv_to_mont(a: Scalar<R>, _cpu: cpu::Features) -> Scalar<R> {
         unary_op_from_binary_op_assign(p384_scalar_mul_mont, a);
     }
 
-    
     fn sqr_mul(a: &Scalar<R>, squarings: LeakyWord, b: &Scalar<R>) -> Scalar<R> {
         debug_assert!(squarings >= 1);
         let mut tmp = sqr(a);
@@ -173,7 +135,6 @@ fn p384_scalar_inv_to_mont(a: Scalar<R>, _cpu: cpu::Features) -> Scalar<R> {
         mul(&tmp, b)
     }
 
-    
     fn sqr_mul_acc(acc: &mut Scalar<R>, squarings: LeakyWord, b: &Scalar<R>) {
         debug_assert!(squarings >= 1);
         for _ in 0..squarings {
@@ -182,7 +143,6 @@ fn p384_scalar_inv_to_mont(a: Scalar<R>, _cpu: cpu::Features) -> Scalar<R> {
         binary_op_assign(p384_scalar_mul_mont, acc, b)
     }
 
-    
     const B_1: usize = 0;
     const B_11: usize = 1;
     const B_101: usize = 2;
@@ -208,14 +168,7 @@ fn p384_scalar_inv_to_mont(a: Scalar<R>, _cpu: cpu::Features) -> Scalar<R> {
 
     let ffffffffffffffffffffffff = sqr_mul(&ffffffffffffffff, 0 + 32, &ffffffff);
 
-    
     let mut acc = sqr_mul(&ffffffffffffffffffffffff, 0 + 96, &ffffffffffffffffffffffff);
-
-    
-    
-    
-    
-    
 
     #[allow(clippy::cast_possible_truncation)]
     static REMAINING_WINDOWS: [(u8, u8); 39] = [
@@ -271,7 +224,7 @@ unsafe extern "C" fn p384_elem_sqr_mont(
     r: *mut Limb,   
     a: *const Limb, 
 ) {
-    
+
     unsafe {
         p384_elem_mul_mont(r, a, a);
     }

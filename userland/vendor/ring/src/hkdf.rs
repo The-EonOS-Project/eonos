@@ -1,47 +1,22 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::{error, hmac};
-
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Algorithm(hmac::Algorithm);
 
 impl Algorithm {
-    
+
     #[inline]
     pub fn hmac_algorithm(&self) -> hmac::Algorithm {
         self.0
     }
 }
 
-
 pub static HKDF_SHA1_FOR_LEGACY_USE_ONLY: Algorithm =
     Algorithm(hmac::HMAC_SHA1_FOR_LEGACY_USE_ONLY);
 
-
 pub static HKDF_SHA256: Algorithm = Algorithm(hmac::HMAC_SHA256);
 
-
 pub static HKDF_SHA384: Algorithm = Algorithm(hmac::HMAC_SHA384);
-
 
 pub static HKDF_SHA512: Algorithm = Algorithm(hmac::HMAC_SHA512);
 
@@ -51,36 +26,22 @@ impl KeyType for Algorithm {
     }
 }
 
-
 #[derive(Debug)]
 pub struct Salt(hmac::Key);
 
 impl Salt {
-    
-    
-    
-    
-    
+
     pub fn new(algorithm: Algorithm, value: &[u8]) -> Self {
         Self(hmac::Key::new(algorithm.0, value))
     }
 
-    
-    
-    
     pub fn extract(&self, secret: &[u8]) -> Prk {
-        
-        
-        
-        
-        
-        
+
         let salt = &self.0;
         let prk = hmac::sign(salt, secret);
         Prk(hmac::Key::new(salt.algorithm(), prk.as_ref()))
     }
 
-    
     #[inline]
     pub fn algorithm(&self) -> Algorithm {
         Algorithm(self.0.algorithm())
@@ -98,31 +59,20 @@ impl From<Okm<'_, Algorithm>> for Salt {
     }
 }
 
-
 pub trait KeyType {
-    
+
     fn len(&self) -> usize;
 }
-
 
 #[derive(Clone, Debug)]
 pub struct Prk(hmac::Key);
 
 impl Prk {
-    
-    
-    
-    
-    
+
     pub fn new_less_safe(algorithm: Algorithm, value: &[u8]) -> Self {
         Self(hmac::Key::new(algorithm.hmac_algorithm(), value))
     }
 
-    
-    
-    
-    
-    
     #[inline]
     pub fn expand<'a, L: KeyType>(
         &'a self,
@@ -153,10 +103,6 @@ impl From<Okm<'_, Algorithm>> for Prk {
     }
 }
 
-
-
-
-
 #[derive(Debug)]
 pub struct Okm<'a, L: KeyType> {
     prk: &'a Prk,
@@ -166,19 +112,12 @@ pub struct Okm<'a, L: KeyType> {
 }
 
 impl<L: KeyType> Okm<'_, L> {
-    
+
     #[inline]
     pub fn len(&self) -> &L {
         &self.len
     }
 
-    
-    
-    
-    
-    
-    
-    
     #[inline]
     pub fn fill(self, out: &mut [u8]) -> Result<(), error::Unspecified> {
         fill_okm(self.prk, self.info, out, self.len_cached)
@@ -211,7 +150,6 @@ fn fill_okm(
         let t = ctx.sign();
         let t = t.as_ref();
 
-        
         out = if out.len() < digest_alg.output_len() {
             let len = out.len();
             out.copy_from_slice(&t[..len]);

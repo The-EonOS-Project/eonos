@@ -1,19 +1,10 @@
-
-
-
-
-
-
-
 VB=@
-
 
 CC=clang  
 CFLAGS+=-ggdb3 -Os -I/usr/local/include
 LDFLAGS+=-Wl,--gc-sections -L/usr/local/lib
 CFLAGS+=-ggdb3 -Wall -DNORMALUNIX -DLINUX -DSNDSERV 
 LIBS+=-lm -lc -lX11
-
 
 OBJDIR=build
 OUTPUT=doomgeneric

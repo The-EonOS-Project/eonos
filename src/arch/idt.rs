@@ -8,8 +8,6 @@ use crate::{log_critical, log_debug, log_fail, log_ok};
 const IDT_ENTRIES: usize = 256;
 const GATE_INTERRUPT: u8 = 0x8E;
 
-
-
 pub const IRQ_BASE: usize = 32;
 pub const IRQ_COUNT: usize = 16;
 const TOTAL_VECTORS: usize = IRQ_BASE + IRQ_COUNT;
@@ -59,15 +57,9 @@ struct Idtr {
 
 static mut IDT: [Entry; IDT_ENTRIES] = [Entry::MISSING; IDT_ENTRIES];
 
-
-
-
 type IrqHandler = fn();
 
 static IRQ_HANDLERS: IrqMutex<[Option<IrqHandler>; IRQ_COUNT]> = IrqMutex::new([None; IRQ_COUNT]);
-
-
-
 
 pub fn register_irq(irq: u8, handler: IrqHandler) {
     IRQ_HANDLERS.lock()[irq as usize] = Some(handler);
@@ -350,8 +342,7 @@ pub fn init() {
 #[no_mangle]
 extern "C" fn exception_handler(frame: &mut InterruptFrame) {
     if frame.vector as usize == APIC_SPURIOUS_VECTOR {
-        
-        
+
         return;
     }
     if frame.vector as usize >= IRQ_BASE {
@@ -359,12 +350,6 @@ extern "C" fn exception_handler(frame: &mut InterruptFrame) {
         return;
     }
 
-    
-    
-    
-    
-    
-    
     if frame.cs & 3 == 3 && !matches!(frame.vector, 2 | 8 | 18) {
         kill_user_process(frame);
     }
@@ -381,11 +366,6 @@ extern "C" fn exception_handler(frame: &mut InterruptFrame) {
         _ => fatal(frame),
     }
 }
-
-
-
-
-
 
 fn kill_user_process(frame: &InterruptFrame) -> ! {
     let name = EXCEPTION_NAMES
@@ -424,8 +404,6 @@ fn kill_user_process(frame: &InterruptFrame) -> ! {
         );
     }
 
-    
-    
     crate::process::exit_current(if frame.vector == 14 {
         139
     } else {
@@ -449,8 +427,6 @@ fn irq_dispatch(frame: &InterruptFrame) {
 
     crate::interrupts::end_of_interrupt(irq);
 
-    
-    
     crate::scheduler::preempt_if_needed();
 }
 

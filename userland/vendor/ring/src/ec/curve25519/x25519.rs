@@ -1,19 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{ops, scalar::SCALAR_LEN};
 use crate::{agreement, bb, cpu, ec, error, rand};
 use core::ffi::c_int;
@@ -26,14 +10,6 @@ static CURVE25519: ec::Curve = ec::Curve {
     generate_private_key: x25519_generate_private_key,
     public_from_private: x25519_public_from_private,
 };
-
-
-
-
-
-
-
-
 
 pub static X25519: agreement::Algorithm = agreement::Algorithm {
     curve: &CURVE25519,
@@ -157,13 +133,12 @@ fn x25519_ecdh(
 
     let zeros: SharedSecret = [0; SHARED_SECRET_LEN];
     if bb::verify_slices_are_equal(out, &zeros).is_ok() {
-        
+
         return Err(error::Unspecified);
     }
 
     Ok(())
 }
-
 
 #[cfg(all(
     all(target_arch = "arm", target_endian = "little"),
@@ -190,10 +165,8 @@ const ELEM_AND_SCALAR_LEN: usize = ops::ELEM_LEN;
 type PrivateKey = ops::MaskedScalar;
 const PRIVATE_KEY_LEN: usize = ELEM_AND_SCALAR_LEN;
 
-
 type PublicKey = [u8; PUBLIC_KEY_LEN];
 const PUBLIC_KEY_LEN: usize = ELEM_AND_SCALAR_LEN;
-
 
 type SharedSecret = [u8; SHARED_SECRET_LEN];
 const SHARED_SECRET_LEN: usize = ELEM_AND_SCALAR_LEN;

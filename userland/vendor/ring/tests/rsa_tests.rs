@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![allow(missing_docs)]
 #![cfg(feature = "alloc")]
 
@@ -81,8 +67,6 @@ fn test_signature_rsa_pkcs1_sign() {
             }
             let key_pair = key_pair.unwrap();
 
-            
-            
             let mut actual = vec![0u8; key_pair.public().modulus_len()];
             key_pair
                 .sign(alg, &rng, &msg, actual.as_mut_slice())
@@ -131,12 +115,9 @@ fn test_signature_rsa_pss_sign() {
     );
 }
 
-
-
 #[test]
 fn test_signature_rsa_pkcs1_sign_output_buffer_len() {
-    
-    
+
     const MESSAGE: &[u8] = b"hello, world";
     let rng = rand::SystemRandom::new();
 
@@ -144,10 +125,6 @@ fn test_signature_rsa_pkcs1_sign_output_buffer_len() {
         include_bytes!("../src/rsa/signature_rsa_example_private_key.der");
     let key_pair = rsa::KeyPair::from_der(PRIVATE_KEY_DER).unwrap();
 
-    
-    
-    
-    
     for len in 0..key_pair.public().modulus_len() + 1 {
         let mut signature = vec![0; len];
         assert_eq!(
@@ -206,9 +183,6 @@ fn test_signature_rsa_pkcs1_verify() {
 
             let public_key = test_case.consume_bytes("Key");
 
-            
-            
-            
             let key_bits = untrusted::Input::from(&public_key)
                 .read_all(error::Unspecified, |input| {
                     der::nested(input, der::Tag::Sequence, error::Unspecified, |input| {
@@ -216,8 +190,6 @@ fn test_signature_rsa_pkcs1_verify() {
                             der::positive_integer(input)?.big_endian_without_leading_zero();
                         let _e = der::positive_integer(input)?;
 
-                        
-                        
                         let n_leading_zeros = usize::try_from(n_bytes[0].leading_zeros()).unwrap();
                         assert!(n_leading_zeros < 8);
                         Ok((n_bytes.len() * 8) - n_leading_zeros)
@@ -258,9 +230,6 @@ fn test_signature_rsa_pss_verify() {
 
             let public_key = test_case.consume_bytes("Key");
 
-            
-            
-            
             assert!(untrusted::Input::from(&public_key)
                 .read_all(error::Unspecified, |input| der::nested(
                     input,
@@ -286,8 +255,6 @@ fn test_signature_rsa_pss_verify() {
         },
     );
 }
-
-
 
 #[cfg(feature = "alloc")]
 #[test]
@@ -316,15 +283,12 @@ fn rsa_test_keypair_coverage() {
 
     let key_pair = rsa::KeyPair::from_pkcs8(PRIVATE_KEY).unwrap();
 
-    
-    
     let _: &rsa::PublicKey = key_pair.public_key();
 
     test_public_key_coverage(key_pair.public());
-    
+
     test_public_key_coverage(&key_pair.public().clone());
 
-    
     assert_eq!(
         format!("RsaKeyPair {{ public: {:?} }}", key_pair.public_key()),
         format!("{:?}", key_pair)
@@ -332,11 +296,10 @@ fn rsa_test_keypair_coverage() {
 }
 
 fn test_public_key_coverage(key: &rsa::PublicKey) {
-    
+
     const PUBLIC_KEY: &[u8] = include_bytes!("rsa_test_public_key_2048.der");
     assert_eq!(key.as_ref(), PUBLIC_KEY);
 
-    
     const PUBLIC_KEY_DEBUG: &str = include_str!("rsa_test_public_key_2048_debug.txt");
     assert_eq!(PUBLIC_KEY_DEBUG, format!("{:?}", key));
 

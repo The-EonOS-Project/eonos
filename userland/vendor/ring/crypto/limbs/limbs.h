@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef RING_LIMBS_H
 #define RING_LIMBS_H
 
@@ -23,7 +9,6 @@ typedef crypto_word_t Limb;
 
 #define LIMB_BITS CRYPTO_WORD_BITS
 #define LIMB_HIGH_BIT ((Limb)(1) << (LIMB_BITS - 1))
-
 
 Limb LIMBS_are_zero(const Limb a[], size_t num_limbs);
 Limb LIMBS_equal(const Limb a[], const Limb b[], size_t num_limbs);

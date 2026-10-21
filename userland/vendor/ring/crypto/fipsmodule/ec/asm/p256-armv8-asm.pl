@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 # ====================================================================
 # Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
 # project.
@@ -1504,7 +1503,6 @@ ecp_nistz256_select_w5:
 
 	ret
 .size	ecp_nistz256_select_w5,.-ecp_nistz256_select_w5
-
 
 ////////////////////////////////////////////////////////////////////////
 // void ecp_nistz256_select_w7(uint64_t *val, uint64_t *in_t, int index);

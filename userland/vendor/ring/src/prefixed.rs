@@ -1,4 +1,3 @@
-
 macro_rules! core_name_and_version {
     () => {
         concat!(
@@ -15,7 +14,6 @@ macro_rules! core_name_and_version {
     };
 }
 
-
 macro_rules! prefix {
     ( ) => {
         concat!(core_name_and_version!(), "_")
@@ -23,7 +21,7 @@ macro_rules! prefix {
 }
 
 macro_rules! prefixed_extern {
-    
+
     {
         $(
             $( #[$meta:meta] )*
@@ -46,7 +44,6 @@ macro_rules! prefixed_extern {
         }
     };
 
-    
     {
         $( #[$meta:meta] )*
         $vis:vis static $name:ident: $typ:ty;
@@ -63,7 +60,6 @@ macro_rules! prefixed_extern {
         }
     };
 
-    
     {
         $( #[$meta:meta] )*
         $vis:vis static mut $name:ident: $typ:ty;
@@ -89,7 +85,7 @@ macro_rules! prefixed_extern {
     target_arch = "x86_64"
 )))]
 macro_rules! prefixed_export {
-    
+
     {
         $( #[$meta:meta] )*
         $vis:vis unsafe extern "C"

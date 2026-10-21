@@ -1,32 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .intel_syntax noprefix
 
 .section .bss
@@ -136,7 +107,6 @@ _start:
     test rax, rax
     jle  .Lloop                         # error or empty read: try again
 
-
     mov  rcx, rax                       # rcx = length (line_buf[0..rcx))
     lea  rsi, [rip + line_buf]
     cmp  byte ptr [rsi + rcx - 1], 10
@@ -146,7 +116,6 @@ _start:
     mov  byte ptr [rsi + rcx], 0        # NUL terminate for argv tokenization
     test rcx, rcx
     jz   .Lloop                         # blank line: reprompt
-
 
     cmp  rcx, 2
     jne  .Ltry_lsblk
@@ -600,7 +569,6 @@ _start:
 
 .Lunknown:
 
-
     push rcx
     lea  rsi, [rip + msg_unknown]
     mov  edx, msg_unknown_len
@@ -612,9 +580,6 @@ _start:
     mov  edx, 1
     call print
     jmp  .Lloop
-
-
-
 
 do_ls:
     push rbx
@@ -635,9 +600,6 @@ do_ls:
     call print
 2:  pop  rbx
     ret
-
-
-
 
 do_lsblk:
     push rbx
@@ -660,9 +622,6 @@ do_lsblk:
     call print
     pop  rbx
     ret
-
-
-
 
 do_mount:
     push rbx
@@ -709,9 +668,6 @@ do_mount:
 1:  pop  rbx
     ret
 
-
-
-
 do_ps:
     push rbx
     lea  rdi, [rip + file_buf]
@@ -732,9 +688,6 @@ do_ps:
     call print
 2:  pop  rbx
     ret
-
-
-
 
 do_cat:
     push rbx
@@ -781,10 +734,6 @@ do_cat:
     pop  r12
     pop  rbx
     ret
-
-
-
-
 
 do_edit:
     push rbx
@@ -912,9 +861,6 @@ do_edit:
     pop  rbx
     ret
 
-
-
-
 do_uptime:
     push rbx
     mov  eax, 9003                      # eonos_uptime_ms
@@ -927,9 +873,6 @@ do_uptime:
     pop  rbx
     ret
 
-
-
-
 do_pid:
     push rbx
     mov  eax, 39                        # getpid
@@ -941,13 +884,6 @@ do_pid:
     call print
     pop  rbx
     ret
-
-
-
-
-
-
-
 
 print_u64_decimal:
     lea  r8, [rip + numbuf]
@@ -969,10 +905,6 @@ print_u64_decimal:
     call print
     ret
 
-
-
-
-
 streq:
     cmp  rcx, r8
     jne  .Lstreq_no
@@ -989,11 +921,6 @@ streq:
 .Lstreq_no:
     xor  eax, eax
     ret
-
-
-
-
-
 
 strprefix:
     cmp  rcx, r8
@@ -1013,20 +940,11 @@ strprefix:
     xor  eax, eax
     ret
 
-
-
-
-
-
-
 read_line:
     xor  edi, edi                       # fd = 0 (stdin)
     xor  eax, eax                       # SYS_READ = 0
     syscall
     ret
-
-
-
 
 print:
     mov  edi, 1

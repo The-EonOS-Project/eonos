@@ -1,34 +1,6 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{Aad, Algorithm, BoundKey, LessSafeKey, NonceSequence, UnboundKey};
 use crate::error;
 use core::ops::RangeFrom;
-
-
-
-
-
 
 pub struct OpeningKey<N: NonceSequence> {
     key: LessSafeKey,
@@ -56,17 +28,7 @@ impl<N: NonceSequence> core::fmt::Debug for OpeningKey<N> {
 }
 
 impl<N: NonceSequence> OpeningKey<N> {
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     #[inline]
     pub fn open_in_place<'in_out, A>(
         &mut self,
@@ -80,49 +42,6 @@ impl<N: NonceSequence> OpeningKey<N> {
             .open_in_place(self.nonce_sequence.advance()?, aad, in_out)
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     #[inline]
     pub fn open_within<'in_out, A>(
         &mut self,

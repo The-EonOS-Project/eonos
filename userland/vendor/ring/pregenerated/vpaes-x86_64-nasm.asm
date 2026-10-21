@@ -1,6 +1,3 @@
-
-
-
 %ifidn __OUTPUT_FORMAT__, win64
 default	rel
 %define XMMWORD
@@ -10,23 +7,6 @@ default	rel
 
 %include "ring_core_generated/prefix_symbols_nasm.inc"
 section	.text code align=64
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ALIGN	16
 _vpaes_encrypt_core:
@@ -101,7 +81,6 @@ DB	102,15,56,0,220
 	pxor	xmm3,xmm1
 	jnz	NEAR $L$enc_loop
 
-
 	movdqa	xmm4,XMMWORD[((-96))+r10]
 	movdqa	xmm0,XMMWORD[((-80))+r10]
 DB	102,15,56,0,226
@@ -111,38 +90,6 @@ DB	102,15,56,0,195
 	pxor	xmm0,xmm4
 DB	102,15,56,0,193
 	ret
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ALIGN	16
 _vpaes_encrypt_core_2x:
@@ -268,7 +215,6 @@ DB	102,69,15,56,0,220
 	pxor	xmm11,xmm7
 	jnz	NEAR $L$enc2x_loop
 
-
 	movdqa	xmm4,XMMWORD[((-96))+r10]
 	movdqa	xmm0,XMMWORD[((-80))+r10]
 	movdqa	xmm12,xmm4
@@ -287,26 +233,12 @@ DB	102,15,56,0,193
 DB	102,15,56,0,241
 	ret
 
-
-
-
-
-
-
-
-
 ALIGN	16
 _vpaes_schedule_core:
-
-
-
-
-
 
 	call	_vpaes_preheat
 	movdqa	xmm8,XMMWORD[$L$k_rcon]
 	movdqu	xmm0,XMMWORD[rdi]
-
 
 	movdqa	xmm3,xmm0
 	lea	r11,[$L$k_ipt]
@@ -315,22 +247,11 @@ _vpaes_schedule_core:
 
 	lea	r10,[$L$k_sr]
 
-
 	movdqu	XMMWORD[rdx],xmm0
 
 $L$schedule_go:
 	cmp	esi,192
 	ja	NEAR $L$schedule_256
-
-
-
-
-
-
-
-
-
-
 
 $L$schedule_128:
 	mov	esi,10
@@ -342,16 +263,6 @@ $L$oop_schedule_128:
 	call	_vpaes_schedule_mangle
 	jmp	NEAR $L$oop_schedule_128
 
-
-
-
-
-
-
-
-
-
-
 ALIGN	16
 $L$schedule_256:
 	movdqu	xmm0,XMMWORD[16+rdi]
@@ -362,12 +273,10 @@ $L$oop_schedule_256:
 	call	_vpaes_schedule_mangle
 	movdqa	xmm6,xmm0
 
-
 	call	_vpaes_schedule_round
 	dec	rsi
 	jz	NEAR $L$schedule_mangle_last
 	call	_vpaes_schedule_mangle
-
 
 	pshufd	xmm0,xmm0,0xFF
 	movdqa	xmm5,xmm7
@@ -377,22 +286,10 @@ $L$oop_schedule_256:
 
 	jmp	NEAR $L$oop_schedule_256
 
-
-
-
-
-
-
-
-
-
-
-
 ALIGN	16
 $L$schedule_mangle_last:
 
 	lea	r11,[$L$k_deskew]
-
 
 	movdqa	xmm1,XMMWORD[r10*1+r8]
 DB	102,15,56,0,193
@@ -405,7 +302,6 @@ $L$schedule_mangle_last_dec:
 	call	_vpaes_schedule_transform
 	movdqu	XMMWORD[rdx],xmm0
 
-
 	pxor	xmm0,xmm0
 	pxor	xmm1,xmm1
 	pxor	xmm2,xmm2
@@ -416,42 +312,16 @@ $L$schedule_mangle_last_dec:
 	pxor	xmm7,xmm7
 	ret
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ALIGN	16
 _vpaes_schedule_round:
-
 
 	pxor	xmm1,xmm1
 DB	102,65,15,58,15,200,15
 DB	102,69,15,58,15,192,15
 	pxor	xmm7,xmm1
 
-
 	pshufd	xmm0,xmm0,0xFF
 DB	102,15,58,15,192,1
-
-
-
 
 _vpaes_schedule_low_round:
 
@@ -462,7 +332,6 @@ _vpaes_schedule_low_round:
 	pslldq	xmm7,8
 	pxor	xmm7,xmm1
 	pxor	xmm7,XMMWORD[$L$k_s63]
-
 
 	movdqa	xmm1,xmm9
 	pandn	xmm1,xmm0
@@ -489,22 +358,9 @@ DB	102,15,56,0,226
 DB	102,15,56,0,195
 	pxor	xmm0,xmm4
 
-
 	pxor	xmm0,xmm7
 	movdqa	xmm7,xmm0
 	ret
-
-
-
-
-
-
-
-
-
-
-
-
 
 ALIGN	16
 _vpaes_schedule_transform:
@@ -520,38 +376,11 @@ DB	102,15,56,0,193
 	pxor	xmm0,xmm2
 	ret
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ALIGN	16
 _vpaes_schedule_mangle:
 
 	movdqa	xmm4,xmm0
 	movdqa	xmm5,XMMWORD[$L$k_mc_forward]
-
 
 	add	rdx,16
 	pxor	xmm4,XMMWORD[$L$k_s63]
@@ -570,11 +399,6 @@ DB	102,15,56,0,217
 	movdqu	XMMWORD[rdx],xmm3
 	ret
 
-
-
-
-
-
 global	vpaes_set_encrypt_key
 
 ALIGN	16
@@ -586,8 +410,6 @@ $L$SEH_begin_vpaes_set_encrypt_key:
 	mov	rdi,rcx
 	mov	rsi,rdx
 	mov	rdx,r8
-
-
 
 _CET_ENDBR
 %ifdef BORINGSSL_DISPATCH_TEST
@@ -647,8 +469,6 @@ $L$SEH_begin_vpaes_ctr32_encrypt_blocks:
 	mov	rcx,r9
 	mov	r8,QWORD[40+rsp]
 
-
-
 _CET_ENDBR
 
 	xchg	rdx,rcx
@@ -676,8 +496,6 @@ $L$ctr32_body:
 	test	rcx,1
 	jz	NEAR $L$ctr32_prep_loop
 
-
-
 	movdqu	xmm7,XMMWORD[rdi]
 	call	_vpaes_encrypt_core
 	pxor	xmm0,xmm7
@@ -688,7 +506,6 @@ $L$ctr32_body:
 	jz	NEAR $L$ctr32_done
 
 $L$ctr32_prep_loop:
-
 
 	movdqa	xmm14,xmm6
 	movdqa	xmm15,xmm6
@@ -734,12 +551,6 @@ $L$ctr32_abort:
 
 $L$SEH_end_vpaes_ctr32_encrypt_blocks:
 
-
-
-
-
-
-
 ALIGN	16
 _vpaes_preheat:
 
@@ -752,13 +563,6 @@ _vpaes_preheat:
 	movdqa	xmm15,XMMWORD[80+r10]
 	movdqa	xmm14,XMMWORD[96+r10]
 	ret
-
-
-
-
-
-
-
 
 section	.rdata rdata align=8
 ALIGN	64
@@ -816,10 +620,8 @@ $L$k_deskew:
 	DQ	0x07E4A34047A4E300,0x1DFEB95A5DBEF91A
 	DQ	0x5F36B5DC83EA6900,0x2841C2ABF49D1E77
 
-
 $L$rev_ctr:
 	DQ	0x0706050403020100,0x0c0d0e0f0b0a0908
-
 
 $L$ctr_add_one:
 	DQ	0x0000000000000000,0x0000000100000000
@@ -912,7 +714,6 @@ $L$in_prologue:
 	pop	rdi
 	pop	rsi
 	ret
-
 
 section	.pdata rdata align=4
 ALIGN	4

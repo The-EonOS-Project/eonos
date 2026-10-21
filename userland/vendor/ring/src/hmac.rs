@@ -1,110 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::{
     bb, cpu,
     digest::{self, Digest, FinishError},
@@ -113,32 +6,24 @@ use crate::{
 
 pub(crate) use crate::digest::InputTooLongError;
 
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Algorithm(&'static digest::Algorithm);
 
 impl Algorithm {
-    
+
     #[inline]
     pub fn digest_algorithm(&self) -> &'static digest::Algorithm {
         self.0
     }
 }
 
-
 pub static HMAC_SHA1_FOR_LEGACY_USE_ONLY: Algorithm = Algorithm(&digest::SHA1_FOR_LEGACY_USE_ONLY);
-
 
 pub static HMAC_SHA256: Algorithm = Algorithm(&digest::SHA256);
 
-
 pub static HMAC_SHA384: Algorithm = Algorithm(&digest::SHA384);
 
-
 pub static HMAC_SHA512: Algorithm = Algorithm(&digest::SHA512);
-
-
-
 
 #[derive(Clone, Copy, Debug)]
 pub struct Tag(Digest);
@@ -149,7 +34,6 @@ impl AsRef<[u8]> for Tag {
         self.0.as_ref()
     }
 }
-
 
 #[derive(Clone)]
 pub struct Key {
@@ -166,13 +50,7 @@ impl core::fmt::Debug for Key {
 }
 
 impl Key {
-    
-    
-    
-    
-    
-    
-    
+
     pub fn generate(
         algorithm: Algorithm,
         rng: &dyn rand::SecureRandom,
@@ -194,25 +72,6 @@ impl Key {
         Self::try_new(algorithm, key_bytes, cpu).map_err(error::erase::<InputTooLongError>)
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     pub fn new(algorithm: Algorithm, key_value: &[u8]) -> Self {
         Self::try_new(algorithm, key_value, cpu::features())
             .map_err(error::erase::<InputTooLongError>)
@@ -245,9 +104,6 @@ impl Key {
         let mut padded_key = [IPAD; digest::MAX_BLOCK_LEN];
         let padded_key = &mut padded_key[..block_len];
 
-        
-        
-        
         bb::xor_assign_at_start(&mut padded_key[..], key_value);
 
         let leftover = key.inner.update(padded_key, cpu_features);
@@ -255,8 +111,6 @@ impl Key {
 
         const OPAD: u8 = 0x5C;
 
-        
-        
         bb::xor_assign(&mut padded_key[..], IPAD ^ OPAD);
         let leftover = key.outer.update(padded_key, cpu_features);
         debug_assert_eq!(leftover.len(), 0);
@@ -264,7 +118,6 @@ impl Key {
         Ok(key)
     }
 
-    
     #[inline]
     pub fn algorithm(&self) -> Algorithm {
         Algorithm(self.inner.algorithm)
@@ -297,9 +150,6 @@ impl From<hkdf::Okm<'_, Algorithm>> for Key {
     }
 }
 
-
-
-
 #[derive(Clone)]
 pub struct Context {
     inner: digest::Context,
@@ -315,8 +165,7 @@ impl core::fmt::Debug for Context {
 }
 
 impl Context {
-    
-    
+
     pub fn with_key(signing_key: &Key) -> Self {
         Self {
             inner: digest::Context::clone_from(&signing_key.inner),
@@ -324,19 +173,10 @@ impl Context {
         }
     }
 
-    
-    
     pub fn update(&mut self, data: &[u8]) {
         self.inner.update(data);
     }
 
-    
-    
-    
-    
-    
-    
-    
     pub fn sign(self) -> Tag {
         self.try_sign(cpu::features())
             .map_err(error::erase::<InputTooLongError>)
@@ -344,7 +184,7 @@ impl Context {
     }
 
     pub(crate) fn try_sign(self, cpu_features: cpu::Features) -> Result<Tag, InputTooLongError> {
-        
+
         debug_assert_eq!(self.inner.algorithm(), self.outer.algorithm);
         debug_assert!(self.inner.algorithm().output_len() < self.outer.algorithm.block_len());
 
@@ -361,26 +201,16 @@ impl Context {
             .map(Tag)
             .map_err(|err| match err {
                 FinishError::InputTooLong(i) => {
-                    
-                    
-                    
-                    
-                    
+
                     i
                 }
                 FinishError::PendingNotAPartialBlock(_) => {
-                    
+
                     unreachable!()
                 }
             })
     }
 }
-
-
-
-
-
-
 
 pub fn sign(key: &Key, data: &[u8]) -> Tag {
     key.sign(data, cpu::features())
@@ -388,24 +218,13 @@ pub fn sign(key: &Key, data: &[u8]) -> Tag {
         .unwrap()
 }
 
-
-
-
-
-
-
-
 pub fn verify(key: &Key, data: &[u8], tag: &[u8]) -> Result<(), error::Unspecified> {
     key.verify(data, tag, cpu::features())
         .map_err(|_: VerifyError| error::Unspecified)
 }
 
 enum VerifyError {
-    
-    
-    
-    
-    
+
     #[allow(dead_code)]
     InputTooLongError(InputTooLongError),
 
@@ -416,8 +235,6 @@ enum VerifyError {
 mod tests {
     use crate::{hmac, rand};
 
-    
-    
     #[test]
     pub fn hmac_signing_key_coverage() {
         let rng = rand::SystemRandom::new();

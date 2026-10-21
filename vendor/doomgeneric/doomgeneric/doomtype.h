@@ -1,29 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __DOOMTYPE__
 #define __DOOMTYPE__
-
-
-
-
 
 #ifdef _MSC_VER
 
@@ -36,34 +12,15 @@
 #include <stdbool.h>
 #endif
 
-
-
-
-
-
-
-
-
-
-
 #ifdef __GNUC__
 #define PACKEDATTR __attribute__((packed))
 #else
 #define PACKEDATTR
 #endif
 
-
-
-
-
-
-
-
-
 #include <inttypes.h>
 
 #if defined(__cplusplus) || defined(__bool_true_false_are_defined)
-
 
 typedef unsigned int boolean;
 

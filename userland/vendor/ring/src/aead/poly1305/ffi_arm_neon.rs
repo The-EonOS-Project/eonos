@@ -1,30 +1,13 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![cfg(all(target_arch = "arm", target_endian = "little"))]
 
 use super::{Key, Tag, KEY_LEN, TAG_LEN};
 use crate::{c, cpu::arm::Neon};
 use core::num::NonZeroUsize;
 
-
 pub(in super::super) struct State {
     state: poly1305_state_st,
     neon: Neon,
 }
-
 
 #[repr(C, align(16))]
 struct poly1305_state_st {

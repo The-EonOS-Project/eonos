@@ -1,25 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{super::PUBLIC_KEY_PUBLIC_MODULUS_MAX_LEN, mgf1, Padding, RsaEncoding, Verification};
 use crate::{bb, bits, digest, error, rand};
-
-
-
-
-
-
 
 #[allow(clippy::upper_case_acronyms)] 
 #[derive(Debug)]
@@ -36,8 +16,7 @@ impl Padding for PSS {
 }
 
 impl RsaEncoding for PSS {
-    
-    
+
     fn encode(
         &self,
         m_hash: digest::Digest,
@@ -47,12 +26,6 @@ impl RsaEncoding for PSS {
     ) -> Result<(), error::Unspecified> {
         let metrics = PSSMetrics::new(self.digest_alg, mod_bits)?;
 
-        
-        
-        
-        
-        
-        
         let em = if metrics.top_byte_mask == 0xff {
             m_out[0] = 0;
             &mut m_out[1..]
@@ -61,37 +34,26 @@ impl RsaEncoding for PSS {
         };
         assert_eq!(em.len(), metrics.em_len);
 
-        
-
-        
-
         let (db, digest_terminator) = em.split_at_mut(metrics.db_len);
 
         let separator_pos = db.len() - 1 - metrics.s_len;
 
-        
         let salt: &[u8] = {
             let salt = &mut db[(separator_pos + 1)..];
             rng.fill(salt)?; 
             salt
         };
 
-        
         let h = pss_digest(self.digest_alg, m_hash, salt);
 
-        
         db[..separator_pos].fill(0); 
 
-        
         db[separator_pos] = 0x01;
 
-        
         mgf1(self.digest_alg, h.as_ref(), db);
 
-        
         db[0] &= metrics.top_byte_mask;
 
-        
         digest_terminator[..metrics.h_len].copy_from_slice(h.as_ref());
         digest_terminator[metrics.h_len] = 0xbc;
 
@@ -100,8 +62,7 @@ impl RsaEncoding for PSS {
 }
 
 impl Verification for PSS {
-    
-    
+
     fn verify(
         &self,
         m_hash: digest::Digest,
@@ -110,15 +71,6 @@ impl Verification for PSS {
     ) -> Result<(), error::Unspecified> {
         let metrics = PSSMetrics::new(self.digest_alg, mod_bits)?;
 
-        
-        
-        
-        
-        
-        
-        
-        
-        
         if metrics.top_byte_mask == 0xff {
             if m.read_byte()? != 0 {
                 return Err(error::Unspecified);
@@ -126,47 +78,34 @@ impl Verification for PSS {
         };
         let em = m;
 
-        
-        
-
-        
-
-        
-
-        
         let masked_db = em.read_bytes(metrics.db_len)?;
         let h_hash = em.read_bytes(metrics.h_len)?;
 
-        
         if em.read_byte()? != 0xbc {
             return Err(error::Unspecified);
         }
 
-        
         let mut db = [0u8; PUBLIC_KEY_PUBLIC_MODULUS_MAX_LEN];
         let db = &mut db[..metrics.db_len];
 
         mgf1(self.digest_alg, h_hash.as_slice_less_safe(), db);
 
         masked_db.read_all(error::Unspecified, |masked_bytes| {
-            
+
             let b = masked_bytes.read_byte()?;
             if b & !metrics.top_byte_mask != 0 {
                 return Err(error::Unspecified);
             }
             db[0] ^= b;
 
-            
             let db_rest = &mut db[1..];
             let masked_bytes = masked_bytes.read_bytes(db_rest.len())?;
             bb::xor_assign_at_start(db_rest, masked_bytes.as_slice_less_safe());
             Ok(())
         })?;
 
-        
         db[0] &= metrics.top_byte_mask;
 
-        
         let ps_len = metrics.ps_len;
         if db[0..ps_len].iter().any(|&db| db != 0) {
             return Err(error::Unspecified);
@@ -175,13 +114,10 @@ impl Verification for PSS {
             return Err(error::Unspecified);
         }
 
-        
         let salt = &db[(db.len() - metrics.s_len)..];
 
-        
         let h_prime = pss_digest(self.digest_alg, m_hash, salt);
 
-        
         if h_hash.as_slice_less_safe() != h_prime.as_ref() {
             return Err(error::Unspecified);
         }
@@ -213,16 +149,8 @@ impl PSSMetrics {
 
         let h_len = digest_alg.output_len();
 
-        
         let s_len = h_len;
 
-        
-        
-        
-        
-        
-        
-        
         let db_len = em_len.checked_sub(1 + s_len).ok_or(error::Unspecified)?;
         let ps_len = db_len.checked_sub(h_len + 1).ok_or(error::Unspecified)?;
 
@@ -244,10 +172,9 @@ fn pss_digest(
     m_hash: digest::Digest,
     salt: &[u8],
 ) -> digest::Digest {
-    
+
     const PREFIX_ZEROS: [u8; 8] = [0u8; 8];
 
-    
     let mut ctx = digest::Context::new(digest_alg);
     ctx.update(&PREFIX_ZEROS);
     ctx.update(m_hash.as_ref());

@@ -1,28 +1,7 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __D_MODE__
 #define __D_MODE__
 
 #include "doomtype.h"
-
-
 
 typedef enum
 {
@@ -39,10 +18,6 @@ typedef enum
     none
 } GameMission_t;
 
-
-
-
-
 typedef enum
 {
     shareware,       
@@ -51,8 +26,6 @@ typedef enum
     retail,          
     indetermined     
 } GameMode_t;
-
-
 
 typedef enum
 {
@@ -73,8 +46,6 @@ typedef enum
     exe_strife_1_2,  
     exe_strife_1_31  
 } GameVersion_t;
-
-
 
 typedef enum
 {

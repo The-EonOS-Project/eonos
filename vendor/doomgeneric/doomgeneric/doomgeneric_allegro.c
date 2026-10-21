@@ -1,5 +1,3 @@
-
-
 #include "doomkeys.h"
 #include "i_system.h"
 #include "i_video.h"
@@ -15,7 +13,6 @@
 #include <allegro.h>
 #undef uint32_t 
 
-
 static bool videomode_set = false;
 
 static BITMAP *temp_bitmap = NULL;
@@ -30,21 +27,18 @@ static unsigned int s_KeyQueueReadIndex = 0;
 
 static volatile unsigned int s_ticks = 0;
 
-
 void key_callback(int scancode) {
-	
+
 	s_KeyQueue[s_KeyQueueWriteIndex] = scancode;
 	s_KeyQueueWriteIndex = (s_KeyQueueWriteIndex + 1) % KEYQUEUE_SIZE;
 }
 END_OF_FUNCTION(key_callback);
 
-
 void timer_callback(void) {
-	
+
 	s_ticks++;
 }
 END_OF_FUNCTION(timer_callback);
-
 
 void DG_Init() {
 	int result;
@@ -76,14 +70,11 @@ void DG_Init() {
 		I_Error("Unable to install timer: %d %s\n", result, allegro_error);
 	}
 
-	
 }
-
 
 static void back_to_text_mode(void) {
 	set_gfx_mode(GFX_TEXT, 80, 25, 0, 0);
 }
-
 
 void DG_DrawFrame()
 {
@@ -98,7 +89,7 @@ void DG_DrawFrame()
 #ifdef CMAP256
 		set_color_depth(8);
 #else  
-		
+
 		set_color_depth(32);
 #endif  
 
@@ -107,9 +98,6 @@ void DG_DrawFrame()
 			I_Error("Failed to set video mode: %s\n", allegro_error);
 		}
 
-		
-		
-		
 		I_AtExit(back_to_text_mode, true);
 
 		if (!screen) {
@@ -121,10 +109,6 @@ void DG_DrawFrame()
 			I_Error("Failed to create temp bitmap\n");
 		}
 
-		
-		
-		
-		
 		for (y = 0; y < DOOMGENERIC_RESY; y++) {
 			temp_bitmap->line[y] = (unsigned char *) &DG_ScreenBuffer[y * DOOMGENERIC_RESX];
 		}
@@ -137,13 +121,11 @@ void DG_DrawFrame()
 
 #ifdef CMAP256
 
-	
-	
 	if (palette_changed) {
 		int i;
 
 		for (i = 0; i < 256; i++) {
-			
+
 			pal[i].r = colors[i].r >> 2;
 			pal[i].g = colors[i].g >> 2;
 			pal[i].b = colors[i].b >> 2;
@@ -158,23 +140,20 @@ void DG_DrawFrame()
 	blit(temp_bitmap, screen, 0, 0, 0, 0, DOOMGENERIC_RESX, DOOMGENERIC_RESY);
 }
 
-
 void DG_SleepMs(uint32_t ms)
 {
 	rest(ms);
 }
-
 
 uint32_t DG_GetTicksMs()
 {
 	return s_ticks;
 }
 
-
 int DG_GetKey(int *pressed, unsigned char *doomKey)
 {
 	if (s_KeyQueueReadIndex == s_KeyQueueWriteIndex){
-		
+
 		return 0;
 	} else {
 		bool released;
@@ -433,12 +412,10 @@ int DG_GetKey(int *pressed, unsigned char *doomKey)
 	return 0;
 }
 
-
 void DG_SetWindowTitle(const char *title)
 {
 	set_window_title(title);
 }
-
 
 int main(int argc, char **argv)
 {

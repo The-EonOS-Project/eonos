@@ -1,32 +1,10 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __HU_STUFF_H__
 #define __HU_STUFF_H__
 
 #include "d_event.h"
 
-
-
-
-
 #define HU_FONTSTART	'!'	
 #define HU_FONTEND	'_'	
-
 
 #define HU_FONTSIZE	(HU_FONTEND - HU_FONTSTART + 1)	
 
@@ -38,10 +16,6 @@
 #define HU_MSGHEIGHT	1	
 
 #define HU_MSGTIMEOUT	(4*TICRATE)
-
-
-
-
 
 void HU_Init(void);
 void HU_Start(void);

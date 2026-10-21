@@ -1,21 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 
 #include "i_system.h"
@@ -33,14 +15,8 @@
 
 #include "doomstat.h"
 
-
 void G_PlayerReborn (int player);
 void P_SpawnMapThing (mapthing_t*	mthing);
-
-
-
-
-
 
 int test;
 
@@ -66,20 +42,14 @@ P_SetMobjState
 	mobj->sprite = st->sprite;
 	mobj->frame = st->frame;
 
-	
-	
 	if (st->action.acp1)		
 	    st->action.acp1(mobj);	
-	
+
 	state = st->nextstate;
     } while (!mobj->tics);
-				
+
     return true;
 }
-
-
-
-
 
 void P_ExplodeMissile (mobj_t* mo)
 {
@@ -98,10 +68,6 @@ void P_ExplodeMissile (mobj_t* mo)
 	S_StartSound (mo, mo->info->deathsound);
 }
 
-
-
-
-
 #define STOPSPEED		0x1000
 #define FRICTION		0xe800
 
@@ -112,12 +78,12 @@ void P_XYMovement (mobj_t* mo)
     player_t*	player;
     fixed_t	xmove;
     fixed_t	ymove;
-			
+
     if (!mo->momx && !mo->momy)
     {
 	if (mo->flags & MF_SKULLFLY)
 	{
-	    
+
 	    mo->flags &= ~MF_SKULLFLY;
 	    mo->momx = mo->momy = mo->momz = 0;
 
@@ -125,9 +91,9 @@ void P_XYMovement (mobj_t* mo)
 	}
 	return;
     }
-	
+
     player = mo->player;
-		
+
     if (mo->momx > MAXMOVE)
 	mo->momx = MAXMOVE;
     else if (mo->momx < -MAXMOVE)
@@ -137,10 +103,10 @@ void P_XYMovement (mobj_t* mo)
 	mo->momy = MAXMOVE;
     else if (mo->momy < -MAXMOVE)
 	mo->momy = -MAXMOVE;
-		
+
     xmove = mo->momx;
     ymove = mo->momy;
-	
+
     do
     {
 	if (xmove > MAXMOVE/2 || ymove > MAXMOVE/2)
@@ -156,24 +122,22 @@ void P_XYMovement (mobj_t* mo)
 	    ptryy = mo->y + ymove;
 	    xmove = ymove = 0;
 	}
-		
+
 	if (!P_TryMove (mo, ptryx, ptryy))
 	{
-	    
+
 	    if (mo->player)
 	    {	
 		P_SlideMove (mo);
 	    }
 	    else if (mo->flags & MF_MISSILE)
 	    {
-		
+
 		if (ceilingline &&
 		    ceilingline->backsector &&
 		    ceilingline->backsector->ceilingpic == skyflatnum)
 		{
-		    
-		    
-		    
+
 		    P_RemoveMobj (mo);
 		    return;
 		}
@@ -183,25 +147,23 @@ void P_XYMovement (mobj_t* mo)
 		mo->momx = mo->momy = 0;
 	}
     } while (xmove || ymove);
-    
-    
+
     if (player && player->cheats & CF_NOMOMENTUM)
     {
-	
+
 	mo->momx = mo->momy = 0;
 	return;
     }
 
     if (mo->flags & (MF_MISSILE | MF_SKULLFLY) )
 	return; 	
-		
+
     if (mo->z > mo->floorz)
 	return;		
 
     if (mo->flags & MF_CORPSE)
     {
-	
-	
+
 	if (mo->momx > FRACUNIT/4
 	    || mo->momx < -FRACUNIT/4
 	    || mo->momy > FRACUNIT/4
@@ -220,10 +182,10 @@ void P_XYMovement (mobj_t* mo)
 	    || (player->cmd.forwardmove== 0
 		&& player->cmd.sidemove == 0 ) ) )
     {
-	
+
 	if ( player&&(unsigned)((player->mo->state - states)- S_PLAY_RUN1) < 4)
 	    P_SetMobjState (player->mo, S_PLAY);
-	
+
 	mo->momx = 0;
 	mo->momy = 0;
     }
@@ -234,15 +196,11 @@ void P_XYMovement (mobj_t* mo)
     }
 }
 
-
-
-
 void P_ZMovement (mobj_t* mo)
 {
     fixed_t	dist;
     fixed_t	delta;
-    
-    
+
     if (mo->player && mo->z < mo->floorz)
     {
 	mo->player->viewheight -= mo->floorz-mo->z;
@@ -250,20 +208,19 @@ void P_ZMovement (mobj_t* mo)
 	mo->player->deltaviewheight
 	    = (VIEWHEIGHT - mo->player->viewheight)>>3;
     }
-    
-    
+
     mo->z += mo->momz;
-	
+
     if ( mo->flags & MF_FLOAT
 	 && mo->target)
     {
-	
+
 	if ( !(mo->flags & MF_SKULLFLY)
 	     && !(mo->flags & MF_INFLOAT) )
 	{
 	    dist = P_AproxDistance (mo->x - mo->target->x,
 				    mo->y - mo->target->y);
-	    
+
 	    delta =(mo->target->z + (mo->height>>1)) - mo->z;
 
 	    if (delta<0 && dist < -(delta*3) )
@@ -271,67 +228,32 @@ void P_ZMovement (mobj_t* mo)
 	    else if (delta>0 && dist < (delta*3) )
 		mo->z += FLOATSPEED;			
 	}
-	
+
     }
-    
-    
+
     if (mo->z <= mo->floorz)
     {
-	
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-	
 	int correct_lost_soul_bounce = gameversion >= exe_ultimate;
 
 	if (correct_lost_soul_bounce && mo->flags & MF_SKULLFLY)
 	{
-	    
+
 	    mo->momz = -mo->momz;
 	}
-	
+
 	if (mo->momz < 0)
 	{
 	    if (mo->player
 		&& mo->momz < -GRAVITY*8)	
 	    {
-		
-		
-		
-		
+
 		mo->player->deltaviewheight = mo->momz>>3;
 		S_StartSound (mo, sfx_oof);
 	    }
 	    mo->momz = 0;
 	}
 	mo->z = mo->floorz;
-
-
-	
-	
-	
-	
-	
 
         if (!correct_lost_soul_bounce && mo->flags & MF_SKULLFLY)
             mo->momz = -mo->momz;
@@ -350,10 +272,10 @@ void P_ZMovement (mobj_t* mo)
 	else
 	    mo->momz -= GRAVITY;
     }
-	
+
     if (mo->z + mo->height > mo->ceilingz)
     {
-	
+
 	if (mo->momz > 0)
 	    mo->momz = 0;
 	{
@@ -364,7 +286,7 @@ void P_ZMovement (mobj_t* mo)
 	{	
 	    mo->momz = -mo->momz;
 	}
-	
+
 	if ( (mo->flags & MF_MISSILE)
 	     && !(mo->flags & MF_NOCLIP) )
 	{
@@ -373,11 +295,6 @@ void P_ZMovement (mobj_t* mo)
 	}
     }
 } 
-
-
-
-
-
 
 void
 P_NightmareRespawn (mobj_t* mobj)
@@ -388,39 +305,32 @@ P_NightmareRespawn (mobj_t* mobj)
     subsector_t*	ss; 
     mobj_t*		mo;
     mapthing_t*		mthing;
-		
+
     x = mobj->spawnpoint.x << FRACBITS; 
     y = mobj->spawnpoint.y << FRACBITS; 
 
-    
     if (!P_CheckPosition (mobj, x, y) ) 
 	return;	
 
-    
-    
     mo = P_SpawnMobj (mobj->x,
 		      mobj->y,
 		      mobj->subsector->sector->floorheight , MT_TFOG); 
-    
+
     S_StartSound (mo, sfx_telept);
 
-    
     ss = R_PointInSubsector (x,y); 
 
     mo = P_SpawnMobj (x, y, ss->sector->floorheight , MT_TFOG); 
 
     S_StartSound (mo, sfx_telept);
 
-    
     mthing = &mobj->spawnpoint;
-	
-    
+
     if (mobj->info->flags & MF_SPAWNCEILING)
 	z = ONCEILINGZ;
     else
 	z = ONFLOORZ;
 
-    
     mo = P_SpawnMobj (x,y,z, mobj->type);
     mo->spawnpoint = mobj->spawnpoint;	
     mo->angle = ANG45 * (mthing->angle/45);
@@ -429,25 +339,19 @@ P_NightmareRespawn (mobj_t* mobj)
 	mo->flags |= MF_AMBUSH;
 
     mo->reactiontime = 18;
-	
-    
+
     P_RemoveMobj (mobj);
 }
 
-
-
-
-
 void P_MobjThinker (mobj_t* mobj)
 {
-    
+
     if (mobj->momx
 	|| mobj->momy
 	|| (mobj->flags&MF_SKULLFLY) )
     {
 	P_XYMovement (mobj);
 
-	
 	if (mobj->thinker.function.acv == (actionf_v) (-1))
 	    return;		
     }
@@ -455,27 +359,22 @@ void P_MobjThinker (mobj_t* mobj)
 	 || mobj->momz )
     {
 	P_ZMovement (mobj);
-	
-	
+
 	if (mobj->thinker.function.acv == (actionf_v) (-1))
 	    return;		
     }
 
-    
-    
-    
     if (mobj->tics != -1)
     {
 	mobj->tics--;
-		
-	
+
 	if (!mobj->tics)
 	    if (!P_SetMobjState (mobj, mobj->state->nextstate) )
 		return;		
     }
     else
     {
-	
+
 	if (! (mobj->flags & MF_COUNTKILL) )
 	    return;
 
@@ -498,10 +397,6 @@ void P_MobjThinker (mobj_t* mobj)
 
 }
 
-
-
-
-
 mobj_t*
 P_SpawnMobj
 ( fixed_t	x,
@@ -512,11 +407,11 @@ P_SpawnMobj
     mobj_t*	mobj;
     state_t*	st;
     mobjinfo_t*	info;
-	
+
     mobj = Z_Malloc (sizeof(*mobj), PU_LEVEL, NULL);
     memset (mobj, 0, sizeof (*mobj));
     info = &mobjinfo[type];
-	
+
     mobj->type = type;
     mobj->info = info;
     mobj->x = x;
@@ -528,10 +423,9 @@ P_SpawnMobj
 
     if (gameskill != sk_nightmare)
 	mobj->reactiontime = info->reactiontime;
-    
+
     mobj->lastlook = P_Random () % MAXPLAYERS;
-    
-    
+
     st = &states[info->spawnstate];
 
     mobj->state = st;
@@ -539,9 +433,8 @@ P_SpawnMobj
     mobj->sprite = st->sprite;
     mobj->frame = st->frame;
 
-    
     P_SetThingPosition (mobj);
-	
+
     mobj->floorz = mobj->subsector->sector->floorheight;
     mobj->ceilingz = mobj->subsector->sector->ceilingheight;
 
@@ -553,21 +446,16 @@ P_SpawnMobj
 	mobj->z = z;
 
     mobj->thinker.function.acp1 = (actionf_p1)P_MobjThinker;
-	
+
     P_AddThinker (&mobj->thinker);
 
     return mobj;
 }
 
-
-
-
-
 mapthing_t	itemrespawnque[ITEMQUESIZE];
 int		itemrespawntime[ITEMQUESIZE];
 int		iquehead;
 int		iquetail;
-
 
 void P_RemoveMobj (mobj_t* mobj)
 {
@@ -580,69 +468,53 @@ void P_RemoveMobj (mobj_t* mobj)
 	itemrespawntime[iquehead] = leveltime;
 	iquehead = (iquehead+1)&(ITEMQUESIZE-1);
 
-	
 	if (iquehead == iquetail)
 	    iquetail = (iquetail+1)&(ITEMQUESIZE-1);
     }
-	
-    
+
     P_UnsetThingPosition (mobj);
-    
-    
+
     S_StopSound (mobj);
-    
-    
+
     P_RemoveThinker ((thinker_t*)mobj);
 }
-
-
-
-
-
-
 
 void P_RespawnSpecials (void)
 {
     fixed_t		x;
     fixed_t		y;
     fixed_t		z;
-    
+
     subsector_t*	ss; 
     mobj_t*		mo;
     mapthing_t*		mthing;
-    
+
     int			i;
 
-    
     if (deathmatch != 2)
 	return;	
 
-    
     if (iquehead == iquetail)
 	return;		
 
-    
     if (leveltime - itemrespawntime[iquetail] < 30*TICRATE)
 	return;			
 
     mthing = &itemrespawnque[iquetail];
-	
+
     x = mthing->x << FRACBITS; 
     y = mthing->y << FRACBITS; 
-	  
-    
+
     ss = R_PointInSubsector (x,y); 
     mo = P_SpawnMobj (x, y, ss->sector->floorheight , MT_IFOG); 
     S_StartSound (mo, sfx_itmbk);
 
-    
     for (i=0 ; i< NUMMOBJTYPES ; i++)
     {
 	if (mthing->type == mobjinfo[i].doomednum)
 	    break;
     }
-    
-    
+
     if (mobjinfo[i].flags & MF_SPAWNCEILING)
 	z = ONCEILINGZ;
     else
@@ -652,18 +524,8 @@ void P_RespawnSpecials (void)
     mo->spawnpoint = *mthing;	
     mo->angle = ANG45 * (mthing->angle/45);
 
-    
     iquetail = (iquetail+1)&(ITEMQUESIZE-1);
 }
-
-
-
-
-
-
-
-
-
 
 void P_SpawnPlayer (mapthing_t* mthing)
 {
@@ -681,10 +543,9 @@ void P_SpawnPlayer (mapthing_t* mthing)
         return;
     }
 
-    
     if (!playeringame[mthing->type-1])
 	return;					
-		
+
     p = &players[mthing->type-1];
 
     if (p->playerstate == PST_REBORN)
@@ -695,10 +556,9 @@ void P_SpawnPlayer (mapthing_t* mthing)
     z		= ONFLOORZ;
     mobj	= P_SpawnMobj (x,y,z, MT_PLAYER);
 
-    
     if (mthing->type > 1)		
 	mobj->flags |= (mthing->type-1)<<MF_TRANSSHIFT;
-		
+
     mobj->angle	= ANG45 * (mthing->angle/45);
     mobj->player = p;
     mobj->health = p->health;
@@ -713,28 +573,20 @@ void P_SpawnPlayer (mapthing_t* mthing)
     p->fixedcolormap = 0;
     p->viewheight = VIEWHEIGHT;
 
-    
     P_SetupPsprites (p);
-    
-    
+
     if (deathmatch)
 	for (i=0 ; i<NUMCARDS ; i++)
 	    p->cards[i] = true;
-			
+
     if (mthing->type-1 == consoleplayer)
     {
-	
+
 	ST_Start ();
-	
+
 	HU_Start ();		
     }
 }
-
-
-
-
-
-
 
 void P_SpawnMapThing (mapthing_t* mthing)
 {
@@ -744,8 +596,7 @@ void P_SpawnMapThing (mapthing_t* mthing)
     fixed_t		x;
     fixed_t		y;
     fixed_t		z;
-		
-    
+
     if (mthing->type == 11)
     {
 	if (deathmatch_p < &deathmatchstarts[10])
@@ -758,16 +609,13 @@ void P_SpawnMapThing (mapthing_t* mthing)
 
     if (mthing->type <= 0)
     {
-        
-        
 
         return;
     }
-	
-    
+
     if (mthing->type <= 4)
     {
-	
+
 	playerstarts[mthing->type-1] = *mthing;
 	if (!deathmatch)
 	    P_SpawnPlayer (mthing);
@@ -775,10 +623,9 @@ void P_SpawnMapThing (mapthing_t* mthing)
 	return;
     }
 
-    
     if (!netgame && (mthing->options & 16) )
 	return;
-		
+
     if (gameskill == sk_baby)
 	bit = 1;
     else if (gameskill == sk_nightmare)
@@ -788,30 +635,26 @@ void P_SpawnMapThing (mapthing_t* mthing)
 
     if (!(mthing->options & bit) )
 	return;
-	
-    
+
     for (i=0 ; i< NUMMOBJTYPES ; i++)
 	if (mthing->type == mobjinfo[i].doomednum)
 	    break;
-	
+
     if (i==NUMMOBJTYPES)
 	I_Error ("P_SpawnMapThing: Unknown type %i at (%i, %i)",
 		 mthing->type,
 		 mthing->x, mthing->y);
-		
-    
+
     if (deathmatch && mobjinfo[i].flags & MF_NOTDMATCH)
 	return;
-		
-    
+
     if (nomonsters
 	&& ( i == MT_SKULL
 	     || (mobjinfo[i].flags & MF_COUNTKILL)) )
     {
 	return;
     }
-    
-    
+
     x = mthing->x << FRACBITS;
     y = mthing->y << FRACBITS;
 
@@ -819,7 +662,7 @@ void P_SpawnMapThing (mapthing_t* mthing)
 	z = ONCEILINGZ;
     else
 	z = ONFLOORZ;
-    
+
     mobj = P_SpawnMobj (x,y,z, i);
     mobj->spawnpoint = *mthing;
 
@@ -829,21 +672,11 @@ void P_SpawnMapThing (mapthing_t* mthing)
 	totalkills++;
     if (mobj->flags & MF_COUNTITEM)
 	totalitems++;
-		
+
     mobj->angle = ANG45 * (mthing->angle/45);
     if (mthing->options & MTF_AMBUSH)
 	mobj->flags |= MF_AMBUSH;
 }
-
-
-
-
-
-
-
-
-
-
 
 extern fixed_t attackrange;
 
@@ -854,7 +687,7 @@ P_SpawnPuff
   fixed_t	z )
 {
     mobj_t*	th;
-	
+
     z += ((P_Random()-P_Random())<<10);
 
     th = P_SpawnMobj (x,y,z, MT_PUFF);
@@ -863,16 +696,10 @@ P_SpawnPuff
 
     if (th->tics < 1)
 	th->tics = 1;
-	
-    
+
     if (attackrange == MELEERANGE)
 	P_SetMobjState (th, S_PUFF3);
 }
-
-
-
-
-
 
 void
 P_SpawnBlood
@@ -882,7 +709,7 @@ P_SpawnBlood
   int		damage )
 {
     mobj_t*	th;
-	
+
     z += ((P_Random()-P_Random())<<10);
     th = P_SpawnMobj (x,y,z, MT_BLOOD);
     th->momz = FRACUNIT*2;
@@ -890,28 +717,19 @@ P_SpawnBlood
 
     if (th->tics < 1)
 	th->tics = 1;
-		
+
     if (damage <= 12 && damage >= 9)
 	P_SetMobjState (th,S_BLOOD2);
     else if (damage < 9)
 	P_SetMobjState (th,S_BLOOD3);
 }
 
-
-
-
-
-
-
-
 void P_CheckMissileSpawn (mobj_t* th)
 {
     th->tics -= P_Random()&3;
     if (th->tics < 1)
 	th->tics = 1;
-    
-    
-    
+
     th->x += (th->momx>>1);
     th->y += (th->momy>>1);
     th->z += (th->momz>>1);
@@ -919,12 +737,6 @@ void P_CheckMissileSpawn (mobj_t* th)
     if (!P_TryMove (th, th->x, th->y))
 	P_ExplodeMissile (th);
 }
-
-
-
-
-
-
 
 mobj_t *P_SubstNullMobj(mobj_t *mobj)
 {
@@ -943,9 +755,6 @@ mobj_t *P_SubstNullMobj(mobj_t *mobj)
     return mobj;
 }
 
-
-
-
 mobj_t*
 P_SpawnMissile
 ( mobj_t*	source,
@@ -959,14 +768,13 @@ P_SpawnMissile
     th = P_SpawnMobj (source->x,
 		      source->y,
 		      source->z + 4*8*FRACUNIT, type);
-    
+
     if (th->info->seesound)
 	S_StartSound (th, th->info->seesound);
 
     th->target = source;	
     an = R_PointToAngle2 (source->x, source->y, dest->x, dest->y);
 
-    
     if (dest->flags & MF_SHADOW)
 	an += (P_Random()-P_Random())<<20;	
 
@@ -974,7 +782,7 @@ P_SpawnMissile
     an >>= ANGLETOFINESHIFT;
     th->momx = FixedMul (th->info->speed, finecosine[an]);
     th->momy = FixedMul (th->info->speed, finesine[an]);
-	
+
     dist = P_AproxDistance (dest->x - source->x, dest->y - source->y);
     dist = dist / th->info->speed;
 
@@ -983,14 +791,9 @@ P_SpawnMissile
 
     th->momz = (dest->z - source->z) / dist;
     P_CheckMissileSpawn (th);
-	
+
     return th;
 }
-
-
-
-
-
 
 void
 P_SpawnPlayerMissile
@@ -999,16 +802,15 @@ P_SpawnPlayerMissile
 {
     mobj_t*	th;
     angle_t	an;
-    
+
     fixed_t	x;
     fixed_t	y;
     fixed_t	z;
     fixed_t	slope;
-    
-    
+
     an = source->angle;
     slope = P_AimLineAttack (source, an, 16*64*FRACUNIT);
-    
+
     if (!linetarget)
     {
 	an += 1<<26;
@@ -1026,11 +828,11 @@ P_SpawnPlayerMissile
 	    slope = 0;
 	}
     }
-		
+
     x = source->x;
     y = source->y;
     z = source->z + 4*8*FRACUNIT;
-	
+
     th = P_SpawnMobj (x,y,z, type);
 
     if (th->info->seesound)

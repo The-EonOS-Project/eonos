@@ -1,11 +1,7 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_AARCH64) && defined(__APPLE__)
 .section	__TEXT,__const
-
 
 .align	7	
 _vpaes_consts:
@@ -25,9 +21,6 @@ Lk_sr:
 .quad	0x0F060D040B020900, 0x070E050C030A0108
 .quad	0x0B0E0104070A0D00, 0x0306090C0F020508
 
-
-
-
 Lk_inv:	
 .quad	0x0E05060F0D080180, 0x040703090A0B0C02
 .quad	0x01040A060F0B0780, 0x030D0E0C02050809
@@ -43,9 +36,6 @@ Lk_sb1:
 Lk_sb2:	
 .quad	0x69EB88400AE12900, 0xC2A163C8AB82234A
 .quad	0xE27A93C60B712400, 0x5EB7E955BC982FCD
-
-
-
 
 Lk_dksd:	
 .quad	0xFEB91A5DA3E44700, 0x0740E3A45A1DBEF9
@@ -77,12 +67,6 @@ Lk_deskew:
 
 .text
 
-
-
-
-
-
-
 .align	4
 _vpaes_encrypt_preheat:
 	adrp	x10, Lk_inv@PAGE
@@ -93,35 +77,18 @@ _vpaes_encrypt_preheat:
 	ld1	{v24.2d,v25.2d,v26.2d,v27.2d}, [x10]		
 	ret
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .align	4
 _vpaes_encrypt_core:
 	mov	x9, x2
 	ldr	w8, [x2,#240]			
 	adrp	x11, Lk_mc_forward@PAGE+16
 	add	x11, x11, Lk_mc_forward@PAGEOFF+16
-						
+
 	ld1	{v16.2d}, [x9], #16		
 	and	v1.16b, v7.16b, v17.16b		
 	ushr	v0.16b, v7.16b, #4		
 	tbl	v1.16b, {v20.16b}, v1.16b	
-						
+
 	tbl	v2.16b, {v21.16b}, v0.16b	
 	eor	v0.16b, v1.16b, v16.16b		
 	eor	v0.16b, v0.16b, v2.16b		
@@ -129,7 +96,7 @@ _vpaes_encrypt_core:
 
 .align	4
 Lenc_loop:
-	
+
 	add	x10, x11, #0x40
 	tbl	v4.16b, {v25.16b}, v2.16b		
 	ld1	{v1.2d}, [x11], #16		
@@ -150,7 +117,7 @@ Lenc_loop:
 	sub	w8, w8, #1			
 
 Lenc_entry:
-	
+
 	and	v1.16b, v0.16b, v17.16b		
 	ushr	v0.16b, v0.16b, #4		
 	tbl	v5.16b, {v19.16b}, v1.16b	
@@ -166,10 +133,8 @@ Lenc_entry:
 	ld1	{v16.2d}, [x9],#16		
 	cbnz	w8, Lenc_loop
 
-	
 	add	x10, x11, #0x80
-						
-						
+
 	tbl	v4.16b, {v22.16b}, v2.16b		
 	ld1	{v1.2d}, [x10]			
 	tbl	v0.16b, {v23.16b}, v3.16b		
@@ -178,15 +143,13 @@ Lenc_entry:
 	tbl	v0.16b, {v0.16b}, v1.16b	
 	ret
 
-
-
 .align	4
 _vpaes_encrypt_2x:
 	mov	x9, x2
 	ldr	w8, [x2,#240]			
 	adrp	x11, Lk_mc_forward@PAGE+16
 	add	x11, x11, Lk_mc_forward@PAGEOFF+16
-						
+
 	ld1	{v16.2d}, [x9], #16		
 	and	v1.16b,  v14.16b,  v17.16b	
 	ushr	v0.16b,  v14.16b,  #4		
@@ -194,7 +157,7 @@ _vpaes_encrypt_2x:
 	ushr	v8.16b,  v15.16b,  #4
 	tbl	v1.16b,  {v20.16b}, v1.16b	
 	tbl	v9.16b,  {v20.16b}, v9.16b
-						
+
 	tbl	v2.16b,  {v21.16b}, v0.16b	
 	tbl	v10.16b, {v21.16b}, v8.16b
 	eor	v0.16b,  v1.16b,   v16.16b	
@@ -205,7 +168,7 @@ _vpaes_encrypt_2x:
 
 .align	4
 Lenc_2x_loop:
-	
+
 	add	x10, x11, #0x40
 	tbl	v4.16b,  {v25.16b}, v2.16b	
 	tbl	v12.16b, {v25.16b}, v10.16b
@@ -239,7 +202,7 @@ Lenc_2x_loop:
 	sub	w8, w8, #1			
 
 Lenc_2x_entry:
-	
+
 	and	v1.16b,  v0.16b, v17.16b	
 	ushr	v0.16b,  v0.16b, #4		
 	and	v9.16b,  v8.16b, v17.16b
@@ -267,10 +230,8 @@ Lenc_2x_entry:
 	ld1	{v16.2d}, [x9],#16		
 	cbnz	w8, Lenc_2x_loop
 
-	
 	add	x10, x11, #0x80
-						
-						
+
 	tbl	v4.16b,  {v22.16b}, v2.16b	
 	tbl	v12.16b, {v22.16b}, v10.16b
 	ld1	{v1.2d}, [x10]			
@@ -283,12 +244,6 @@ Lenc_2x_entry:
 	tbl	v0.16b,  {v0.16b},v1.16b	
 	tbl	v1.16b,  {v8.16b},v1.16b
 	ret
-
-
-
-
-
-
 
 .align	4
 _vpaes_key_preheat:
@@ -310,8 +265,6 @@ _vpaes_key_preheat:
 	ld1	{v9.2d}, [x11]			
 	ret
 
-
-
 .align	4
 _vpaes_schedule_core:
 	AARCH64_SIGN_LINK_REGISTER
@@ -322,7 +275,6 @@ _vpaes_schedule_core:
 
 	ld1	{v0.16b}, [x0],#16		
 
-	
 	mov	v3.16b, v0.16b			
 	bl	_vpaes_schedule_transform
 	mov	v7.16b, v0.16b			
@@ -332,21 +284,11 @@ _vpaes_schedule_core:
 
 	add	x8, x8, x10
 
-	
 	st1	{v0.2d}, [x2]			
 
 	cmp	w1, #192			
 	b.hi	Lschedule_256
 	b.eq	Lschedule_192
-	
-
-
-
-
-
-
-
-
 
 Lschedule_128:
 	mov	x0, #10			
@@ -357,21 +299,6 @@ Loop_schedule_128:
 	cbz	x0, Lschedule_mangle_last
 	bl	_vpaes_schedule_mangle		
 	b	Loop_schedule_128
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 .align	4
 Lschedule_192:
@@ -396,16 +323,6 @@ Loop_schedule_192:
 	bl	_vpaes_schedule_192_smear
 	b	Loop_schedule_192
 
-
-
-
-
-
-
-
-
-
-
 .align	4
 Lschedule_256:
 	ld1	{v0.16b}, [x0]		
@@ -417,12 +334,10 @@ Loop_schedule_256:
 	bl	_vpaes_schedule_mangle		
 	mov	v6.16b, v0.16b			
 
-	
 	bl	_vpaes_schedule_round
 	cbz	x0, Lschedule_mangle_last
 	bl	_vpaes_schedule_mangle
 
-	
 	dup	v0.4s, v0.s[3]			
 	movi	v4.16b, #0
 	mov	v5.16b, v7.16b			
@@ -432,25 +347,14 @@ Loop_schedule_256:
 
 	b	Loop_schedule_256
 
-
-
-
-
-
-
-
-
-
-
 .align	4
 Lschedule_mangle_last:
-	
+
 	adrp	x11, Lk_deskew@PAGE	
 	add	x11, x11, Lk_deskew@PAGEOFF
 
 	cbnz	w3, Lschedule_mangle_last_dec
 
-	
 	ld1	{v1.2d}, [x8]			
 	adrp	x11, Lk_opt@PAGE		
 	add	x11, x11, Lk_opt@PAGEOFF
@@ -464,7 +368,6 @@ Lschedule_mangle_last_dec:
 	bl	_vpaes_schedule_transform	
 	st1	{v0.2d}, [x2]			
 
-	
 	eor	v0.16b, v0.16b, v0.16b		
 	eor	v1.16b, v1.16b, v1.16b		
 	eor	v2.16b, v2.16b, v2.16b		
@@ -476,22 +379,6 @@ Lschedule_mangle_last_dec:
 	ldp	x29, x30, [sp],#16
 	AARCH64_VALIDATE_LINK_REGISTER
 	ret
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 .align	4
 _vpaes_schedule_192_smear:
@@ -506,48 +393,23 @@ _vpaes_schedule_192_smear:
 	ins	v6.d[0], v1.d[0]	
 	ret
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .align	4
 _vpaes_schedule_round:
-	
+
 	movi	v4.16b, #0			
 	ext	v1.16b, v8.16b, v4.16b, #15	
 	ext	v8.16b, v8.16b, v8.16b, #15	
 	eor	v7.16b, v7.16b, v1.16b		
 
-	
 	dup	v0.4s, v0.s[3]			
 	ext	v0.16b, v0.16b, v0.16b, #1	
 
-	
-
-	
 _vpaes_schedule_low_round:
-	
+
 	ext	v1.16b, v4.16b, v7.16b, #12	
 	eor	v7.16b, v7.16b, v1.16b		
 	ext	v4.16b, v4.16b, v7.16b, #8	
 
-	
 	and	v1.16b, v0.16b, v17.16b		
 	ushr	v0.16b, v0.16b, #4		
 	eor	v7.16b, v7.16b, v4.16b		
@@ -566,64 +428,25 @@ _vpaes_schedule_low_round:
 	tbl	v1.16b, {v22.16b}, v2.16b	
 	eor	v1.16b, v1.16b, v4.16b		
 
-	
 	eor	v0.16b, v1.16b, v7.16b		
 	eor	v7.16b, v1.16b, v7.16b		
 	ret
-
-
-
-
-
-
-
-
-
-
-
 
 .align	4
 _vpaes_schedule_transform:
 	and	v1.16b, v0.16b, v17.16b		
 	ushr	v0.16b, v0.16b, #4		
-						
+
 	tbl	v2.16b, {v20.16b}, v1.16b	
-						
+
 	tbl	v0.16b, {v21.16b}, v0.16b	
 	eor	v0.16b, v0.16b, v2.16b		
 	ret
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .align	4
 _vpaes_schedule_mangle:
 	mov	v4.16b, v0.16b			
-						
 
-	
 	eor	v4.16b, v0.16b, v16.16b		
 	add	x2, x2, #16			
 	tbl	v4.16b, {v4.16b}, v9.16b	
@@ -639,7 +462,6 @@ Lschedule_mangle_both:
 	and	x8, x8, #~(1<<6)		
 	st1	{v3.2d}, [x2]			
 	ret
-
 
 .globl	_vpaes_set_encrypt_key
 .private_extern	_vpaes_set_encrypt_key
@@ -680,12 +502,9 @@ _vpaes_ctr32_encrypt_blocks:
 
 	cbz	x2, Lctr32_done
 
-	
-	
 	mov	x17, x2
 	mov	x2,  x3
 
-	
 	ldr	w6, [x4, #12]
 	ld1	{v7.16b}, [x4]
 
@@ -694,22 +513,19 @@ _vpaes_ctr32_encrypt_blocks:
 	rev	w6, w6		
 	b.eq	Lctr32_prep_loop
 
-	
-	
 	ld1	{v6.16b}, [x0], #16	
 	bl	_vpaes_encrypt_core
 	eor	v0.16b, v0.16b, v6.16b	
 	st1	{v0.16b}, [x1], #16
 	subs	x17, x17, #1
-	
+
 	add	w6, w6, #1
 	rev	w7, w6
 	mov	v7.s[3], w7
 	b.ls	Lctr32_done
 
 Lctr32_prep_loop:
-	
-	
+
 	mov	v15.16b, v7.16b
 	mov	v14.16b, v7.16b
 	add	w6, w6, #1
@@ -723,7 +539,7 @@ Lctr32_loop:
 	eor	v1.16b, v1.16b, v7.16b		
 	st1	{v0.16b,v1.16b}, [x1], #32
 	subs	x17, x17, #2
-	
+
 	add	w7, w6, #1
 	add	w6, w6, #2
 	rev	w7, w7

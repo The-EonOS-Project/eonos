@@ -1,22 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 #include <ctype.h>
 
@@ -35,16 +16,7 @@
 #include "st_lib.h"
 #include "r_local.h"
 
-
-
 extern boolean		automapactive; 
-
-
-
-
-
-
-
 
 patch_t*		sttminus;
 
@@ -52,8 +24,6 @@ void STlib_init(void)
 {
     sttminus = (patch_t *) W_CacheLumpName(DEH_String("STTMINUS"), PU_STATIC);
 }
-
-
 
 void
 STlib_initNum
@@ -74,12 +44,6 @@ STlib_initNum
     n->p	= pl;
 }
 
-
-
-
-
-
-
 void
 STlib_drawNum
 ( st_number_t*	n,
@@ -88,11 +52,11 @@ STlib_drawNum
 
     int		numdigits = n->width;
     int		num = *n->num;
-    
+
     int		w = SHORT(n->p[0]->width);
     int		h = SHORT(n->p[0]->height);
     int		x = n->x;
-    
+
     int		neg;
 
     n->oldnum = *n->num;
@@ -105,11 +69,10 @@ STlib_drawNum
 	    num = -9;
 	else if (numdigits == 3 && num < -99)
 	    num = -99;
-	
+
 	num = -num;
     }
 
-    
     x = n->x - numdigits*w;
 
     if (n->y - ST_Y < 0)
@@ -117,17 +80,14 @@ STlib_drawNum
 
     V_CopyRect(x, n->y - ST_Y, st_backing_screen, w*numdigits, h, x, n->y);
 
-    
     if (num == 1994)
 	return;
 
     x = n->x;
 
-    
     if (!num)
 	V_DrawPatch(x - w, n->y, n->p[ 0 ]);
 
-    
     while (num && numdigits--)
     {
 	x -= w;
@@ -135,12 +95,9 @@ STlib_drawNum
 	num /= 10;
     }
 
-    
     if (neg)
 	V_DrawPatch(x - 8, n->y, sttminus);
 }
-
-
 
 void
 STlib_updateNum
@@ -149,8 +106,6 @@ STlib_updateNum
 {
     if (*n->on) STlib_drawNum(n, refresh);
 }
-
-
 
 void
 STlib_initPercent
@@ -166,9 +121,6 @@ STlib_initPercent
     p->p = percent;
 }
 
-
-
-
 void
 STlib_updatePercent
 ( st_percent_t*		per,
@@ -176,11 +128,9 @@ STlib_updatePercent
 {
     if (refresh && *per->n.on)
 	V_DrawPatch(per->n.x, per->n.y, per->p);
-    
+
     STlib_updateNum(&per->n, refresh);
 }
-
-
 
 void
 STlib_initMultIcon
@@ -198,8 +148,6 @@ STlib_initMultIcon
     i->on	= on;
     i->p	= il;
 }
-
-
 
 void
 STlib_updateMultIcon
@@ -230,8 +178,6 @@ STlib_updateMultIcon
     }
 }
 
-
-
 void
 STlib_initBinIcon
 ( st_binicon_t*		b,
@@ -248,8 +194,6 @@ STlib_initBinIcon
     b->on	= on;
     b->p	= i;
 }
-
-
 
 void
 STlib_updateBinIcon

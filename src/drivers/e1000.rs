@@ -1,8 +1,3 @@
-
-
-
-
-
 use alloc::vec::Vec;
 use core::ptr::{read_volatile, write_volatile};
 use core::sync::atomic::{fence, Ordering};
@@ -285,7 +280,6 @@ pub fn transmit(frame: &[u8]) -> Result<(), Error> {
     device.transmitted += 1;
     Ok(())
 }
-
 
 pub fn receive(output: &mut [u8]) -> Result<Option<usize>, Error> {
     let mut guard = DEVICE.lock();

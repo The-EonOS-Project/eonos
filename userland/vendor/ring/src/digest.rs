@@ -1,23 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use self::{
     dynstate::DynState,
     sha2::{SHA256_BLOCK_LEN, SHA512_BLOCK_LEN},
@@ -39,12 +19,8 @@ mod sha2;
 pub(crate) struct BlockContext {
     state: DynState,
 
-    
-    
-    
     completed_bytes: u64,
 
-    
     pub algorithm: &'static Algorithm,
 }
 
@@ -57,25 +33,15 @@ impl BlockContext {
         }
     }
 
-    
-    
     pub(crate) fn update<'i>(&mut self, input: &'i [u8], cpu_features: cpu::Features) -> &'i [u8] {
         let (completed_bytes, leftover) = self.block_data_order(input, cpu_features);
-        
-        
-        
-        
+
         self.completed_bytes = self
             .completed_bytes
             .saturating_add(polyfill::u64_from_usize(completed_bytes));
         leftover
     }
 
-    
-    
-    
-    
-    
     pub(crate) fn try_finish(
         mut self,
         block: &mut [u8; MAX_BLOCK_LEN],
@@ -86,7 +52,7 @@ impl BlockContext {
             .completed_bytes
             .checked_add(polyfill::u64_from_usize(num_pending))
             .ok_or_else(|| {
-                
+
                 InputTooLongError::new(self.completed_bytes)
             })
             .and_then(BitLength::from_byte_len)
@@ -100,7 +66,7 @@ impl BlockContext {
                 *separator = 0x80;
                 padding
             }
-            
+
             unreachable => {
                 return Err(FinishError::pending_not_a_partial_block(
                     unreachable.as_deref(),
@@ -117,8 +83,7 @@ impl BlockContext {
                 padding.fill(0);
                 let (completed_bytes, leftover) = self.block_data_order(block, cpu_features);
                 debug_assert_eq!((completed_bytes, leftover.len()), (block_len, 0));
-                
-                
+
                 &mut block[..]
             }
         };
@@ -166,35 +131,17 @@ impl FinishError {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #[derive(Clone)]
 pub struct Context {
     block: BlockContext,
-    
+
     pending: [u8; MAX_BLOCK_LEN],
 
-    
     num_pending: usize,
 }
 
 impl Context {
-    
+
     pub fn new(algorithm: &'static Algorithm) -> Self {
         Self {
             block: BlockContext::new(algorithm),
@@ -211,7 +158,6 @@ impl Context {
         }
     }
 
-    
     pub fn update(&mut self, data: &[u8]) {
         let cpu_features = cpu::features();
 
@@ -224,7 +170,7 @@ impl Context {
             let buffer_to_fill = match buffer.get_mut(self.num_pending..) {
                 Some(buffer_to_fill) => buffer_to_fill,
                 None => {
-                    
+
                     unreachable!();
                 }
             };
@@ -240,7 +186,7 @@ impl Context {
                 }
                 None => {
                     self.num_pending += data.len();
-                    
+
                     debug_assert!(self.num_pending < block_len);
                     return;
                 }
@@ -253,10 +199,6 @@ impl Context {
         debug_assert!(self.num_pending < block_len);
     }
 
-    
-    
-    
-    
     pub fn finish(self) -> Digest {
         let cpu = cpu::features();
         self.try_finish(cpu)
@@ -273,19 +215,17 @@ impl Context {
             .map_err(|err| match err {
                 FinishError::InputTooLong(i) => i,
                 FinishError::PendingNotAPartialBlock(_) => {
-                    
+
                     unreachable!()
                 }
             })
     }
 
-    
     #[inline(always)]
     pub fn algorithm(&self) -> &'static Algorithm {
         self.block.algorithm
     }
 }
-
 
 pub fn digest(algorithm: &'static Algorithm, data: &[u8]) -> Digest {
     let cpu = cpu::features();
@@ -293,9 +233,6 @@ pub fn digest(algorithm: &'static Algorithm, data: &[u8]) -> Digest {
         .map_err(error::erase::<InputTooLongError>)
         .unwrap()
 }
-
-
-
 
 #[derive(Clone, Copy)]
 pub struct Digest {
@@ -314,7 +251,6 @@ impl Digest {
         ctx.try_finish(cpu)
     }
 
-    
     #[inline(always)]
     pub fn algorithm(&self) -> &'static Algorithm {
         self.algorithm
@@ -335,15 +271,11 @@ impl core::fmt::Debug for Digest {
     }
 }
 
-
 pub struct Algorithm {
     output_len: OutputLen,
     chaining_len: usize,
     block_len: BlockLen,
 
-    
-    
-    
     block_data_order: for<'d> fn(
         state: &mut DynState,
         data: &'d [u8],
@@ -375,30 +307,19 @@ impl Eq for Algorithm {}
 derive_debug_via_id!(Algorithm);
 
 impl Algorithm {
-    
+
     pub fn block_len(&self) -> usize {
         self.block_len.into()
     }
 
-    
-    
-    
-    
-    
-    
-    
     pub fn chaining_len(&self) -> usize {
         self.chaining_len
     }
 
-    
     pub fn output_len(&self) -> usize {
         self.output_len.into()
     }
 }
-
-
-
 
 pub static SHA1_FOR_LEGACY_USE_ONLY: Algorithm = Algorithm {
     output_len: sha1::OUTPUT_LEN,
@@ -418,9 +339,6 @@ pub static SHA1_FOR_LEGACY_USE_ONLY: Algorithm = Algorithm {
     id: AlgorithmID::SHA1,
 };
 
-
-
-
 pub static SHA256: Algorithm = Algorithm {
     output_len: OutputLen::_256,
     chaining_len: SHA256_OUTPUT_LEN,
@@ -438,9 +356,6 @@ pub static SHA256: Algorithm = Algorithm {
     ]),
     id: AlgorithmID::SHA256,
 };
-
-
-
 
 pub static SHA384: Algorithm = Algorithm {
     output_len: OutputLen::_384,
@@ -460,9 +375,6 @@ pub static SHA384: Algorithm = Algorithm {
     id: AlgorithmID::SHA384,
 };
 
-
-
-
 pub static SHA512: Algorithm = Algorithm {
     output_len: OutputLen::_512,
     chaining_len: SHA512_OUTPUT_LEN,
@@ -480,13 +392,6 @@ pub static SHA512: Algorithm = Algorithm {
     ]),
     id: AlgorithmID::SHA512,
 };
-
-
-
-
-
-
-
 
 pub static SHA512_256: Algorithm = Algorithm {
     output_len: OutputLen::_256,
@@ -509,15 +414,9 @@ pub static SHA512_256: Algorithm = Algorithm {
 #[derive(Clone, Copy)]
 struct Output([u8; MAX_OUTPUT_LEN]);
 
-
-
 pub const MAX_BLOCK_LEN: usize = BlockLen::MAX.into();
 
-
-
 pub const MAX_OUTPUT_LEN: usize = OutputLen::MAX.into();
-
-
 
 pub const MAX_CHAINING_LEN: usize = MAX_OUTPUT_LEN;
 
@@ -538,18 +437,13 @@ where
     output
 }
 
-
 pub const SHA1_OUTPUT_LEN: usize = sha1::OUTPUT_LEN.into();
-
 
 pub const SHA256_OUTPUT_LEN: usize = OutputLen::_256.into();
 
-
 pub const SHA384_OUTPUT_LEN: usize = OutputLen::_384.into();
 
-
 pub const SHA512_OUTPUT_LEN: usize = OutputLen::_512.into();
-
 
 pub const SHA512_256_OUTPUT_LEN: usize = OutputLen::_256.into();
 
@@ -655,9 +549,7 @@ mod tests {
         }
 
         fn nearly_full_context(alg: &'static digest::Algorithm) -> digest::Context {
-            
-            
-            
+
             let max_bytes = 1u64 << (64 - 3);
             let max_blocks = max_bytes / u64_from_usize(alg.block_len());
             let completed_bytes = (max_blocks - 1) * u64_from_usize(alg.block_len());

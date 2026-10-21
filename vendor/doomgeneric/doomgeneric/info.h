@@ -1,26 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __INFO__
 #define __INFO__
-
 
 #include "d_think.h"
 
@@ -1140,13 +1119,12 @@ typedef enum
     NUMSTATES
 } statenum_t;
 
-
 typedef struct
 {
     spritenum_t sprite;
     int frame;
     int tics;
-    
+
     actionf_t action;
     statenum_t nextstate;
     int misc1;

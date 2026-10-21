@@ -1,117 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use self::{derive_error::DeriveError, verify_error::VerifyError};
 use crate::{
     bb, cpu, digest,
@@ -120,48 +6,16 @@ use crate::{
 };
 use core::num::NonZeroU32;
 
-
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Algorithm(hmac::Algorithm);
 
-
 pub static PBKDF2_HMAC_SHA1: Algorithm = Algorithm(hmac::HMAC_SHA1_FOR_LEGACY_USE_ONLY);
-
 
 pub static PBKDF2_HMAC_SHA256: Algorithm = Algorithm(hmac::HMAC_SHA256);
 
-
 pub static PBKDF2_HMAC_SHA384: Algorithm = Algorithm(hmac::HMAC_SHA384);
 
-
 pub static PBKDF2_HMAC_SHA512: Algorithm = Algorithm(hmac::HMAC_SHA512);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 pub fn derive(
     algorithm: Algorithm,
@@ -187,15 +41,9 @@ fn try_derive(
     let digest_alg = algorithm.0.digest_algorithm();
     let output_len = digest_alg.output_len();
 
-    
-    
-    
-    
-
     let secret =
         hmac::Key::try_new(algorithm.0, secret, cpu).map_err(DeriveError::secret_too_long)?;
 
-    
     out.fill(0);
 
     let mut idx: u32 = 0;
@@ -205,8 +53,7 @@ fn try_derive(
         idx = idx.checked_add(1).ok_or_else(|| {
             DeriveError::too_much_output_requested(TooMuchOutputRequestedError::new(out_len))
         })?;
-        
-        
+
         derive_block(&secret, iterations, salt, idx, chunk, cpu)
             .map_err(DeriveError::salt_too_long)?;
     }
@@ -236,9 +83,6 @@ fn derive_block(
         }
         remaining -= 1;
 
-        
-        
-        
         u = secret.sign(u.as_ref(), cpu)?
     }
     Ok(())
@@ -260,21 +104,6 @@ cold_exhaustive_error! {
         previously_derived_empty => PreviouslyDerivedEmpty(usize),
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 pub fn verify(
     algorithm: Algorithm,
@@ -313,8 +142,7 @@ fn try_verify(
 
     for previously_derived_chunk in previously_derived.chunks(output_len) {
         idx = idx.checked_add(1).ok_or_else(|| {
-            
-            
+
             VerifyError::mismatch(())
         })?;
 
@@ -324,7 +152,6 @@ fn try_verify(
         derive_block(&secret, iterations, salt, idx, derived_chunk, cpu)
             .map_err(VerifyError::salt_too_long)?;
 
-        
         #[allow(clippy::bool_to_int_with_if)]
         let current_block_matches =
             if bb::verify_slices_are_equal(derived_chunk, previously_derived_chunk).is_ok() {

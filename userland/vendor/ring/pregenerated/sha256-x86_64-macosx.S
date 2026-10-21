@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86_64) && defined(__APPLE__)
@@ -1718,7 +1715,6 @@ L$rounds_16_xx:
 L$epilogue:
 	ret
 
-
 .section	__DATA,__const
 .p2align	6
 
@@ -1974,7 +1970,6 @@ L$oop_shaext:
 	movdqu	%xmm2,16(%rdi)
 	ret
 
-
 .globl	_sha256_block_data_order_ssse3
 .private_extern _sha256_block_data_order_ssse3
 
@@ -2015,7 +2010,6 @@ L$prologue_ssse3:
 	movl	20(%rdi),%r9d
 	movl	24(%rdi),%r10d
 	movl	28(%rdi),%r11d
-
 
 	jmp	L$loop_ssse3
 .p2align	4
@@ -3088,7 +3082,6 @@ L$ssse3_00_47:
 
 L$epilogue_ssse3:
 	ret
-
 
 .globl	_sha256_block_data_order_avx
 .private_extern _sha256_block_data_order_avx
@@ -4165,6 +4158,5 @@ L$avx_00_47:
 
 L$epilogue_avx:
 	ret
-
 
 #endif

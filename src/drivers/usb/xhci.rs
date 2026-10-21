@@ -1,30 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![allow(dead_code)]
 
 use core::sync::atomic::{AtomicBool, Ordering};
@@ -34,12 +7,6 @@ use crate::{log_debug, log_fail, log_ok};
 use crate::{pmm, vmm};
 
 use super::pci::UsbController;
-
-
-
-
-
-
 
 #[repr(C)]
 struct CapRegs {
@@ -55,9 +22,6 @@ struct CapRegs {
     hcc_params2: u32,
 }
 
-
-
-
 #[repr(C)]
 struct OpRegs {
     usbcmd: u32,
@@ -71,20 +35,14 @@ struct OpRegs {
     dcbaap_lo: u32,
     dcbaap_hi: u32,
     config: u32,
-    
-    
-    
+
 }
 
 const USBCMD_RUN: u32 = 1 << 0;
 const USBCMD_HCRST: u32 = 1 << 1;
 
-
 const USBSTS_HCH: u32 = 1 << 0; 
 const USBSTS_CNR: u32 = 1 << 11; 
-
-
-
 
 #[repr(C)]
 struct PortRegs {
@@ -103,13 +61,8 @@ const PORTSC_WRC: u32 = 1 << 19;
 const PORTSC_PRC: u32 = 1 << 21; 
 const PORTSC_CSC: u32 = 1 << 17; 
 
-
-
 const PORTSC_WRITE_ONE_MASK: u32 =
     PORTSC_PED | (1 << 17) | (1 << 18) | (1 << 19) | (1 << 20) | (1 << 21) | (1 << 22) | (1 << 23);
-
-
-
 
 #[repr(C)]
 struct RuntimeRegs {
@@ -126,11 +79,6 @@ struct RuntimeRegs {
 }
 
 const ERDP_BUSY: u32 = 1 << 3; 
-
-
-
-
-
 
 #[repr(C)]
 #[derive(Clone, Copy)]
@@ -154,8 +102,6 @@ fn make_type(t: u32) -> u32 {
 
 const TRB_TYPE_NORMAL: u32 = 1;
 
-
-
 const KEYBOARD_REPORT_QUEUE_DEPTH: usize = 8;
 const TRB_TYPE_SETUP_STAGE: u32 = 2;
 const TRB_TYPE_DATA_STAGE: u32 = 3;
@@ -172,25 +118,13 @@ const TRB_TYPE_COMMAND_COMPLETION: u32 = 33;
 const COMPLETION_SUCCESS: u32 = 1;
 const COMPLETION_SHORT_PACKET: u32 = 13;
 
-
-
-
-
-
-
 const RING_SIZE: usize = 16;
-
-
-
 
 struct Ring {
     trbs: *mut Trb,
     phys: u64,
     enqueue: usize,
-    
-    
-    
-    
+
     cycle: u32,
 }
 
@@ -199,9 +133,6 @@ impl Ring {
         Self::allocate(true)
     }
 
-    
-    
-    
     fn new_event() -> Option<Ring> {
         Self::allocate(false)
     }
@@ -210,10 +141,7 @@ impl Ring {
         let phys = pmm::alloc_frame_zeroed()?;
         let trbs = pmm::phys_to_virt(phys) as *mut Trb;
         if with_link {
-            
-            
-            
-            
+
             unsafe {
                 let link = trbs.add(RING_SIZE - 1);
                 core::ptr::write_volatile(
@@ -234,19 +162,13 @@ impl Ring {
         })
     }
 
-    
-    
-    
-    
-    
     unsafe fn push(&mut self, mut trb: Trb) -> u64 {
         trb.control = (trb.control & !TRB_CYCLE) | self.cycle;
         let slot_phys = self.phys + (self.enqueue as u64) * 16;
         core::ptr::write_volatile(self.trbs.add(self.enqueue), trb);
         self.enqueue += 1;
         if self.enqueue == RING_SIZE - 1 {
-            
-            
+
             let link = self.trbs.add(RING_SIZE - 1);
             let mut existing = core::ptr::read_volatile(link);
             existing.control = (existing.control & !TRB_CYCLE) | self.cycle;
@@ -258,21 +180,9 @@ impl Ring {
     }
 }
 
-
-
-
-
-
-
-
 fn input_context_entry(ctx_phys: u64, context_size: usize, index: usize) -> *mut u32 {
     unsafe { pmm::phys_to_virt(ctx_phys).add(index * context_size) as *mut u32 }
 }
-
-
-
-
-
 
 fn setup_packet(request_type: u8, request: u8, value: u16, index: u16, length: u16) -> u64 {
     (request_type as u64)
@@ -332,7 +242,7 @@ fn find_boot_hid(config: &[u8], speed: u32) -> alloc::vec::Vec<BootHidEndpoint> 
         match kind {
             4 if len >= 9 => {
                 interface_count += 1;
-                
+
                 let protocol = config[offset + 7];
                 hid_iface = if config[offset + 3] == 0
                     && config[offset + 5] == 3
@@ -355,18 +265,11 @@ fn find_boot_hid(config: &[u8], speed: u32) -> alloc::vec::Vec<BootHidEndpoint> 
                 } else {
                     3
                 };
-                
-                
-                
-                
-                
+
                 let report_len = if protocol == HID_PROTOCOL_KEYBOARD {
                     8
                 } else {
-                    
-                    
-                    
-                    
+
                     packet.min(64) as u8
                 };
                 if address & 0x80 != 0 && attributes & 0x03 == 0x03 {
@@ -376,8 +279,7 @@ fn find_boot_hid(config: &[u8], speed: u32) -> alloc::vec::Vec<BootHidEndpoint> 
                     && address & 0x0f != 0
                     && attributes & 0x03 == 0x03
                     && packet >= min_packet as u16
-                    
-                    
+
                     && (speed != 2 || packet <= 8)
                 {
                     let endpoint = address & 0x0f;
@@ -415,24 +317,16 @@ fn find_boot_hid(config: &[u8], speed: u32) -> alloc::vec::Vec<BootHidEndpoint> 
 fn xhci_interval(speed: u32, descriptor_interval: u8) -> Option<u32> {
     let interval = descriptor_interval.max(1) as u32;
     match speed {
-        
-        
-        
-        
+
         1 | 2 => {
             let microframes = interval.checked_mul(8)?;
             Some(31 - microframes.leading_zeros())
         }
-        
-        
+
         3 | 4 if interval <= 16 => Some(interval - 1),
         _ => None,
     }
 }
-
-
-
-
 
 struct Controller {
     cap: *const CapRegs,
@@ -444,17 +338,14 @@ struct Controller {
 
     cmd_ring: Ring,
     event_ring: Ring,
-    
-    
-    
+
     event_cycle: u32,
     event_dequeue: usize,
 
     dcbaa_phys: u64,
-    
+
     input_ctx_phys: u64,
-    
-    
+
     output_ctx_phys: u64,
     ep0_ring_phys: u64,
 
@@ -481,23 +372,12 @@ struct UsbHidDevice {
     mouse_report_logged: bool,
 }
 
-
-
-
 unsafe impl Send for Controller {}
 
 static CONTROLLERS: IrqMutex<alloc::vec::Vec<Controller>> = IrqMutex::new(alloc::vec::Vec::new());
 static POLLING: AtomicBool = AtomicBool::new(false);
 
-
-
 static CAPS_LOCK: AtomicBool = AtomicBool::new(false);
-
-
-
-
-
-
 
 fn reg_read32(ptr: *const u32) -> u32 {
     unsafe { core::ptr::read_volatile(ptr) }
@@ -509,8 +389,6 @@ fn reg_write64_split(lo: *mut u32, hi: *mut u32, val: u64) {
     reg_write32(lo, val as u32);
     reg_write32(hi, (val >> 32) as u32);
 }
-
-
 
 fn spin_until(timeout_ms: u64, mut cond: impl FnMut() -> bool) -> bool {
     let deadline = crate::pit::uptime_ms().saturating_add(timeout_ms);
@@ -525,46 +403,17 @@ fn spin_until(timeout_ms: u64, mut cond: impl FnMut() -> bool) -> bool {
     }
 }
 
-
-
-
-
-
-
-
-
-
 const XECP_ID_USB_LEGACY: u32 = 1;
 const XECP_ID_SUPPORTED_PROTOCOL: u32 = 2;
 const USBLEGSUP_BIOS_OWNED: u32 = 1 << 16;
 const USBLEGSUP_OS_OWNED: u32 = 1 << 24;
 
-
-
-
 const USBLEGCTLSTS_DISABLE_SMI: u32 = (0x7 << 1) | (0xFF << 5) | (0x7 << 17);
 const USBLEGCTLSTS_SMI_EVENTS: u32 = 0x7 << 29;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 fn request_bios_handoff(base: *mut u8, xecp_offset_dwords: usize) {
     let mut offset = xecp_offset_dwords;
-    
-    
-    
-    
-    
+
     for _ in 0..256 {
         if offset == 0 {
             return; 
@@ -602,10 +451,6 @@ fn request_bios_handoff(base: *mut u8, xecp_offset_dwords: usize) {
         offset += next as usize;
     }
 }
-
-
-
-
 
 fn port_uses_usb3(c: &Controller, port: u8) -> bool {
     let hcc_params1 = unsafe { core::ptr::read_volatile(core::ptr::addr_of!((*c.cap).hcc_params1)) };
@@ -658,11 +503,6 @@ pub fn probe(controller: &UsbController) {
         return;
     }
 
-    
-    
-    
-    
-    
     let base = vmm::map_mmio(controller.mmio_base, 0x10000);
     let cap = base as *const CapRegs;
 
@@ -735,9 +575,7 @@ pub fn probe(controller: &UsbController) {
         );
         return;
     };
-    
-    
-    
+
     unsafe {
         let erst = pmm::phys_to_virt(erst_phys) as *mut u64;
         core::ptr::write_volatile(erst, event_ring.phys);
@@ -745,9 +583,6 @@ pub fn probe(controller: &UsbController) {
         core::ptr::write_volatile((erst as *mut u32).add(3), 0);
     }
 
-    
-    
-    
     reg_write64_split(
         unsafe { core::ptr::addr_of_mut!((*op).dcbaap_lo) },
         unsafe { core::ptr::addr_of_mut!((*op).dcbaap_hi) },
@@ -769,15 +604,12 @@ pub fn probe(controller: &UsbController) {
         unsafe { core::ptr::addr_of_mut!((*rt).ir0_erdp_hi) },
         event_ring.phys,
     );
-    
-    
+
     reg_write32(
         unsafe { core::ptr::addr_of_mut!((*op).config) },
         max_slots as u32,
     );
 
-    
-    
     reg_write32(unsafe { core::ptr::addr_of_mut!((*op).usbcmd) }, USBCMD_RUN);
     if !spin_until(1_000, || {
         reg_read32(unsafe { core::ptr::addr_of!((*op).usbsts) }) & USBSTS_HCH == 0
@@ -858,8 +690,7 @@ pub fn probe(controller: &UsbController) {
                 count,
                 port
             );
-            
-            
+
             controller.slot_id = 0;
             *EP0_RING_STATE.lock() = (0, 1);
         }
@@ -868,8 +699,7 @@ pub fn probe(controller: &UsbController) {
             || controller.ep0_ring_phys != 0
         {
             if !cleanup_failed_setup(&mut controller) {
-                
-                
+
                 break;
             }
         }
@@ -901,8 +731,7 @@ pub fn probe(controller: &UsbController) {
 }
 
 fn reset_controller(op: *mut OpRegs) -> bool {
-    
-    
+
     if reg_read32(unsafe { core::ptr::addr_of!((*op).usbcmd) }) & USBCMD_RUN != 0 {
         reg_write32(unsafe { core::ptr::addr_of_mut!((*op).usbcmd) }, 0);
         if !spin_until(1_000, || {
@@ -929,9 +758,6 @@ fn port_regs(c: &Controller, port: u8) -> *mut PortRegs {
     let op_base = c.op as *mut u8;
     unsafe { op_base.add(0x400 + (port as usize - 1) * 0x10) as *mut PortRegs }
 }
-
-
-
 
 fn cleanup_failed_setup(c: &mut Controller) -> bool {
     if c.slot_id != 0 {
@@ -988,12 +814,6 @@ fn cleanup_failed_setup(c: &mut Controller) -> bool {
     true
 }
 
-
-
-
-
-
-
 fn do_command(c: &mut Controller, trb: Trb) -> Option<(u32, u8)> {
     let slot_phys = unsafe { c.cmd_ring.push(trb) };
     reg_write32(c.db, 0); 
@@ -1007,8 +827,7 @@ fn do_command(c: &mut Controller, trb: Trb) -> Option<(u32, u8)> {
                 result = Some((completion_code, slot_id));
                 return true;
             }
-            
-            
+
             dispatch_hid_event(c, ev);
         }
         false
@@ -1019,11 +838,6 @@ fn do_command(c: &mut Controller, trb: Trb) -> Option<(u32, u8)> {
     result
 }
 
-
-
-
-
-
 fn poll_event_ring(c: &mut Controller) -> Option<Trb> {
     let trb = unsafe { core::ptr::read_volatile(c.event_ring.trbs.add(c.event_dequeue)) };
     if trb.control & TRB_CYCLE != c.event_cycle {
@@ -1032,9 +846,7 @@ fn poll_event_ring(c: &mut Controller) -> Option<Trb> {
 
     c.event_dequeue += 1;
     if c.event_dequeue == RING_SIZE {
-        
-        
-        
+
         c.event_dequeue = 0;
         c.event_cycle ^= 1;
     }
@@ -1048,11 +860,6 @@ fn poll_event_ring(c: &mut Controller) -> Option<Trb> {
 
     Some(trb)
 }
-
-
-
-
-
 
 fn try_setup_hid(c: &mut Controller, port: u8) -> bool {
     macro_rules! fail_setup {
@@ -1075,8 +882,6 @@ fn try_setup_hid(c: &mut Controller, port: u8) -> bool {
         return false; 
     }
 
-    
-    
     let Some(output_ctx_phys) = pmm::alloc_frame_zeroed() else {
         log_fail!(
             "USB",
@@ -1098,9 +903,6 @@ fn try_setup_hid(c: &mut Controller, port: u8) -> bool {
     };
     c.ep0_ring_phys = ep0_ring.phys;
 
-    
-    
-    
     let initial_speed = (portsc & PORTSC_SPEED_MASK) >> 10;
     let warm_reset = port_uses_usb3(c, port) || initial_speed == 4;
     let (reset_bit, reset_change) = if warm_reset {
@@ -1108,9 +910,7 @@ fn try_setup_hid(c: &mut Controller, port: u8) -> bool {
     } else {
         (PORTSC_PR, PORTSC_PRC)
     };
-    
-    
-    
+
     reg_write32(
         unsafe { core::ptr::addr_of_mut!((*regs).portsc) },
         (portsc & !PORTSC_WRITE_ONE_MASK) | reset_change,
@@ -1132,7 +932,7 @@ fn try_setup_hid(c: &mut Controller, port: u8) -> bool {
         );
         return false;
     }
-    
+
     let after_reset = reg_read32(unsafe { core::ptr::addr_of!((*regs).portsc) });
     reg_write32(
         unsafe { core::ptr::addr_of_mut!((*regs).portsc) },
@@ -1170,7 +970,6 @@ fn try_setup_hid(c: &mut Controller, port: u8) -> bool {
         speed
     );
 
-    
     let Some((code, slot_id)) = do_command(
         c,
         Trb {
@@ -1207,27 +1006,18 @@ fn try_setup_hid(c: &mut Controller, port: u8) -> bool {
         );
     }
 
-    
-    
-    
-    
     unsafe {
         let control_ctx = input_context_entry(c.input_ctx_phys, c.context_size, 0);
         *control_ctx.add(1) = 0b11; 
 
         let slot_ctx = input_context_entry(c.input_ctx_phys, c.context_size, 1);
-        
-        
+
         *slot_ctx = (speed << 20) | (1 << 27);
-        
+
         *slot_ctx.add(1) = (port as u32) << 16;
 
         let ep0_ctx = input_context_entry(c.input_ctx_phys, c.context_size, 2);
-        
-        
-        
-        
-        
+
         let max_packet0: u32 = match speed {
             1 | 2 => 8, 
             3 => 64,    
@@ -1239,8 +1029,6 @@ fn try_setup_hid(c: &mut Controller, port: u8) -> bool {
         *ep0_ctx.add(3) = (c.ep0_ring_phys >> 32) as u32;
     }
 
-    
-    
     unsafe {
         let dcbaa = pmm::phys_to_virt(c.dcbaa_phys) as *mut u64;
         core::ptr::write_volatile(dcbaa.add(c.slot_id as usize), c.output_ctx_phys);
@@ -1267,9 +1055,6 @@ fn try_setup_hid(c: &mut Controller, port: u8) -> bool {
         return false;
     }
 
-    
-    
-    
     if speed == 1 || speed == 2 {
         let Some(device_desc_phys) = pmm::alloc_frame_zeroed() else {
             fail_setup!("allocating device descriptor buffer");
@@ -1331,7 +1116,6 @@ fn try_setup_hid(c: &mut Controller, port: u8) -> bool {
         }
     }
 
-    
     let Some(desc_phys) = pmm::alloc_frame_zeroed() else {
         fail_setup!("allocating configuration descriptor buffer");
     };
@@ -1376,8 +1160,6 @@ fn try_setup_hid(c: &mut Controller, port: u8) -> bool {
         fail_setup!("finding HID boot interface");
     }
 
-    
-    
     if !control_transfer_out(
         c,
         setup_packet(
@@ -1397,9 +1179,6 @@ fn try_setup_hid(c: &mut Controller, port: u8) -> bool {
             fail_setup!("decoding HID polling interval");
         };
 
-        
-        
-        
         if endpoint.protocol == HID_PROTOCOL_KEYBOARD
             && !control_transfer_out(
                 c,
@@ -1414,8 +1193,7 @@ fn try_setup_hid(c: &mut Controller, port: u8) -> bool {
         {
             fail_setup!("HID keyboard SET_PROTOCOL request");
         }
-        
-        
+
         let _ = control_transfer_out(
             c,
             setup_packet(
@@ -1430,8 +1208,7 @@ fn try_setup_hid(c: &mut Controller, port: u8) -> bool {
         let Some(ring) = Ring::new() else {
             fail_setup!("allocating HID transfer ring");
         };
-        
-        
+
         c.devices.push(UsbHidDevice {
             port,
             slot_id: c.slot_id,
@@ -1452,8 +1229,7 @@ fn try_setup_hid(c: &mut Controller, port: u8) -> bool {
         unsafe {
             let control_ctx = input_context_entry(c.input_ctx_phys, c.context_size, 0);
             core::ptr::write_bytes(control_ctx, 0, c.context_size / 4);
-            
-            
+
             *control_ctx.add(1) = (1 << 0) | (1 << endpoint.dci);
             let slot_ctx = input_context_entry(c.input_ctx_phys, c.context_size, 1);
             let output_slot_ctx = pmm::phys_to_virt(c.output_ctx_phys) as *const u32;
@@ -1471,10 +1247,7 @@ fn try_setup_hid(c: &mut Controller, port: u8) -> bool {
             *ep_ctx = interval << 16;
             *ep_ctx.add(2) = (c.devices.last().unwrap().ring.phys | 1) as u32;
             *ep_ctx.add(3) = (c.devices.last().unwrap().ring.phys >> 32) as u32;
-            
-            
-            
-            
+
             *ep_ctx.add(4) = endpoint.report_len as u32 | ((endpoint.max_packet as u32) << 16);
         }
 
@@ -1525,8 +1298,6 @@ fn try_setup_hid(c: &mut Controller, port: u8) -> bool {
         );
     }
 
-    
-    
     c.devices[first_device_index].output_ctx_phys = c.output_ctx_phys;
     c.devices[first_device_index].ep0_ring_phys = c.ep0_ring_phys;
     c.output_ctx_phys = 0;
@@ -1535,22 +1306,11 @@ fn try_setup_hid(c: &mut Controller, port: u8) -> bool {
     true
 }
 
-
-
-
-
-
 static EP0_RING_STATE: IrqMutex<(usize, u32)> = IrqMutex::new((0, 1));
-
-
-
 
 fn control_transfer_in(c: &mut Controller, setup: u64, buf_phys: u64, len: u32) -> bool {
     control_transfer(c, setup, Some((buf_phys, len)), true)
 }
-
-
-
 
 fn control_transfer_out(c: &mut Controller, setup: u64) -> bool {
     control_transfer(c, setup, None, false)
@@ -1594,9 +1354,6 @@ fn control_transfer(
         unsafe { ring.push(data_trb) };
     }
 
-    
-    
-    
     let status_is_in = !data_is_in || data.is_none();
     let status_trb = Trb {
         parameter: 0,
@@ -1609,7 +1366,6 @@ fn control_transfer(
 
     *EP0_RING_STATE.lock() = (ring.enqueue, ring.cycle);
 
-    
     reg_write32(unsafe { c.db.add(c.slot_id as usize) }, 1);
 
     let mut saw_completion = false;
@@ -1653,7 +1409,6 @@ fn control_transfer(
     responded && saw_completion
 }
 
-
 fn queue_report_read(keyboard: &mut UsbHidDevice) {
     let buffer = keyboard.report_enqueue;
     let trb = Trb {
@@ -1677,15 +1432,6 @@ fn submit_report_read(db: *mut u32, keyboard: &mut UsbHidDevice) {
     ring_endpoint_doorbell(db, keyboard);
 }
 
-
-
-
-
-
-
-
-
-
 pub fn poll() {
     if POLLING
         .compare_exchange(false, true, Ordering::Acquire, Ordering::Relaxed)
@@ -1693,8 +1439,7 @@ pub fn poll() {
     {
         return;
     }
-    
-    
+
     let mut controllers = {
         let mut registry = CONTROLLERS.lock();
         core::mem::take(&mut *registry)
@@ -1709,8 +1454,6 @@ pub fn poll() {
     POLLING.store(false, Ordering::Release);
 }
 
-
-
 pub fn service() {
     loop {
         poll();
@@ -1719,9 +1462,7 @@ pub fn service() {
 }
 
 fn poll_root_ports(c: &mut Controller) {
-    
-    
-    
+
     if c.slot_id != 0 || c.output_ctx_phys != 0 || c.ep0_ring_phys != 0 {
         return;
     }
@@ -1746,8 +1487,7 @@ fn poll_root_ports(c: &mut Controller) {
                     }
                 }
                 if !disable_hid_slot(c, slot_id, port) {
-                    
-                    
+
                     c.devices.extend(disconnected);
                     continue;
                 }
@@ -1777,8 +1517,7 @@ fn poll_root_ports(c: &mut Controller) {
             c.slot_id = 0;
             *EP0_RING_STATE.lock() = (0, 1);
         } else if !cleanup_failed_setup(c) {
-            
-            
+
             return;
         }
     }
@@ -1849,9 +1588,7 @@ fn dispatch_hid_event(c: &mut Controller, ev: Trb) {
         handle_hid_report(keyboard, keyboard.report_dequeue, actual_len);
     } else {
         if keyboard.protocol == HID_PROTOCOL_KEYBOARD {
-            
-            
-            
+
             for &code in &keyboard.prev_keys {
                 if code != 0 {
                     crate::input::push(code, false, 0);
@@ -1869,15 +1606,9 @@ fn dispatch_hid_event(c: &mut Controller, ev: Trb) {
         }
     }
     keyboard.report_dequeue = (keyboard.report_dequeue + 1) % KEYBOARD_REPORT_QUEUE_DEPTH;
-    
-    
+
     submit_report_read(db, keyboard);
 }
-
-
-
-
-
 
 #[rustfmt::skip]
 const HID_UNSHIFTED: [u8; 0x39] = [
@@ -1907,9 +1638,6 @@ const MOD_RCTRL: u8 = 1 << 4;
 const MOD_RSHIFT: u8 = 1 << 5;
 const MOD_RALT: u8 = 1 << 6;
 const MOD_RGUI: u8 = 1 << 7;
-
-
-
 
 struct RingBuffer {
     buf: [u8; 256],
@@ -2000,9 +1728,6 @@ fn handle_hid_report(keyboard: &mut UsbHidDevice, buffer: usize, actual_len: usi
     CAPS_LOCK.store(caps, Ordering::Relaxed);
     if focused { return; }
 
-    
-    
-    
     for &code in &keys {
         if code == 0 || previous_keys.contains(&code) { continue; }
         match code {
@@ -2021,9 +1746,6 @@ fn handle_hid_report(keyboard: &mut UsbHidDevice, buffer: usize, actual_len: usi
         queue.push(byte);
     }
 }
-
-
-
 
 fn translate_boot_report(
     prev_keys: &mut [u8; 6],
@@ -2072,8 +1794,6 @@ fn translate_boot_report(
     (output, count)
 }
 
-
-
 pub fn self_test() {
     let mut prev = [0; 6];
     let mut caps = false;
@@ -2119,9 +1839,6 @@ pub fn self_test() {
         );
     }
 }
-
-
-
 
 pub fn try_read_byte() -> Option<u8> {
     ASCII_QUEUE.lock().pop()

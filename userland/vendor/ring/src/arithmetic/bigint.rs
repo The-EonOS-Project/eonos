@@ -1,41 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use self::boxed_limbs::BoxedLimbs;
 pub(crate) use self::{
     modulus::{Modulus, OwnedModulus},
@@ -62,9 +24,6 @@ mod private_exponent;
 
 pub trait PublicModulus {}
 
-
-
-
 pub struct Storage<M> {
     limbs: BoxedLimbs<M>,
 }
@@ -75,16 +34,9 @@ impl<M, E> From<Elem<M, E>> for Storage<M> {
     }
 }
 
-
-
-
-
-
 pub struct Elem<M, E = Unencoded> {
     limbs: BoxedLimbs<M>,
 
-    
-    
     encoding: PhantomData<E>,
 }
 
@@ -104,11 +56,6 @@ impl<M, E> Elem<M, E> {
         limb::limbs_are_zero(&self.limbs).leak()
     }
 }
-
-
-
-
-
 
 fn from_montgomery_amm<M>(mut in_out: Storage<M>, m: &Modulus<M>) -> Elem<M, Unencoded> {
     let mut one = [0; MAX_LIMBS];
@@ -148,7 +95,7 @@ impl<M> Elem<M, Unencoded> {
 
     #[inline]
     pub fn fill_be_bytes(&self, out: &mut [u8]) {
-        
+
         limb::big_endian_from_limbs(&self.limbs, out)
     }
 }
@@ -196,15 +143,10 @@ where
     }
 }
 
-
 fn elem_double<M, AF>(r: &mut Elem<M, AF>, m: &Modulus<M>) {
     limb::limbs_double_mod(&mut r.limbs, m.limbs())
         .unwrap_or_else(unwrap_impossible_len_mismatch_error)
 }
-
-
-
-
 
 pub fn elem_reduced_once<A, M>(
     mut r: Storage<M>,
@@ -229,12 +171,9 @@ pub fn elem_reduced<Larger, Smaller>(
     m: &Modulus<Smaller>,
     other_prime_len_bits: BitLength,
 ) -> Elem<Smaller, RInverse> {
-    
-    
-    
+
     assert_eq!(other_prime_len_bits, m.len_bits());
 
-    
     assert_eq!(a.limbs.len(), m.limbs().len() * 2);
 
     let mut tmp = [0; MAX_LIMBS];
@@ -282,17 +221,15 @@ pub fn elem_widen<Larger, Smaller>(
     })
 }
 
-
 pub fn elem_add<M, E>(mut a: Elem<M, E>, b: Elem<M, E>, m: &Modulus<M>) -> Elem<M, E> {
     limb::limbs_add_assign_mod(&mut a.limbs, &b.limbs, m.limbs())
         .unwrap_or_else(unwrap_impossible_len_mismatch_error);
     a
 }
 
-
 pub fn elem_sub<M, E>(mut a: Elem<M, E>, b: &Elem<M, E>, m: &Modulus<M>) -> Elem<M, E> {
     prefixed_extern! {
-        
+
         fn LIMBS_sub_mod(
             r: *mut Limb,
             a: *const Limb,
@@ -311,22 +248,14 @@ pub fn elem_sub<M, E>(mut a: Elem<M, E>, b: &Elem<M, E>, m: &Modulus<M>) -> Elem
     a
 }
 
-
 pub struct One<M, E>(Elem<M, E>);
 
 impl<M> One<M, RR> {
-    
-    
-    
-    
-    
-    
-    
+
     pub(crate) fn newRR(mut out: Storage<M>, m: &Modulus<M>) -> Self {
-        
+
         let w = m.limbs().len();
 
-        
         let r = w * LIMB_BITS;
 
         m.oneR(&mut out.limbs);
@@ -335,16 +264,6 @@ impl<M> One<M, RR> {
             encoding: PhantomData,
         };
 
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         let t = w;
         let z = w.trailing_zeros();
         let d = w >> z;
@@ -355,27 +274,6 @@ impl<M> One<M, RR> {
             elem_double(&mut acc, m);
         }
 
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         const B: u32 = if cfg!(target_pointer_width = "64") {
             6
         } else if cfg!(target_pointer_width = "32") {
@@ -415,38 +313,13 @@ impl<M: PublicModulus, E> One<M, E> {
     }
 }
 
-
-
-
-
-
-
-
-
-
 pub(crate) fn elem_exp_vartime<M>(
     out: Storage<M>,
     base: Elem<M, R>,
     exponent: NonZeroU64,
     m: &Modulus<M>,
 ) -> Elem<M, R> {
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     let exponent = exponent.get();
     let mut acc = base.clone_into(out);
     let mut bit = 1 << (64 - 1 - exponent.leading_zeros());
@@ -469,8 +342,7 @@ pub fn elem_exp_consttime<N, P>(
     p: &Modulus<P>,
     other_prime_len_bits: BitLength,
 ) -> Result<Elem<P, Unencoded>, LimbSliceError> {
-    
-    
+
     elem_exp_consttime_inner::<N, P, { ELEM_EXP_CONSTTIME_MAX_MODULUS_LIMBS * STORAGE_ENTRIES }>(
         out,
         base,
@@ -480,8 +352,6 @@ pub fn elem_exp_consttime<N, P>(
         other_prime_len_bits,
     )
 }
-
-
 
 const ELEM_EXP_CONSTTIME_MAX_MODULUS_LIMBS: usize = 2048 / LIMB_BITS;
 const _LIMBS_PER_CHUNK_DIVIDES_ELEM_EXP_CONSTTIME_MAX_MODULUS_LIMBS: () =
@@ -515,15 +385,12 @@ fn elem_exp_consttime_inner<N, M, const STORAGE_LIMBS: usize>(
     };
     let cpe = m_chunked.len(); 
 
-    
-    
     assert!(STORAGE_LIMBS % (STORAGE_ENTRIES * limbs512::LIMBS_PER_CHUNK) == 0); 
     let mut table = limbs512::AlignedStorage::<STORAGE_LIMBS>::zeroed();
     let mut table = table
         .aligned_chunks_mut(TABLE_ENTRIES, cpe)
         .map_err(LimbSliceError::len_mismatch)?;
 
-    
     let table = table.as_flattened_mut();
 
     fn gather<M>(table: &[Limb], acc: &mut Elem<M, R>, i: Window) {
@@ -563,10 +430,8 @@ fn elem_exp_consttime_inner<N, M, const STORAGE_LIMBS: usize>(
         &mut table[(i * num_limbs)..][..num_limbs]
     }
 
-    
     m.oneR(entry_mut(table, 0, num_limbs));
 
-    
     limbs_mul_mont(
         (
             entry_mut(table, 1, num_limbs),
@@ -659,22 +524,8 @@ fn elem_exp_consttime_inner<N, M, const STORAGE_LIMBS: usize>(
         }
     };
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     const MOD_EXP_CTIME_ALIGN: usize = 64;
-    
+
     const _TABLE_ENTRIES_IS_32: () = assert!(TABLE_ENTRIES == 32);
     const _STORAGE_ENTRIES_HAS_3_EXTRA: () = assert!(STORAGE_ENTRIES == TABLE_ENTRIES + 3);
 
@@ -686,11 +537,9 @@ fn elem_exp_consttime_inner<N, M, const STORAGE_LIMBS: usize>(
     let (mut table, mut state) = table.split_at_mut(TABLE_ENTRIES * cpe);
     assert_eq!((table.as_ptr() as usize) % MOD_EXP_CTIME_ALIGN, 0);
 
-    
     let (mut acc, mut rest) = state.split_at_mut(cpe);
     let (mut base_cached, mut m_cached) = rest.split_at_mut(cpe);
 
-    
     m_cached
         .as_flattened_mut()
         .copy_from_slice(m_original.as_flattened());
@@ -706,7 +555,6 @@ fn elem_exp_consttime_inner<N, M, const STORAGE_LIMBS: usize>(
         }
     };
 
-    
     mul_mont5(
         base_cached.as_mut(),
         base_rinverse,
@@ -718,8 +566,6 @@ fn elem_exp_consttime_inner<N, M, const STORAGE_LIMBS: usize>(
     let base_cached = base_cached.as_ref();
     let mut out = Storage::from(out); 
 
-    
-    
     fn scatter_powers_of_2(
         mut table: AsChunksMut<Limb, 8>,
         mut acc: AsChunksMut<Limb, 8>,
@@ -739,20 +585,14 @@ fn elem_exp_consttime_inner<N, M, const STORAGE_LIMBS: usize>(
         Ok(())
     }
 
-    
-
-    
     m.oneR(acc.as_flattened_mut());
     scatter5(acc.as_ref(), table.as_mut(), 0)?;
 
-    
     acc.as_flattened_mut()
         .copy_from_slice(base_cached.as_flattened());
 
-    
     scatter_powers_of_2(table.as_mut(), acc.as_mut(), m_cached, n0, 1, cpu2)?;
-    
-    
+
     for i in (3..(TABLE_ENTRIES as LeakyWindow)).step_by(2) {
         let power = Window::from(i - 1);
         assert!(power < 32); 
@@ -786,11 +626,9 @@ fn elem_exp_consttime_inner<N, M, const STORAGE_LIMBS: usize>(
         },
     );
 
-    
     out.limbs.copy_from_slice(acc.as_flattened());
     Ok(from_montgomery_amm(out, m))
 }
-
 
 pub fn verify_inverses_consttime<M>(
     a: &Elem<M, R>,
@@ -836,7 +674,6 @@ mod tests {
     use crate::cpu;
     use crate::testutil as test;
 
-    
     struct M {}
 
     impl PublicModulus for M {}
@@ -862,10 +699,6 @@ mod tests {
                 let oneRR = One::newRR(m.alloc_zero(), &m);
                 let oneRRR = One::newRRR(oneRR, &m);
 
-                
-                
-                
-                
                 struct N {}
                 let other_modulus_len_bits = m.len_bits();
                 let base: Elem<N> = {
@@ -896,9 +729,9 @@ mod tests {
                         &m,
                         other_modulus_len_bits,
                     );
-                    
+
                     assert!(actual_result.is_err());
-                    
+
                     elem_exp_consttime_inner::<_, _, { (4096 / LIMB_BITS) * STORAGE_ENTRIES }>(
                         m.alloc_zero(),
                         &base,
@@ -920,10 +753,6 @@ mod tests {
         )
     }
 
-    
-    
-    
-    
     #[test]
     fn test_elem_mul() {
         let cpu_features = cpu::features();

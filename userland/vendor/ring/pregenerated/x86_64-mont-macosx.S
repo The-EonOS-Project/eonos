@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86_64) && defined(__APPLE__)
@@ -28,20 +25,11 @@ _CET_ENDBR
 
 	pushq	%r15
 
-
 	negq	%r9
 	movq	%rsp,%r11
 	leaq	-16(%rsp,%r9,8),%r10
 	negq	%r9
 	andq	$-1024,%r10
-
-
-
-
-
-
-
-
 
 	subq	%r10,%r11
 	andq	$-4096,%r11
@@ -247,7 +235,6 @@ L$copy:
 L$mul_epilogue:
 	ret
 
-
 .globl	_bn_mul4x_mont
 .private_extern _bn_mul4x_mont
 
@@ -269,7 +256,6 @@ _CET_ENDBR
 	pushq	%r14
 
 	pushq	%r15
-
 
 	negq	%r9
 	movq	%rsp,%r11
@@ -680,10 +666,6 @@ L$copy4x:
 L$mul4x_epilogue:
 	ret
 
-
-
-
-
 .globl	_bn_sqr8x_mont
 .private_extern _bn_sqr8x_mont
 
@@ -712,11 +694,6 @@ L$sqr8x_prologue:
 	shll	$3,%r9d
 	shlq	$3+2,%r10
 	negq	%r9
-
-
-
-
-
 
 	leaq	-64(%rsp,%r9,2),%r11
 	movq	%rsp,%rbp
@@ -773,9 +750,6 @@ L$sqr8x_body:
 
 	call	_bn_sqrx8x_internal
 
-
-
-
 	leaq	(%r8,%rcx,1),%rbx
 	movq	%rcx,%r9
 	movq	%rcx,%rdx
@@ -786,9 +760,6 @@ L$sqr8x_body:
 .p2align	5
 L$sqr8x_nox:
 	call	_bn_sqr8x_internal
-
-
-
 
 	leaq	(%rdi,%r9,1),%rbx
 	movq	%r9,%rcx
@@ -871,7 +842,6 @@ L$sqr8x_cond_copy:
 L$sqr8x_epilogue:
 	ret
 
-
 .globl	_bn_mulx4x_mont
 .private_extern _bn_mulx4x_mont
 
@@ -919,17 +889,6 @@ L$mulx4x_page_walk:
 L$mulx4x_page_walk_done:
 
 	leaq	(%rdx,%r9,1),%r10
-
-
-
-
-
-
-
-
-
-
-
 
 	movq	%r9,0(%rsp)
 	shrq	$5,%r9
@@ -1228,7 +1187,6 @@ L$mulx4x_cond_copy:
 
 L$mulx4x_epilogue:
 	ret
-
 
 .byte	77,111,110,116,103,111,109,101,114,121,32,77,117,108,116,105,112,108,105,99,97,116,105,111,110,32,102,111,114,32,120,56,54,95,54,52,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
 .p2align	4

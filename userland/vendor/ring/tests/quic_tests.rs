@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![allow(missing_docs)]
 
 use ring::aead::quic;
@@ -73,15 +59,11 @@ fn test_sample_len(alg: &'static quic::Algorithm) {
     assert_eq!(sample_len, 16); 
     let sample_data = vec![0u8; sample_len + 2];
 
-    
     assert!(key.new_mask(&sample_data[..sample_len]).is_ok());
 
-    
     assert!(key.new_mask(&sample_data[..(sample_len - 1)]).is_err());
 
-    
     assert!(key.new_mask(&sample_data[..(sample_len + 1)]).is_err());
 
-    
     assert!(key.new_mask(&[]).is_err());
 }

@@ -1,38 +1,12 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{Algorithm, LessSafeKey, MAX_KEY_LEN};
 use crate::{cpu, error, hkdf};
-
 
 pub struct UnboundKey {
     inner: LessSafeKey,
 }
 
 impl UnboundKey {
-    
-    
-    
+
     #[inline]
     pub fn new(
         algorithm: &'static Algorithm,
@@ -43,7 +17,6 @@ impl UnboundKey {
         })
     }
 
-    
     #[inline]
     pub fn algorithm(&self) -> &'static Algorithm {
         self.inner.algorithm()

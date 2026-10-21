@@ -1,55 +1,6 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <ring-core/aes.h>
 
 #include "../../internal.h"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #if defined(OPENSSL_64_BIT)
 typedef uint64_t aes_word_t;
@@ -96,85 +47,21 @@ OPENSSL_STATIC_ASSERT(AES_NOHW_BATCH_SIZE * 128 == 8 * 8 * sizeof(aes_word_t),
 OPENSSL_STATIC_ASSERT(AES_NOHW_WORD_SIZE == sizeof(aes_word_t),
                       "AES_NOHW_WORD_SIZE is incorrect");
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #define AES_NOHW_BLOCK_WORDS (16 / sizeof(aes_word_t))
-
-
 
 typedef struct {
   aes_word_t w[8];
 } AES_NOHW_BATCH;
 
-
-
-
 typedef struct {
-  
-  
+
   AES_NOHW_BATCH keys[AES_MAXNR + 1];
 } AES_NOHW_SCHEDULE;
-
-
 
 static inline void aes_nohw_batch_set(AES_NOHW_BATCH *batch,
                                       const aes_word_t in[AES_NOHW_BLOCK_WORDS],
                                       size_t i) {
-  
-  
-  
-  
-  
-  
+
   dev_assert_secret(i < AES_NOHW_BATCH_SIZE);
 #if defined(OPENSSL_64_BIT)
   batch->w[i] = in[0];
@@ -186,8 +73,6 @@ static inline void aes_nohw_batch_set(AES_NOHW_BATCH *batch,
   batch->w[i + 6] = in[3];
 #endif
 }
-
-
 
 static inline void aes_nohw_batch_get(const AES_NOHW_BATCH *batch,
                                       aes_word_t out[AES_NOHW_BLOCK_WORDS],
@@ -204,46 +89,29 @@ static inline void aes_nohw_batch_get(const AES_NOHW_BATCH *batch,
 #endif
 }
 
-
-
 static inline aes_word_t aes_nohw_delta_swap(aes_word_t a, aes_word_t mask,
                                              aes_word_t shift) {
-  
-  
+
   aes_word_t b = (a ^ (a >> shift)) & mask;
   return a ^ b ^ (b << shift);
 }
-
-
-
-
-
-
-
 
 #if defined(OPENSSL_64_BIT)
 static inline uint64_t aes_nohw_compact_word(uint64_t a) {
 #if defined(RING_BIG_ENDIAN)
   a = CRYPTO_bswap8(a);
 #endif
-  
-  
-  
-  
+
   a = aes_nohw_delta_swap(a, UINT64_C(0x00f000f000f000f0), 4);
-  
-  
-  
+
   a = aes_nohw_delta_swap(a, UINT64_C(0x0000ff000000ff00), 8);
-  
-  
-  
+
   a = aes_nohw_delta_swap(a, UINT64_C(0x00000000ffff0000), 16);
   return a;
 }
 
 static inline uint64_t aes_nohw_uncompact_word(uint64_t a) {
-  
+
   a = aes_nohw_delta_swap(a, UINT64_C(0x00000000ffff0000), 16);
   a = aes_nohw_delta_swap(a, UINT64_C(0x0000ff000000ff00), 8);
   a = aes_nohw_delta_swap(a, UINT64_C(0x00f000f000f000f0), 4);
@@ -257,22 +125,15 @@ static inline uint32_t aes_nohw_compact_word(uint32_t a) {
 #if defined(RING_BIG_ENDIAN)
   a = CRYPTO_bswap4(a);
 #endif
-  
-  
-  
-  
-  
+
   a = aes_nohw_delta_swap(a, 0x00cc00cc, 6);
-  
-  
-  
-  
+
   a = aes_nohw_delta_swap(a, 0x0000f0f0, 12);
   return a;
 }
 
 static inline uint32_t aes_nohw_uncompact_word(uint32_t a) {
-  
+
   a = aes_nohw_delta_swap(a, 0x0000f0f0, 12);
   a = aes_nohw_delta_swap(a, 0x00cc00cc, 6);
 #if defined(RING_BIG_ENDIAN)
@@ -306,11 +167,7 @@ static inline void aes_nohw_compact_block(aes_word_t out[AES_NOHW_BLOCK_WORDS],
   uint32_t a1 = aes_nohw_compact_word(out[1]);
   uint32_t a2 = aes_nohw_compact_word(out[2]);
   uint32_t a3 = aes_nohw_compact_word(out[3]);
-  
-  
-  
-  
-  
+
   out[0] = aes_nohw_word_from_bytes(lo(a0), lo(a1), lo(a2), lo(a3));
   out[1] = aes_nohw_word_from_bytes(lo(a0 >> 8), lo(a1 >> 8), lo(a2 >> 8), lo(a3 >> 8));
   out[2] = aes_nohw_word_from_bytes(lo(a0 >> 16), lo(a1 >> 16), lo(a2 >> 16), lo(a3 >> 16));
@@ -334,11 +191,7 @@ static inline void aes_nohw_uncompact_block(
   uint32_t a1 = in[1];
   uint32_t a2 = in[2];
   uint32_t a3 = in[3];
-  
-  
-  
-  
-  
+
   uint32_t b0 = aes_nohw_word_from_bytes(lo(a0), lo(a1), lo(a2), lo(a3));
   uint32_t b1 = aes_nohw_word_from_bytes(lo(a0 >> 8), lo(a1 >> 8), lo(a2 >> 8), lo(a3 >> 8));
   uint32_t b2 =
@@ -356,10 +209,6 @@ static inline void aes_nohw_uncompact_block(
 #endif
 }
 
-
-
-
-
 static inline void aes_nohw_swap_bits(aes_word_t *a, aes_word_t *b,
                                       uint32_t mask, aes_word_t shift) {
 #if defined(OPENSSL_64_BIT)
@@ -367,24 +216,21 @@ static inline void aes_nohw_swap_bits(aes_word_t *a, aes_word_t *b,
 #else
   aes_word_t mask_w = mask;
 #endif
-  
+
   aes_word_t swap = ((*a >> shift) ^ *b) & mask_w;
   *a ^= swap << shift;
   *b ^= swap;
 }
 
-
-
-
 static void aes_nohw_transpose(AES_NOHW_BATCH *batch) {
-  
+
   aes_nohw_swap_bits(&batch->w[0], &batch->w[1], 0x55555555, 1);
   aes_nohw_swap_bits(&batch->w[2], &batch->w[3], 0x55555555, 1);
   aes_nohw_swap_bits(&batch->w[4], &batch->w[5], 0x55555555, 1);
   aes_nohw_swap_bits(&batch->w[6], &batch->w[7], 0x55555555, 1);
 
 #if AES_NOHW_BATCH_SIZE >= 4
-  
+
   aes_nohw_swap_bits(&batch->w[0], &batch->w[2], 0x33333333, 2);
   aes_nohw_swap_bits(&batch->w[1], &batch->w[3], 0x33333333, 2);
   aes_nohw_swap_bits(&batch->w[4], &batch->w[6], 0x33333333, 2);
@@ -392,7 +238,7 @@ static void aes_nohw_transpose(AES_NOHW_BATCH *batch) {
 #endif
 
 #if AES_NOHW_BATCH_SIZE >= 8
-  
+
   aes_nohw_swap_bits(&batch->w[0], &batch->w[4], 0x0f0f0f0f, 4);
   aes_nohw_swap_bits(&batch->w[1], &batch->w[5], 0x0f0f0f0f, 4);
   aes_nohw_swap_bits(&batch->w[2], &batch->w[6], 0x0f0f0f0f, 4);
@@ -400,11 +246,9 @@ static void aes_nohw_transpose(AES_NOHW_BATCH *batch) {
 #endif
 }
 
-
-
 static void aes_nohw_to_batch(AES_NOHW_BATCH *out, const uint8_t *in,
                               size_t num_blocks) {
-  
+
   OPENSSL_memset(out, 0, sizeof(AES_NOHW_BATCH));
   debug_assert_nonsecret(num_blocks <= AES_NOHW_BATCH_SIZE);
   for (size_t i = 0; i < num_blocks; i++) {
@@ -415,8 +259,6 @@ static void aes_nohw_to_batch(AES_NOHW_BATCH *out, const uint8_t *in,
 
   aes_nohw_transpose(out);
 }
-
-
 
 static void aes_nohw_from_batch(uint8_t *out, size_t num_blocks,
                                 const AES_NOHW_BATCH *batch) {
@@ -431,9 +273,6 @@ static void aes_nohw_from_batch(uint8_t *out, size_t num_blocks,
   }
 }
 
-
-
-
 static void aes_nohw_add_round_key(AES_NOHW_BATCH *batch,
                                    const AES_NOHW_BATCH *key) {
   for (size_t i = 0; i < 8; i++) {
@@ -442,7 +281,7 @@ static void aes_nohw_add_round_key(AES_NOHW_BATCH *batch,
 }
 
 static void aes_nohw_sub_bytes(AES_NOHW_BATCH *batch) {
-  
+
   aes_word_t x0 = batch->w[7];
   aes_word_t x1 = batch->w[6];
   aes_word_t x2 = batch->w[5];
@@ -452,7 +291,6 @@ static void aes_nohw_sub_bytes(AES_NOHW_BATCH *batch) {
   aes_word_t x6 = batch->w[1];
   aes_word_t x7 = batch->w[0];
 
-  
   aes_word_t y14 = aes_nohw_xor(x3, x5);
   aes_word_t y13 = aes_nohw_xor(x0, x6);
   aes_word_t y9 = aes_nohw_xor(x0, x3);
@@ -477,7 +315,6 @@ static void aes_nohw_sub_bytes(AES_NOHW_BATCH *batch) {
   aes_word_t y21 = aes_nohw_xor(y13, y16);
   aes_word_t y18 = aes_nohw_xor(x0, y16);
 
-  
   aes_word_t t2 = aes_nohw_and(y12, y15);
   aes_word_t t3 = aes_nohw_and(y3, y6);
   aes_word_t t4 = aes_nohw_xor(t3, t2);
@@ -541,7 +378,6 @@ static void aes_nohw_sub_bytes(AES_NOHW_BATCH *batch) {
   aes_word_t z16 = aes_nohw_and(t45, y14);
   aes_word_t z17 = aes_nohw_and(t41, y8);
 
-  
   aes_word_t t46 = aes_nohw_xor(z15, z16);
   aes_word_t t47 = aes_nohw_xor(z10, z11);
   aes_word_t t48 = aes_nohw_xor(z5, z13);
@@ -583,9 +419,6 @@ static void aes_nohw_sub_bytes(AES_NOHW_BATCH *batch) {
   batch->w[7] = s0;
 }
 
-
-
-
 #define aes_nohw_rotate_cols_right(  v,  n) \
   (aes_nohw_or(aes_nohw_shift_right((v), (n)*4),                      \
                aes_nohw_shift_left((v), 16 - (n)*4)))
@@ -603,8 +436,6 @@ static void aes_nohw_shift_rows(AES_NOHW_BATCH *batch) {
   }
 }
 
-
-
 static inline aes_word_t aes_nohw_rotate_rows_down(aes_word_t v) {
 #if defined(OPENSSL_64_BIT)
   return ((v >> 4) & UINT64_C(0x0fff0fff0fff0fff)) |
@@ -613,8 +444,6 @@ static inline aes_word_t aes_nohw_rotate_rows_down(aes_word_t v) {
   return ((v >> 2) & 0x3f3f3f3f) | ((v << 6) & 0xc0c0c0c0);
 #endif
 }
-
-
 
 static inline aes_word_t aes_nohw_rotate_rows_twice(aes_word_t v) {
 #if defined(OPENSSL_64_BIT)
@@ -626,7 +455,7 @@ static inline aes_word_t aes_nohw_rotate_rows_twice(aes_word_t v) {
 }
 
 static void aes_nohw_mix_columns(AES_NOHW_BATCH *batch) {
-  
+
   aes_word_t a0 = batch->w[0];
   aes_word_t a1 = batch->w[1];
   aes_word_t a2 = batch->w[2];
@@ -688,12 +517,10 @@ static void aes_nohw_encrypt_batch(const AES_NOHW_SCHEDULE *key,
   aes_nohw_add_round_key(batch, &key->keys[num_rounds]);
 }
 
-
-
 static void aes_nohw_expand_round_keys(AES_NOHW_SCHEDULE *out,
                                        const AES_KEY *key) {
   for (size_t i = 0; i <= key->rounds; i++) {
-    
+
     for (size_t j = 0; j < AES_NOHW_BATCH_SIZE; j++) {
       aes_word_t tmp[AES_NOHW_BLOCK_WORDS];
       OPENSSL_memcpy(tmp, key->rd_key + 4 * i, 16);
@@ -705,8 +532,6 @@ static void aes_nohw_expand_round_keys(AES_NOHW_SCHEDULE *out,
 
 static const uint8_t aes_nohw_rcon[10] = {0x01, 0x02, 0x04, 0x08, 0x10,
                                           0x20, 0x40, 0x80, 0x1b, 0x36};
-
-
 
 static inline aes_word_t aes_nohw_rcon_slice(uint8_t rcon, size_t i) {
   rcon = (rcon >> (i * AES_NOHW_BATCH_SIZE)) & ((1 << AES_NOHW_BATCH_SIZE) - 1);
@@ -736,13 +561,12 @@ static void aes_nohw_setup_key_128(AES_KEY *key, const uint8_t in[16]) {
     aes_nohw_sub_block(sub, block);
     uint8_t rcon = aes_nohw_rcon[i - 1];
     for (size_t j = 0; j < AES_NOHW_BLOCK_WORDS; j++) {
-      
+
       block[j] = aes_nohw_xor(block[j], aes_nohw_rcon_slice(rcon, j));
       block[j] = aes_nohw_xor(
           block[j],
           aes_nohw_shift_right(aes_nohw_rotate_rows_down(sub[j]), 12));
-      
-      
+
       aes_word_t v = block[j];
       block[j] = aes_nohw_xor(block[j], aes_nohw_shift_left(v, 4));
       block[j] = aes_nohw_xor(block[j], aes_nohw_shift_left(v, 8));
@@ -755,7 +579,6 @@ static void aes_nohw_setup_key_128(AES_KEY *key, const uint8_t in[16]) {
 static void aes_nohw_setup_key_256(AES_KEY *key, const uint8_t in[32]) {
   key->rounds = 14;
 
-  
   aes_word_t block1[AES_NOHW_BLOCK_WORDS], block2[AES_NOHW_BLOCK_WORDS];
   aes_nohw_compact_block(block1, in);
   OPENSSL_memcpy(key->rd_key, block1, 16);
@@ -768,12 +591,12 @@ static void aes_nohw_setup_key_256(AES_KEY *key, const uint8_t in[32]) {
     aes_nohw_sub_block(sub, block2);
     uint8_t rcon = aes_nohw_rcon[i / 2 - 1];
     for (size_t j = 0; j < AES_NOHW_BLOCK_WORDS; j++) {
-      
+
       block1[j] = aes_nohw_xor(block1[j], aes_nohw_rcon_slice(rcon, j));
       block1[j] = aes_nohw_xor(
           block1[j],
           aes_nohw_shift_right(aes_nohw_rotate_rows_down(sub[j]), 12));
-      
+
       aes_word_t v = block1[j];
       block1[j] = aes_nohw_xor(block1[j], aes_nohw_shift_left(v, 4));
       block1[j] = aes_nohw_xor(block1[j], aes_nohw_shift_left(v, 8));
@@ -787,9 +610,9 @@ static void aes_nohw_setup_key_256(AES_KEY *key, const uint8_t in[32]) {
 
     aes_nohw_sub_block(sub, block1);
     for (size_t j = 0; j < AES_NOHW_BLOCK_WORDS; j++) {
-      
+
       block2[j] = aes_nohw_xor(block2[j], aes_nohw_shift_right(sub[j], 12));
-      
+
       aes_word_t v = block2[j];
       block2[j] = aes_nohw_xor(block2[j], aes_nohw_shift_left(v, 4));
       block2[j] = aes_nohw_xor(block2[j], aes_nohw_shift_left(v, 8));
@@ -798,9 +621,6 @@ static void aes_nohw_setup_key_256(AES_KEY *key, const uint8_t in[32]) {
     OPENSSL_memcpy(key->rd_key + 4 * (i + 1), block2, 16);
   }
 }
-
-
-
 
 int aes_nohw_set_encrypt_key(const uint8_t *key, unsigned bits,
                              AES_KEY *aeskey) {
@@ -845,7 +665,6 @@ void aes_nohw_ctr32_encrypt_blocks(const uint8_t *in, uint8_t *out,
   AES_NOHW_SCHEDULE sched;
   aes_nohw_expand_round_keys(&sched, key);
 
-  
   alignas(AES_NOHW_WORD_SIZE) uint8_t ivs[AES_NOHW_BATCH_SIZE * 16];
   alignas(AES_NOHW_WORD_SIZE) uint8_t enc_ivs[AES_NOHW_BATCH_SIZE * 16];
   for (size_t i = 0; i < AES_NOHW_BATCH_SIZE; i++) {
@@ -854,7 +673,7 @@ void aes_nohw_ctr32_encrypt_blocks(const uint8_t *in, uint8_t *out,
 
   uint32_t ctr = CRYPTO_load_u32_be(ivs + 12);
   for (;;) {
-    
+
     for (size_t i = 0; i < AES_NOHW_BATCH_SIZE; i++) {
       CRYPTO_store_u32_be(ivs + 16 * i + 12, ctr + (uint32_t)i);
     }

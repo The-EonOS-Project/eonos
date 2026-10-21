@@ -1,22 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdlib.h>
 
 #include "doomfeatures.h"
@@ -40,17 +21,12 @@
 
 ticcmd_t *netcmds;
 
-
-
 static void PlayerQuitGame(player_t *player)
 {
     static char exitmsg[80];
     unsigned int player_num;
 
     player_num = player - players;
-
-    
-    
 
     M_StringCopy(exitmsg, DEH_String("Player 1 left the game"),
                  sizeof(exitmsg));
@@ -59,8 +35,6 @@ static void PlayerQuitGame(player_t *player)
 
     playeringame[player_num] = false;
     players[consoleplayer].message = exitmsg;
-
-    
 
     if (demorecording) 
     {
@@ -73,8 +47,6 @@ static void RunTic(ticcmd_t *cmds, boolean *ingame)
     extern boolean advancedemo;
     unsigned int i;
 
-    
-
     for (i = 0; i < MAXPLAYERS; ++i)
     {
         if (!demoplayback && playeringame[i] && !ingame[i])
@@ -84,9 +56,6 @@ static void RunTic(ticcmd_t *cmds, boolean *ingame)
     }
 
     netcmds = cmds;
-
-    
-    
 
     if (advancedemo)
         D_DoAdvanceDemo ();
@@ -100,10 +69,6 @@ static loop_interface_t doom_loop_interface = {
     RunTic,
     M_Ticker
 };
-
-
-
-
 
 static void LoadGameSettings(net_gamesettings_t *settings)
 {
@@ -133,13 +98,8 @@ static void LoadGameSettings(net_gamesettings_t *settings)
     }
 }
 
-
-
-
 static void SaveGameSettings(net_gamesettings_t *settings)
 {
-    
-    
 
     settings->deathmatch = deathmatch;
     settings->episode = startepisode;
@@ -161,23 +121,11 @@ static void InitConnectData(net_connect_data_t *connect_data)
     connect_data->max_players = MAXPLAYERS;
     connect_data->drone = false;
 
-    
-    
-    
-    
-    
-
     if (M_CheckParm("-left") > 0)
     {
         viewangleoffset = ANG90;
         connect_data->drone = true;
     }
-
-    
-    
-    
-    
-    
 
     if (M_CheckParm("-right") > 0)
     {
@@ -185,29 +133,17 @@ static void InitConnectData(net_connect_data_t *connect_data)
         connect_data->drone = true;
     }
 
-    
-    
-    
-
-    
-
     connect_data->gamemode = gamemode;
     connect_data->gamemission = gamemission;
 
-    
-
     connect_data->lowres_turn = M_CheckParm("-record") > 0
                              && M_CheckParm("-longtics") == 0;
-
-    
 
     W_Checksum(connect_data->wad_sha1sum);
 
 #if ORIGCODE
     DEH_Checksum(connect_data->deh_sha1sum);
 #endif
-
-    
 
     connect_data->is_freedoom = W_CheckNumForName("FREEDOOM") >= 0;
 }
@@ -219,23 +155,11 @@ void D_ConnectNetGame(void)
     InitConnectData(&connect_data);
     netgame = D_InitNetGame(&connect_data);
 
-    
-    
-    
-    
-    
-    
-    
-
     if (M_CheckParm("-solo-net") > 0)
     {
         netgame = true;
     }
 }
-
-
-
-
 
 void D_CheckNetGame (void)
 {
@@ -258,11 +182,8 @@ void D_CheckNetGame (void)
     DEH_printf("player %i of %i (%i nodes)\n",
                consoleplayer+1, settings.num_players, settings.num_players);
 
-    
-
     if (timelimit > 0 && deathmatch)
     {
-        
 
         if (timelimit == 20 && M_CheckParm("-avg"))
         {

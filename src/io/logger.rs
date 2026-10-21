@@ -56,8 +56,6 @@ pub struct Logger {
     early_count: usize,
 }
 
-
-
 const DEBUG_LOGS: bool = cfg!(feature = "debug-logs");
 
 pub static LOGGER: IrqMutex<Logger> = IrqMutex::new(Logger {

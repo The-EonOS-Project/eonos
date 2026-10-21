@@ -1,24 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -41,35 +20,20 @@
 #include <png.h>
 #endif
 
-
-
 #define RANGECHECK
-
-
-
 
 byte *tinttable = NULL;
 
-
 byte *xlatab = NULL;
-
-
 
 static byte *dest_screen = NULL;
 
 int dirtybox[4]; 
 
-
-
 static vpatchclipfunc_t patchclip_callback = NULL;
-
-
-
 
 void V_MarkRect(int x, int y, int width, int height) 
 { 
-    
-    
 
     if (dest_screen == I_VideoBuffer)
     {
@@ -77,10 +41,6 @@ void V_MarkRect(int x, int y, int width, int height)
         M_AddToBox (dirtybox, x + width-1, y + height-1); 
     }
 } 
- 
-
-
-
 
 void V_CopyRect(int srcx, int srcy, byte *source,
                 int width, int height,
@@ -88,7 +48,7 @@ void V_CopyRect(int srcx, int srcy, byte *source,
 { 
     byte *src;
     byte *dest; 
- 
+
 #ifdef RANGECHECK 
     if (srcx < 0
      || srcx + width > SCREENWIDTH
@@ -104,7 +64,7 @@ void V_CopyRect(int srcx, int srcy, byte *source,
 #endif 
 
     V_MarkRect(destx, desty, width, height); 
- 
+
     src = source + SCREENWIDTH * srcy + srcx; 
     dest = dest_screen + SCREENWIDTH * desty + destx; 
 
@@ -115,26 +75,11 @@ void V_CopyRect(int srcx, int srcy, byte *source,
         dest += SCREENWIDTH; 
     } 
 } 
- 
-
-
-
-
-
-
-
-
-
 
 void V_SetPatchClipCallback(vpatchclipfunc_t func)
 {
     patchclip_callback = func;
 }
-
-
-
-
-
 
 void V_DrawPatch(int x, int y, patch_t *patch)
 { 
@@ -149,7 +94,6 @@ void V_DrawPatch(int x, int y, patch_t *patch)
     y -= SHORT(patch->topoffset);
     x -= SHORT(patch->leftoffset);
 
-    
     if(patchclip_callback)
     {
         if(!patchclip_callback(patch, x, y))
@@ -177,7 +121,6 @@ void V_DrawPatch(int x, int y, patch_t *patch)
     {
         column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
 
-        
         while (column->topdelta != 0xff)
         {
             source = (byte *)column + 3;
@@ -194,12 +137,6 @@ void V_DrawPatch(int x, int y, patch_t *patch)
     }
 }
 
-
-
-
-
-
-
 void V_DrawPatchFlipped(int x, int y, patch_t *patch)
 {
     int count;
@@ -209,11 +146,10 @@ void V_DrawPatchFlipped(int x, int y, patch_t *patch)
     byte *dest;
     byte *source; 
     int w; 
- 
+
     y -= SHORT(patch->topoffset); 
     x -= SHORT(patch->leftoffset); 
 
-    
     if(patchclip_callback)
     {
         if(!patchclip_callback(patch, x, y))
@@ -241,7 +177,6 @@ void V_DrawPatchFlipped(int x, int y, patch_t *patch)
     {
         column = (column_t *)((byte *)patch + LONG(patch->columnofs[w-1-col]));
 
-        
         while (column->topdelta != 0xff )
         {
             source = (byte *)column + 3;
@@ -258,23 +193,10 @@ void V_DrawPatchFlipped(int x, int y, patch_t *patch)
     }
 }
 
-
-
-
-
-
-
-
 void V_DrawPatchDirect(int x, int y, patch_t *patch)
 {
     V_DrawPatch(x, y, patch); 
 } 
-
-
-
-
-
-
 
 void V_DrawTLPatch(int x, int y, patch_t * patch)
 {
@@ -302,8 +224,6 @@ void V_DrawTLPatch(int x, int y, patch_t * patch)
     {
         column = (column_t *) ((byte *) patch + LONG(patch->columnofs[col]));
 
-        
-
         while (column->topdelta != 0xff)
         {
             source = (byte *) column + 3;
@@ -319,12 +239,6 @@ void V_DrawTLPatch(int x, int y, patch_t * patch)
         }
     }
 }
-
-
-
-
-
-
 
 void V_DrawXlaPatch(int x, int y, patch_t * patch)
 {
@@ -350,8 +264,6 @@ void V_DrawXlaPatch(int x, int y, patch_t * patch)
     {
         column = (column_t *) ((byte *) patch + LONG(patch->columnofs[col]));
 
-        
-
         while(column->topdelta != 0xff)
         {
             source = (byte *) column + 3;
@@ -368,12 +280,6 @@ void V_DrawXlaPatch(int x, int y, patch_t * patch)
         }
     }
 }
-
-
-
-
-
-
 
 void V_DrawAltTLPatch(int x, int y, patch_t * patch)
 {
@@ -401,8 +307,6 @@ void V_DrawAltTLPatch(int x, int y, patch_t * patch)
     {
         column = (column_t *) ((byte *) patch + LONG(patch->columnofs[col]));
 
-        
-
         while (column->topdelta != 0xff)
         {
             source = (byte *) column + 3;
@@ -418,12 +322,6 @@ void V_DrawAltTLPatch(int x, int y, patch_t * patch)
         }
     }
 }
-
-
-
-
-
-
 
 void V_DrawShadowedPatch(int x, int y, patch_t *patch)
 {
@@ -453,8 +351,6 @@ void V_DrawShadowedPatch(int x, int y, patch_t *patch)
     {
         column = (column_t *) ((byte *) patch + LONG(patch->columnofs[col]));
 
-        
-
         while (column->topdelta != 0xff)
         {
             source = (byte *) column + 3;
@@ -475,35 +371,20 @@ void V_DrawShadowedPatch(int x, int y, patch_t *patch)
     }
 }
 
-
-
-
-
 void V_LoadTintTable(void)
 {
     tinttable = W_CacheLumpName("TINTTAB", PU_STATIC);
 }
-
-
-
-
-
-
 
 void V_LoadXlaTable(void)
 {
     xlatab = W_CacheLumpName("XLATAB", PU_STATIC);
 }
 
-
-
-
-
-
 void V_DrawBlock(int x, int y, int width, int height, byte *src) 
 { 
     byte *dest; 
- 
+
 #ifdef RANGECHECK 
     if (x < 0
      || x + width >SCREENWIDTH
@@ -513,9 +394,9 @@ void V_DrawBlock(int x, int y, int width, int height, byte *src)
 	I_Error ("Bad V_DrawBlock");
     }
 #endif 
- 
+
     V_MarkRect (x, y, width, height); 
- 
+
     dest = dest_screen + y * SCREENWIDTH + x; 
 
     while (height--) 
@@ -581,43 +462,25 @@ void V_DrawBox(int x, int y, int w, int h, int c)
     V_DrawVertLine(x+w-1, y, h, c);
 }
 
-
-
-
-
- 
 void V_DrawRawScreen(byte *raw)
 {
     memcpy(dest_screen, raw, SCREENWIDTH * SCREENHEIGHT);
 }
 
-
-
-
 void V_Init (void) 
 { 
-    
-    
-    
+
 }
-
-
 
 void V_UseBuffer(byte *buffer)
 {
     dest_screen = buffer;
 }
 
-
-
 void V_RestoreBuffer(void)
 {
     dest_screen = I_VideoBuffer;
 }
-
-
-
-
 
 typedef struct
 {
@@ -630,25 +493,20 @@ typedef struct
     unsigned short	ymin;
     unsigned short	xmax;
     unsigned short	ymax;
-    
+
     unsigned short	hres;
     unsigned short	vres;
 
     unsigned char	palette[48];
-    
+
     char		reserved;
     char		color_planes;
     unsigned short	bytes_per_line;
     unsigned short	palette_type;
-    
+
     char		filler[58];
     unsigned char	data;		
 } PACKEDATTR pcx_t;
-
-
-
-
-
 
 void WritePCXfile(char *filename, byte *data,
                   int width, int height,
@@ -658,7 +516,7 @@ void WritePCXfile(char *filename, byte *data,
     int		length;
     pcx_t*	pcx;
     byte*	pack;
-	
+
     pcx = Z_Malloc (width*height*2+1000, PU_STATIC, NULL);
 
     pcx->manufacturer = 0x0a;		
@@ -677,9 +535,8 @@ void WritePCXfile(char *filename, byte *data,
     pcx->palette_type = SHORT(2);	
     memset (pcx->filler,0,sizeof(pcx->filler));
 
-    
     pack = &pcx->data;
-	
+
     for (i=0 ; i<width*height ; i++)
     {
 	if ( (*data & 0xc0) != 0xc0)
@@ -690,13 +547,11 @@ void WritePCXfile(char *filename, byte *data,
 	    *pack++ = *data++;
 	}
     }
-    
-    
+
     *pack++ = 0x0c;	
     for (i=0 ; i<768 ; i++)
 	*pack++ = *palette++;
-    
-    
+
     length = pack - (byte *)pcx;
     M_WriteFile (filename, pcx, length);
 
@@ -704,9 +559,6 @@ void WritePCXfile(char *filename, byte *data,
 }
 
 #ifdef HAVE_LIBPNG
-
-
-
 
 static void error_fn(png_structp p, png_const_charp s)
 {
@@ -784,17 +636,11 @@ void WritePNGfile(char *filename, byte *data,
 }
 #endif
 
-
-
-
-
 void V_ScreenShot(char *format)
 {
     int i;
     char lbmname[16]; 
     char *ext;
-    
-    
 
 #ifdef HAVE_LIBPNG
     extern int png_screenshots;
@@ -833,7 +679,7 @@ void V_ScreenShot(char *format)
     else
 #endif
     {
-    
+
     WritePCXfile(lbmname, I_VideoBuffer,
                  SCREENWIDTH, SCREENHEIGHT,
                  W_CacheLumpName (DEH_String("PLAYPAL"), PU_CACHE));
@@ -852,9 +698,6 @@ void V_DrawMouseSpeedBox(int speed)
     int redline_x;
     int linelen;
 
-    
-    
-
     bgcolor = I_GetPaletteIndex(0x77, 0x77, 0x77);
     bordercolor = I_GetPaletteIndex(0x55, 0x55, 0x55);
     red = I_GetPaletteIndex(0xff, 0x00, 0x00);
@@ -862,15 +705,10 @@ void V_DrawMouseSpeedBox(int speed)
     yellow = I_GetPaletteIndex(0xff, 0xff, 0x00);
     white = I_GetPaletteIndex(0xff, 0xff, 0xff);
 
-    
-    
-
     if (!usemouse || fabs(mouse_acceleration - 1) < 0.01)
     {
         return;
     }
-
-    
 
     box_x = SCREENWIDTH - MOUSE_SPEED_BOX_WIDTH - 10;
     box_y = 15;
@@ -880,12 +718,7 @@ void V_DrawMouseSpeedBox(int speed)
     V_DrawBox(box_x, box_y,
               MOUSE_SPEED_BOX_WIDTH, MOUSE_SPEED_BOX_HEIGHT, bordercolor);
 
-    
-    
-
     redline_x = MOUSE_SPEED_BOX_WIDTH / 3;
-
-    
 
     if (speed < mouse_threshold)
     {
@@ -898,11 +731,7 @@ void V_DrawMouseSpeedBox(int speed)
         original_speed += mouse_threshold;
     }
 
-    
-
     linelen = (original_speed * redline_x) / mouse_threshold;
-
-    
 
     if (linelen > MOUSE_SPEED_BOX_WIDTH - 1)
     {
@@ -923,8 +752,6 @@ void V_DrawMouseSpeedBox(int speed)
         V_DrawHorizLine(box_x + redline_x, box_y + MOUSE_SPEED_BOX_HEIGHT / 2,
                         linelen - redline_x, yellow);
     }
-
-    
 
     V_DrawVertLine(box_x + redline_x, box_y + 1,
                  MOUSE_SPEED_BOX_HEIGHT - 2, red);

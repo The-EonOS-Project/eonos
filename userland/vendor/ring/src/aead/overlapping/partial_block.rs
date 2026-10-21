@@ -1,22 +1,8 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::Overlapping;
 use crate::error::InputTooLongError;
 
 pub struct PartialBlock<'i, T, const BLOCK_LEN: usize> {
-    
+
     in_out: Overlapping<'i, T>,
 }
 
@@ -44,8 +30,7 @@ impl<T, const BLOCK_LEN: usize> PartialBlock<'_, T, BLOCK_LEN> {
     #[inline(always)]
     pub fn input(&self) -> &[T] {
         let r = self.in_out.input();
-        
-        
+
         if r.len() >= BLOCK_LEN {
             unreachable!()
         }

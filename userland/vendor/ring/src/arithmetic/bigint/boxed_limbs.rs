@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::Modulus;
 use crate::{
     error,
@@ -23,11 +9,9 @@ use core::{
     ops::{Deref, DerefMut},
 };
 
-
 pub(super) struct BoxedLimbs<M> {
     limbs: Box<[Limb]>,
 
-    
     m: PhantomData<M>,
 }
 
@@ -45,8 +29,6 @@ impl<M> DerefMut for BoxedLimbs<M> {
         &mut self.limbs
     }
 }
-
-
 
 impl<M> Clone for BoxedLimbs<M> {
     fn clone(&self) -> Self {

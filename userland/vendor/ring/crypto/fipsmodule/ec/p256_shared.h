@@ -1,26 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef OPENSSL_HEADER_EC_P256_SHARED_H
 #define OPENSSL_HEADER_EC_P256_SHARED_H
 
@@ -34,16 +11,7 @@
 # define OPENSSL_USE_NISTZ256
 #endif
 
-
-
-
-
-
-
-
-
 #define P256_LIMBS (256 / BN_BITS2)
-
 
 typedef struct {
   BN_ULONG X[P256_LIMBS];

@@ -1,29 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 pub struct InputTooLongError<T = usize> {
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     #[allow(dead_code)]
     imprecise_input_length: T,
 }

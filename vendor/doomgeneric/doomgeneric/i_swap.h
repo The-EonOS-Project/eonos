@@ -1,36 +1,14 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __I_SWAP__
 #define __I_SWAP__
 
 #ifdef __DJGPP__
-
 
 #define SHORT(x)  ((signed short) (x))
 #define LONG(x)   ((signed int) (x))
 
 #define SYS_LITTLE_ENDIAN
 
-
 #else  
-
 
 #if ( __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__ )
 #define SYS_LITTLE_ENDIAN
@@ -53,8 +31,6 @@ static inline unsigned long swapLE32(unsigned long val) {
 #error "Unknown byte order"
 #endif
 
-
-
 #define doom_swap_s(x) \
         ((short int)((((unsigned short int)(x) & 0x00ff) << 8) | \
                               (((unsigned short int)(x) & 0xff00) >> 8))) 
@@ -65,9 +41,7 @@ static inline unsigned long swapLE32(unsigned long val) {
 #define doom_wtohs(x) (short int)(x)
 #endif
 
-
 #endif  
-
 
 #endif
 

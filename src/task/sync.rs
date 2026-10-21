@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![allow(dead_code)]
 
 use core::arch::asm;
@@ -20,19 +6,15 @@ use core::ops::{Deref, DerefMut};
 
 use spin::{Mutex, MutexGuard};
 
-
-
 #[inline]
 pub fn irq_save() -> bool {
     let flags: u64;
     unsafe {
-        
-        
+
         asm!("pushfq", "pop {0}", "cli", out(reg) flags);
     }
     flags & (1 << 9) != 0
 }
-
 
 #[inline]
 pub fn irq_restore(was_enabled: bool) {
@@ -65,8 +47,6 @@ impl<T> IrqMutex<T> {
         }
     }
 
-    
-    
     pub fn try_lock(&self) -> Option<IrqMutexGuard<'_, T>> {
         let irq_was_enabled = irq_save();
         match self.inner.try_lock() {
@@ -81,10 +61,6 @@ impl<T> IrqMutex<T> {
         }
     }
 
-    
-    
-    
-    
     pub unsafe fn force_unlock(&self) {
         self.inner.force_unlock();
     }
@@ -106,7 +82,7 @@ impl<T> DerefMut for IrqMutexGuard<'_, T> {
 
 impl<T> Drop for IrqMutexGuard<'_, T> {
     fn drop(&mut self) {
-        
+
         unsafe { ManuallyDrop::drop(&mut self.guard) };
         irq_restore(self.irq_was_enabled);
     }

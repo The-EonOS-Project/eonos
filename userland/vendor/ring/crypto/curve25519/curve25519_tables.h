@@ -1,21 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 static const fe d = {{
 #if defined(OPENSSL_64_BIT)
     929955233495203, 466365720129213, 1662059464998953, 2033849074728123,
@@ -47,14 +29,6 @@ static const fe d2 = {{
 }};
 
 #if defined(OPENSSL_SMALL)
-
-
-
-
-
-
-
-
 
 static const uint8_t k25519SmallPrecomp[15 * 2 * 32] = {
     0x1a, 0xd5, 0x25, 0x8f, 0x60, 0x2d, 0x56, 0xc9, 0xb2, 0xa7, 0x25, 0x95,
@@ -140,7 +114,6 @@ static const uint8_t k25519SmallPrecomp[15 * 2 * 32] = {
 };
 
 #else
-
 
 const uint8_t k25519Precomp[32][8][3][32] = {
     {
@@ -3026,7 +2999,6 @@ const uint8_t k25519Precomp[32][8][3][32] = {
 };
 
 #endif  
-
 
 static const ge_precomp Bi[8] = {
     {

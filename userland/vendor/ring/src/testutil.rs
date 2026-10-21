@@ -1,122 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 extern crate alloc;
 
 use alloc::{format, string::String, vec::Vec};
@@ -126,35 +7,18 @@ use crate::{bits, digest, error};
 #[cfg(any(feature = "std", feature = "test_logging"))]
 extern crate std;
 
-
-
 pub const fn compile_time_assert_clone<T: Clone>() {}
-
-
 
 pub const fn compile_time_assert_copy<T: Copy>() {}
 
-
-
 pub const fn compile_time_assert_eq<T: Eq>() {}
-
-
 
 pub const fn compile_time_assert_send<T: Send>() {}
 
-
-
 pub const fn compile_time_assert_sync<T: Sync>() {}
-
-
 
 #[cfg(feature = "std")]
 pub const fn compile_time_assert_std_error_error<T: std::error::Error>() {}
-
-
-
-
-
 
 #[derive(Debug)]
 pub struct TestCase {
@@ -162,7 +26,7 @@ pub struct TestCase {
 }
 
 impl TestCase {
-    
+
     pub fn consume_bool(&mut self, key: &str) -> bool {
         match self.consume_string(key).as_ref() {
             "true" => true,
@@ -171,11 +35,6 @@ impl TestCase {
         }
     }
 
-    
-    
-    
-    
-    
     pub fn consume_digest_alg(&mut self, key: &str) -> Option<&'static digest::Algorithm> {
         let name = self.consume_string(key);
         match name.as_ref() {
@@ -189,31 +48,26 @@ impl TestCase {
         }
     }
 
-    
-    
-    
     pub fn consume_bytes(&mut self, key: &str) -> Vec<u8> {
         self.consume_optional_bytes(key)
             .unwrap_or_else(|| panic!("No attribute named \"{}\"", key))
     }
 
-    
-    
     pub fn consume_optional_bytes(&mut self, key: &str) -> Option<Vec<u8>> {
         let s = self.consume_optional_string(key)?;
         let result = if let [b'\"', s @ ..] = s.as_bytes() {
-            
+
             let mut s = s.iter();
             let mut bytes = Vec::with_capacity(s.len() - 1);
             loop {
                 let b = match s.next() {
                     Some(b'\\') => {
                         match s.next() {
-                            
+
                             Some(b'0') => 0u8,
                             Some(b't') => b'\t',
                             Some(b'n') => b'\n',
-                            
+
                             Some(b'x') => {
                                 let hi = s.next().expect("Invalid hex escape sequence in string.");
                                 let lo = s.next().expect("Invalid hex escape sequence in string.");
@@ -242,7 +96,7 @@ impl TestCase {
             }
             bytes
         } else {
-            
+
             match from_hex(&s) {
                 Ok(s) => s,
                 Err(err_str) => {
@@ -253,30 +107,22 @@ impl TestCase {
         Some(result)
     }
 
-    
-    
     pub fn consume_usize(&mut self, key: &str) -> usize {
         let s = self.consume_string(key);
         s.parse::<usize>().unwrap()
     }
 
-    
-    
     pub fn consume_usize_bits(&mut self, key: &str) -> bits::BitLength {
         let s = self.consume_string(key);
         let bits = s.parse::<usize>().unwrap();
         bits::BitLength::from_bits(bits)
     }
 
-    
-    
     pub fn consume_string(&mut self, key: &str) -> String {
         self.consume_optional_string(key)
             .unwrap_or_else(|| panic!("No attribute named \"{}\"", key))
     }
 
-    
-    
     pub fn consume_optional_string(&mut self, key: &str) -> Option<String> {
         for (name, value, consumed) in &mut self.attributes {
             if key == name {
@@ -291,7 +137,6 @@ impl TestCase {
     }
 }
 
-
 #[cfg(test)]
 macro_rules! test_vector_file {
     ($file_name:expr) => {
@@ -302,17 +147,12 @@ macro_rules! test_vector_file {
     };
 }
 
-
 pub struct File<'a> {
-    
+
     pub file_name: &'a str,
 
-    
     pub contents: &'a str,
 }
-
-
-
 
 pub fn run<F>(test_file: File, mut f: F)
 where
@@ -360,8 +200,6 @@ where
     }
 }
 
-
-
 pub fn from_hex(hex_str: &str) -> Result<Vec<u8>, String> {
     if hex_str.len() % 2 != 0 {
         return Err(String::from(
@@ -407,26 +245,22 @@ fn parse_test_case(
         }
 
         match line {
-            
-            
+
             None if is_first_line => {
                 return None;
             }
 
-            
             None => {
                 return Some(TestCase { attributes });
             }
 
-            
             Some("") => {
                 if !is_first_line {
                     return Some(TestCase { attributes });
                 }
-                
+
             }
 
-            
             Some(line) if line.starts_with('#') => (),
 
             Some(line) if line.starts_with('[') => {
@@ -449,29 +283,18 @@ fn parse_test_case(
                 let key = parts[0].trim();
                 let value = parts[1].trim();
 
-                
-                
                 assert_ne!(value.len(), 0);
 
-                
                 attributes.push((String::from(key), String::from(value), false));
             }
         }
     }
 }
 
-
-
-
-
-
-
 #[doc(hidden)]
 pub mod rand {
     use crate::{error, rand};
 
-    
-    
     #[derive(Debug)]
     pub struct FixedByteRandom {
         pub byte: u8,
@@ -484,9 +307,6 @@ pub mod rand {
         }
     }
 
-    
-    
-    
     #[derive(Debug)]
     pub struct FixedSliceRandom<'a> {
         pub bytes: &'a [u8],
@@ -499,18 +319,9 @@ pub mod rand {
         }
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
     #[derive(Debug)]
     pub struct FixedSliceSequenceRandom<'a> {
-        
+
         pub bytes: &'a [&'a [u8]],
         pub current: core::cell::UnsafeCell<usize>,
     }
@@ -520,8 +331,7 @@ pub mod rand {
             let current = unsafe { *self.current.get() };
             let bytes = self.bytes[current];
             dest.copy_from_slice(bytes);
-            
-            
+
             unsafe { *self.current.get() += 1 };
             Ok(())
         }
@@ -529,8 +339,7 @@ pub mod rand {
 
     impl Drop for FixedSliceSequenceRandom<'_> {
         fn drop(&mut self) {
-            
-            
+
             assert_eq!(unsafe { *self.current.get() }, self.bytes.len());
         }
     }

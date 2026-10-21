@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::{cpu, error, rand};
 
 pub use self::keys::{KeyPair, PublicKey, Seed};
@@ -22,7 +8,6 @@ pub struct Curve {
 
     pub id: CurveID,
 
-    
     check_private_key_bytes: fn(bytes: &[u8], cpu: cpu::Features) -> Result<(), error::Unspecified>,
 
     generate_private_key: fn(
@@ -52,14 +37,6 @@ pub const ELEM_MAX_BYTES: usize = (ELEM_MAX_BITS + 7) / 8;
 
 pub const SCALAR_MAX_BYTES: usize = ELEM_MAX_BYTES;
 const SEED_MAX_BYTES: usize = ELEM_MAX_BYTES;
-
-
-
-
-
-
-
-
 
 pub const PKCS8_DOCUMENT_MAX_LEN: usize = 40 + SCALAR_MAX_BYTES + keys::PUBLIC_KEY_MAX_LEN;
 

@@ -1,22 +1,7 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{
     padding::{self, RsaEncoding},
     KeyPairComponents, PublicExponent, PublicKey, PublicKeyComponents, N,
 };
-
 
 use crate::{
     arithmetic::{
@@ -31,7 +16,6 @@ use crate::{
     pkcs8, rand, signature,
 };
 
-
 pub struct KeyPair {
     p: PrivateCrtPrime<P>,
     q: PrivateCrtPrime<Q>,
@@ -42,59 +26,7 @@ pub struct KeyPair {
 derive_debug_via_field!(KeyPair, stringify!(RsaKeyPair), public);
 
 impl KeyPair {
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     pub fn from_pkcs8(pkcs8: &[u8]) -> Result<Self, KeyRejected> {
         const RSA_ENCRYPTION: &[u8] = include_bytes!("../data/alg-rsa-encryption.der");
         let (der, _) = pkcs8::unwrap_key_(
@@ -105,24 +37,6 @@ impl KeyPair {
         Self::from_der(der.as_slice_less_safe())
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     pub fn from_der(input: &[u8]) -> Result<Self, KeyRejected> {
         untrusted::Input::from(input).read_all(KeyRejected::invalid_encoding(), |input| {
             der::nested(
@@ -171,51 +85,6 @@ impl KeyPair {
         Self::from_components(&components)
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     pub fn from_components<Public, Private>(
         components: &KeyPairComponents<Public, Private>,
     ) -> Result<Self, KeyRejected>
@@ -257,24 +126,6 @@ impl KeyPair {
         let dQ = untrusted::Input::from(dQ);
         let qInv = untrusted::Input::from(qInv);
 
-        
-        
-        
-
-        
-
-        
-
-        
-        
-        
-        
-        
-        
-        
-        
-
-        
         let n = untrusted::Input::from(public_key.n);
         let e = untrusted::Input::from(public_key.e);
         let public_key = PublicKey::from_modulus_and_exponent(
@@ -289,36 +140,11 @@ impl KeyPair {
         let n_one = public_key.inner().n().oneRR();
         let n = &public_key.inner().n().value(cpu_features);
 
-        
-
-        
-
-        
-        
-
-        
-        
-
-        
-
-        
-
         let n_bits = public_key.inner().n().len_bits();
 
         let p = PrivatePrime::new(p, n_bits, cpu_features)?;
         let q = PrivatePrime::new(q, n_bits, cpu_features)?;
 
-        
-        
-        
-
-        
-        
-        
-        
-        
-        
-        
         let q_mod_n = q
             .modulus
             .to_elem(n)
@@ -333,45 +159,25 @@ impl KeyPair {
             return Err(KeyRejected::inconsistent_components());
         }
 
-        
-
-        
-        
-        
-        
-        
         let d = bigint::OwnedModulusValue::<D>::from_be_bytes(d)
             .map_err(|_| KeyRejected::invalid_component())?;
         if !(n_bits.half_rounded_up() < d.len_bits()) {
             return Err(KeyRejected::inconsistent_components());
         }
-        
-        
+
         d.verify_less_than(n)
             .map_err(|error::Unspecified| KeyRejected::inconsistent_components())?;
 
-        
-
         let pm = &p.modulus.modulus(cpu_features);
 
-        
-
-        
         let qInv = bigint::Elem::from_be_bytes_padded(qInv, pm)
             .map_err(|error::Unspecified| KeyRejected::invalid_component())?;
 
-        
-        
-        
-
-        
         let qInv = bigint::elem_mul(p.oneRR.as_ref(), qInv, pm);
         let q_mod_p = bigint::elem_reduced(pm.alloc_zero(), &q_mod_n, pm, q.modulus.len_bits());
         let q_mod_p = bigint::elem_mul(p.oneRR.as_ref(), q_mod_p, pm);
         bigint::verify_inverses_consttime(&qInv, q_mod_p, pm)
             .map_err(|error::Unspecified| KeyRejected::inconsistent_components())?;
-
-        
 
         let p = PrivateCrtPrime::new(p, dP, cpu_features)?;
         let q = PrivateCrtPrime::new(q, dQ, cpu_features)?;
@@ -384,14 +190,10 @@ impl KeyPair {
         })
     }
 
-    
     pub fn public(&self) -> &PublicKey {
         &self.public
     }
 
-    
-    
-    
     #[deprecated = "Use `public().modulus_len()`"]
     #[inline]
     pub fn public_modulus_len(&self) -> usize {
@@ -420,13 +222,6 @@ impl<M> PrivatePrime<M> {
     ) -> Result<Self, KeyRejected> {
         let p = bigint::OwnedModulusValue::from_be_bytes(p)?;
 
-        
-        
-        
-        
-        
-        
-        
         if p.len_bits() != n_bits.half_rounded_up() {
             return Err(KeyRejected::inconsistent_components());
         }
@@ -435,10 +230,6 @@ impl<M> PrivatePrime<M> {
             return Err(KeyRejected::private_modulus_len_not_multiple_of_512_bits());
         }
 
-        
-        
-
-        
         let p = bigint::OwnedModulus::from(p);
         let pm = p.modulus(cpu_features);
         let oneRR = bigint::One::newRR(pm.alloc_zero(), &pm);
@@ -454,26 +245,16 @@ struct PrivateCrtPrime<M> {
 }
 
 impl<M> PrivateCrtPrime<M> {
-    
-    
+
     fn new(
         p: PrivatePrime<M>,
         dP: untrusted::Input,
         cpu_features: cpu::Features,
     ) -> Result<Self, KeyRejected> {
         let m = &p.modulus.modulus(cpu_features);
-        
+
         let dP = bigint::PrivateExponent::from_be_bytes_padded(dP, m)
             .map_err(|error::Unspecified| KeyRejected::inconsistent_components())?;
-
-        
-        
-        
-        
-        
-        
-        
-        
 
         let oneRRR = bigint::One::newRRR(p.oneRR, m);
 
@@ -503,9 +284,6 @@ fn elem_exp_consttime<M>(
     .map_err(error::erase::<LimbSliceError>)
 }
 
-
-
-
 enum P {}
 
 enum Q {}
@@ -513,23 +291,7 @@ enum Q {}
 enum D {}
 
 impl KeyPair {
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     pub fn sign(
         &self,
         padding_alg: &'static dyn RsaEncoding,
@@ -545,8 +307,6 @@ impl KeyPair {
 
         let m_hash = digest::digest(padding_alg.digest_alg(), msg);
 
-        
-        
         padding::encode(
             padding_alg,
             m_hash,
@@ -555,25 +315,13 @@ impl KeyPair {
             rng,
         )?;
 
-        
-        
-
-        
         let m = self.private_exponentiate(signature, cpu_features)?;
 
-        
         m.fill_be_bytes(signature);
 
         Ok(())
     }
 
-    
-    
-    
-    
-    
-    
-    
     fn private_exponentiate(
         &self,
         base: &[u8],
@@ -581,26 +329,17 @@ impl KeyPair {
     ) -> Result<bigint::Elem<N>, error::Unspecified> {
         assert_eq!(base.len(), self.public().modulus_len());
 
-        
-        
-
         let n = &self.public.inner().n().value(cpu_features);
         let n_one = self.public.inner().n().oneRR();
 
-        
         let base = bigint::Elem::from_be_bytes_padded(untrusted::Input::from(base), n)?;
 
-        
         let c = base;
 
-        
         let q_bits = self.q.modulus.len_bits();
         let m_1 = elem_exp_consttime(&c, &self.p, q_bits, cpu_features)?;
         let m_2 = elem_exp_consttime(&c, &self.q, self.p.modulus.len_bits(), cpu_features)?;
 
-        
-
-        
         let h = {
             let p = &self.p.modulus.modulus(cpu_features);
             let m_2 = bigint::elem_reduced_once(p.alloc_zero(), &m_2, p, q_bits);
@@ -608,10 +347,6 @@ impl KeyPair {
             bigint::elem_mul(&self.qInv, m_1_minus_m_2, p)
         };
 
-        
-        
-        
-        
         let p_bits = self.p.modulus.len_bits();
         let h = bigint::elem_widen(n.alloc_zero(), h, n, p_bits)?;
         let q_mod_n = self.q.modulus.to_elem(n)?;
@@ -620,16 +355,6 @@ impl KeyPair {
         let m_2 = bigint::elem_widen(n.alloc_zero(), m_2, n, q_bits)?;
         let m = bigint::elem_add(m_2, q_times_h, n);
 
-        
-
-        
-        
-        
-        
-        
-        
-        
-        
         {
             let verify = n.alloc_zero();
             let verify = self
@@ -638,8 +363,6 @@ impl KeyPair {
                 .exponentiate_elem(verify, &m, cpu_features);
             bigint::elem_verify_equal_consttime(&verify, &c)?;
         }
-
-        
 
         Ok(m)
     }
@@ -670,9 +393,7 @@ mod tests {
                     test_case.consume_bytes("q_minus_1"),
                 ];
                 for test_case in test_cases {
-                    
-                    
-                    
+
                     let mut padded = vec![0; key.public.modulus_len()];
                     let zeroes = padded.len() - test_case.len();
                     padded[zeroes..].copy_from_slice(test_case);

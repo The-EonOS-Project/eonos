@@ -1,19 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::digest_scalar::digest_scalar;
 use crate::{
     arithmetic::montgomery::*,
@@ -23,7 +7,6 @@ use crate::{
     io::der,
     limb, sealed, signature,
 };
-
 
 pub struct EcdsaVerificationAlgorithm {
     ops: &'static PublicScalarOps,
@@ -58,12 +41,9 @@ impl signature::VerificationAlgorithm for EcdsaVerificationAlgorithm {
     ) -> Result<(), error::Unspecified> {
         let cpu = cpu::features();
         let e = {
-            
-            
+
             let h = digest::digest(self.digest_alg, msg.as_slice_less_safe());
 
-            
-            
             let n = &self.ops.scalar_ops.scalar_modulus(cpu);
             digest_scalar(n, h)
         };
@@ -73,7 +53,7 @@ impl signature::VerificationAlgorithm for EcdsaVerificationAlgorithm {
 }
 
 impl EcdsaVerificationAlgorithm {
-    
+
     fn verify_digest(
         &self,
         public_key: untrusted::Input,
@@ -82,70 +62,29 @@ impl EcdsaVerificationAlgorithm {
     ) -> Result<(), error::Unspecified> {
         let cpu = cpu::features();
 
-        
-
         let public_key_ops = self.ops.public_key_ops;
         let scalar_ops = self.ops.scalar_ops;
         let q = &public_key_ops.common.elem_modulus(cpu);
         let n = &scalar_ops.scalar_modulus(cpu);
 
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         let peer_pub_key = parse_uncompressed_point(public_key_ops, q, public_key)?;
 
         let (r, s) = signature.read_all(error::Unspecified, |input| {
             (self.split_rs)(scalar_ops, input)
         })?;
 
-        
-        
         let r = scalar_parse_big_endian_variable(n, limb::AllowZero::No, r)?;
         let s = scalar_parse_big_endian_variable(n, limb::AllowZero::No, s)?;
 
-        
-        
         let w = self.ops.scalar_inv_to_mont_vartime(&s, cpu);
 
-        
-        
         let u1 = scalar_ops.scalar_product(&e, &w, cpu);
         let u2 = scalar_ops.scalar_product(&r, &w, cpu);
 
-        
-        
-        
         let product = (self.ops.twin_mul)(&u1, &u2, &peer_pub_key, cpu);
 
-        
-        
-        
-        
-        
-        
-        
         let z2 = verify_jacobian_point_is_on_the_curve(q, &product)?;
 
-        
-        
-        
-        
-        
-        
         let x = q.point_x(&product);
         fn sig_r_equals_x(q: &Modulus<Q>, r: &Elem<Unencoded>, x: &Elem<R>, z2: &Elem<R>) -> bool {
             let r_jacobian = q.elem_product(z2, r);
@@ -191,22 +130,12 @@ fn split_rs_asn1<'a>(
     })
 }
 
-
-
-
-
-
 pub static ECDSA_P256_SHA256_FIXED: EcdsaVerificationAlgorithm = EcdsaVerificationAlgorithm {
     ops: &p256::PUBLIC_SCALAR_OPS,
     digest_alg: &digest::SHA256,
     split_rs: split_rs_fixed,
     id: AlgorithmID::ECDSA_P256_SHA256_FIXED,
 };
-
-
-
-
-
 
 pub static ECDSA_P384_SHA384_FIXED: EcdsaVerificationAlgorithm = EcdsaVerificationAlgorithm {
     ops: &p384::PUBLIC_SCALAR_OPS,
@@ -215,27 +144,12 @@ pub static ECDSA_P384_SHA384_FIXED: EcdsaVerificationAlgorithm = EcdsaVerificati
     id: AlgorithmID::ECDSA_P384_SHA384_FIXED,
 };
 
-
-
-
-
-
 pub static ECDSA_P256_SHA256_ASN1: EcdsaVerificationAlgorithm = EcdsaVerificationAlgorithm {
     ops: &p256::PUBLIC_SCALAR_OPS,
     digest_alg: &digest::SHA256,
     split_rs: split_rs_asn1,
     id: AlgorithmID::ECDSA_P256_SHA256_ASN1,
 };
-
-
-
-
-
-
-
-
-
-
 
 pub static ECDSA_P256_SHA384_ASN1: EcdsaVerificationAlgorithm = EcdsaVerificationAlgorithm {
     ops: &p256::PUBLIC_SCALAR_OPS,
@@ -244,27 +158,12 @@ pub static ECDSA_P256_SHA384_ASN1: EcdsaVerificationAlgorithm = EcdsaVerificatio
     id: AlgorithmID::ECDSA_P256_SHA384_ASN1,
 };
 
-
-
-
-
-
-
-
-
-
-
 pub static ECDSA_P384_SHA256_ASN1: EcdsaVerificationAlgorithm = EcdsaVerificationAlgorithm {
     ops: &p384::PUBLIC_SCALAR_OPS,
     digest_alg: &digest::SHA256,
     split_rs: split_rs_asn1,
     id: AlgorithmID::ECDSA_P384_SHA256_ASN1,
 };
-
-
-
-
-
 
 pub static ECDSA_P384_SHA384_ASN1: EcdsaVerificationAlgorithm = EcdsaVerificationAlgorithm {
     ops: &p384::PUBLIC_SCALAR_OPS,

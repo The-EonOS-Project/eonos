@@ -191,7 +191,6 @@ my ($Xhi,$Xi,$Hkey,$HK)=@_;
 	&pxor		($Xi,$T2);		#
 }
 
-
 if (1) {		# Algorithm 9 with <<1 twist.
 			# Reduction is shorter and uses only two
 			# temporary registers, which makes it better
@@ -422,9 +421,9 @@ my ($Xhi,$Xi) = @_;
 	&pshufb		($Xi,$T3);
 	&movdqu		(&QWP(0,$Xip),$Xi);
 &function_end("gcm_ghash_clmul");
-
+
 }
-
+
 &set_label("bswap",64);
 	&data_byte(15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0);
 	&data_byte(1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0xc2);	# 0x1c2_polynomial

@@ -122,12 +122,10 @@ open OUT,"| \"$^X\" \"$xlate\" $flavour \"$output\"";
 
 $do4xaggr=1;
 
-
 $code=<<___;
 .text
 ___
 
-
 ######################################################################
 # PCLMULQDQ version.
 
@@ -199,7 +197,7 @@ $code.=<<___;
 	pxor		$Xhi,$Xi		#
 ___
 }
-
+
 { my ($Htbl,$Xip)=@_4args;
   my $HK="%xmm6";
 
@@ -286,7 +284,6 @@ $code.=<<___;
 ___
 }
 
-
 { my ($Xip,$Htbl,$inp,$len)=@_4args;
   my ($Xln,$Xmn,$Xhn,$Hkey2,$HK) = map("%xmm$_",(3..7));
   my ($T1,$T2,$T3)=map("%xmm$_",(8..10));
@@ -655,7 +652,7 @@ $code.=<<___;
 .size	gcm_ghash_clmul,.-gcm_ghash_clmul
 ___
 }
-
+
 $code.=<<___;
 .globl	gcm_init_avx
 .type	gcm_init_avx,\@abi-omnipotent
@@ -802,7 +799,7 @@ $code.=<<___;
 .size	gcm_init_avx,.-gcm_init_avx
 ___
 }
-
+
 $code.=<<___;
 .globl	gcm_ghash_avx
 .type	gcm_ghash_avx,\@abi-omnipotent
@@ -1242,7 +1239,7 @@ $code.=<<___;
 .size	gcm_ghash_avx,.-gcm_ghash_avx
 ___
 }
-
+
 $code.=<<___;
 .section .rodata
 .align	64
@@ -1258,7 +1255,7 @@ $code.=<<___;
 .align	64
 .text
 ___
-
+
 $code =~ s/\`([^\`]*)\`/eval($1)/gem;
 
 print $code;

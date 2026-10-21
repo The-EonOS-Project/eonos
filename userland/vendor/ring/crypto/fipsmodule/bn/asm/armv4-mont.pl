@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 # ====================================================================
 # Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
 # project.
@@ -175,7 +174,7 @@ bn_mul_mont_nohw:
 	str	$nlo,[$num]		@ tp[num-1]=
 	mov	$tj,sp
 	str	$nhi,[$num,#4]		@ tp[num]=
-
+
 .Louter:
 	sub	$tj,$num,$tj		@ "original" $num-1 value
 	sub	$ap,$ap,$tj		@ "rewind" ap to &ap[1]
@@ -227,7 +226,7 @@ bn_mul_mont_nohw:
 #endif
 	movne	$tj,sp
 	bne	.Louter
-
+
 	ldr	$rp,[$_rp]		@ pull rp
 	mov	$aj,sp
 	add	$num,$num,#4		@ $num to point at &tp[num]

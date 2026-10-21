@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdint.h>
 typedef unsigned char fiat_25519_uint1;
 typedef signed char fiat_25519_int1;
@@ -26,11 +12,7 @@ typedef signed char fiat_25519_int1;
 FIAT_25519_FIAT_EXTENSION typedef signed __int128 fiat_25519_int128;
 FIAT_25519_FIAT_EXTENSION typedef unsigned __int128 fiat_25519_uint128;
 
-
-
 typedef uint64_t fiat_25519_loose_field_element[5];
-
-
 
 typedef uint64_t fiat_25519_tight_field_element[5];
 
@@ -47,22 +29,6 @@ static __inline__ uint64_t fiat_25519_value_barrier_u64(uint64_t a) {
 #  define fiat_25519_value_barrier_u64(x) (x)
 #endif
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 static FIAT_25519_FIAT_INLINE void fiat_25519_addcarryx_u51(uint64_t* out1, fiat_25519_uint1* out2, fiat_25519_uint1 arg1, uint64_t arg2, uint64_t arg3) {
   uint64_t x1;
   uint64_t x2;
@@ -73,21 +39,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_addcarryx_u51(uint64_t* out1, fiat
   *out1 = x2;
   *out2 = x3;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 static FIAT_25519_FIAT_INLINE void fiat_25519_subborrowx_u51(uint64_t* out1, fiat_25519_uint1* out2, fiat_25519_uint1 arg1, uint64_t arg2, uint64_t arg3) {
   int64_t x1;
@@ -100,19 +51,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_subborrowx_u51(uint64_t* out1, fia
   *out2 = (fiat_25519_uint1)(0x0 - x2);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 static FIAT_25519_FIAT_INLINE void fiat_25519_cmovznz_u64(uint64_t* out1, fiat_25519_uint1 arg1, uint64_t arg2, uint64_t arg3) {
   fiat_25519_uint1 x1;
   uint64_t x2;
@@ -122,13 +60,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_cmovznz_u64(uint64_t* out1, fiat_2
   x3 = ((fiat_25519_value_barrier_u64(x2) & arg3) | (fiat_25519_value_barrier_u64((~x2)) & arg2));
   *out1 = x3;
 }
-
-
-
-
-
-
-
 
 static FIAT_25519_FIAT_INLINE void fiat_25519_carry_mul(fiat_25519_tight_field_element out1, const fiat_25519_loose_field_element arg1, const fiat_25519_loose_field_element arg2) {
   fiat_25519_uint128 x1;
@@ -242,13 +173,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_carry_mul(fiat_25519_tight_field_e
   out1[4] = x44;
 }
 
-
-
-
-
-
-
-
 static FIAT_25519_FIAT_INLINE void fiat_25519_carry_square(fiat_25519_tight_field_element out1, const fiat_25519_loose_field_element arg1) {
   uint64_t x1;
   uint64_t x2;
@@ -357,13 +281,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_carry_square(fiat_25519_tight_fiel
   out1[4] = x42;
 }
 
-
-
-
-
-
-
-
 static FIAT_25519_FIAT_INLINE void fiat_25519_carry(fiat_25519_tight_field_element out1, const fiat_25519_loose_field_element arg1) {
   uint64_t x1;
   uint64_t x2;
@@ -396,13 +313,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_carry(fiat_25519_tight_field_eleme
   out1[4] = x12;
 }
 
-
-
-
-
-
-
-
 static FIAT_25519_FIAT_INLINE void fiat_25519_add(fiat_25519_loose_field_element out1, const fiat_25519_tight_field_element arg1, const fiat_25519_tight_field_element arg2) {
   uint64_t x1;
   uint64_t x2;
@@ -420,13 +330,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_add(fiat_25519_loose_field_element
   out1[3] = x4;
   out1[4] = x5;
 }
-
-
-
-
-
-
-
 
 static FIAT_25519_FIAT_INLINE void fiat_25519_sub(fiat_25519_loose_field_element out1, const fiat_25519_tight_field_element arg1, const fiat_25519_tight_field_element arg2) {
   uint64_t x1;
@@ -446,13 +349,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_sub(fiat_25519_loose_field_element
   out1[4] = x5;
 }
 
-
-
-
-
-
-
-
 static FIAT_25519_FIAT_INLINE void fiat_25519_opp(fiat_25519_loose_field_element out1, const fiat_25519_tight_field_element arg1) {
   uint64_t x1;
   uint64_t x2;
@@ -470,15 +366,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_opp(fiat_25519_loose_field_element
   out1[3] = x4;
   out1[4] = x5;
 }
-
-
-
-
-
-
-
-
-
 
 static FIAT_25519_FIAT_INLINE void fiat_25519_to_bytes(uint8_t out1[32], const fiat_25519_tight_field_element arg1) {
   uint64_t x1;
@@ -687,15 +574,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_to_bytes(uint8_t out1[32], const f
   out1[31] = x91;
 }
 
-
-
-
-
-
-
-
-
-
 static FIAT_25519_FIAT_INLINE void fiat_25519_from_bytes(fiat_25519_tight_field_element out1, const uint8_t arg1[32]) {
   uint64_t x1;
   uint64_t x2;
@@ -845,13 +723,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_from_bytes(fiat_25519_tight_field_
   out1[3] = x64;
   out1[4] = x71;
 }
-
-
-
-
-
-
-
 
 static FIAT_25519_FIAT_INLINE void fiat_25519_carry_scmul_121666(fiat_25519_tight_field_element out1, const fiat_25519_loose_field_element arg1) {
   fiat_25519_uint128 x1;

@@ -74,7 +74,6 @@ easily lock at 60 fps (well, there are some issues with DOOM's 35 hz
 timebase...).  The biggest issues would probably be the non-power of two
 texture sizes and the walls composed of multiple textures.
 
-
 I don't have a real good guess at how many people are going to be
 playing with this, but if significant projects are undertaken, it would
 be cool to see a level of community cooperation.  I know that most early

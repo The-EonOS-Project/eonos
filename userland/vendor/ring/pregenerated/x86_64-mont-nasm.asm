@@ -1,6 +1,3 @@
-
-
-
 %ifidn __OUTPUT_FORMAT__, win64
 default	rel
 %define XMMWORD
@@ -10,7 +7,6 @@ default	rel
 
 %include "ring_core_generated/prefix_symbols_nasm.inc"
 section	.text code align=64
-
 
 global	bn_mul_mont_nohw
 
@@ -26,8 +22,6 @@ $L$SEH_begin_bn_mul_mont_nohw:
 	mov	rcx,r9
 	mov	r8,QWORD[40+rsp]
 	mov	r9,QWORD[48+rsp]
-
-
 
 _CET_ENDBR
 	mov	r9d,r9d
@@ -45,20 +39,11 @@ _CET_ENDBR
 
 	push	r15
 
-
 	neg	r9
 	mov	r11,rsp
 	lea	r10,[((-16))+r9*8+rsp]
 	neg	r9
 	and	r10,-1024
-
-
-
-
-
-
-
-
 
 	sub	r11,r10
 	and	r11,-4096
@@ -282,8 +267,6 @@ $L$SEH_begin_bn_mul4x_mont:
 	mov	r8,QWORD[40+rsp]
 	mov	r9,QWORD[48+rsp]
 
-
-
 _CET_ENDBR
 	mov	r9d,r9d
 	mov	rax,rsp
@@ -299,7 +282,6 @@ _CET_ENDBR
 	push	r14
 
 	push	r15
-
 
 	neg	r9
 	mov	r11,rsp
@@ -731,8 +713,6 @@ $L$SEH_begin_bn_sqr8x_mont:
 	mov	r8,QWORD[40+rsp]
 	mov	r9,QWORD[48+rsp]
 
-
-
 _CET_ENDBR
 	mov	r9d,r9d
 	mov	rax,rsp
@@ -755,11 +735,6 @@ $L$sqr8x_prologue:
 	shl	r9d,3
 	shl	r10,3+2
 	neg	r9
-
-
-
-
-
 
 	lea	r11,[((-64))+r9*2+rsp]
 	mov	rbp,rsp
@@ -816,9 +791,6 @@ DB	102,73,15,110,218
 
 	call	bn_sqrx8x_internal
 
-
-
-
 	lea	rbx,[rcx*1+r8]
 	mov	r9,rcx
 	mov	rdx,rcx
@@ -829,9 +801,6 @@ DB	102,72,15,126,207
 ALIGN	32
 $L$sqr8x_nox:
 	call	bn_sqr8x_internal
-
-
-
 
 	lea	rbx,[r9*1+rdi]
 	mov	rcx,r9
@@ -932,8 +901,6 @@ $L$SEH_begin_bn_mulx4x_mont:
 	mov	r8,QWORD[40+rsp]
 	mov	r9,QWORD[48+rsp]
 
-
-
 _CET_ENDBR
 	mov	rax,rsp
 
@@ -975,17 +942,6 @@ $L$mulx4x_page_walk:
 $L$mulx4x_page_walk_done:
 
 	lea	r10,[r9*1+rdx]
-
-
-
-
-
-
-
-
-
-
-
 
 	mov	QWORD[rsp],r9
 	shr	r9,5
@@ -1332,8 +1288,6 @@ mul_handler:
 
 	jmp	NEAR $L$common_pop_regs
 
-
-
 ALIGN	16
 sqr_handler:
 	push	rsi
@@ -1424,7 +1378,6 @@ $L$common_seh_tail:
 	pop	rdi
 	pop	rsi
 	ret
-
 
 section	.pdata rdata align=4
 ALIGN	4

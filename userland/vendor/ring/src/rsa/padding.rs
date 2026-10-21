@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::{bb, bits, digest, error, rand};
 
 mod pkcs1;
@@ -23,10 +9,8 @@ pub use self::{
 };
 pub(super) use pkcs1::RSA_PKCS1_SHA1_FOR_LEGACY_USE_ONLY;
 
-
 pub trait Padding: 'static + Sync + crate::sealed::Sealed + core::fmt::Debug {
-    
-    
+
     fn digest_alg(&self) -> &'static digest::Algorithm;
 }
 
@@ -41,9 +25,6 @@ pub(super) fn encode(
     encoding.encode(m_hash, m_out, mod_bits, rng)
 }
 
-
-
-
 #[cfg(feature = "alloc")]
 pub trait RsaEncoding: Padding {
     #[deprecated(note = "internal API that will be removed")]
@@ -57,10 +38,6 @@ pub trait RsaEncoding: Padding {
     ) -> Result<(), error::Unspecified>;
 }
 
-
-
-
-
 pub trait Verification: Padding {
     fn verify(
         &self,
@@ -70,22 +47,16 @@ pub trait Verification: Padding {
     ) -> Result<(), error::Unspecified>;
 }
 
-
-
 fn mgf1(digest_alg: &'static digest::Algorithm, seed: &[u8], out: &mut [u8]) {
     let digest_len = digest_alg.output_len();
 
-    
     for (i, out) in out.chunks_mut(digest_len).enumerate() {
         let mut ctx = digest::Context::new(digest_alg);
         ctx.update(seed);
-        
-        
+
         ctx.update(&u32::to_be_bytes(i.try_into().unwrap()));
         let digest = ctx.finish();
 
-        
-        
         bb::xor_assign_at_start(out, digest.as_ref());
     }
 }
@@ -119,7 +90,6 @@ mod test {
                 let encoded = test_case.consume_bytes("EM");
                 let encoded = untrusted::Input::from(&encoded);
 
-                
                 let _ = test_case.consume_bytes("Salt");
 
                 let bit_len = test_case.consume_usize_bits("Len");
@@ -134,7 +104,6 @@ mod test {
         );
     }
 
-    
     #[cfg(feature = "alloc")]
     #[test]
     fn test_pss_padding_encode() {
@@ -157,7 +126,6 @@ mod test {
                 let bit_len = test_case.consume_usize_bits("Len");
                 let expected_result = test_case.consume_string("Result");
 
-                
                 if expected_result != "P" {
                     return Ok(());
                 }

@@ -1,21 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 
 #include "m_misc.h"
@@ -42,8 +24,6 @@ static wad_file_t *W_StdC_OpenFile(char *path)
         return NULL;
     }
 
-    
-
     result = Z_Malloc(sizeof(stdc_wad_file_t), PU_STATIC, 0);
     result->wad.file_class = &stdc_wad_file;
     result->wad.mapped = NULL;
@@ -63,9 +43,6 @@ static void W_StdC_CloseFile(wad_file_t *wad)
     Z_Free(stdc_wad);
 }
 
-
-
-
 size_t W_StdC_Read(wad_file_t *wad, unsigned int offset,
                    void *buffer, size_t buffer_len)
 {
@@ -74,17 +51,12 @@ size_t W_StdC_Read(wad_file_t *wad, unsigned int offset,
 
     stdc_wad = (stdc_wad_file_t *) wad;
 
-    
-
     fseek(stdc_wad->fstream, offset, SEEK_SET);
-
-    
 
     result = fread(buffer, 1, buffer_len, stdc_wad->fstream);
 
     return result;
 }
-
 
 wad_file_class_t stdc_wad_file = 
 {
@@ -92,5 +64,4 @@ wad_file_class_t stdc_wad_file =
     W_StdC_CloseFile,
     W_StdC_Read,
 };
-
 

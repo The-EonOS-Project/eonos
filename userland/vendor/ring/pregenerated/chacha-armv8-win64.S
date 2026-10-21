@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_AARCH64) && defined(_WIN32)
@@ -294,7 +291,6 @@ Loop_tail:
 	ldp	x29,x30,[sp],#96
 	AARCH64_VALIDATE_LINK_REGISTER
 	ret
-
 
 .globl	ChaCha20_ctr32_neon
 

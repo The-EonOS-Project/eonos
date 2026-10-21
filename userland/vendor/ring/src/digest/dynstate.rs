@@ -1,23 +1,6 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{format_output, sha1, sha2, Output};
 use crate::{cpu, polyfill::slice};
 use core::mem::size_of;
-
-
-
 
 #[derive(Clone)]
 pub(super) enum DynState {

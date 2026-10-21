@@ -1,51 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #[cfg(feature = "std")]
 extern crate std;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #[derive(Copy, Clone, Debug)]
 pub struct KeyRejected(&'static str);
@@ -64,7 +18,6 @@ impl KeyRejected {
         Self("InvalidEncoding")
     }
 
-    
     pub(crate) fn rng_failed() -> Self {
         Self("RNG failed")
     }

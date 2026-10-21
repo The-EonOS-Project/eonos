@@ -1,10 +1,3 @@
-
-
-
-
-
-
-
 .PHONY: all clean print
 
 .SUFFIXES:
@@ -15,8 +8,6 @@ else
 	VB=@
 endif
 
-
-
 CC:=i386-pc-msdosdjgpp-gcc
 OPTFLAGS:=-O3
 CFLAGS+=-std=gnu89
@@ -26,17 +17,7 @@ CFLAGS+=-DDOOMGENERIC_RESX=320 -DDOOMGENERIC_RESY=200
 CFLAGS+=-DFEATURE_SOUND=1
 CFLAGS+=-DCMAP256
 
-
-
-
-
-
-
-
-
 LIBS+=-lalleg
-
-
 
 OBJDIR:=djgpp
 OUTPUT:=doomgen.exe

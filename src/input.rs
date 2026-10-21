@@ -1,10 +1,6 @@
-
-
 use crate::sync::IrqMutex;
 
 const QUEUE_CAPACITY: usize = 512;
-
-
 
 #[derive(Clone, Copy, Debug, Default)]
 #[repr(C)]
@@ -50,8 +46,6 @@ impl EventQueue {
 
 static EVENTS: IrqMutex<EventQueue> = IrqMutex::new(EventQueue::new());
 
-
-
 pub fn claim(pid: u64) -> bool {
     let mut queue = EVENTS.lock();
     if queue.owner.is_some_and(|owner| owner != pid) { return false; }
@@ -70,9 +64,6 @@ pub fn release(pid: u64) {
     }
 }
 
-
-
-
 pub fn push(usage: u8, pressed: bool, modifiers: u8) -> bool {
     let mut queue = EVENTS.lock();
     if queue.owner.is_none() { return false; }
@@ -80,9 +71,6 @@ pub fn push(usage: u8, pressed: bool, modifiers: u8) -> bool {
     let mask = 1u64 << (usage % 64);
     if pressed { queue.held[slot] |= mask; } else { queue.held[slot] &= !mask; }
 
-    
-    
-    
     if queue.len == QUEUE_CAPACITY {
         queue.clear_events();
         let held = queue.held;

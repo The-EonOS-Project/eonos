@@ -1,24 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::{
     arithmetic::bigint,
     bits, error,
@@ -27,13 +6,10 @@ use crate::{
 
 pub(crate) mod padding;
 
-
 const PUBLIC_KEY_PUBLIC_MODULUS_MAX_LEN: usize =
     bits::BitLength::from_bits(8192).as_usize_bytes_rounded_up();
 
-
 const PRIVATE_KEY_PUBLIC_MODULUS_MAX_BITS: bits::BitLength = bits::BitLength::from_bits(4096);
-
 
 #[derive(Debug)]
 pub struct RsaParameters {
@@ -52,8 +28,6 @@ fn parse_public_key(
         })
     })
 }
-
-
 
 enum N {}
 

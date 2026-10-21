@@ -1,22 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef OPENSSL_HEADER_BASE_H
 #define OPENSSL_HEADER_BASE_H
-
-
-
 
 #if defined(_MSC_VER) && !defined(__clang__)
 #pragma warning(push, 3)
@@ -41,7 +24,6 @@
 
 #if defined(__APPLE__)
 
-
 #if defined(TARGET_OS_OSX) && TARGET_OS_OSX
 #define OPENSSL_MACOS
 #endif
@@ -50,12 +32,7 @@
 #endif
 #endif
 
-
-
-
 #define OPENSSL_EXPORT
-
-
 
 OPENSSL_STATIC_ASSERT(sizeof(int32_t) == sizeof(int), "int isn't 32 bits.");
 OPENSSL_STATIC_ASSERT(sizeof(uint32_t) == sizeof(unsigned int), "unsigned int isn't 32 bits.");

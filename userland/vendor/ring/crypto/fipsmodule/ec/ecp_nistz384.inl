@@ -1,33 +1,9 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include "ecp_nistz.h"
 
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #endif
-
 
 static void nistz384_point_double(P384_POINT *r, const P384_POINT *a) {
   BN_ULONG S[P384_LIMBS];
@@ -72,7 +48,6 @@ static void nistz384_point_double(P384_POINT *r, const P384_POINT *a) {
   elem_mul_mont(S, S, M);
   elem_sub(res_y, S, res_y);
 }
-
 
 static void nistz384_point_add(P384_POINT *r, const P384_POINT *a,
                                const P384_POINT *b) {
@@ -173,7 +148,6 @@ static void add_precomputed_w5(P384_POINT *r, crypto_word_t wvalue,
   nistz384_point_add(r, r, &h);
 }
 
-
 static void nistz384_point_mul(P384_POINT *r,
                                const BN_ULONG p_scalar[P384_LIMBS],
                                const Limb p_x[P384_LIMBS],
@@ -185,13 +159,7 @@ static void nistz384_point_mul(P384_POINT *r,
   little_endian_bytes_from_scalar(p_str, sizeof(p_str) / sizeof(p_str[0]),
                                   p_scalar, P384_LIMBS);
 
-  
-
-
   alignas(64) P384_POINT table[16];
-
-  
-
 
   P384_POINT *row = table;
 
@@ -247,7 +215,6 @@ static void nistz384_point_mul(P384_POINT *r,
     nistz384_point_double(r, r);
   }
 
-  
   wvalue = p_str[0];
   wvalue = (wvalue << 1) & kMask;
   add_precomputed_w5(r, wvalue, table);

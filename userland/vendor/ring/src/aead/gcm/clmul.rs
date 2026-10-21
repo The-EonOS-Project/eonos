@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![cfg(any(
     all(target_arch = "aarch64", target_endian = "little"),
     target_arch = "x86",

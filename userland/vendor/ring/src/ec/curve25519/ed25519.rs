@@ -1,25 +1,8 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::ops::ELEM_LEN;
 use crate::digest;
 
 pub mod signing;
 pub mod verification;
-
 
 pub const ED25519_PUBLIC_KEY_LEN: usize = ELEM_LEN;
 

@@ -1,6 +1,3 @@
-
-
-
 %ifidn __OUTPUT_FORMAT__, win64
 default	rel
 %define XMMWORD
@@ -10,7 +7,6 @@ default	rel
 
 %include "ring_core_generated/prefix_symbols_nasm.inc"
 section	.text code align=64
-
 
 global	sha512_block_data_order_nohw
 
@@ -23,8 +19,6 @@ $L$SEH_begin_sha512_block_data_order_nohw:
 	mov	rdi,rcx
 	mov	rsi,rdx
 	mov	rdx,r8
-
-
 
 _CET_ENDBR
 	mov	rax,rsp
@@ -1840,8 +1834,6 @@ $L$SEH_begin_sha512_block_data_order_avx:
 	mov	rdi,rcx
 	mov	rsi,rdx
 	mov	rdx,r8
-
-
 
 _CET_ENDBR
 	mov	rax,rsp

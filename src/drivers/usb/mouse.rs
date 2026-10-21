@@ -1,8 +1,4 @@
-
-
 use crate::sync::IrqMutex;
-
-
 
 #[derive(Clone, Copy, Debug, Default)]
 #[repr(C)]
@@ -46,10 +42,7 @@ pub(super) fn handle_report(report: &[u8]) {
         .map(|fb| (fb.width, fb.height))
         .unwrap_or((1, 1));
     let mut state = STATE.lock();
-    
-    
-    
-    
+
     let (buttons, dx, dy, wheel) = if report.len() >= 8 && report[0] == 1 {
         (
             report[1] & 0x1f,
@@ -58,10 +51,7 @@ pub(super) fn handle_report(report: &[u8]) {
             report[6] as i8 as i32,
         )
     } else if report.len() >= 6 && report[0] == 1 {
-        
-        
-        
-        
+
         (
             report[1] & 0x1f,
             report[2] as i8 as i32,
@@ -69,9 +59,7 @@ pub(super) fn handle_report(report: &[u8]) {
             report[4] as i8 as i32,
         )
     } else if report.len() > 4 {
-        
-        
-        
+
         return;
     } else if report.len() >= 3 {
         (

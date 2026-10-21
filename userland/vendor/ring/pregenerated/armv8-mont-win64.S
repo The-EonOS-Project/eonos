@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_AARCH64) && defined(_WIN32)
@@ -37,19 +34,9 @@ bn_mul_mont_nohw:
 	mul	x15,x6,x4		
 	mov	sp,x22			
 
-	
 	umulh	x13,x13,x15
 	mul	x16,x14,x15		
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	subs	xzr,x6,#1		
 	umulh	x17,x14,x15
 	adc	x13,x13,xzr
@@ -108,10 +95,9 @@ Louter:
 	mul	x15,x6,x4
 	sub	x20,x20,#8		
 
-	
 	umulh	x13,x13,x15
 	mul	x16,x14,x15		
-	
+
 	subs	xzr,x6,#1		
 	umulh	x17,x14,x15
 	cbz	x21,Linner_skip
@@ -161,10 +147,6 @@ Linner_skip:
 
 	cbnz	x20,Louter
 
-	
-	
-	
-	
 	ldr	x23,[sp]		
 	add	x22,sp,#8
 	ldr	x14,[x3],#8		
@@ -265,37 +247,8 @@ Lsqr8x_zero_start:
 	mov	x2,sp
 	str	x4,[x29,#112]		
 
-	
 .align	4
 Lsqr8x_outer_loop:
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
 
 	mul	x14,x7,x6		
 	mul	x15,x8,x6
@@ -450,31 +403,9 @@ Lsqr8x_outer_loop:
 	adcs	x26,xzr,x13
 	ldp	x12,x13,[x1,#8*6]
 	add	x1,x1,#8*8
-	
+
 	mov	x27,#-8*8
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 Lsqr8x_mul:
 	mul	x14,x6,x4
 	adc	x28,xzr,xzr		
@@ -513,10 +444,9 @@ Lsqr8x_mul:
 	adcs	x24,x25,x15
 	adcs	x25,x26,x16
 	adcs	x26,x28,x17
-	
+
 	cbnz	x27,Lsqr8x_mul
-					
-					
+
 	cmp	x1,x3		
 	b.eq	Lsqr8x_break
 
@@ -539,7 +469,7 @@ Lsqr8x_mul:
 	adcs	x26,x26,x13
 	ldp	x12,x13,[x1,#8*6]
 	add	x1,x1,#8*8
-	
+
 	b	Lsqr8x_mul
 
 .align	4
@@ -566,7 +496,7 @@ Lsqr8x_break:
 
 .align	4
 Lsqr8x_outer_break:
-	
+
 	ldp	x7,x9,[x14,#8*0]	
 	ldp	x15,x16,[sp,#8*1]
 	ldp	x11,x13,[x14,#8*2]
@@ -649,7 +579,6 @@ Lsqr4x_shift_n_add:
 	adc	x26,x13,x16
 	ldp	x10,x11,[x1,#8*4]
 
-	
 	mul	x28,x4,x19		
 	ldp	x12,x13,[x1,#8*6]
 	add	x3,x1,x5
@@ -664,13 +593,13 @@ Lsqr4x_shift_n_add:
 	mov	x27,#8
 
 Lsqr8x_reduction:
-	
+
 	mul	x15,x7,x28
 	sub	x27,x27,#1
 	mul	x16,x8,x28
 	str	x28,[x2],#8		
 	mul	x17,x9,x28
-	
+
 	subs	xzr,x19,#1		
 	mul	x14,x10,x28
 	adcs	x19,x20,x15
@@ -717,7 +646,7 @@ Lsqr8x_reduction:
 	adcs	x24,x24,x15
 	adcs	x25,x25,x16
 	adcs	x26,x26,x17
-	
+
 	cbz	x27,Lsqr8x8_post_condition
 
 	ldr	x4,[x2,#-8*8]
@@ -766,10 +695,9 @@ Lsqr8x_tail:
 	adcs	x24,x25,x15
 	adcs	x25,x26,x16
 	adcs	x26,x28,x17
-	
+
 	cbnz	x27,Lsqr8x_tail
-					
-					
+
 	ldp	x6,x7,[x2,#8*0]
 	sub	x27,x3,x1	
 	sub	x16,x3,x5	
@@ -793,7 +721,7 @@ Lsqr8x_tail:
 	adcs	x26,x26,x13
 	ldp	x12,x13,[x1,#8*6]
 	add	x1,x1,#8*8
-	
+
 	b	Lsqr8x_tail
 
 .align	4
@@ -830,10 +758,6 @@ Lsqr8x_tail_break:
 	mov	x27,#8
 	b.ne	Lsqr8x_reduction
 
-	
-	
-	
-	
 	ldr	x0,[x29,#96]		
 	add	x2,x2,#8*8
 	subs	x14,x19,x6
@@ -924,7 +848,7 @@ Lsqr4x_cond_copy:
 Lsqr8x8_post_condition:
 	adc	x28,xzr,xzr
 	ldr	x30,[x29,#8]		
-	
+
 	subs	x6,x19,x6
 	ldr	x1,[x29,#96]		
 	sbcs	x7,x20,x7
@@ -944,7 +868,6 @@ Lsqr8x8_post_condition:
 	sbcs	x28,x28,xzr	
 	stp	xzr,xzr,[sp,#8*14]
 
-	
 	csel	x6,x19,x6,lo
 	csel	x7,x20,x7,lo
 	csel	x8,x21,x8,lo
@@ -967,7 +890,7 @@ Lsqr8x_done:
 	ldp	x25,x26,[x29,#64]
 	ldp	x27,x28,[x29,#80]
 	ldr	x29,[sp],#128
-	
+
 	AARCH64_VALIDATE_LINK_REGISTER
 	ret
 
@@ -1031,7 +954,7 @@ Loop_mul4x_1st_reduction:
 	umulh	x13,x9,x24
 	ldr	x24,[x2,x28]		
 	adds	x20,x20,x10
-	
+
 	str	x25,[x26],#8		
 	adcs	x21,x21,x11
 	mul	x11,x15,x25
@@ -1039,7 +962,7 @@ Loop_mul4x_1st_reduction:
 	mul	x12,x16,x25
 	adc	x23,x23,x13		
 	mul	x13,x17,x25
-	
+
 	subs	xzr,x19,#1		
 	umulh	x10,x14,x25		
 	adcs	x19,x20,x11
@@ -1055,7 +978,7 @@ Loop_mul4x_1st_reduction:
 	adcs	x20,x20,x11
 	adcs	x21,x21,x12
 	adcs	x22,x22,x13
-	
+
 	cbnz	x28,Loop_mul4x_1st_reduction
 
 	cbz	x10,Lmul4x4_post_condition
@@ -1111,7 +1034,7 @@ Loop_mul4x_1st_tail:
 	adcs	x20,x21,x11
 	adcs	x21,x22,x12
 	adcs	x22,x23,x13
-	
+
 	cbnz	x28,Loop_mul4x_1st_tail
 
 	sub	x11,x27,x5	
@@ -1166,7 +1089,7 @@ Loop_mul4x_reduction:
 	umulh	x13,x9,x24
 	ldr	x24,[x2,x28]		
 	adds	x20,x20,x10
-	
+
 	str	x25,[x26],#8		
 	adcs	x21,x21,x11
 	mul	x11,x15,x25		
@@ -1174,7 +1097,7 @@ Loop_mul4x_reduction:
 	mul	x12,x16,x25
 	adc	x23,x23,x13		
 	mul	x13,x17,x25
-	
+
 	subs	xzr,x19,#1		
 	umulh	x10,x14,x25		
 	adcs	x19,x20,x11
@@ -1189,7 +1112,7 @@ Loop_mul4x_reduction:
 	adcs	x20,x20,x11
 	adcs	x21,x21,x12
 	adcs	x22,x22,x13
-	
+
 	cbnz	x28,Loop_mul4x_reduction
 
 	adc	x0,x0,xzr
@@ -1202,7 +1125,6 @@ Loop_mul4x_reduction:
 	adcs	x20,x20,x11
 	adcs	x21,x21,x12
 	adcs	x22,x22,x13
-	
 
 	ldr	x25,[sp]		
 	ldp	x14,x15,[x3,#8*0]	
@@ -1253,7 +1175,7 @@ Loop_mul4x_tail:
 	adcs	x20,x21,x11
 	adcs	x21,x22,x12
 	adcs	x22,x23,x13
-	
+
 	cbnz	x28,Loop_mul4x_tail
 
 	sub	x11,x3,x5		
@@ -1269,7 +1191,7 @@ Loop_mul4x_tail:
 	adcs	x20,x20,x11
 	adcs	x21,x21,x12
 	adcs	x22,x22,x13
-	
+
 	ldp	x14,x15,[x3,#8*0]
 	ldp	x16,x17,[x3,#8*2]
 	add	x3,x3,#8*4
@@ -1305,10 +1227,7 @@ Loop_mul4x_break:
 
 .align	4
 Lmul4x_post:
-	
-	
-	
-	
+
 	mov	x0,x12
 	mov	x27,x12		
 	subs	x10,x19,x14
@@ -1383,7 +1302,7 @@ Lmul4x_cond_copy:
 Lmul4x4_post_condition:
 	adc	x0,x0,xzr
 	ldr	x1,[x29,#96]		
-	
+
 	subs	x6,x19,x14
 	ldr	x30,[x29,#8]		
 	sbcs	x7,x20,x15
@@ -1395,7 +1314,6 @@ Lmul4x4_post_condition:
 	sbcs	xzr,x0,xzr		
 	stp	xzr,xzr,[sp,#8*6]
 
-	
 	csel	x6,x19,x6,lo
 	csel	x7,x20,x7,lo
 	csel	x8,x21,x8,lo
@@ -1412,7 +1330,7 @@ Lmul4x_done:
 	ldp	x25,x26,[x29,#64]
 	ldp	x27,x28,[x29,#80]
 	ldr	x29,[sp],#128
-	
+
 	AARCH64_VALIDATE_LINK_REGISTER
 	ret
 

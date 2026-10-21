@@ -1,22 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,55 +25,39 @@
 #include <allegro/sound.h>
 #include <allegro/system.h>
 
-
 #define MAXMIDLENGTH (96 * 1024)
 #define MID_HEADER_MAGIC "MThd"
 #define MUS_HEADER_MAGIC "MUS\x1a"
 
-
 static boolean music_initialized = false;
-
 
 static boolean musicpaused = false;
 static int current_music_volume;
 
-
-
 MIDI *current_track_music = NULL;
-
 
 static boolean current_track_loop;
 
-
-
-
 static void I_Allegro_ShutdownMusic(void)
 {
-	
-	
+
 }
-
-
 
 static boolean I_Allegro_InitMusic(void)
 {
-	
+
 	music_initialized = true;
 
 	return true;
 }
 
-
-
 static void I_Allegro_SetMusicVolume(int volume)
 {
 	int digivol = -1;
 	get_volume(&digivol, NULL);
-	
+
 	set_volume(digivol, volume * 2);
 }
-
-
 
 static void I_Allegro_PlaySong(void *handle, boolean looping)
 {
@@ -117,7 +82,6 @@ static void I_Allegro_PlaySong(void *handle, boolean looping)
 	}
 }
 
-
 static void I_Allegro_PauseSong(void)
 {
 	if (!music_initialized)
@@ -129,7 +93,6 @@ static void I_Allegro_PauseSong(void)
 
 	midi_pause();
 }
-
 
 static void I_Allegro_ResumeSong(void)
 {
@@ -143,7 +106,6 @@ static void I_Allegro_ResumeSong(void)
 	midi_resume();
 }
 
-
 static void I_Allegro_StopSong(void)
 {
 	if (!music_initialized)
@@ -155,7 +117,6 @@ static void I_Allegro_StopSong(void)
 
 	current_track_music = NULL;
 }
-
 
 static void I_Allegro_UnRegisterSong(void *handle)
 {
@@ -174,13 +135,10 @@ static void I_Allegro_UnRegisterSong(void *handle)
 	destroy_midi(midi);
 }
 
-
-
 static boolean IsMid(byte *mem, int len)
 {
     return len > 4 && !memcmp(mem, "MThd", 4);
 }
-
 
 static boolean ConvertMus(byte *musdata, int len, char *filename)
 {
@@ -208,7 +166,6 @@ static boolean ConvertMus(byte *musdata, int len, char *filename)
     return result;
 }
 
-
 static void *I_Allegro_RegisterSong(void *data, int len)
 {
 	char *filename;
@@ -227,30 +184,24 @@ static void *I_Allegro_RegisterSong(void *data, int len)
 	}
 	else
 	{
-		
+
 		ConvertMus(data, len, filename);
 	}
-
-	
-	
 
 	music = load_midi(filename);
 
 	if (music == NULL)
 	{
-		
+
 		fprintf(stderr, "Error loading midi: %s\n", allegro_error);
 	}
 
-	
 	remove(filename);
 
 	free(filename);
 
 	return music;
 }
-
-
 
 static boolean I_Allegro_MusicIsPlaying(void)
 {
@@ -262,21 +213,15 @@ static boolean I_Allegro_MusicIsPlaying(void)
 	return (current_track_music != NULL) && (midi_pos > 0);
 }
 
-
-
 static double GetMusicPosition(void)
 {
 	return midi_time;
 }
 
-
-
-
 static void I_Allegro_PollMusic(void)
 {
-	
-}
 
+}
 
 static snddevice_t music_allegro_devices[] =
 {
@@ -287,7 +232,6 @@ static snddevice_t music_allegro_devices[] =
 	SNDDEVICE_GENMIDI,
 	SNDDEVICE_AWE32,
 };
-
 
 music_module_t DG_music_module =
 {

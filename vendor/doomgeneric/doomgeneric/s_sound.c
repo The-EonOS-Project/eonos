@@ -1,20 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -38,24 +21,11 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
-
-
-
 #define S_CLIPPING_DIST (1200 * FRACUNIT)
-
-
-
-
-
-
 
 #define S_CLOSE_DIST (200 * FRACUNIT)
 
-
-
 #define S_ATTENUATOR ((S_CLIPPING_DIST - S_CLOSE_DIST) >> FRACBITS)
-
-
 
 #define S_STEREO_SWING (96 * FRACUNIT)
 
@@ -65,51 +35,28 @@
 
 typedef struct
 {
-    
+
     sfxinfo_t *sfxinfo;
 
-    
     mobj_t *origin;
 
-    
     int handle;
-    
+
 } channel_t;
-
-
 
 static channel_t *channels;
 
-
-
-
 int sfxVolume = 8;
-
-
 
 int musicVolume = 8;
 
-
-
 static int snd_SfxVolume;
-
-
 
 static boolean mus_paused;        
 
-
-
 static musicinfo_t *mus_playing = NULL;
 
-
-
 int snd_channels = 8;
-
-
-
-
-
-
 
 void S_Init(int sfxVolume, int musicVolume)
 {  
@@ -120,21 +67,15 @@ void S_Init(int sfxVolume, int musicVolume)
     S_SetSfxVolume(sfxVolume);
     S_SetMusicVolume(musicVolume);
 
-    
-    
-    
     channels = Z_Malloc(snd_channels*sizeof(channel_t), PU_STATIC, 0);
 
-    
     for (i=0 ; i<snd_channels ; i++)
     {
         channels[i].sfxinfo = 0;
     }
 
-    
     mus_paused = 0;
 
-    
     for (i=1 ; i<NUMSFX ; i++)
     {
         S_sfx[i].lumpnum = S_sfx[i].usefulness = -1;
@@ -158,14 +99,11 @@ static void S_StopChannel(int cnum)
 
     if (c->sfxinfo)
     {
-        
 
         if (I_SoundIsPlaying(c->handle))
         {
             I_StopSound(c->handle);
         }
-
-        
 
         for (i=0; i<snd_channels; i++)
         {
@@ -174,27 +112,17 @@ static void S_StopChannel(int cnum)
                 break;
             }
         }
-        
-        
 
         c->sfxinfo->usefulness--;
         c->sfxinfo = NULL;
     }
 }
 
-
-
-
-
-
-
 void S_Start(void)
 {
     int cnum;
     int mnum;
 
-    
-    
     for (cnum=0 ; cnum<snd_channels ; cnum++)
     {
         if (channels[cnum].sfxinfo)
@@ -203,7 +131,6 @@ void S_Start(void)
         }
     }
 
-    
     mus_paused = 0;
 
     if (gamemode == commercial)
@@ -214,7 +141,6 @@ void S_Start(void)
     {
         int spmus[]=
         {
-            
 
             mus_e3m4,        
             mus_e3m2,        
@@ -254,19 +180,13 @@ void S_StopSound(mobj_t *origin)
     }
 }
 
-
-
-
-
-
 static int S_GetChannel(mobj_t *origin, sfxinfo_t *sfxinfo)
 {
-    
+
     int                cnum;
-    
+
     channel_t*        c;
 
-    
     for (cnum=0 ; cnum<snd_channels ; cnum++)
     {
         if (!channels[cnum].sfxinfo)
@@ -280,10 +200,9 @@ static int S_GetChannel(mobj_t *origin, sfxinfo_t *sfxinfo)
         }
     }
 
-    
     if (cnum == snd_channels)
     {
-        
+
         for (cnum=0 ; cnum<snd_channels ; cnum++)
         {
             if (channels[cnum].sfxinfo->priority >= sfxinfo->priority)
@@ -294,31 +213,23 @@ static int S_GetChannel(mobj_t *origin, sfxinfo_t *sfxinfo)
 
         if (cnum == snd_channels)
         {
-            
+
             return -1;
         }
         else
         {
-            
+
             S_StopChannel(cnum);
         }
     }
 
     c = &channels[cnum];
 
-    
     c->sfxinfo = sfxinfo;
     c->origin = origin;
 
     return cnum;
 }
-
-
-
-
-
-
-
 
 static int S_AdjustSoundParams(mobj_t *listener, mobj_t *source,
                                int *vol, int *sep)
@@ -328,20 +239,16 @@ static int S_AdjustSoundParams(mobj_t *listener, mobj_t *source,
     fixed_t        ady;
     angle_t        angle;
 
-    
-    
     adx = abs(listener->x - source->x);
     ady = abs(listener->y - source->y);
 
-    
     approx_dist = adx + ady - ((adx < ady ? adx : ady)>>1);
-    
+
     if (gamemap != 8 && approx_dist > S_CLIPPING_DIST)
     {
         return 0;
     }
-    
-    
+
     angle = R_PointToAngle2(listener->x,
                             listener->y,
                             source->x,
@@ -358,10 +265,8 @@ static int S_AdjustSoundParams(mobj_t *listener, mobj_t *source,
 
     angle >>= ANGLETOFINESHIFT;
 
-    
     *sep = 128 - (FixedMul(S_STEREO_SWING, finesine[angle]) >> FRACBITS);
 
-    
     if (approx_dist < S_CLOSE_DIST)
     {
         *vol = snd_SfxVolume;
@@ -379,12 +284,12 @@ static int S_AdjustSoundParams(mobj_t *listener, mobj_t *source,
     }
     else
     {
-        
+
         *vol = (snd_SfxVolume
                 * ((S_CLIPPING_DIST - approx_dist)>>FRACBITS))
             / S_ATTENUATOR; 
     }
-    
+
     return (*vol > 0);
 }
 
@@ -400,7 +305,6 @@ void S_StartSound(void *origin_p, int sfx_id)
     origin = (mobj_t *) origin_p;
     volume = snd_SfxVolume;
 
-    
     if (sfx_id < 1 || sfx_id > NUMSFX)
     {
         I_Error("Bad sfx #: %d", sfx_id);
@@ -408,7 +312,6 @@ void S_StartSound(void *origin_p, int sfx_id)
 
     sfx = &S_sfx[sfx_id];
 
-    
     if (sfx->link)
     {
         volume += sfx->volume;
@@ -424,9 +327,6 @@ void S_StartSound(void *origin_p, int sfx_id)
         }
     }
 
-
-    
-    
     if (origin && origin != players[consoleplayer].mo)
     {
         rc = S_AdjustSoundParams(players[consoleplayer].mo,
@@ -450,10 +350,8 @@ void S_StartSound(void *origin_p, int sfx_id)
         sep = NORM_SEP;
     }
 
-    
     S_StopSound(origin);
 
-    
     cnum = S_GetChannel(origin, sfx);
 
     if (cnum < 0)
@@ -461,7 +359,6 @@ void S_StartSound(void *origin_p, int sfx_id)
         return;
     }
 
-    
     if (sfx->usefulness++ < 0)
     {
         sfx->usefulness = 1;
@@ -474,10 +371,6 @@ void S_StartSound(void *origin_p, int sfx_id)
 
     channels[cnum].handle = I_StartSound(sfx, cnum, volume, sep);
 }        
-
-
-
-
 
 void S_PauseSound(void)
 {
@@ -496,10 +389,6 @@ void S_ResumeSound(void)
         mus_paused = false;
     }
 }
-
-
-
-
 
 void S_UpdateSounds(mobj_t *listener)
 {
@@ -521,7 +410,7 @@ void S_UpdateSounds(mobj_t *listener)
         {
             if (I_SoundIsPlaying(c->handle))
             {
-                
+
                 volume = snd_SfxVolume;
                 sep = NORM_SEP;
 
@@ -539,15 +428,13 @@ void S_UpdateSounds(mobj_t *listener)
                     }
                 }
 
-                
-                
                 if (c->origin && listener != c->origin)
                 {
                     audible = S_AdjustSoundParams(listener,
                                                   c->origin,
                                                   &volume,
                                                   &sep);
-                    
+
                     if (!audible)
                     {
                         S_StopChannel(cnum);
@@ -560,8 +447,7 @@ void S_UpdateSounds(mobj_t *listener)
             }
             else
             {
-                
-                
+
                 S_StopChannel(cnum);
             }
         }
@@ -589,10 +475,6 @@ void S_SetSfxVolume(int volume)
     snd_SfxVolume = volume;
 }
 
-
-
-
-
 void S_StartMusic(int m_id)
 {
     S_ChangeMusic(m_id, false);
@@ -603,9 +485,6 @@ void S_ChangeMusic(int musicnum, int looping)
     musicinfo_t *music = NULL;
     char namebuf[9];
     void *handle;
-
-    
-    
 
     if (musicnum == mus_intro && (snd_musicdevice == SNDDEVICE_ADLIB
                                || snd_musicdevice == SNDDEVICE_SB))
@@ -627,10 +506,8 @@ void S_ChangeMusic(int musicnum, int looping)
         return;
     }
 
-    
     S_StopMusic();
 
-    
     if (!music->lumpnum)
     {
         M_snprintf(namebuf, sizeof(namebuf), "d_%s", DEH_String(music->name));

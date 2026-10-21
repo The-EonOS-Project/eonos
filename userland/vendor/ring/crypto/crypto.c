@@ -1,23 +1,4 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <ring-core/base.h>
-
-
-
-
-
 
 #if defined(OPENSSL_WINDOWS)
 #define HIDDEN

@@ -12,7 +12,6 @@ description = "An EonOS ERA application"
 [dependencies]
 eonos-app = { path = "../../userland/app-sdk" }
 
-
 [profile.release]
 panic = "abort"
 strip = true

@@ -1,5 +1,3 @@
-
-
 use core::sync::atomic::{AtomicU64, Ordering};
 
 use crate::{log_fail, log_ok};
@@ -47,15 +45,13 @@ fn read_register(register: u8) -> u8 {
 }
 
 fn snapshot() -> Option<DateTime> {
-    
-    
+
     let flags: u64;
     unsafe {
         core::arch::asm!("pushfq", "pop {}", "cli", out(reg) flags, options(nomem));
     }
     let result = (|| {
-        
-        
+
         for _ in 0..8 {
             if read_register(STATUS_A) & 0x80 != 0 {
                 continue;
@@ -176,7 +172,6 @@ fn to_unix_seconds(date: DateTime) -> u64 {
     days * 86_400 + date.hour as u64 * 3_600 + date.minute as u64 * 60 + date.second as u64
 }
 
-
 pub fn init() {
     match snapshot() {
         Some(date) if date.year >= 1970 => {
@@ -201,7 +196,6 @@ pub fn init() {
         ),
     }
 }
-
 
 pub fn unix_seconds() -> Option<u64> {
     let base = BASE_UNIX_SECONDS.load(Ordering::Acquire);

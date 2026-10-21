@@ -1,25 +1,7 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86_64) && defined(__ELF__)
 .text	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 .type	_vpaes_encrypt_core,@function
 .align	16
@@ -95,7 +77,6 @@ _vpaes_encrypt_core:
 	pxor	%xmm1,%xmm3
 	jnz	.Lenc_loop
 
-
 	movdqa	-96(%r10),%xmm4
 	movdqa	-80(%r10),%xmm0
 .byte	102,15,56,0,226
@@ -107,35 +88,6 @@ _vpaes_encrypt_core:
 	ret
 .cfi_endproc	
 .size	_vpaes_encrypt_core,.-_vpaes_encrypt_core
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 .type	_vpaes_encrypt_core_2x,@function
 .align	16
@@ -262,7 +214,6 @@ _vpaes_encrypt_core_2x:
 	pxor	%xmm7,%xmm11
 	jnz	.Lenc2x_loop
 
-
 	movdqa	-96(%r10),%xmm4
 	movdqa	-80(%r10),%xmm0
 	movdqa	%xmm4,%xmm12
@@ -283,24 +234,14 @@ _vpaes_encrypt_core_2x:
 .cfi_endproc	
 .size	_vpaes_encrypt_core_2x,.-_vpaes_encrypt_core_2x
 
-
-
-
-
-
 .type	_vpaes_schedule_core,@function
 .align	16
 _vpaes_schedule_core:
 .cfi_startproc	
 
-
-
-
-
 	call	_vpaes_preheat
 	movdqa	.Lk_rcon(%rip),%xmm8
 	movdqu	(%rdi),%xmm0
-
 
 	movdqa	%xmm0,%xmm3
 	leaq	.Lk_ipt(%rip),%r11
@@ -309,22 +250,11 @@ _vpaes_schedule_core:
 
 	leaq	.Lk_sr(%rip),%r10
 
-
 	movdqu	%xmm0,(%rdx)
 
 .Lschedule_go:
 	cmpl	$192,%esi
 	ja	.Lschedule_256
-
-
-
-
-
-
-
-
-
-
 
 .Lschedule_128:
 	movl	$10,%esi
@@ -336,16 +266,6 @@ _vpaes_schedule_core:
 	call	_vpaes_schedule_mangle
 	jmp	.Loop_schedule_128
 
-
-
-
-
-
-
-
-
-
-
 .align	16
 .Lschedule_256:
 	movdqu	16(%rdi),%xmm0
@@ -356,12 +276,10 @@ _vpaes_schedule_core:
 	call	_vpaes_schedule_mangle
 	movdqa	%xmm0,%xmm6
 
-
 	call	_vpaes_schedule_round
 	decq	%rsi
 	jz	.Lschedule_mangle_last
 	call	_vpaes_schedule_mangle
-
 
 	pshufd	$0xFF,%xmm0,%xmm0
 	movdqa	%xmm7,%xmm5
@@ -371,22 +289,10 @@ _vpaes_schedule_core:
 
 	jmp	.Loop_schedule_256
 
-
-
-
-
-
-
-
-
-
-
-
 .align	16
 .Lschedule_mangle_last:
 
 	leaq	.Lk_deskew(%rip),%r11
-
 
 	movdqa	(%r8,%r10,1),%xmm1
 .byte	102,15,56,0,193
@@ -398,7 +304,6 @@ _vpaes_schedule_core:
 	pxor	.Lk_s63(%rip),%xmm0
 	call	_vpaes_schedule_transform
 	movdqu	%xmm0,(%rdx)
-
 
 	pxor	%xmm0,%xmm0
 	pxor	%xmm1,%xmm1
@@ -412,24 +317,6 @@ _vpaes_schedule_core:
 .cfi_endproc	
 .size	_vpaes_schedule_core,.-_vpaes_schedule_core
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .type	_vpaes_schedule_round,@function
 .align	16
 _vpaes_schedule_round:
@@ -440,12 +327,8 @@ _vpaes_schedule_round:
 .byte	102,69,15,58,15,192,15
 	pxor	%xmm1,%xmm7
 
-
 	pshufd	$0xFF,%xmm0,%xmm0
 .byte	102,15,58,15,192,1
-
-
-
 
 _vpaes_schedule_low_round:
 
@@ -456,7 +339,6 @@ _vpaes_schedule_low_round:
 	pslldq	$8,%xmm7
 	pxor	%xmm1,%xmm7
 	pxor	.Lk_s63(%rip),%xmm7
-
 
 	movdqa	%xmm9,%xmm1
 	pandn	%xmm0,%xmm1
@@ -483,21 +365,11 @@ _vpaes_schedule_low_round:
 .byte	102,15,56,0,195
 	pxor	%xmm4,%xmm0
 
-
 	pxor	%xmm7,%xmm0
 	movdqa	%xmm0,%xmm7
 	ret
 .cfi_endproc	
 .size	_vpaes_schedule_round,.-_vpaes_schedule_round
-
-
-
-
-
-
-
-
-
 
 .type	_vpaes_schedule_transform,@function
 .align	16
@@ -516,36 +388,12 @@ _vpaes_schedule_transform:
 .cfi_endproc	
 .size	_vpaes_schedule_transform,.-_vpaes_schedule_transform
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .type	_vpaes_schedule_mangle,@function
 .align	16
 _vpaes_schedule_mangle:
 .cfi_startproc	
 	movdqa	%xmm0,%xmm4
 	movdqa	.Lk_mc_forward(%rip),%xmm5
-
 
 	addq	$16,%rdx
 	pxor	.Lk_s63(%rip),%xmm4
@@ -565,9 +413,6 @@ _vpaes_schedule_mangle:
 	ret
 .cfi_endproc	
 .size	_vpaes_schedule_mangle,.-_vpaes_schedule_mangle
-
-
-
 
 .globl	vpaes_set_encrypt_key
 .hidden vpaes_set_encrypt_key
@@ -615,8 +460,6 @@ _CET_ENDBR
 	testq	$1,%rcx
 	jz	.Lctr32_prep_loop
 
-
-
 	movdqu	(%rdi),%xmm7
 	call	_vpaes_encrypt_core
 	pxor	%xmm7,%xmm0
@@ -627,7 +470,6 @@ _CET_ENDBR
 	jz	.Lctr32_done
 
 .Lctr32_prep_loop:
-
 
 	movdqa	%xmm6,%xmm14
 	movdqa	%xmm6,%xmm15
@@ -659,11 +501,6 @@ _CET_ENDBR
 .cfi_endproc	
 .size	vpaes_ctr32_encrypt_blocks,.-vpaes_ctr32_encrypt_blocks
 
-
-
-
-
-
 .type	_vpaes_preheat,@function
 .align	16
 _vpaes_preheat:
@@ -679,10 +516,6 @@ _vpaes_preheat:
 	ret
 .cfi_endproc	
 .size	_vpaes_preheat,.-_vpaes_preheat
-
-
-
-
 
 .type	_vpaes_consts,@object
 .section	.rodata
@@ -741,10 +574,8 @@ _vpaes_consts:
 .quad	0x07E4A34047A4E300, 0x1DFEB95A5DBEF91A
 .quad	0x5F36B5DC83EA6900, 0x2841C2ABF49D1E77
 
-
 .Lrev_ctr:
 .quad	0x0706050403020100, 0x0c0d0e0f0b0a0908
-
 
 .Lctr_add_one:
 .quad	0x0000000000000000, 0x0000000100000000

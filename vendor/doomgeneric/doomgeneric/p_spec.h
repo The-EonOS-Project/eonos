@@ -1,49 +1,16 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __P_SPEC__
 #define __P_SPEC__
-
-
-
-
 
 extern	boolean levelTimer;
 extern	int	levelTimeCount;
 
-
-
 #define MO_TELEPORTMAN          14
-
-
 
 void    P_InitPicAnims (void);
 
-
 void    P_SpawnSpecials (void);
 
-
 void    P_UpdateSpecials (void);
-
 
 boolean
 P_UseSpecialLine
@@ -107,16 +74,7 @@ getNextSector
 ( line_t*	line,
   sector_t*	sec );
 
-
-
-
-
 int EV_DoDonut(line_t* line);
-
-
-
-
-
 
 typedef struct
 {
@@ -125,10 +83,8 @@ typedef struct
     int		count;
     int		maxlight;
     int		minlight;
-    
+
 } fireflicker_t;
-
-
 
 typedef struct
 {
@@ -139,10 +95,8 @@ typedef struct
     int		minlight;
     int		maxtime;
     int		mintime;
-    
+
 } lightflash_t;
-
-
 
 typedef struct
 {
@@ -153,11 +107,8 @@ typedef struct
     int		maxlight;
     int		darktime;
     int		brighttime;
-    
+
 } strobe_t;
-
-
-
 
 typedef struct
 {
@@ -168,7 +119,6 @@ typedef struct
     int		direction;
 
 } glow_t;
-
 
 #define GLOWSPEED			8
 #define STROBEBRIGHT		5
@@ -197,20 +147,13 @@ EV_LightTurnOn
 void    T_Glow(glow_t* g);
 void    P_SpawnGlowingLight(sector_t* sector);
 
-
-
-
-
-
-
 typedef struct
 {
     char	name1[9];
     char	name2[9];
     short	episode;
-    
-} switchlist_t;
 
+} switchlist_t;
 
 typedef enum
 {
@@ -219,7 +162,6 @@ typedef enum
     bottom
 
 } bwhere_e;
-
 
 typedef struct
 {
@@ -231,16 +173,10 @@ typedef struct
 
 } button_t;
 
-
-
-
- 
 #define MAXSWITCHES		50
 
- 
 #define MAXBUTTONS		16
 
- 
 #define BUTTONTIME      35             
 
 extern button_t	buttonlist[MAXBUTTONS]; 
@@ -252,10 +188,6 @@ P_ChangeSwitchTexture
 
 void P_InitSwitchList(void);
 
-
-
-
-
 typedef enum
 {
     up,
@@ -264,8 +196,6 @@ typedef enum
     in_stasis
 
 } plat_e;
-
-
 
 typedef enum
 {
@@ -276,8 +206,6 @@ typedef enum
     blazeDWUS
 
 } plattype_e;
-
-
 
 typedef struct
 {
@@ -293,15 +221,12 @@ typedef struct
     boolean	crush;
     int		tag;
     plattype_e	type;
-    
+
 } plat_t;
-
-
 
 #define PLATWAIT		3
 #define PLATSPEED		FRACUNIT
 #define MAXPLATS		30
-
 
 extern plat_t*	activeplats[MAXPLATS];
 
@@ -318,10 +243,6 @@ void    P_RemoveActivePlat(plat_t* plat);
 void    EV_StopPlat(line_t* line);
 void    P_ActivateInStasis(int tag);
 
-
-
-
-
 typedef enum
 {
     vld_normal,
@@ -335,8 +256,6 @@ typedef enum
 
 } vldoor_e;
 
-
-
 typedef struct
 {
     thinker_t	thinker;
@@ -345,18 +264,13 @@ typedef struct
     fixed_t	topheight;
     fixed_t	speed;
 
-    
     int             direction;
-    
-    
+
     int             topwait;
-    
-    
+
     int             topcountdown;
-    
+
 } vldoor_t;
-
-
 
 #define VDOORSPEED		FRACUNIT*2
 #define VDOORWAIT		150
@@ -385,94 +299,9 @@ P_SpawnDoorRaiseIn5Mins
 ( sector_t*	sec,
   int		secnum );
 
-
-
 #if 0 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #endif
-
-
-
-
-
 
 typedef enum
 {
@@ -485,8 +314,6 @@ typedef enum
 
 } ceiling_e;
 
-
-
 typedef struct
 {
     thinker_t	thinker;
@@ -497,18 +324,12 @@ typedef struct
     fixed_t	speed;
     boolean	crush;
 
-    
     int		direction;
 
-    
     int		tag;                   
     int		olddirection;
-    
+
 } ceiling_t;
-
-
-
-
 
 #define CEILSPEED		FRACUNIT
 #define CEILWAIT		150
@@ -527,56 +348,39 @@ void    P_RemoveActiveCeiling(ceiling_t* c);
 int	EV_CeilingCrushStop(line_t* line);
 void    P_ActivateInStasisCeiling(line_t* line);
 
-
-
-
-
 typedef enum
 {
-    
+
     lowerFloor,
-    
-    
+
     lowerFloorToLowest,
-    
-    
+
     turboLower,
-    
-    
+
     raiseFloor,
-    
-    
+
     raiseFloorToNearest,
 
-    
     raiseToTexture,
-    
-    
-    
+
     lowerAndChange,
-  
+
     raiseFloor24,
     raiseFloor24AndChange,
     raiseFloorCrush,
 
-     
     raiseFloorTurbo,       
     donutRaise,
     raiseFloor512
-    
+
 } floor_e;
-
-
-
 
 typedef enum
 {
     build8,	
     turbo16	
-    
+
 } stair_e;
-
-
 
 typedef struct
 {
@@ -592,8 +396,6 @@ typedef struct
 
 } floormove_t;
 
-
-
 #define FLOORSPEED		FRACUNIT
 
 typedef enum
@@ -601,7 +403,7 @@ typedef enum
     ok,
     crushed,
     pastdest
-    
+
 } result_e;
 
 result_e
@@ -624,9 +426,6 @@ EV_DoFloor
   floor_e	floortype );
 
 void T_MoveFloor( floormove_t* floor);
-
-
-
 
 int
 EV_Teleport

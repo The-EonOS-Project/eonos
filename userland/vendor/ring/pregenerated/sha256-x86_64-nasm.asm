@@ -1,6 +1,3 @@
-
-
-
 %ifidn __OUTPUT_FORMAT__, win64
 default	rel
 %define XMMWORD
@@ -10,7 +7,6 @@ default	rel
 
 %include "ring_core_generated/prefix_symbols_nasm.inc"
 section	.text code align=64
-
 
 global	sha256_block_data_order_nohw
 
@@ -23,8 +19,6 @@ $L$SEH_begin_sha256_block_data_order_nohw:
 	mov	rdi,rcx
 	mov	rsi,rdx
 	mov	rdx,r8
-
-
 
 _CET_ENDBR
 	mov	rax,rsp
@@ -1797,8 +1791,6 @@ $L$SEH_begin_sha256_block_data_order_hw:
 	mov	rsi,rdx
 	mov	rdx,r8
 
-
-
 _CET_ENDBR
 	lea	rsp,[((-88))+rsp]
 	movaps	XMMWORD[(-8-80)+rax],xmm6
@@ -2032,8 +2024,6 @@ $L$SEH_begin_sha256_block_data_order_ssse3:
 	mov	rsi,rdx
 	mov	rdx,r8
 
-
-
 _CET_ENDBR
 	mov	rax,rsp
 
@@ -2072,7 +2062,6 @@ $L$prologue_ssse3:
 	mov	r9d,DWORD[20+rdi]
 	mov	r10d,DWORD[24+rdi]
 	mov	r11d,DWORD[28+rdi]
-
 
 	jmp	NEAR $L$loop_ssse3
 ALIGN	16
@@ -3164,8 +3153,6 @@ $L$SEH_begin_sha256_block_data_order_avx:
 	mov	rdi,rcx
 	mov	rsi,rdx
 	mov	rdx,r8
-
-
 
 _CET_ENDBR
 	mov	rax,rsp
@@ -4343,7 +4330,6 @@ $L$in_prologue:
 	pop	rdi
 	pop	rsi
 	ret
-
 
 ALIGN	16
 shaext_handler:

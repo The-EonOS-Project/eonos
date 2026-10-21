@@ -1,32 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 static const alignas(4096) PRECOMP256_ROW ecp_nistz256_precomputed[37] = {
     {{{TOBN(0x79e730d4, 0x18a9143c), TOBN(0x75ba95fc, 0x5fedb601),
        TOBN(0x79fb732b, 0x77622510), TOBN(0x18905f76, 0xa53755c6)},

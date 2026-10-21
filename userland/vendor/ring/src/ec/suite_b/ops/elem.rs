@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::ec::suite_b::ops::{
     p256::NUM_LIMBS as P256_NUM_LIMBS, p384::NUM_LIMBS as P384_NUM_LIMBS,
 };
@@ -41,18 +27,13 @@ impl NumLimbs {
     }
 }
 
-
-
 #[derive(Clone, Copy)]
 pub struct Elem<M, E: Encoding> {
-    
+
     pub(super) limbs: [Limb; NumLimbs::MAX],
 
-    
     pub(super) m: PhantomData<M>,
 
-    
-    
     pub(super) encoding: PhantomData<E>,
 }
 
@@ -73,9 +54,7 @@ impl<M, E: Encoding> From<&PublicElem<M, E>> for Elem<M, E> {
 }
 
 impl<M, E: Encoding> Elem<M, E> {
-    
-    
-    
+
     pub fn zero() -> Self {
         Self {
             limbs: [0; NumLimbs::MAX],
@@ -115,7 +94,6 @@ where
     binary_op(f, a, b)
 }
 
-
 #[inline]
 pub fn binary_op<M, EA: Encoding, EB: Encoding, ER: Encoding>(
     f: unsafe extern "C" fn(r: *mut Limb, a: *const Limb, b: *const Limb),
@@ -127,7 +105,6 @@ pub fn binary_op<M, EA: Encoding, EB: Encoding, ER: Encoding>(
     r
 }
 
-
 #[inline]
 pub fn binary_op_assign<M, EA: Encoding, EB: Encoding>(
     f: unsafe extern "C" fn(r: *mut Limb, a: *const Limb, b: *const Limb),
@@ -136,7 +113,6 @@ pub fn binary_op_assign<M, EA: Encoding, EB: Encoding>(
 ) {
     unsafe { f(a.limbs.as_mut_ptr(), a.limbs.as_ptr(), b.limbs.as_ptr()) }
 }
-
 
 #[inline]
 pub fn unary_op<M, E: Encoding>(
@@ -148,7 +124,6 @@ pub fn unary_op<M, E: Encoding>(
     r
 }
 
-
 #[inline]
 pub fn unary_op_assign<M, E: Encoding>(
     f: unsafe extern "C" fn(r: *mut Limb, a: *const Limb),
@@ -156,7 +131,6 @@ pub fn unary_op_assign<M, E: Encoding>(
 ) {
     unsafe { f(a.limbs.as_mut_ptr(), a.limbs.as_ptr()) }
 }
-
 
 #[inline]
 pub fn unary_op_from_binary_op_assign<M, E: Encoding>(

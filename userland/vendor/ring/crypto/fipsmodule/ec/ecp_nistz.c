@@ -1,29 +1,8 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include "ecp_nistz.h"
 
 #if defined(__GNUC__)
 #pragma GCC diagnostic ignored "-Wconversion"
 #endif
-
-
-
-
-
-
-
 
 void little_endian_bytes_from_scalar(uint8_t str[], size_t str_len,
                                          const Limb scalar[],

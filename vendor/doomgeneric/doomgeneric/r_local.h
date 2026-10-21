@@ -1,38 +1,11 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __R_LOCAL__
 #define __R_LOCAL__
 
-
 #include "tables.h"
-
 
 #include "doomdef.h"
 
-
 #include "r_data.h"
-
-
-
-
-
 
 #include "r_main.h"
 #include "r_bsp.h"

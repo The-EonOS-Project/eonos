@@ -7,7 +7,6 @@ use crate::{
 };
 use core::ops::RangeInclusive;
 
-
 pub struct PublicModulus {
     value: bigint::OwnedModulus<N>,
     oneRR: bigint::One<N, RR>,
@@ -18,8 +17,6 @@ impl Clone for PublicModulus {
         let PublicModulus { value, oneRR } = self;
         let value = value.clone();
 
-        
-        
         let cpu = cpu::features();
         let n = value.modulus(cpu);
         let oneRR = oneRR.clone_into(n.alloc_zero());
@@ -28,37 +25,21 @@ impl Clone for PublicModulus {
     }
 }
 
- 
-
-
-
-
- 
-
 impl PublicModulus {
     pub(super) fn from_be_bytes(
         n: untrusted::Input,
         allowed_bit_lengths: RangeInclusive<bits::BitLength>,
         cpu_features: cpu::Features,
     ) -> Result<Self, error::KeyRejected> {
-        
-        
 
         let min_bits = *allowed_bit_lengths.start();
         let max_bits = *allowed_bit_lengths.end();
 
-        
-        
-        
         const MIN_BITS: bits::BitLength = bits::BitLength::from_bits(1024);
 
-        
         let value = bigint::OwnedModulusValue::from_be_bytes(n)?;
         let bits = value.len_bits();
 
-        
-        
-        
         assert!(min_bits >= MIN_BITS);
         let bits_rounded_up = bits::BitLength::from_byte_len(bits.as_usize_bytes_rounded_up())
             .map_err(error::erase::<InputTooLongError>)
@@ -76,14 +57,10 @@ impl PublicModulus {
         Ok(Self { value, oneRR })
     }
 
-    
-    
-    
     pub fn be_bytes(&self) -> impl ExactSizeIterator<Item = u8> + Clone + '_ {
         self.value.be_bytes()
     }
 
-    
     pub fn len_bits(&self) -> bits::BitLength {
         self.value.len_bits()
     }

@@ -1,21 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -37,8 +19,6 @@ struct _MEMFILE {
 	memfile_mode_t mode;
 };
 
-
-
 MEMFILE *mem_fopen_read(void *buf, size_t buflen)
 {
 	MEMFILE *file;
@@ -53,8 +33,6 @@ MEMFILE *mem_fopen_read(void *buf, size_t buflen)
 	return file;
 }
 
-
-
 size_t mem_fread(void *buf, size_t size, size_t nmemb, MEMFILE *stream)
 {
 	size_t items;
@@ -65,27 +43,19 @@ size_t mem_fread(void *buf, size_t size, size_t nmemb, MEMFILE *stream)
 		return -1;
 	}
 
-	
-	
 	items = nmemb;
 
 	if (items * size > stream->buflen - stream->position) 
 	{
 		items = (stream->buflen - stream->position) / size;
 	}
-	
-	
-	
+
 	memcpy(buf, stream->buf + stream->position, items * size);
 
-	
-
 	stream->position += items * size;
-	
+
 	return items;
 }
-
-
 
 MEMFILE *mem_fopen_write(void)
 {
@@ -102,8 +72,6 @@ MEMFILE *mem_fopen_write(void)
 	return file;
 }
 
-
-
 size_t mem_fwrite(const void *ptr, size_t size, size_t nmemb, MEMFILE *stream)
 {
 	size_t bytes;
@@ -112,12 +80,9 @@ size_t mem_fwrite(const void *ptr, size_t size, size_t nmemb, MEMFILE *stream)
 	{
 		return -1;
 	}
-	
-	
-	
 
 	bytes = size * nmemb;
-	
+
 	while (bytes > stream->alloced - stream->position)
 	{
 		unsigned char *newbuf;
@@ -129,8 +94,6 @@ size_t mem_fwrite(const void *ptr, size_t size, size_t nmemb, MEMFILE *stream)
 		stream->alloced *= 2;
 	}
 
-	
-	
 	memcpy(stream->buf + stream->position, ptr, bytes);
 	stream->position += bytes;
 
@@ -174,7 +137,7 @@ int mem_fseek(MEMFILE *stream, signed long position, mem_rel_t whence)
 		case MEM_SEEK_CUR:
 			newpos = (int) (stream->position + position);
 			break;
-			
+
 		case MEM_SEEK_END:
 			newpos = (int) (stream->buflen + position);
 			break;
@@ -193,5 +156,4 @@ int mem_fseek(MEMFILE *stream, signed long position, mem_rel_t whence)
 		return -1;
 	}
 }
-
 

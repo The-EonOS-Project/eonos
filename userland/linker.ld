@@ -1,8 +1,3 @@
-
-
-
-
-
 ENTRY(_start)
 
 PHDRS

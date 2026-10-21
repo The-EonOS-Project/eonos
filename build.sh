@@ -57,7 +57,6 @@ BUILD_STD_FLAGS=(
     -Zbuild-std-features=compiler-builtins-mem
 )
 
-
 KERNEL_RUSTFLAGS="${RUSTFLAGS:+$RUSTFLAGS }-C link-arg=-Tconfig/linker.ld -C force-frame-pointers=yes"
 
 if [ "$PROFILE" = "release" ]; then
@@ -267,8 +266,6 @@ xorriso -as mkisofs \
 echo "==> Installing BIOS stage 1 into ISO"
 
 "$LIMINE_DIR/limine" bios-install "$ISO_PATH"
-
-
 
 printf '%s:%s\n' "$PROFILE" "$DEBUG_BUILD" > "$ISO_PATH.profile"
 

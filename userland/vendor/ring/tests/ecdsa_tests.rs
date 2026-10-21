@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![allow(missing_docs)]
 
 use ring::{
@@ -20,8 +6,6 @@ use ring::{
 };
 #[allow(deprecated)]
 use ring::{test, test_file};
-
-
 
 #[test]
 fn ecdsa_from_pkcs8_test() {
@@ -88,7 +72,6 @@ fn ecdsa_from_pkcs8_test() {
         },
     );
 }
-
 
 #[test]
 fn ecdsa_generate_pkcs8_test() {
@@ -194,28 +177,19 @@ fn ecdsa_test_public_key_coverage() {
     )
     .unwrap();
 
-    
     assert_eq!(key_pair.public_key().as_ref(), PUBLIC_KEY);
 
-    
     #[allow(clippy::clone_on_copy, clippy::redundant_clone)]
     let _: <signature::EcdsaKeyPair as KeyPair>::PublicKey = key_pair.public_key().clone();
 
-    
     let _: <signature::EcdsaKeyPair as KeyPair>::PublicKey = *key_pair.public_key();
 
-    
     assert_eq!(PUBLIC_KEY_DEBUG, format!("{:?}", key_pair.public_key()));
     assert_eq!(
         format!("EcdsaKeyPair {{ public_key: {:?} }}", key_pair.public_key()),
         format!("{:?}", key_pair)
     );
 }
-
-
-
-
-
 
 #[test]
 fn signature_ecdsa_sign_fixed_sign_and_verify_test() {
@@ -233,7 +207,6 @@ fn signature_ecdsa_sign_fixed_sign_and_verify_test() {
             let d = test_case.consume_bytes("d");
             let q = test_case.consume_bytes("Q");
 
-            
             let _k = test_case.consume_bytes("k");
             let _expected_result = test_case.consume_bytes("Sig");
 
@@ -266,11 +239,6 @@ fn signature_ecdsa_sign_fixed_sign_and_verify_test() {
     );
 }
 
-
-
-
-
-
 #[test]
 fn signature_ecdsa_sign_asn1_test() {
     let rng = rand::SystemRandom::new();
@@ -287,7 +255,6 @@ fn signature_ecdsa_sign_asn1_test() {
             let d = test_case.consume_bytes("d");
             let q = test_case.consume_bytes("Q");
 
-            
             let _k = test_case.consume_bytes("k");
             let _expected_result = test_case.consume_bytes("Sig");
 

@@ -1,23 +1,14 @@
-
-
-
-
-
-
-
 ifeq ($(V),1)
 	VB=''
 else
 	VB=@
 endif
 
-
 CC=/opt/musl-i386-clang-debug/bin/musl-clang-debug  
 CFLAGS+=-g
 LDFLAGS+=-static
 CFLAGS+=-I../../microwindows/src/include -Wall -DNORMALUNIX -DLINUX -DSNDSERV -D_DEFAULT_SOURCE 
 LIBS+=-L../../microwindows/src/lib -lnano-X
-
 
 OBJDIR=build
 OUTPUT=doom

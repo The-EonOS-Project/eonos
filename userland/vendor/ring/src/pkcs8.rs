@@ -1,26 +1,7 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::{ec, error, io::der};
 
 pub(crate) struct PublicKeyOptions {
-    
-    
+
     pub accept_legacy_ed25519_public_key_tag: bool,
 }
 
@@ -30,24 +11,13 @@ pub(crate) enum Version {
     V2Only(PublicKeyOptions),
 }
 
-
-
-
 pub(crate) struct Template {
     pub bytes: &'static [u8],
 
-    
-    
     pub alg_id_range: core::ops::Range<usize>,
 
-    
-    
     pub curve_id_index: usize,
 
-    
-    
-    
-    
     pub private_key_index: usize,
 }
 
@@ -67,12 +37,6 @@ impl Template {
     }
 }
 
-
-
-
-
-
-
 pub(crate) fn unwrap_key<'a>(
     template: &Template,
     version: Version,
@@ -80,16 +44,6 @@ pub(crate) fn unwrap_key<'a>(
 ) -> Result<(untrusted::Input<'a>, Option<untrusted::Input<'a>>), error::KeyRejected> {
     unwrap_key_(template.alg_id_value(), version, input)
 }
-
-
-
-
-
-
-
-
-
-
 
 pub(crate) fn unwrap_key_<'a>(
     alg_id: untrusted::Input,
@@ -114,11 +68,6 @@ fn unwrap_key__<'a>(
     let actual_version = der::small_nonnegative_integer(input)
         .map_err(|error::Unspecified| error::KeyRejected::invalid_encoding())?;
 
-    
-    
-    
-    
-
     if actual_version > 1 {
         return Err(error::KeyRejected::version_not_supported());
     };
@@ -141,7 +90,6 @@ fn unwrap_key__<'a>(
     let private_key = der::expect_tag_and_get_value(input, der::Tag::OctetString)
         .map_err(|error::Unspecified| error::KeyRejected::invalid_encoding())?;
 
-    
     if input.peek(der::Tag::ContextSpecificConstructed0.into()) {
         let _ = der::expect_tag_and_get_value(input, der::Tag::ContextSpecificConstructed0)
             .map_err(|error::Unspecified| error::KeyRejected::invalid_encoding())?;
@@ -175,7 +123,6 @@ fn unwrap_key__<'a>(
     Ok((private_key, public_key))
 }
 
-
 pub struct Document {
     bytes: [u8; ec::PKCS8_DOCUMENT_MAX_LEN],
     len: usize,
@@ -201,8 +148,6 @@ pub(crate) fn wrap_key(template: &Template, private_key: &[u8], public_key: &[u8
     );
     result
 }
-
-
 
 fn wrap_key_(template: &Template, private_key: &[u8], public_key: &[u8], bytes: &mut [u8]) {
     let (before_private_key, after_private_key) =

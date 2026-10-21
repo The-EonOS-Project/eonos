@@ -1,10 +1,3 @@
-
-
-
-
-
-
-
 use core::ptr;
 use core::sync::atomic::{fence, AtomicBool, Ordering};
 use spin::Mutex;
@@ -492,7 +485,6 @@ impl Driver {
             return false;
         }
 
-        
         let mut attach = [0u8; 48];
         Self::command_header(&mut attach, GPU_CMD_RESOURCE_ATTACH_BACKING);
         attach[24..28].copy_from_slice(&RESOURCE_ID.to_le_bytes());
@@ -531,9 +523,7 @@ impl Driver {
         transfer[28..32].copy_from_slice(&(y as u32).to_le_bytes());
         transfer[32..36].copy_from_slice(&(width as u32).to_le_bytes());
         transfer[36..40].copy_from_slice(&(height as u32).to_le_bytes());
-        
-        
-        
+
         let Some(offset) = y
             .checked_mul(self.pitch)
             .and_then(|row| x.checked_mul(4).and_then(|column| row.checked_add(column)))
@@ -609,9 +599,6 @@ unsafe fn initialize(location: PciLocation, caps: VirtioCaps) -> Option<Driver> 
     }
     driver.set_status(STATUS_ACKNOWLEDGE | STATUS_DRIVER | STATUS_FEATURES_OK | STATUS_DRIVER_OK);
 
-    
-    
-    
     if driver.get_display_info().is_none() {
         return None;
     }
@@ -629,8 +616,6 @@ unsafe fn initialize(location: PciLocation, caps: VirtioCaps) -> Option<Driver> 
         return None;
     }
 
-    
-    
     if ptr::read_volatile(device.add(8).cast::<u32>()) == 0 {
         return None;
     }
@@ -639,8 +624,6 @@ unsafe fn initialize(location: PciLocation, caps: VirtioCaps) -> Option<Driver> 
     }
     Some(driver)
 }
-
-
 
 pub fn init() {
     let Some(location) = find_gpu() else {
@@ -683,8 +666,6 @@ pub fn init() {
         height
     );
 }
-
-
 
 pub fn present_rect(x: usize, y: usize, width: usize, height: usize) -> bool {
     if !GPU_ACTIVE.load(Ordering::Acquire) {

@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 # Ascetic x86_64 AT&T to MASM/NASM assembler translator by <appro>.
 #
 # Why AT&T to MASM and not vice versa? Several reasons. Because AT&T
@@ -920,7 +919,6 @@ ____
 	    $xdata .= "\t.value\t0\n";
 	}
 
-	
 	return $end_label;
     }
 
@@ -1665,7 +1663,7 @@ ___
 
 close STDOUT or die "error closing STDOUT: $!";
 
-#################################################
+#################################################
 # Cross-reference x86_64 ABI "card"
 #
 # 		Unix		Win64

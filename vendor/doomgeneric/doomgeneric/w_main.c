@@ -1,21 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include "doomfeatures.h"
 #include "d_iwad.h"
 #include "m_argv.h"
@@ -24,26 +6,12 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
-
-
-
 boolean W_ParseCommandLine(void)
 {
     boolean modifiedgame = false;
     int p;
 
 #ifdef FEATURE_WAD_MERGE
-
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
 
     p = M_CheckParmWithArgs("-merge", 1);
 
@@ -62,17 +30,6 @@ boolean W_ParseCommandLine(void)
         }
     }
 
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-
     p = M_CheckParmWithArgs("-nwtmerge", 1);
 
     if (p > 0)
@@ -89,16 +46,6 @@ boolean W_ParseCommandLine(void)
             W_NWTDashMerge(filename);
         }
     }
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
 
     p = M_CheckParmWithArgs("-af", 1);
 
@@ -117,14 +64,6 @@ boolean W_ParseCommandLine(void)
         }
     }
 
-    
-    
-    
-    
-    
-    
-    
-
     p = M_CheckParmWithArgs("-as", 1);
 
     if (p > 0)
@@ -140,13 +79,6 @@ boolean W_ParseCommandLine(void)
             W_NWTMergeFile(filename, W_NWT_MERGE_SPRITES);
         }
     }
-
-    
-    
-    
-    
-    
-    
 
     p = M_CheckParmWithArgs("-aa", 1);
 
@@ -167,18 +99,10 @@ boolean W_ParseCommandLine(void)
 
 #endif
 
-    
-    
-    
-    
-    
-    
-
     p = M_CheckParmWithArgs ("-file", 1);
     if (p)
     {
-	
-	
+
 	modifiedgame = true;            
 	while (++p != myargc && myargv[p][0] != '-')
         {
@@ -190,8 +114,6 @@ boolean W_ParseCommandLine(void)
 	    W_AddFile(filename);
         }
     }
-
-
 
     return modifiedgame;
 }

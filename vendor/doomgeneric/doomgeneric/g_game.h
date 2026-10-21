@@ -1,22 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __G_GAME__
 #define __G_GAME__
 
@@ -24,30 +5,19 @@
 #include "d_event.h"
 #include "d_ticcmd.h"
 
-
-
-
-
 void G_DeathMatchSpawnPlayer (int playernum);
 
 void G_InitNew (skill_t skill, int episode, int map);
-
-
-
 
 void G_DeferedInitNew (skill_t skill, int episode, int map);
 
 void G_DeferedPlayDemo (char* demo);
 
-
-
 void G_LoadGame (char* name);
 
 void G_DoLoadGame (void);
 
-
 void G_SaveGame (int slot, char* description);
-
 
 void G_RecordDemo (char* name);
 
@@ -61,8 +31,6 @@ void G_ExitLevel (void);
 void G_SecretExitLevel (void);
 
 void G_WorldDone (void);
-
-
 
 void G_BuildTiccmd (ticcmd_t *cmd, int maketic); 
 

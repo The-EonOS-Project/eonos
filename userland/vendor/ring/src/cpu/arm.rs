@@ -1,26 +1,8 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::CAPS_STATIC;
 
 mod abi_assumptions {
     use core::mem::size_of;
 
-    
-    
-    
-    
     #[cfg(target_arch = "aarch64")]
     const _ASSUMED_POINTER_SIZE: usize = 8;
     #[cfg(target_arch = "arm")]
@@ -28,18 +10,8 @@ mod abi_assumptions {
     const _ASSUMED_USIZE_SIZE: () = assert!(size_of::<usize>() == _ASSUMED_POINTER_SIZE);
     const _ASSUMED_REF_SIZE: () = assert!(size_of::<&'static u8>() == _ASSUMED_POINTER_SIZE);
 
-    
-    
     const _ASSUMED_ENDIANNESS: () = assert!(cfg!(target_endian = "little"));
 }
-
-
-
-
-
-
-
-
 
 cfg_if::cfg_if! {
     if #[cfg(all(all(target_arch = "aarch64", target_endian = "little"),
@@ -65,24 +37,15 @@ cfg_if::cfg_if! {
 
 impl_get_feature! {
     features: [
-        
+
         { ("aarch64", "arm") => Neon },
 
-        
-        
-        
-        
-        
-        
         { ("aarch64") => PMull },
 
         { ("aarch64") => Aes },
 
         { ("aarch64") => Sha256 },
 
-        
-
-        
         { ("aarch64") => Sha512 },
     ],
 }
@@ -119,15 +82,11 @@ pub(super) mod featureflags {
                 target_has_atomic = "32"
             ))]
             if (merged & Neon::mask()) == Neon::mask() {
-                
-                
+
                 prefixed_extern! {
                     static neon_available: AtomicU32;
                 }
-                
-                
-                
-                
+
                 let p = unsafe { &neon_available };
                 p.store(1, Ordering::Relaxed);
             }
@@ -136,24 +95,15 @@ pub(super) mod featureflags {
             NonZeroUsize::new(merged).unwrap() 
         }
 
-        
-        
         let _: NonZeroUsize = FEATURES.get_or_init(init);
 
-        
         unsafe { cpu::Features::new_after_feature_flags_written_and_synced_unchecked() }
     }
 
     pub(in super::super) fn get(_cpu_features: cpu::Features) -> u32 {
-        
-        
-        
-        
-        
-        
+
         let features = FEATURES.get().map(NonZeroUsize::get).unwrap_or(0);
 
-        
         #[allow(clippy::cast_possible_truncation)]
         let features = features as u32;
 
@@ -162,14 +112,6 @@ pub(super) mod featureflags {
 
     static FEATURES: race::OnceNonZeroUsize = race::OnceNonZeroUsize::new();
 
-    
-    
-    
-    
-    
-    
-    
-    
     #[cfg(all(target_arch = "aarch64", target_endian = "little"))]
     #[rustfmt::skip]
     pub(in super::super) const STATIC_DETECTED: u32 = 0
@@ -180,7 +122,6 @@ pub(super) mod featureflags {
         | (if cfg!(target_feature = "sha3") { Sha512::mask() } else { 0 })
         ;
 
-    
     #[cfg(all(target_arch = "arm", target_endian = "little"))]
     pub(in super::super) const STATIC_DETECTED: u32 = 0;
 }

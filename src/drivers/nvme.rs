@@ -1,6 +1,3 @@
-
-
-
 use crate::block::{BlockDevice, BlockError};
 use crate::fat32::SECTOR_SIZE;
 use alloc::boxed::Box;
@@ -313,7 +310,7 @@ fn controller(base: u64) -> Option<(Arc<Shared>, alloc::vec::Vec<(u32, u64)>)> {
         );
         core::ptr::write_volatile(mm.add(0x28).cast::<u64>(), asq.phys);
         core::ptr::write_volatile(mm.add(0x30).cast::<u64>(), acq.phys);
-        
+
         core::ptr::write_volatile(cc, (6 << 16) | (4 << 20) | 1);
     }
     if !wait_ready(csts, true) {
@@ -358,8 +355,7 @@ fn controller(base: u64) -> Option<(Arc<Shared>, alloc::vec::Vec<(u32, u64)>)> {
         );
         return None;
     }
-    
-    
+
     let queue_count = Entry {
         opcode: 9,
         cdw: [7, 0, 0, 0, 0, 0],
@@ -380,7 +376,7 @@ fn controller(base: u64) -> Option<(Arc<Shared>, alloc::vec::Vec<(u32, u64)>)> {
     let io_sq_phys = io_sq.phys;
     let io_cq_phys = io_cq.phys;
     let db1 = unsafe { mm.add(0x1000 + 2 * stride).cast::<u32>() };
-    
+
     let create_cq = Entry {
         opcode: 5,
         prp1: io_cq_phys,
@@ -412,8 +408,7 @@ fn controller(base: u64) -> Option<(Arc<Shared>, alloc::vec::Vec<(u32, u64)>)> {
         qid: 1,
         csts,
     };
-    
-    
+
     let Some(nsdata) = dma() else {
         crate::log_fail!("NVMe", "Init", "No DMA memory for namespace Identify data");
         return None;

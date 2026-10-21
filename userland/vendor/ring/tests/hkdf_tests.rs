@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![allow(missing_docs)]
 
 use ring::{digest, error, hkdf};
@@ -35,7 +21,7 @@ fn hkdf_tests() {
             if digest_alg == &digest::SHA256 {
                 hkdf::HKDF_SHA256
             } else {
-                
+
                 panic!("unsupported algorithm: {:?}", digest_alg);
             }
         };
@@ -47,7 +33,6 @@ fn hkdf_tests() {
 
         let salt = hkdf::Salt::new(alg, &salt);
 
-        
         let My(out) = salt
             .extract(&secret)
             .expand(&[&info], My(expected_out.len()))
@@ -68,7 +53,7 @@ fn hkdf_output_len_tests() {
         let prk = salt.extract(&[]); 
 
         {
-            
+
             let okm = prk.expand(&[b"info"], My(0)).unwrap();
             let result: My<Vec<u8>> = okm.into();
             assert_eq!(&result.0, &[]);
@@ -77,41 +62,39 @@ fn hkdf_output_len_tests() {
         let max_out_len = MAX_BLOCKS * alg.hmac_algorithm().digest_algorithm().output_len();
 
         {
-            
+
             let okm = prk.expand(&[b"info"], My(max_out_len)).unwrap();
             let result: My<Vec<u8>> = okm.into();
             assert_eq!(result.0.len(), max_out_len);
         }
 
         {
-            
+
             assert!(prk.expand(&[b"info"], My(max_out_len + 1)).is_err());
         }
 
         {
-            
+
             let okm = prk.expand(&[b"info"], My(2)).unwrap();
             let mut buf = [0u8; 1];
             assert_eq!(okm.fill(&mut buf), Err(error::Unspecified));
         }
 
         {
-            
+
             let okm = prk.expand(&[b"info"], My(2)).unwrap();
             let mut buf = [0u8; 3];
             assert_eq!(okm.fill(&mut buf), Err(error::Unspecified));
         }
 
         {
-            
+
             let okm = prk.expand(&[b"info"], My(2)).unwrap();
             let mut buf = [0u8; 2];
             assert_eq!(okm.fill(&mut buf), Ok(()));
         }
     }
 }
-
-
 
 #[derive(Debug, PartialEq)]
 struct My<T: core::fmt::Debug + PartialEq>(T);

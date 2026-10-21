@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![cfg(all(target_arch = "aarch64", target_endian = "little"))]
 
 use super::{aes, gcm, Counter, BLOCK_LEN};
@@ -60,7 +46,7 @@ pub(super) fn open_whole(
     in_out: Overlapping,
     ctr: &mut Counter,
 ) {
-    
+
     assert_eq!(in_out.len() % BLOCK_LEN, 0);
 
     in_out.with_input_output_len(|input, output, _len| {

@@ -1,44 +1,20 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 pub use super::n0::N0;
 use super::{inout::AliasingSlices3, LimbSliceError, MIN_LIMBS};
 use crate::cpu;
 use cfg_if::cfg_if;
 
-
-
 #[derive(Copy, Clone)]
 pub enum Unencoded {}
 
-
-
 #[derive(Copy, Clone)]
 pub enum R {}
-
-
 
 #[allow(clippy::upper_case_acronyms)]
 #[derive(Copy, Clone)]
 pub enum RRR {}
 
-
-
 #[derive(Copy, Clone)]
 pub enum RR {}
-
-
 
 #[derive(Copy, Clone)]
 pub enum RInverse {}
@@ -50,7 +26,6 @@ impl Encoding for RR {}
 impl Encoding for R {}
 impl Encoding for Unencoded {}
 impl Encoding for RInverse {}
-
 
 pub trait ReductionEncoding {
     type Output: Encoding;
@@ -69,7 +44,6 @@ impl ReductionEncoding for R {
 impl ReductionEncoding for Unencoded {
     type Output = RInverse;
 }
-
 
 pub trait ProductEncoding {
     type Output: Encoding;
@@ -93,12 +67,6 @@ where
 {
     type Output = <<E as ReductionEncoding>::Output as ReductionEncoding>::Output;
 }
-
-
-
-
-
-
 
 impl ProductEncoding for (RR, Unencoded) {
     type Output = <(Unencoded, RR) as ProductEncoding>::Output;
@@ -147,21 +115,21 @@ pub(super) fn limbs_mul_mont(
                     });
                 }
             }
-            
+
             const _MIN_LIMBS_AT_LEAST_2: () = assert!(MIN_LIMBS >= 2);
             bn_mul_mont_ffi!(in_out, n, n0, (), unsafe {
                 (MIN_LIMBS, MOD_FALLBACK, ()) => bn_mul_mont_nohw
             })
         } else if #[cfg(target_arch = "x86")] {
             use crate::{cpu::GetFeature as _, cpu::intel::Sse2};
-            
+
             const _MIN_LIMBS_AT_LEAST_4: () = assert!(MIN_LIMBS >= 4);
             if let Some(cpu) = cpu.get_feature() {
                 bn_mul_mont_ffi!(in_out, n, n0, cpu, unsafe {
                     (MIN_LIMBS, MOD_FALLBACK, Sse2) => bn_mul_mont
                 })
             } else {
-                
+
                 unsafe {
                     super::ffi::bn_mul_mont_ffi::<(), {MIN_LIMBS}, 1>(in_out, n, n0, (),
                     bn_mul_mont_fallback)
@@ -179,9 +147,7 @@ pub(super) fn limbs_mul_mont(
                 (MIN_LIMBS, MOD_FALLBACK, ()) => bn_mul_mont_nohw
             })
         } else {
-            
-            
-            
+
             bn_mul_mont_ffi!(in_out, n, n0, cpu, unsafe {
                 (MIN_LIMBS, MOD_FALLBACK, cpu::Features) => bn_mul_mont
             })
@@ -195,7 +161,6 @@ cfg_if! {
             all(target_arch = "arm", target_endian = "little"),
             target_arch = "x86_64")))] {
 
-        
         #[cfg(not(target_arch = "x86"))]
         prefixed_export! {
             unsafe extern "C" fn bn_mul_mont(
@@ -224,11 +189,6 @@ cfg_if! {
 
             let num_limbs = num_limbs.get();
 
-            
-            
-            
-
-            
             let n = unsafe { core::slice::from_raw_parts(n, num_limbs) };
 
             let mut tmp = [0; 2 * MAX_LIMBS];
@@ -243,8 +203,6 @@ cfg_if! {
         }
     }
 }
-
-
 
 #[cfg(any(
     feature = "alloc",
@@ -307,11 +265,10 @@ fn limbs_mul(r: &mut [Limb], a: &[Limb], b: &[Limb]) {
     ))
 ))]
 prefixed_extern! {
-    
+
     #[must_use]
     fn limbs_mul_add_limb(r: *mut Limb, a: *const Limb, b: Limb, num_limbs: c::size_t) -> Limb;
 }
-
 
 pub(super) fn limbs_square_mont(
     r: &mut [Limb],
@@ -347,7 +304,7 @@ mod tests {
     use crate::limb::Limb;
 
     #[test]
-    
+
     fn test_mul_add_words() {
         const ZERO: Limb = 0;
         const MAX: Limb = ZERO.wrapping_sub(1);

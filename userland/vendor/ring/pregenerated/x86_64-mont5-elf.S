@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86_64) && defined(__ELF__)
@@ -32,20 +29,9 @@ _CET_ENDBR
 
 .byte	0x67
 
-
-
 	shll	$3,%r9d
 	leaq	(%r9,%r9,2),%r10
 	negq	%r9
-
-
-
-
-
-
-
-
-
 
 	leaq	-320(%rsp,%r9,2),%r11
 	movq	%rsp,%rbp
@@ -666,20 +652,10 @@ _CET_ENDBR
 .cfi_offset	%r15,-56
 .Lpower5_prologue:
 
-
-
-
 	shll	$3,%r9d
 	leal	(%r9,%r9,2),%r10d
 	negq	%r9
 	movq	(%r8),%r8
-
-
-
-
-
-
-
 
 	leaq	-320(%rsp,%r9,2),%r11
 	movq	%rsp,%rbp
@@ -719,15 +695,6 @@ _CET_ENDBR
 
 	movq	%r9,%r10
 	negq	%r9
-
-
-
-
-
-
-
-
-
 
 	movq	%r8,32(%rsp)
 	movq	%rax,40(%rsp)
@@ -789,83 +756,10 @@ __bn_sqr8x_internal:
 .cfi_startproc	
 _CET_ENDBR
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	leaq	32(%r10),%rbp
 	leaq	(%rsi,%r9,1),%rsi
 
 	movq	%r9,%rcx
-
 
 	movq	-32(%rsi,%rbp,1),%r14
 	leaq	48+8(%rsp,%r9,2),%rdi
@@ -886,7 +780,6 @@ _CET_ENDBR
 	adcq	$0,%rdx
 	movq	%r11,-16(%rdi,%rbp,1)
 	movq	%rdx,%r10
-
 
 	movq	-8(%rsi,%rbp,1),%rbx
 	mulq	%r15
@@ -923,7 +816,6 @@ _CET_ENDBR
 	addq	%r13,%r11
 	adcq	$0,%r10
 
-
 	mulq	%r15
 	addq	%rax,%r12
 	movq	%rbx,%rax
@@ -955,7 +847,6 @@ _CET_ENDBR
 	adcq	$0,%r10
 	addq	%r13,%r11
 	adcq	$0,%r10
-
 
 	mulq	%r15
 	addq	%rax,%r12
@@ -1094,7 +985,6 @@ _CET_ENDBR
 
 	addq	$16,%rbp
 	jnz	.Lsqr4x_outer
-
 
 	movq	-32(%rsi),%r14
 	leaq	48+8(%rsp,%r9,2),%rdi
@@ -1643,22 +1533,10 @@ _CET_ENDBR
 .cfi_offset	%r15,-56
 .Lmulx4x_prologue:
 
-
-
-
 	shll	$3,%r9d
 	leaq	(%r9,%r9,2),%r10
 	negq	%r9
 	movq	(%r8),%r8
-
-
-
-
-
-
-
-
-
 
 	leaq	-320(%rsp,%r9,2),%r11
 	movq	%rsp,%rbp
@@ -1694,18 +1572,6 @@ _CET_ENDBR
 	cmpq	%rbp,%rsp
 	ja	.Lmulx4x_page_walk
 .Lmulx4x_page_walk_done:
-
-
-
-
-
-
-
-
-
-
-
-
 
 	movq	%r8,32(%rsp)
 	movq	%rax,40(%rsp)
@@ -2185,20 +2051,10 @@ _CET_ENDBR
 .cfi_offset	%r15,-56
 .Lpowerx5_prologue:
 
-
-
-
 	shll	$3,%r9d
 	leaq	(%r9,%r9,2),%r10
 	negq	%r9
 	movq	(%r8),%r8
-
-
-
-
-
-
-
 
 	leaq	-320(%rsp,%r9,2),%r11
 	movq	%rsp,%rbp
@@ -2238,17 +2094,6 @@ _CET_ENDBR
 
 	movq	%r9,%r10
 	negq	%r9
-
-
-
-
-
-
-
-
-
-
-
 
 	pxor	%xmm0,%xmm0
 .byte	102,72,15,110,207
@@ -2311,45 +2156,6 @@ bn_sqrx8x_internal:
 __bn_sqrx8x_internal:
 .cfi_startproc	
 _CET_ENDBR
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	leaq	48+8(%rsp),%rdi
 	leaq	(%rsi,%r9,1),%rbp
@@ -2415,7 +2221,6 @@ _CET_ENDBR
 	movq	%r9,16(%rdi)
 	sbbq	%rcx,%rcx
 	xorq	%rbp,%rbp
-
 
 	mulxq	16(%rsi),%r8,%rbx
 	mulxq	24(%rsi),%r9,%rax
@@ -2530,7 +2335,6 @@ _CET_ENDBR
 	movq	-64(%rsi),%rdx
 	movq	%rax,16+8(%rsp)
 	movq	%rdi,24+8(%rsp)
-
 
 	xorl	%eax,%eax
 	jmp	.Lsqrx8x_loop
@@ -2654,7 +2458,6 @@ _CET_ENDBR
 	adoxq	%r11,%r11
 	movq	16(%rdi),%r12
 	movq	24(%rdi),%r13
-
 
 .align	32
 .Lsqrx4x_shift_n_add:
@@ -2986,14 +2789,6 @@ bn_scatter5:
 _CET_ENDBR
 	cmpl	$0,%esi
 	jz	.Lscatter_epilogue
-
-
-
-
-
-
-
-
 
 	leaq	(%rdx,%rcx,8),%rdx
 .Lscatter:

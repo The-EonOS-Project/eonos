@@ -1,21 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <ring-core/base.h>
 
 #include "../internal.h"
@@ -28,7 +10,6 @@
 
 static uint64_t mul32x32_64(uint32_t a, uint32_t b) { return (uint64_t)a * b; }
 
-
 struct poly1305_state_st {
   alignas(64) uint32_t r0;
   uint32_t r1, r2, r3, r4;
@@ -36,9 +17,6 @@ struct poly1305_state_st {
   uint32_t h0, h1, h2, h3, h4;
   uint8_t key[16];
 };
-
-
-
 
 static void poly1305_update(struct poly1305_state_st *state, const uint8_t *in,
                             size_t len) {
@@ -107,7 +85,6 @@ poly1305_donna_mul:
     goto poly1305_donna_16bytes;
   }
 
-
 poly1305_donna_atmost15bytes:
   if (!len) {
     return;
@@ -146,7 +123,6 @@ void CRYPTO_poly1305_init(struct poly1305_state_st *state, const uint8_t key[32]
   t2 = CRYPTO_load_u32_le(key + 8);
   t3 = CRYPTO_load_u32_le(key + 12);
 
-  
   state->r0 = t0 & 0x3ffffff;
   t0 >>= 26;
   t0 |= t1 << 6;
@@ -165,7 +141,6 @@ void CRYPTO_poly1305_init(struct poly1305_state_st *state, const uint8_t key[32]
   state->s3 = state->r3 * 5;
   state->s4 = state->r4 * 5;
 
-  
   state->h0 = 0;
   state->h1 = 0;
   state->h2 = 0;
@@ -177,7 +152,7 @@ void CRYPTO_poly1305_init(struct poly1305_state_st *state, const uint8_t key[32]
 
 void CRYPTO_poly1305_update(struct poly1305_state_st *state, const uint8_t *in,
                             size_t in_len) {
-  
+
   if (in_len == 0) {
     return;
   }

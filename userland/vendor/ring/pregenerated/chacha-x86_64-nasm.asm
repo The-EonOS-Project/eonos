@@ -1,6 +1,3 @@
-
-
-
 %ifidn __OUTPUT_FORMAT__, win64
 default	rel
 %define XMMWORD
@@ -10,7 +7,6 @@ default	rel
 
 %include "ring_core_generated/prefix_symbols_nasm.inc"
 section	.text code align=64
-
 
 section	.rdata rdata align=8
 ALIGN	64
@@ -62,8 +58,6 @@ $L$SEH_begin_ChaCha20_ctr32_nohw:
 	mov	rcx,r9
 	mov	r8,QWORD[40+rsp]
 
-
-
 _CET_ENDBR
 	push	rbx
 
@@ -81,12 +75,10 @@ _CET_ENDBR
 
 $L$ctr32_body:
 
-
 	movdqu	xmm1,XMMWORD[rcx]
 	movdqu	xmm2,XMMWORD[16+rcx]
 	movdqu	xmm3,XMMWORD[r8]
 	movdqa	xmm4,XMMWORD[$L$one]
-
 
 	movdqa	XMMWORD[16+rsp],xmm1
 	movdqa	XMMWORD[32+rsp],xmm2
@@ -351,8 +343,6 @@ $L$SEH_begin_ChaCha20_ctr32_ssse3_4x:
 	mov	rdx,r8
 	mov	rcx,r9
 	mov	r8,QWORD[40+rsp]
-
-
 
 _CET_ENDBR
 	mov	r9,rsp
@@ -756,7 +746,6 @@ $L$tail4x:
 	cmp	rdx,64
 	jae	NEAR $L$64_or_more4x
 
-
 	xor	r10,r10
 
 	movdqa	XMMWORD[16+rsp],xmm12
@@ -927,8 +916,6 @@ $L$SEH_begin_ChaCha20_ctr32_avx2:
 	mov	rcx,r9
 	mov	r8,QWORD[40+rsp]
 
-
-
 _CET_ENDBR
 	mov	r9,rsp
 
@@ -946,15 +933,6 @@ _CET_ENDBR
 	movaps	XMMWORD[(-24)+r9],xmm15
 $L$8x_body:
 	vzeroupper
-
-
-
-
-
-
-
-
-
 
 	vbroadcasti128	ymm11,XMMWORD[$L$sigma]
 	vbroadcasti128	ymm3,XMMWORD[rcx]
@@ -1639,8 +1617,6 @@ $L$common_seh_tail:
 	pop	rsi
 	ret
 
-
-
 ALIGN	16
 ssse3_handler:
 	push	rsi
@@ -1679,8 +1655,6 @@ ssse3_handler:
 
 	jmp	NEAR $L$common_seh_tail
 
-
-
 ALIGN	16
 full_handler:
 	push	rsi
@@ -1718,7 +1692,6 @@ full_handler:
 	DD	0xa548f3fc
 
 	jmp	NEAR $L$common_seh_tail
-
 
 section	.pdata rdata align=4
 ALIGN	4

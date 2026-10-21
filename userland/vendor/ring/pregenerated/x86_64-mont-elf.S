@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86_64) && defined(__ELF__)
@@ -34,14 +31,6 @@ _CET_ENDBR
 	leaq	-16(%rsp,%r9,8),%r10
 	negq	%r9
 	andq	$-1024,%r10
-
-
-
-
-
-
-
-
 
 	subq	%r10,%r11
 	andq	$-4096,%r11
@@ -715,11 +704,6 @@ _CET_ENDBR
 	shlq	$3+2,%r10
 	negq	%r9
 
-
-
-
-
-
 	leaq	-64(%rsp,%r9,2),%r11
 	movq	%rsp,%rbp
 	movq	(%r8),%r8
@@ -775,9 +759,6 @@ _CET_ENDBR
 
 	call	bn_sqrx8x_internal
 
-
-
-
 	leaq	(%r8,%rcx,1),%rbx
 	movq	%rcx,%r9
 	movq	%rcx,%rdx
@@ -788,9 +769,6 @@ _CET_ENDBR
 .align	32
 .Lsqr8x_nox:
 	call	bn_sqr8x_internal
-
-
-
 
 	leaq	(%rdi,%r9,1),%rbx
 	movq	%r9,%rcx
@@ -921,17 +899,6 @@ _CET_ENDBR
 .Lmulx4x_page_walk_done:
 
 	leaq	(%rdx,%r9,1),%r10
-
-
-
-
-
-
-
-
-
-
-
 
 	movq	%r9,0(%rsp)
 	shrq	$5,%r9

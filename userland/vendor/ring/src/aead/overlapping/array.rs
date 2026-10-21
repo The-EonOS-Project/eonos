@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![cfg_attr(not(test), allow(dead_code))]
 
 use super::Overlapping;
@@ -19,8 +5,7 @@ use crate::error::LenMismatchError;
 use core::array::TryFromSliceError;
 
 pub struct Array<'o, T, const N: usize> {
-    
-    
+
     in_out: Overlapping<'o, T>,
 }
 

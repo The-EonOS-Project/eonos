@@ -1,21 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,9 +22,6 @@ static int GetFileNumber(wad_file_t *handle)
             return i;
         }
     }
-
-    
-    
 
     open_wadfiles = realloc(open_wadfiles,
                             sizeof(wad_file_t *) * (num_open_wadfiles + 1));
@@ -74,14 +53,11 @@ void W_Checksum(sha1_digest_t digest)
 
     num_open_wadfiles = 0;
 
-    
-    
-
     for (i=0; i<numlumps; ++i)
     {
         ChecksumAddLump(&sha1_context, &lumpinfo[i]);
     }
-    
+
     SHA1_Final(digest, &sha1_context);
 }
 

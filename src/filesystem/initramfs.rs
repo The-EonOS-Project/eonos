@@ -1,20 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![allow(dead_code)]
 
 use alloc::string::String;
@@ -29,17 +12,14 @@ use crate::{log_debug, log_fail, log_ok};
 #[link_section = ".requests"]
 static MODULE_REQUEST: ModuleRequest = ModuleRequest::new();
 
-
 static ARCHIVE: IrqMutex<Option<&'static [u8]>> = IrqMutex::new(None);
-
 
 static FILE_COUNT: AtomicUsize = AtomicUsize::new(0);
 
 const BLOCK: usize = 512;
 
-
 pub struct Entry {
-    
+
     pub name: String,
     pub data: &'static [u8],
 }
@@ -53,8 +33,6 @@ fn cstr(field: &[u8]) -> &[u8] {
     let end = field.iter().position(|&b| b == 0).unwrap_or(field.len());
     &field[..end]
 }
-
-
 
 fn parse_octal(field: &[u8]) -> Option<u64> {
     let mut value = 0u64;
@@ -81,8 +59,7 @@ fn parse_octal(field: &[u8]) -> Option<u64> {
 }
 
 fn checksum_ok(hdr: &[u8]) -> bool {
-    
-    
+
     let mut sum = 0u64;
     for (i, &b) in hdr.iter().enumerate() {
         sum += if (148..156).contains(&i) {
@@ -93,7 +70,6 @@ fn checksum_ok(hdr: &[u8]) -> bool {
     }
     parse_octal(&hdr[148..156]) == Some(sum)
 }
-
 
 fn normalize(mut s: &str) -> &str {
     loop {
@@ -129,8 +105,7 @@ impl Iterator for Entries {
     type Item = Entry;
 
     fn next(&mut self) -> Option<Entry> {
-        
-        
+
         let data: &'static [u8] = self.data;
         loop {
             let hdr_end = self.off.checked_add(BLOCK)?;
@@ -139,12 +114,10 @@ impl Iterator for Entries {
             }
             let hdr = &data[self.off..hdr_end];
 
-            
             if hdr.iter().all(|&b| b == 0) {
                 return None;
             }
-            
-            
+
             if !checksum_ok(hdr) {
                 return None;
             }
@@ -156,7 +129,7 @@ impl Iterator for Entries {
             if data_end > data.len() {
                 return None;
             }
-            
+
             let padded = size.checked_add(BLOCK - 1)? / BLOCK * BLOCK;
             self.off = data_start.checked_add(padded)?;
 
@@ -167,12 +140,10 @@ impl Iterator for Entries {
                     data: &data[data_start..data_end],
                 });
             }
-            
+
         }
     }
 }
-
-
 
 pub fn entries() -> Entries {
     Entries {
@@ -181,13 +152,10 @@ pub fn entries() -> Entries {
     }
 }
 
-
 pub fn find(path: &str) -> Option<&'static [u8]> {
     let want = normalize(path);
     entries().find(|e| e.name == want).map(|e| e.data)
 }
-
-
 
 pub fn module_bytes(suffix: &str) -> Option<&'static [u8]> {
     let response = MODULE_REQUEST.get_response()?;
@@ -207,8 +175,6 @@ pub fn module_bytes(suffix: &str) -> Option<&'static [u8]> {
     }
     Some(unsafe { core::slice::from_raw_parts(base, size) })
 }
-
-
 
 pub fn init() {
     let Some(response) = MODULE_REQUEST.get_response() else {
@@ -244,9 +210,6 @@ pub fn init() {
         return;
     }
 
-    
-    
-    
     let first = base as u64;
     let last = first + (size as u64 - 1);
     if crate::vmm::translate(first).is_none() || crate::vmm::translate(last).is_none() {

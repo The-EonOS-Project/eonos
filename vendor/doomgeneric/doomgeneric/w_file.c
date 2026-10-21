@@ -1,21 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 
 #include "config.h"
@@ -27,22 +9,12 @@
 
 extern wad_file_class_t stdc_wad_file;
 
-
-
-
-
-
-
 #ifdef HAVE_MMAP
 extern wad_file_class_t posix_wad_file;
 #endif 
 
 static wad_file_class_t *wad_file_classes[] = 
 {
-
-
-
-
 
 #ifdef HAVE_MMAP
     &posix_wad_file,
@@ -55,17 +27,10 @@ wad_file_t *W_OpenFile(char *path)
     wad_file_t *result;
     int i;
 
-    
-    
-    
-    
-
     if (!M_CheckParm("-mmap"))
     {
         return stdc_wad_file.OpenFile(path);
     }
-
-    
 
     result = NULL;
 

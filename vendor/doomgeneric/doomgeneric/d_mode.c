@@ -1,27 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include "doomtype.h"
 #include "d_mode.h"
-
-
-
 
 static struct
 {
@@ -45,8 +23,6 @@ static struct
     { strife,    commercial, 1, 34 },
 };
 
-
-
 boolean D_ValidGameMode(GameMission_t mission, GameMode_t mode)
 {
     int i;
@@ -67,8 +43,6 @@ boolean D_ValidEpisodeMap(GameMission_t mission, GameMode_t mode,
 {
     int i;
 
-    
-
     if (mission == heretic)
     {
         if (mode == retail && episode == 6)
@@ -81,8 +55,6 @@ boolean D_ValidEpisodeMap(GameMission_t mission, GameMode_t mode,
         }
     }
 
-    
-
     for (i=0; i<arrlen(valid_modes); ++i) 
     {
         if (mission == valid_modes[i].mission
@@ -93,12 +65,8 @@ boolean D_ValidEpisodeMap(GameMission_t mission, GameMode_t mode,
         }
     }
 
-    
-
     return false;
 }
-
-
 
 int D_GetNumEpisodes(GameMission_t mission, GameMode_t mode)
 {
@@ -113,8 +81,6 @@ int D_GetNumEpisodes(GameMission_t mission, GameMode_t mode)
 
     return episode - 1;
 }
-
-
 
 static struct {
     GameMission_t mission;
@@ -136,8 +102,6 @@ boolean D_ValidGameVersion(GameMission_t mission, GameVersion_t version)
 {
     int i;
 
-    
-
     if (mission == doom2 || mission == pack_plut || mission == pack_tnt
      || mission == pack_hacx || mission == pack_chex)
     {
@@ -155,8 +119,6 @@ boolean D_ValidGameVersion(GameMission_t mission, GameVersion_t version)
 
     return false;
 }
-
-
 
 boolean D_IsEpisodeMap(GameMission_t mission)
 {

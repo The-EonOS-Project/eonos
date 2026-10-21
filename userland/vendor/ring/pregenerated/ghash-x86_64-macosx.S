@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86_64) && defined(__APPLE__)
@@ -11,12 +8,10 @@
 .p2align	4
 _gcm_init_clmul:
 
-
 _CET_ENDBR
 L$_init_clmul:
 	movdqu	(%rsi),%xmm2
 	pshufd	$78,%xmm2,%xmm2
-
 
 	pshufd	$255,%xmm2,%xmm4
 	movdqa	%xmm2,%xmm3
@@ -27,10 +22,8 @@ L$_init_clmul:
 	pslldq	$8,%xmm3
 	por	%xmm3,%xmm2
 
-
 	pand	L$0x1c2_polynomial(%rip),%xmm5
 	pxor	%xmm5,%xmm2
-
 
 	pshufd	$78,%xmm2,%xmm6
 	movdqa	%xmm2,%xmm0
@@ -62,7 +55,6 @@ L$_init_clmul:
 	psrldq	$8,%xmm3
 	pxor	%xmm4,%xmm0
 	pxor	%xmm3,%xmm1
-
 
 	movdqa	%xmm0,%xmm4
 	psrlq	$1,%xmm0
@@ -108,7 +100,6 @@ L$_init_clmul:
 	pxor	%xmm4,%xmm0
 	pxor	%xmm3,%xmm1
 
-
 	movdqa	%xmm0,%xmm4
 	psrlq	$1,%xmm0
 	pxor	%xmm4,%xmm1
@@ -146,7 +137,6 @@ L$_init_clmul:
 	pxor	%xmm4,%xmm0
 	pxor	%xmm3,%xmm1
 
-
 	movdqa	%xmm0,%xmm4
 	psrlq	$1,%xmm0
 	pxor	%xmm4,%xmm1
@@ -165,14 +155,11 @@ L$_init_clmul:
 	movdqu	%xmm4,80(%rdi)
 	ret
 
-
-
 .globl	_gcm_ghash_clmul
 .private_extern _gcm_ghash_clmul
 
 .p2align	5
 _gcm_ghash_clmul:
-
 
 _CET_ENDBR
 L$_ghash_clmul:
@@ -194,9 +181,6 @@ L$_ghash_clmul:
 	movq	$0xA040608020C0E000,%rax
 	movdqu	48(%rsi),%xmm14
 	movdqu	64(%rsi),%xmm15
-
-
-
 
 	movdqu	48(%rdx),%xmm3
 	movdqu	32(%rdx),%xmm11
@@ -356,7 +340,6 @@ L$tail4x:
 	pxor	%xmm4,%xmm0
 	pxor	%xmm3,%xmm1
 
-
 	movdqa	%xmm0,%xmm4
 	psrlq	$1,%xmm0
 	pxor	%xmm4,%xmm1
@@ -371,10 +354,6 @@ L$tail4x:
 	subq	$0x10,%rcx
 	jz	L$odd_tail
 L$skip4x:
-
-
-
-
 
 	movdqu	(%rdx),%xmm8
 	movdqu	16(%rdx),%xmm3
@@ -491,7 +470,6 @@ L$even_tail:
 	pxor	%xmm4,%xmm0
 	pxor	%xmm3,%xmm1
 
-
 	movdqa	%xmm0,%xmm4
 	psrlq	$1,%xmm0
 	pxor	%xmm4,%xmm1
@@ -535,7 +513,6 @@ L$odd_tail:
 	pxor	%xmm4,%xmm0
 	pxor	%xmm3,%xmm1
 
-
 	movdqa	%xmm0,%xmm4
 	psrlq	$1,%xmm0
 	pxor	%xmm4,%xmm1
@@ -549,21 +526,17 @@ L$done:
 	movdqu	%xmm0,(%rdi)
 	ret
 
-
-
 .globl	_gcm_init_avx
 .private_extern _gcm_init_avx
 
 .p2align	5
 _gcm_init_avx:
 
-
 _CET_ENDBR
 	vzeroupper
 
 	vmovdqu	(%rsi),%xmm2
 	vpshufd	$78,%xmm2,%xmm2
-
 
 	vpshufd	$255,%xmm2,%xmm4
 	vpsrlq	$63,%xmm2,%xmm3
@@ -572,7 +545,6 @@ _CET_ENDBR
 	vpcmpgtd	%xmm4,%xmm5,%xmm5
 	vpslldq	$8,%xmm3,%xmm3
 	vpor	%xmm3,%xmm2,%xmm2
-
 
 	vpand	L$0x1c2_polynomial(%rip),%xmm5,%xmm5
 	vpxor	%xmm5,%xmm2,%xmm2
@@ -662,14 +634,11 @@ L$init_start_avx:
 	vzeroupper
 	ret
 
-
-
 .globl	_gcm_ghash_avx
 .private_extern _gcm_ghash_avx
 
 .p2align	5
 _gcm_ghash_avx:
-
 
 _CET_ENDBR
 	vzeroupper
@@ -1043,8 +1012,6 @@ L$tail_no_xor_avx:
 	vmovdqu	%xmm10,(%rdi)
 	vzeroupper
 	ret
-
-
 
 .section	__DATA,__const
 .p2align	6

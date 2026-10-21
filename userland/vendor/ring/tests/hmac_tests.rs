@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![allow(missing_docs)]
 
 use ring::{digest, hmac};
@@ -55,7 +41,6 @@ fn hmac_tests() {
 
         hmac_test_case_inner(algorithm, &key_value[..], &input[..], &output[..], true);
 
-        
         if input.is_empty() {
             input.push(0);
         } else {
@@ -77,14 +62,12 @@ fn hmac_test_case_inner(
 ) {
     let key = hmac::Key::new(algorithm, key_value);
 
-    
     {
         let signature = hmac::sign(&key, input);
         assert_eq!(is_ok, signature.as_ref() == output);
         assert_eq!(is_ok, hmac::verify(&key, input, output).is_ok());
     }
 
-    
     {
         let mut s_ctx = hmac::Context::with_key(&key);
         s_ctx.update(input);
@@ -92,7 +75,6 @@ fn hmac_test_case_inner(
         assert_eq!(is_ok, signature.as_ref() == output);
     }
 
-    
     {
         let mut ctx = hmac::Context::with_key(&key);
         for b in input {

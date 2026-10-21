@@ -1,18 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{overlapping, quic::Sample, Nonce};
 use crate::cpu;
 use cfg_if::cfg_if;
@@ -51,8 +36,7 @@ impl Key {
 }
 
 impl Key {
-    
-    
+
     #[inline]
     pub(super) fn encrypt_single_block_with_ctr_0<const N: usize>(
         &self,
@@ -159,13 +143,11 @@ impl Key {
     }
 }
 
-
 #[repr(transparent)]
 pub struct Counter([u32; 4]);
 
 impl Counter {
-    
-    
+
     fn zero_one_less_safe(nonce: Nonce) -> (Self, Self) {
         let ctr0 @ Self([_, n0, n1, n2]) = Self::from_nonce_and_ctr(nonce, 0);
         let ctr1 = Self([1, n0, n1, n2]);
@@ -177,8 +159,6 @@ impl Counter {
         Self([ctr, n0, n1, n2])
     }
 
-    
-    
     #[cfg(any(
         test,
         not(any(
@@ -215,7 +195,7 @@ mod tests {
 
     #[test]
     fn chacha20_test_default() {
-        
+
         let max_offset = if cfg!(any(
             all(target_arch = "aarch64", target_endian = "little"),
             all(target_arch = "arm", target_endian = "little"),
@@ -229,7 +209,6 @@ mod tests {
         chacha20_test(max_offset, Key::encrypt);
     }
 
-    
     #[test]
     fn chacha20_test_fallback() {
         chacha20_test(MAX_ALIGNMENT_AND_OFFSET_SUBSET, |key, ctr, in_out, _cpu| {
@@ -237,20 +216,12 @@ mod tests {
         });
     }
 
-    
-    
-    
-    
-    
-    
-    
     fn chacha20_test(
         max_alignment_and_offset: (usize, usize),
         f: impl for<'k, 'o> Fn(&'k Key, Counter, Overlapping<'o>, cpu::Features),
     ) {
         let cpu = cpu::features();
 
-        
         let mut buf = vec![0u8; 1300];
 
         test::run(
@@ -267,9 +238,6 @@ mod tests {
                 let input = test_case.consume_bytes("Input");
                 let output = test_case.consume_bytes("Output");
 
-                
-                
-                
                 for len in 0..=input.len() {
                     #[allow(clippy::cast_possible_truncation)]
                     chacha20_test_case_inner(

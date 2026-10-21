@@ -1,29 +1,9 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 pub use super::scalar::{MaskedScalar, Scalar, SCALAR_LEN};
 use crate::{
     bssl, cpu, error,
     limb::{Limb, LIMB_BITS},
 };
 use core::{ffi::c_int, marker::PhantomData};
-
-
-
 
 #[repr(C)]
 pub struct Elem<E: Encoding> {
@@ -54,15 +34,8 @@ impl Elem<T> {
     }
 }
 
-
-
-
-
-
-
 pub type EncodedPoint = [u8; ELEM_LEN];
 pub const ELEM_LEN: usize = 32;
-
 
 #[repr(C)]
 pub struct ExtPoint {
@@ -73,7 +46,7 @@ pub struct ExtPoint {
 }
 
 impl ExtPoint {
-    
+
     pub(super) fn from_scalarmult_base(scalar: &Scalar, cpu: cpu::Features) -> Self {
         let mut r = Self {
             x: Elem::zero(),
@@ -110,7 +83,6 @@ impl ExtPoint {
         self.t.negate();
     }
 }
-
 
 #[repr(C)]
 pub struct Point {
@@ -150,8 +122,6 @@ fn encode_point(x: Elem<T>, y: Elem<T>, z: Elem<T>, _cpu_features: cpu::Features
         x25519_fe_isnegative(&x_over_z)
     };
 
-    
-    
     bytes[ELEM_LEN - 1] ^= sign_bit << 7;
 
     bytes

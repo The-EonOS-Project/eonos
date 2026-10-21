@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_AARCH64) && defined(__ELF__)
@@ -12,7 +9,7 @@
 .align	4
 gcm_init_neon:
 	AARCH64_VALID_CALL_TARGET
-	
+
 	ld1	{v17.2d}, [x1]			
 	movi	v19.16b, #0xe1
 	shl	v19.2d, v19.2d, #57		
@@ -75,8 +72,7 @@ gcm_ghash_neon:
 	eor	v3.16b, v3.16b, v0.16b	
 
 .Lgmult_neon:
-	
-	
+
 	ins	v4.d[0], v3.d[1]
 	ext	v16.8b, v5.8b, v5.8b, #1	
 	pmull	v16.8h, v16.8b, v3.8b		
@@ -93,35 +89,10 @@ gcm_ghash_neon:
 	eor	v17.16b, v17.16b, v19.16b	
 	pmull	v0.8h, v5.8b, v0.8b		
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
 	ext	v19.8b, v3.8b, v3.8b, #4	
 	eor	v18.16b, v18.16b, v0.16b	
 	pmull	v19.8h, v5.8b, v19.8b		
 
-	
-	
 	zip1	v20.2d, v16.2d, v17.2d
 	zip1	v22.2d, v18.2d, v19.2d
 	zip2	v21.2d, v16.2d, v17.2d
@@ -162,35 +133,10 @@ gcm_ghash_neon:
 	eor	v17.16b, v17.16b, v19.16b	
 	pmull	v1.8h, v7.8b, v1.8b		
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
 	ext	v19.8b, v3.8b, v3.8b, #4	
 	eor	v18.16b, v18.16b, v1.16b	
 	pmull	v19.8h, v7.8b, v19.8b		
 
-	
-	
 	zip1	v20.2d, v16.2d, v17.2d
 	zip1	v22.2d, v18.2d, v19.2d
 	zip2	v21.2d, v16.2d, v17.2d
@@ -230,35 +176,10 @@ gcm_ghash_neon:
 	eor	v17.16b, v17.16b, v19.16b	
 	pmull	v2.8h, v6.8b, v2.8b		
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
 	ext	v19.8b, v4.8b, v4.8b, #4	
 	eor	v18.16b, v18.16b, v2.16b	
 	pmull	v19.8h, v6.8b, v19.8b		
 
-	
-	
 	zip1	v20.2d, v16.2d, v17.2d
 	zip1	v22.2d, v18.2d, v19.2d
 	zip2	v21.2d, v16.2d, v17.2d
@@ -288,16 +209,13 @@ gcm_ghash_neon:
 	eor	v1.16b, v1.16b, v2.16b
 	eor	v1.16b, v1.16b, v16.16b	
 	ins	v0.d[1], v1.d[0]		
-	
-	
 
-	
 	shl	v17.2d, v0.2d, #57		
 	shl	v18.2d, v0.2d, #62
 	eor	v18.16b, v18.16b, v17.16b	
 	shl	v17.2d, v0.2d, #63
 	eor	v18.16b, v18.16b, v17.16b	
-	
+
 	eor	v18.16b, v18.16b, v1.16b
 	ins	v0.d[1], v18.d[0]		
 	ins	v2.d[0], v18.d[1]		

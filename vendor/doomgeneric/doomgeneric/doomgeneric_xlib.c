@@ -81,8 +81,6 @@ void DG_Init()
 {
 	memset(s_KeyQueue, 0, KEYQUEUE_SIZE * sizeof(unsigned short));
 
-    
-
     s_Display = XOpenDisplay(NULL);
 
     s_Screen = DefaultScreen(s_Display);
@@ -109,8 +107,6 @@ void DG_Init()
 
     XkbSetDetectableAutoRepeat(s_Display, 1, 0);
 
-    
-
     while(1)
     {
         XEvent e;
@@ -124,7 +120,6 @@ void DG_Init()
     s_Image = XCreateImage(s_Display, DefaultVisual(s_Display, s_Screen), depth, ZPixmap, 0, (char *)DG_ScreenBuffer, DOOMGENERIC_RESX, DOOMGENERIC_RESX, 32, 0);
 }
 
-
 void DG_DrawFrame()
 {
     if (s_Display)
@@ -136,24 +131,21 @@ void DG_DrawFrame()
             if (e.type == KeyPress)
             {
                 KeySym sym = XkbKeycodeToKeysym(s_Display, e.xkey.keycode, 0, 0);
-                
 
                 addKeyToQueue(1, sym);
             }
             else if (e.type == KeyRelease)
             {
                 KeySym sym = XkbKeycodeToKeysym(s_Display, e.xkey.keycode, 0, 0);
-                
+
                 addKeyToQueue(0, sym);
             }
         }
 
         XPutImage(s_Display, s_Window, s_Gc, s_Image, 0, 0, 0, 0, DOOMGENERIC_RESX, DOOMGENERIC_RESY);
 
-        
     }
 
-    
 }
 
 void DG_SleepMs(uint32_t ms)
@@ -175,7 +167,6 @@ int DG_GetKey(int* pressed, unsigned char* doomKey)
 {
 	if (s_KeyQueueReadIndex == s_KeyQueueWriteIndex)
 	{
-		
 
 		return 0;
 	}

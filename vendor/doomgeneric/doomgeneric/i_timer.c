@@ -1,21 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include "i_timer.h"
 #include "doomtype.h"
 
@@ -23,17 +5,7 @@
 
 #include <stdarg.h>
 
-
-
-
-
-
-
-
-
-
 static uint32_t basetime = 0;
-
 
 int I_GetTicks(void)
 {
@@ -54,11 +26,6 @@ int  I_GetTime (void)
     return (ticks * TICRATE) / 1000;
 }
 
-
-
-
-
-
 int I_GetTimeMS(void)
 {
     uint32_t ticks;
@@ -71,26 +38,19 @@ int I_GetTimeMS(void)
     return ticks - basetime;
 }
 
-
-
 void I_Sleep(int ms)
 {
-    
-    
 
 	DG_SleepMs(ms);
 }
 
 void I_WaitVBL(int count)
 {
-    
-}
 
+}
 
 void I_InitTimer(void)
 {
-    
 
-    
 }
 

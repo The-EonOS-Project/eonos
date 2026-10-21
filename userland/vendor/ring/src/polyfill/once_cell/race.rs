@@ -1,36 +1,14 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use core::sync::atomic;
 
 use atomic::{AtomicUsize, Ordering};
 use core::num::NonZeroUsize;
-
 
 pub struct OnceNonZeroUsize {
     inner: AtomicUsize,
 }
 
 impl OnceNonZeroUsize {
-    
+
     #[inline]
     pub const fn new() -> OnceNonZeroUsize {
         OnceNonZeroUsize {
@@ -38,19 +16,12 @@ impl OnceNonZeroUsize {
         }
     }
 
-    
     #[inline]
     pub fn get(&self) -> Option<NonZeroUsize> {
         let val = self.inner.load(Ordering::Acquire);
         NonZeroUsize::new(val)
     }
 
-    
-    
-    
-    
-    
-    
     pub fn get_or_init<F>(&self, f: F) -> NonZeroUsize
     where
         F: FnOnce() -> NonZeroUsize,

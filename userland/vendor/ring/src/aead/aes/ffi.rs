@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{Block, KeyBytes, Overlapping, BLOCK_LEN};
 use crate::{bits::BitLength, c, error};
 use core::{
@@ -19,10 +5,8 @@ use core::{
     num::{NonZeroU32, NonZeroUsize},
 };
 
-
 #[repr(transparent)]
 pub(in super::super) struct Counter(pub(super) [u8; BLOCK_LEN]);
-
 
 #[repr(C)]
 #[derive(Clone)]
@@ -30,7 +14,6 @@ pub(in super::super) struct AES_KEY {
     pub rd_key: [u32; 4 * (MAX_ROUNDS + 1)],
     pub rounds: c_uint,
 }
-
 
 const MAX_ROUNDS: usize = 14;
 
@@ -50,7 +33,6 @@ impl AES_KEY {
             KeyBytes::AES_256(bytes) => (&bytes[..], BitLength::from_bits(256)),
         };
 
-        
         if 0 == unsafe { f(bytes.as_ptr(), key_bits, &mut key) } {
             debug_assert_ne!(key.rounds, 0); 
             Ok(key)
@@ -78,16 +60,6 @@ impl AES_KEY {
         self.rounds
     }
 }
-
-
-
-
-
-
-
-
-
-
 
 macro_rules! set_encrypt_key {
     ( $name:ident, $key_bytes:expr $(,)? ) => {{
@@ -125,11 +97,6 @@ impl AES_KEY {
     }
 }
 
-
-
-
-
-
 macro_rules! ctr32_encrypt_blocks {
     ($name:ident, $in_out:expr, $key:expr, $ctr:expr $(,)? ) => {{
         use crate::{
@@ -150,17 +117,7 @@ macro_rules! ctr32_encrypt_blocks {
 }
 
 impl AES_KEY {
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     #[inline]
     pub(super) unsafe fn ctr32_encrypt_blocks(
         &self,
@@ -188,14 +145,6 @@ impl AES_KEY {
             let output: *mut [u8; BLOCK_LEN] = output.cast();
             let blocks_u32: NonZeroU32 = blocks.try_into().unwrap();
 
-            
-            
-            
-            
-            
-            
-            
-            
             unsafe {
                 f(input, output, blocks, self, ctr);
             }

@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86_64) && defined(__ELF__)
@@ -17,7 +14,6 @@ _CET_ENDBR
 	movdqu	(%rsi),%xmm2
 	pshufd	$78,%xmm2,%xmm2
 
-
 	pshufd	$255,%xmm2,%xmm4
 	movdqa	%xmm2,%xmm3
 	psllq	$1,%xmm2
@@ -27,10 +23,8 @@ _CET_ENDBR
 	pslldq	$8,%xmm3
 	por	%xmm3,%xmm2
 
-
 	pand	.L0x1c2_polynomial(%rip),%xmm5
 	pxor	%xmm5,%xmm2
-
 
 	pshufd	$78,%xmm2,%xmm6
 	movdqa	%xmm2,%xmm0
@@ -62,7 +56,6 @@ _CET_ENDBR
 	psrldq	$8,%xmm3
 	pxor	%xmm4,%xmm0
 	pxor	%xmm3,%xmm1
-
 
 	movdqa	%xmm0,%xmm4
 	psrlq	$1,%xmm0
@@ -108,7 +101,6 @@ _CET_ENDBR
 	pxor	%xmm4,%xmm0
 	pxor	%xmm3,%xmm1
 
-
 	movdqa	%xmm0,%xmm4
 	psrlq	$1,%xmm0
 	pxor	%xmm4,%xmm1
@@ -145,7 +137,6 @@ _CET_ENDBR
 	psrldq	$8,%xmm3
 	pxor	%xmm4,%xmm0
 	pxor	%xmm3,%xmm1
-
 
 	movdqa	%xmm0,%xmm4
 	psrlq	$1,%xmm0
@@ -194,9 +185,6 @@ _CET_ENDBR
 	movq	$0xA040608020C0E000,%rax
 	movdqu	48(%rsi),%xmm14
 	movdqu	64(%rsi),%xmm15
-
-
-
 
 	movdqu	48(%rdx),%xmm3
 	movdqu	32(%rdx),%xmm11
@@ -356,7 +344,6 @@ _CET_ENDBR
 	pxor	%xmm4,%xmm0
 	pxor	%xmm3,%xmm1
 
-
 	movdqa	%xmm0,%xmm4
 	psrlq	$1,%xmm0
 	pxor	%xmm4,%xmm1
@@ -371,10 +358,6 @@ _CET_ENDBR
 	subq	$0x10,%rcx
 	jz	.Lodd_tail
 .Lskip4x:
-
-
-
-
 
 	movdqu	(%rdx),%xmm8
 	movdqu	16(%rdx),%xmm3
@@ -491,7 +474,6 @@ _CET_ENDBR
 	pxor	%xmm4,%xmm0
 	pxor	%xmm3,%xmm1
 
-
 	movdqa	%xmm0,%xmm4
 	psrlq	$1,%xmm0
 	pxor	%xmm4,%xmm1
@@ -535,7 +517,6 @@ _CET_ENDBR
 	pxor	%xmm4,%xmm0
 	pxor	%xmm3,%xmm1
 
-
 	movdqa	%xmm0,%xmm4
 	psrlq	$1,%xmm0
 	pxor	%xmm4,%xmm1
@@ -564,7 +545,6 @@ _CET_ENDBR
 	vmovdqu	(%rsi),%xmm2
 	vpshufd	$78,%xmm2,%xmm2
 
-
 	vpshufd	$255,%xmm2,%xmm4
 	vpsrlq	$63,%xmm2,%xmm3
 	vpsllq	$1,%xmm2,%xmm2
@@ -572,7 +552,6 @@ _CET_ENDBR
 	vpcmpgtd	%xmm4,%xmm5,%xmm5
 	vpslldq	$8,%xmm3,%xmm3
 	vpor	%xmm3,%xmm2,%xmm2
-
 
 	vpand	.L0x1c2_polynomial(%rip),%xmm5,%xmm5
 	vpxor	%xmm5,%xmm2,%xmm2

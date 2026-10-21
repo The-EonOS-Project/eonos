@@ -1,27 +1,10 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{Key, Tag, KEY_LEN, TAG_LEN};
 use crate::c;
 use core::num::NonZeroUsize;
 
-
 pub(in super::super) struct State {
     state: poly1305_state_st,
 }
-
 
 #[repr(C, align(64))]
 struct poly1305_state_st {
@@ -70,8 +53,6 @@ impl State {
         super::Context::Fallback(r)
     }
 
-    
-    
     pub(super) fn update_internal(&mut self, input: &[u8]) {
         prefixed_extern! {
             fn CRYPTO_poly1305_update(

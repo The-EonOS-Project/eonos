@@ -1,6 +1,3 @@
-
-
-
 %ifidn __OUTPUT_FORMAT__, win64
 default	rel
 %define XMMWORD
@@ -27,7 +24,6 @@ $L$SEH_endprologue_gcm_init_clmul_4:
 	movdqu	xmm2,XMMWORD[rdx]
 	pshufd	xmm2,xmm2,78
 
-
 	pshufd	xmm4,xmm2,255
 	movdqa	xmm3,xmm2
 	psllq	xmm2,1
@@ -37,10 +33,8 @@ $L$SEH_endprologue_gcm_init_clmul_4:
 	pslldq	xmm3,8
 	por	xmm2,xmm3
 
-
 	pand	xmm5,XMMWORD[$L$0x1c2_polynomial]
 	pxor	xmm2,xmm5
-
 
 	pshufd	xmm6,xmm2,78
 	movdqa	xmm0,xmm2
@@ -72,7 +66,6 @@ DB	102,15,58,68,222,0
 	psrldq	xmm3,8
 	pxor	xmm0,xmm4
 	pxor	xmm1,xmm3
-
 
 	movdqa	xmm4,xmm0
 	psrlq	xmm0,1
@@ -118,7 +111,6 @@ DB	102,15,58,68,222,0
 	pxor	xmm0,xmm4
 	pxor	xmm1,xmm3
 
-
 	movdqa	xmm4,xmm0
 	psrlq	xmm0,1
 	pxor	xmm1,xmm4
@@ -155,7 +147,6 @@ DB	102,15,58,68,222,0
 	psrldq	xmm3,8
 	pxor	xmm0,xmm4
 	pxor	xmm1,xmm3
-
 
 	movdqa	xmm4,xmm0
 	psrlq	xmm0,1
@@ -229,9 +220,6 @@ DB	102,65,15,56,0,194
 	mov	rax,0xA040608020C0E000
 	movdqu	xmm14,XMMWORD[48+rdx]
 	movdqu	xmm15,XMMWORD[64+rdx]
-
-
-
 
 	movdqu	xmm3,XMMWORD[48+r8]
 	movdqu	xmm11,XMMWORD[32+r8]
@@ -391,7 +379,6 @@ DB	102,68,15,58,68,199,16
 	pxor	xmm0,xmm4
 	pxor	xmm1,xmm3
 
-
 	movdqa	xmm4,xmm0
 	psrlq	xmm0,1
 	pxor	xmm1,xmm4
@@ -406,10 +393,6 @@ DB	102,68,15,58,68,199,16
 	sub	r9,0x10
 	jz	NEAR $L$odd_tail
 $L$skip4x:
-
-
-
-
 
 	movdqu	xmm8,XMMWORD[r8]
 	movdqu	xmm3,XMMWORD[16+r8]
@@ -526,7 +509,6 @@ DB	102,15,58,68,231,16
 	pxor	xmm0,xmm4
 	pxor	xmm1,xmm3
 
-
 	movdqa	xmm4,xmm0
 	psrlq	xmm0,1
 	pxor	xmm1,xmm4
@@ -569,7 +551,6 @@ DB	102,15,58,68,223,0
 	psrldq	xmm3,8
 	pxor	xmm0,xmm4
 	pxor	xmm1,xmm3
-
 
 	movdqa	xmm4,xmm0
 	psrlq	xmm0,1
@@ -614,7 +595,6 @@ $L$SEH_endprologue_gcm_init_avx_4:
 	vmovdqu	xmm2,XMMWORD[rdx]
 	vpshufd	xmm2,xmm2,78
 
-
 	vpshufd	xmm4,xmm2,255
 	vpsrlq	xmm3,xmm2,63
 	vpsllq	xmm2,xmm2,1
@@ -622,7 +602,6 @@ $L$SEH_endprologue_gcm_init_avx_4:
 	vpcmpgtd	xmm5,xmm5,xmm4
 	vpslldq	xmm3,xmm3,8
 	vpor	xmm2,xmm2,xmm3
-
 
 	vpand	xmm5,xmm5,XMMWORD[$L$0x1c2_polynomial]
 	vpxor	xmm2,xmm2,xmm5
@@ -714,7 +693,6 @@ $L$init_start_avx:
 	lea	rsp,[24+rsp]
 	ret
 $L$SEH_end_gcm_init_avx_5:
-
 
 global	gcm_ghash_avx
 
@@ -1166,7 +1144,6 @@ ALIGN	4
 	DD	$L$SEH_begin_gcm_ghash_avx_1 wrt ..imagebase
 	DD	$L$SEH_end_gcm_ghash_avx_14 wrt ..imagebase
 	DD	$L$SEH_info_gcm_ghash_avx_0 wrt ..imagebase
-
 
 section	.xdata rdata align=8
 ALIGN	4

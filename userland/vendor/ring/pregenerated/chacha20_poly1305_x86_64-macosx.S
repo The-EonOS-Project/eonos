@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86_64) && defined(__APPLE__)
@@ -45,10 +42,8 @@ L$and_masks:
 .byte	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff
 .text	
 
-
 .p2align	6
 poly_hash_ad_internal:
-
 
 	xorq	%r10,%r10
 	xorq	%r11,%r11
@@ -206,11 +201,8 @@ L$hash_ad_tail_loop:
 	adcq	%r9,%r11
 	adcq	$0,%r12
 
-
 L$hash_ad_done:
 	ret
-
-
 
 .globl	_chacha20_poly1305_open_sse41
 .private_extern _chacha20_poly1305_open_sse41
@@ -231,12 +223,9 @@ _CET_ENDBR
 
 	pushq	%r15
 
-
-
 	pushq	%r9
 
 	subq	$288 + 0 + 32,%rsp
-
 
 	leaq	32(%rsp),%rbp
 	andq	$-32,%rbp
@@ -343,8 +332,6 @@ L$open_sse_main_loop:
 	movdqa	%xmm13,0+112(%rbp)
 	movdqa	%xmm14,0+128(%rbp)
 	movdqa	%xmm15,0+144(%rbp)
-
-
 
 	movq	$4,%rcx
 	movq	%rsi,%r8
@@ -1673,7 +1660,6 @@ L$open_sse_tail_256_hash:
 	leaq	192(%rsi),%rsi
 	leaq	192(%rdi),%rdi
 
-
 L$open_sse_tail_64_dec_loop:
 	cmpq	$16,%rbx
 	jb	L$open_sse_tail_16_init
@@ -1690,12 +1676,9 @@ L$open_sse_tail_64_dec_loop:
 L$open_sse_tail_16_init:
 	movdqa	%xmm0,%xmm1
 
-
 L$open_sse_tail_16:
 	testq	%rbx,%rbx
 	jz	L$open_sse_finalize
-
-
 
 	pxor	%xmm3,%xmm3
 	leaq	-1(%rsi,%rbx,1),%rsi
@@ -1711,7 +1694,6 @@ L$open_sse_tail_16_compose:
 	pextrq	$1,%xmm3,%r14
 
 	pxor	%xmm1,%xmm3
-
 
 L$open_sse_tail_16_extract:
 	pextrb	$0,%xmm3,(%rdi)
@@ -1761,7 +1743,6 @@ L$open_sse_tail_16_extract:
 	adcq	%r9,%r11
 	adcq	$0,%r12
 
-
 L$open_sse_finalize:
 	addq	0+0+32(%rbp),%r10
 	adcq	8+0+32(%rbp),%r11
@@ -1804,7 +1785,6 @@ L$open_sse_finalize:
 	adcq	%r9,%r11
 	adcq	$0,%r12
 
-
 	movq	%r10,%r13
 	movq	%r11,%r14
 	movq	%r12,%r15
@@ -1818,9 +1798,7 @@ L$open_sse_finalize:
 	addq	0+0+16(%rbp),%r10
 	adcq	8+0+16(%rbp),%r11
 
-
 	addq	$288 + 0 + 32,%rsp
-
 
 	popq	%r9
 
@@ -2017,7 +1995,6 @@ L$open_sse_128_xor_hash:
 	adcq	8+0(%rsi),%r11
 	adcq	$1,%r12
 
-
 	movdqu	0(%rsi),%xmm3
 	pxor	%xmm3,%xmm1
 	movdqu	%xmm1,0(%rdi)
@@ -2061,7 +2038,6 @@ L$open_sse_128_xor_hash:
 	adcq	%r9,%r11
 	adcq	$0,%r12
 
-
 	movdqa	%xmm5,%xmm1
 	movdqa	%xmm9,%xmm5
 	movdqa	%xmm13,%xmm9
@@ -2070,14 +2046,6 @@ L$open_sse_128_xor_hash:
 	movdqa	%xmm10,%xmm6
 	movdqa	%xmm14,%xmm10
 	jmp	L$open_sse_128_xor_hash
-
-
-
-
-
-
-
-
 
 .globl	_chacha20_poly1305_seal_sse41
 .private_extern _chacha20_poly1305_seal_sse41
@@ -2097,8 +2065,6 @@ _CET_ENDBR
 	pushq	%r14
 
 	pushq	%r15
-
-
 
 	pushq	%r9
 
@@ -2348,7 +2314,6 @@ L$seal_sse_init_rounds:
 	paddd	0+48(%rbp),%xmm4
 	paddd	0+64(%rbp),%xmm8
 	paddd	0+96(%rbp),%xmm12
-
 
 	pand	L$clamp(%rip),%xmm3
 	movdqa	%xmm3,0+0(%rbp)
@@ -3545,7 +3510,6 @@ L$seal_sse_128_tail_xor:
 	adcq	%r9,%r11
 	adcq	$0,%r12
 
-
 	movdqa	%xmm4,%xmm0
 	movdqa	%xmm8,%xmm4
 	movdqa	%xmm12,%xmm8
@@ -3570,9 +3534,7 @@ L$seal_sse_tail_16_compose:
 	decq	%rcx
 	jne	L$seal_sse_tail_16_compose
 
-
 	pxor	%xmm0,%xmm15
-
 
 	movq	%rbx,%rcx
 	movdqu	%xmm15,%xmm0
@@ -3582,13 +3544,6 @@ L$seal_sse_tail_16_extract:
 	addq	$1,%rdi
 	subq	$1,%rcx
 	jnz	L$seal_sse_tail_16_extract
-
-
-
-
-
-
-
 
 	movq	288 + 0 + 32(%rsp),%r9
 	movq	56(%r9),%r14
@@ -3605,19 +3560,14 @@ L$seal_sse_tail_16_extract:
 
 L$load_extra_in:
 
-
 	leaq	-1(%r13,%r15,1),%rsi
-
 
 	addq	%r15,%r13
 	subq	%r15,%r14
 	movq	%r13,48(%r9)
 	movq	%r14,56(%r9)
 
-
-
 	addq	%r15,%r8
-
 
 	pxor	%xmm11,%xmm11
 L$load_extra_load_loop:
@@ -3627,9 +3577,6 @@ L$load_extra_load_loop:
 	subq	$1,%r15
 	jnz	L$load_extra_load_loop
 
-
-
-
 	movq	%rbx,%r15
 
 L$load_extra_shift_loop:
@@ -3637,17 +3584,11 @@ L$load_extra_shift_loop:
 	subq	$1,%r15
 	jnz	L$load_extra_shift_loop
 
-
-
-
 	leaq	L$and_masks(%rip),%r15
 	shlq	$4,%rbx
 	pand	-16(%r15,%rbx,1),%xmm15
 
-
 	por	%xmm11,%xmm15
-
-
 
 .byte	102,77,15,126,253
 	pextrq	$1,%xmm15,%r14
@@ -3691,7 +3632,6 @@ L$load_extra_shift_loop:
 	addq	%r15,%r10
 	adcq	%r9,%r11
 	adcq	$0,%r12
-
 
 L$process_blocks_of_extra_in:
 
@@ -3808,7 +3748,6 @@ L$process_partial_block:
 	adcq	%r9,%r11
 	adcq	$0,%r12
 
-
 L$do_length_block:
 	addq	0+0+32(%rbp),%r10
 	adcq	8+0+32(%rbp),%r11
@@ -3851,7 +3790,6 @@ L$do_length_block:
 	adcq	%r9,%r11
 	adcq	$0,%r12
 
-
 	movq	%r10,%r13
 	movq	%r11,%r14
 	movq	%r12,%r15
@@ -3865,9 +3803,7 @@ L$do_length_block:
 	addq	0+0+16(%rbp),%r10
 	adcq	8+0+16(%rbp),%r11
 
-
 	addq	$288 + 0 + 32,%rsp
-
 
 	popq	%r9
 
@@ -4058,9 +3994,6 @@ L$seal_sse_128_rounds:
 	call	poly_hash_ad_internal
 	jmp	L$seal_sse_128_tail_xor
 
-
-
-
 .globl	_chacha20_poly1305_open_avx2
 .private_extern _chacha20_poly1305_open_avx2
 
@@ -4080,12 +4013,9 @@ _CET_ENDBR
 
 	pushq	%r15
 
-
-
 	pushq	%r9
 
 	subq	$288 + 0 + 32,%rsp
-
 
 	leaq	32(%rsp),%rbp
 	andq	$-32,%rbp
@@ -5991,7 +5921,6 @@ L$open_avx2_short_hash_and_xor_loop:
 	adcq	%r9,%r11
 	adcq	$0,%r12
 
-
 	vpxor	(%rsi),%ymm0,%ymm0
 	vmovdqu	%ymm0,(%rdi)
 	leaq	32(%rsi),%rsi
@@ -6224,9 +6153,6 @@ L$open_avx2_320_rounds:
 	vperm2i128	$0x13,%ymm10,%ymm14,%ymm6
 	jmp	L$open_avx2_short
 
-
-
-
 .globl	_chacha20_poly1305_seal_avx2
 .private_extern _chacha20_poly1305_seal_avx2
 
@@ -6245,8 +6171,6 @@ _CET_ENDBR
 	pushq	%r14
 
 	pushq	%r15
-
-
 
 	pushq	%r9
 
@@ -8291,42 +8215,8 @@ L$seal_avx2_tail_512_rounds_and_2xhash:
 	vpalignr	$8,%ymm8,%ymm8,%ymm8
 	vpalignr	$4,%ymm12,%ymm12,%ymm12
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	addq	%rax,%r15
 	adcq	%rdx,%r9
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	movq	%r13,%r10
 	movq	%r14,%r11
@@ -8893,6 +8783,5 @@ L$seal_avx2_short_tail:
 L$seal_avx2_exit:
 	vzeroupper
 	jmp	L$seal_sse_tail_16
-
 
 #endif

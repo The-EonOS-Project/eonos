@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_AARCH64) && defined(__ELF__)
@@ -21,8 +18,6 @@
 .byte	69,67,80,95,78,73,83,84,90,50,53,54,32,102,111,114,32,65,82,77,118,56,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
 .align	2
 .text
-
-
 
 .globl	ecp_nistz256_mul_mont
 .hidden	ecp_nistz256_mul_mont
@@ -50,7 +45,6 @@ ecp_nistz256_mul_mont:
 	ret
 .size	ecp_nistz256_mul_mont,.-ecp_nistz256_mul_mont
 
-
 .globl	ecp_nistz256_sqr_mont
 .hidden	ecp_nistz256_sqr_mont
 .type	ecp_nistz256_sqr_mont,%function
@@ -75,7 +69,6 @@ ecp_nistz256_sqr_mont:
 	AARCH64_VALIDATE_LINK_REGISTER
 	ret
 .size	ecp_nistz256_sqr_mont,.-ecp_nistz256_sqr_mont
-
 
 .globl	ecp_nistz256_neg
 .hidden	ecp_nistz256_neg
@@ -102,8 +95,6 @@ ecp_nistz256_neg:
 	AARCH64_VALIDATE_LINK_REGISTER
 	ret
 .size	ecp_nistz256_neg,.-ecp_nistz256_neg
-
-
 
 .type	__ecp_nistz256_mul_mont,%function
 .align	4
@@ -214,7 +205,7 @@ __ecp_nistz256_mul_mont:
 	adcs	x17,x17,x10
 	adcs	x19,x19,x11
 	adc	x20,xzr,xzr
-	
+
 	subs	x10,x14,x8		
 	sbc	x11,x14,x9
 	adds	x14,x15,x8		
@@ -239,24 +230,9 @@ __ecp_nistz256_mul_mont:
 	ret
 .size	__ecp_nistz256_mul_mont,.-__ecp_nistz256_mul_mont
 
-
-
 .type	__ecp_nistz256_sqr_mont,%function
 .align	4
 __ecp_nistz256_sqr_mont:
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 
 	mul	x15,x5,x4		
 	umulh	x9,x5,x4
@@ -361,9 +337,6 @@ __ecp_nistz256_sqr_mont:
 
 	ret
 .size	__ecp_nistz256_sqr_mont,.-__ecp_nistz256_sqr_mont
-
-
-
 
 .type	__ecp_nistz256_add_to,%function
 .align	4
@@ -1086,15 +1059,13 @@ ecp_nistz256_point_add_affine:
 	ret
 .size	ecp_nistz256_point_add_affine,.-ecp_nistz256_point_add_affine
 
-
-
 .globl	ecp_nistz256_ord_mul_mont
 .hidden	ecp_nistz256_ord_mul_mont
 .type	ecp_nistz256_ord_mul_mont,%function
 .align	4
 ecp_nistz256_ord_mul_mont:
 	AARCH64_VALID_CALL_TARGET
-	
+
 	stp	x29,x30,[sp,#-64]!
 	add	x29,sp,#0
 	stp	x19,x20,[sp,#16]
@@ -1297,16 +1268,13 @@ ecp_nistz256_ord_mul_mont:
 	ret
 .size	ecp_nistz256_ord_mul_mont,.-ecp_nistz256_ord_mul_mont
 
-
-
-
 .globl	ecp_nistz256_ord_sqr_mont
 .hidden	ecp_nistz256_ord_sqr_mont
 .type	ecp_nistz256_ord_sqr_mont,%function
 .align	4
 ecp_nistz256_ord_sqr_mont:
 	AARCH64_VALID_CALL_TARGET
-	
+
 	stp	x29,x30,[sp,#-64]!
 	add	x29,sp,#0
 	stp	x19,x20,[sp,#16]
@@ -1326,20 +1294,6 @@ ecp_nistz256_ord_sqr_mont:
 .align	4
 .Loop_ord_sqr:
 	sub	x2,x2,#1
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 
 	mul	x15,x5,x4		
 	umulh	x9,x5,x4
@@ -1491,7 +1445,6 @@ ecp_nistz256_ord_sqr_mont:
 	ret
 .size	ecp_nistz256_ord_sqr_mont,.-ecp_nistz256_ord_sqr_mont
 
-
 .globl	ecp_nistz256_select_w5
 .hidden	ecp_nistz256_select_w5
 .type	ecp_nistz256_select_w5,%function
@@ -1499,12 +1452,9 @@ ecp_nistz256_ord_sqr_mont:
 ecp_nistz256_select_w5:
 	AARCH64_VALID_CALL_TARGET
 
-    
-    
 	mov	x10, x0
 	mov	w9, #0
 
-    
 	movi	v16.16b, #0
 	movi	v17.16b, #0
 	movi	v18.16b, #0
@@ -1513,27 +1463,18 @@ ecp_nistz256_select_w5:
 	movi	v21.16b, #0
 
 .Lselect_w5_loop:
-    
 
-    
 	add	w9, w9, #1
 
-    
-    
 	ld1	{v22.2d, v23.2d, v24.2d, v25.2d}, [x1],#64
 
-    
 	cmp	w9, w2
 	csetm	x11, eq
 
-    
 	ld1	{v26.2d, v27.2d}, [x1],#32
 
-    
 	dup	v3.2d, x11
 
-    
-    
 	bit	v16.16b, v22.16b, v3.16b
 	bit	v17.16b, v23.16b, v3.16b
 
@@ -1543,18 +1484,13 @@ ecp_nistz256_select_w5:
 	bit	v20.16b, v26.16b, v3.16b
 	bit	v21.16b, v27.16b, v3.16b
 
-    
 	tbz	w9, #4, .Lselect_w5_loop
 
-    
 	st1	{v16.2d, v17.2d, v18.2d, v19.2d}, [x10],#64
 	st1	{v20.2d, v21.2d}, [x10]
 
 	ret
 .size	ecp_nistz256_select_w5,.-ecp_nistz256_select_w5
-
-
-
 
 .globl	ecp_nistz256_select_w7
 .hidden	ecp_nistz256_select_w7
@@ -1563,44 +1499,32 @@ ecp_nistz256_select_w5:
 ecp_nistz256_select_w7:
 	AARCH64_VALID_CALL_TARGET
 
-    
 	mov	w9, #0
 
-    
 	movi	v16.16b, #0
 	movi	v17.16b, #0
 	movi	v18.16b, #0
 	movi	v19.16b, #0
 
 .Lselect_w7_loop:
-    
 
-    
 	add	w9, w9, #1
 
-    
-    
 	ld1	{v22.2d, v23.2d, v24.2d, v25.2d}, [x1],#64
 
-    
 	cmp	w9, w2
 	csetm	x11, eq
 
-    
 	dup	v3.2d, x11
 
-    
-    
 	bit	v16.16b, v22.16b, v3.16b
 	bit	v17.16b, v23.16b, v3.16b
 
 	bit	v18.16b, v24.16b, v3.16b
 	bit	v19.16b, v25.16b, v3.16b
 
-    
 	tbz	w9, #6, .Lselect_w7_loop
 
-    
 	st1	{v16.2d, v17.2d, v18.2d, v19.2d}, [x0]
 
 	ret

@@ -1,20 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifdef ORIGCODE
 #include "SDL.h"
 #include "SDL_joystick.h"
@@ -32,43 +15,24 @@
 #include "m_config.h"
 #include "m_misc.h"
 
-
-
-
 #define DEAD_ZONE (32768 / 3)
 
 #ifdef ORIGCODE
 static SDL_Joystick *joystick = NULL;
 #endif
 
-
-
-
-
 static int usejoystick = 0;
 
-
-
 static int joystick_index = -1;
-
-
-
 
 static int joystick_x_axis = 0;
 static int joystick_x_invert = 0;
 
-
-
-
 static int joystick_y_axis = 1;
 static int joystick_y_invert = 0;
 
-
-
 static int joystick_strafe_axis = -1;
 static int joystick_strafe_invert = 0;
-
-
 
 static int joystick_physical_buttons[NUM_VIRTUAL_BUTTONS] = {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9
@@ -132,8 +96,6 @@ void I_InitJoystick(void)
         return;
     }
 
-    
-
     joystick = SDL_JoystickOpen(joystick_index);
 
     if (joystick == NULL)
@@ -158,8 +120,6 @@ void I_InitJoystick(void)
     }
 
     SDL_JoystickEventState(SDL_ENABLE);
-
-    
 
     printf("I_InitJoystick: %s\n", SDL_JoystickName(joystick_index));
 
@@ -198,13 +158,10 @@ static boolean IsAxisButton(int physbutton)
     return false;
 }
 
-
-
 static int ReadButtonState(int vbutton)
 {
     int physbutton;
 
-    
     if (vbutton < NUM_VIRTUAL_BUTTONS)
     {
         physbutton = joystick_physical_buttons[vbutton];
@@ -214,7 +171,6 @@ static int ReadButtonState(int vbutton)
         physbutton = vbutton;
     }
 
-    
     if (IsAxisButton(physbutton))
     {
         return 0;
@@ -222,8 +178,6 @@ static int ReadButtonState(int vbutton)
 
     return SDL_JoystickGetButton(joystick, physbutton);
 }
-
-
 
 static int GetButtonsState(void)
 {
@@ -243,21 +197,14 @@ static int GetButtonsState(void)
     return result;
 }
 
-
-
 static int GetAxisState(int axis, int invert)
 {
     int result;
-
-    
 
     if (axis < 0)
     {
         return 0;
     }
-
-    
-    
 
     result = 0;
 

@@ -1,8 +1,3 @@
-
-
-
-
-
 use super::{checked, syscall3, syscall6, Error};
 
 const SYS_ERA_GRAPHICS: usize = 9021;
@@ -12,14 +7,12 @@ const TEXT: usize = 2;
 const PRESENT: usize = 3;
 const EXIT: usize = 4;
 
-
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 #[repr(C)]
 pub struct DisplayInfo {
     pub width: u32,
     pub height: u32,
 }
-
 
 pub fn enter() -> Result<DisplayInfo, Error> {
     let mut info = DisplayInfo::default();
@@ -33,7 +26,6 @@ pub fn enter() -> Result<DisplayInfo, Error> {
     })?;
     Ok(info)
 }
-
 
 pub fn fill_rect(x: i32, y: i32, width: u32, height: u32, color: u32) -> Result<(), Error> {
     checked(unsafe {
@@ -50,7 +42,6 @@ pub fn fill_rect(x: i32, y: i32, width: u32, height: u32, color: u32) -> Result<
     .map(|_| ())
 }
 
-
 pub fn text(x: i32, y: i32, color: u32, text: &str) -> Result<(), Error> {
     checked(unsafe {
         syscall6(
@@ -66,12 +57,9 @@ pub fn text(x: i32, y: i32, color: u32, text: &str) -> Result<(), Error> {
     .map(|_| ())
 }
 
-
-
 pub fn present() -> Result<(), Error> {
     checked(unsafe { syscall3(SYS_ERA_GRAPHICS, PRESENT, 0, 0) }).map(|_| ())
 }
-
 
 pub fn exit() -> Result<(), Error> {
     checked(unsafe { syscall3(SYS_ERA_GRAPHICS, EXIT, 0, 0) }).map(|_| ())

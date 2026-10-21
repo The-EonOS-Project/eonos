@@ -3,7 +3,6 @@
 
 extern crate alloc;
 
-
 #[path = "arch/acpi.rs"]
 pub mod acpi;
 #[path = "io/block.rs"]
@@ -111,10 +110,6 @@ unsafe extern "C" fn _start() -> ! {
         "Breakpoint exception handled and returned"
     );
 
-    
-    
-    
-
     pmm::init();
     pmm::self_test();
 
@@ -124,8 +119,7 @@ unsafe extern "C" fn _start() -> ! {
 
     heap::init();
     drivers::virtio_gpu::init();
-    
-    
+
     console::init();
     heap::self_test();
 
@@ -154,9 +148,6 @@ unsafe extern "C" fn _start() -> ! {
     pit::self_test();
     rtc::init();
 
-    
-    
-    
     drivers::ps2::init();
     drivers::usb::init();
     drivers::ahci::init();
@@ -173,8 +164,6 @@ unsafe extern "C" fn _start() -> ! {
 
     vmm::address_space_self_test();
 
-    
-    
     initramfs::init();
     initramfs::self_test();
     vfs::init();
@@ -191,7 +180,6 @@ unsafe extern "C" fn _start() -> ! {
         "Initialization complete, handing over to the scheduler"
     );
 
-    
     scheduler::exit();
 }
 

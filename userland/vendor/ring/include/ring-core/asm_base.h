@@ -1,41 +1,7 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef OPENSSL_HEADER_ASM_BASE_H
 #define OPENSSL_HEADER_ASM_BASE_H
 
 #include <ring-core/target.h>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #if defined(__ASSEMBLER__)
 
@@ -43,21 +9,11 @@
 
 #if defined(__ELF__)
 
-
 .pushsection .note.GNU-stack, "", %progbits
 .popsection
 #endif
 
 #if defined(__CET__) && defined(OPENSSL_X86_64)
-
-
-
-
-
-
-
-
-
 
 #include <cet.h>
 #else
@@ -66,93 +22,11 @@
 
 #if defined(OPENSSL_ARM) || defined(OPENSSL_AARCH64)
 
-
-
-
 #if !defined(__ARM_ARCH)
 #error "ARM assembler must define __ARM_ARCH"
 #endif
 
-
-
-
-
-
-
-
 #define __ARM_MAX_ARCH__ 8
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #if defined(__ARM_FEATURE_BTI_DEFAULT) && __ARM_FEATURE_BTI_DEFAULT == 1
 #define GNU_PROPERTY_AARCH64_BTI (1 << 0)   

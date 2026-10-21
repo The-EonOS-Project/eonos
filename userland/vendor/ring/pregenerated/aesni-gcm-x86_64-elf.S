@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86_64) && defined(__ELF__)
@@ -38,22 +35,6 @@ _aesni_ctr32_ghash_6x:
 	vpxor	%xmm15,%xmm12,%xmm12
 	vmovups	16-128(%rcx),%xmm2
 	vpclmulqdq	$0x01,%xmm3,%xmm7,%xmm6
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	xorq	%r12,%r12
 	cmpq	%r14,%r15
@@ -233,7 +214,6 @@ _aesni_ctr32_ghash_6x:
 	vaesenc	%xmm1,%xmm14,%xmm14
 	vmovups	192-128(%rcx),%xmm1
 
-
 	vaesenc	%xmm15,%xmm9,%xmm9
 	vaesenc	%xmm15,%xmm10,%xmm10
 	vaesenc	%xmm15,%xmm11,%xmm11
@@ -349,8 +329,6 @@ aesni_gcm_decrypt:
 _CET_ENDBR
 	xorq	%rax,%rax
 
-
-
 	cmpq	$0x60,%rdx
 	jb	.Lgcm_dec_abort
 
@@ -404,12 +382,6 @@ _CET_ENDBR
 	vmovdqu	80(%rdi),%xmm7
 	movq	%rdi,%r14
 	vmovdqu	64(%rdi),%xmm4
-
-
-
-
-
-
 
 	leaq	-192(%rdi,%rdx,1),%r15
 
@@ -578,9 +550,6 @@ _CET_ENDBR
 #endif
 	xorq	%rax,%rax
 
-
-
-
 	cmpq	$288,%rdx
 	jb	.Lgcm_enc_abort
 
@@ -628,13 +597,6 @@ _CET_ENDBR
 .Lenc_no_key_aliasing:
 
 	movq	%rsi,%r14
-
-
-
-
-
-
-
 
 	leaq	-192(%rsi,%rdx,1),%r15
 

@@ -1,36 +1,11 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __SOUNDS__
 #define __SOUNDS__
 
 #include "i_sound.h"
 
-
 extern sfxinfo_t	S_sfx[];
 
-
 extern musicinfo_t	S_music[];
-
-
-
-
 
 typedef enum
 {
@@ -104,11 +79,6 @@ typedef enum
     mus_dm2int,
     NUMMUSIC
 } musicenum_t;
-
-
-
-
-
 
 typedef enum
 {

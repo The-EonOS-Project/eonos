@@ -44,9 +44,7 @@ QEMU_VIDEO="${EONOS_QEMU_VIDEO:-auto}"
 QEMU_DEVICE_LIST="$(qemu-system-x86_64 -device help 2>&1 || true)"
 qemu_display_starts() {
     local model="$1"
-    
-    
-    
+
     command -v timeout >/dev/null 2>&1 || return 0
     local status=0
     (
@@ -58,8 +56,7 @@ qemu_display_starts() {
     [[ "$status" -eq 124 || "$status" -eq 137 ]]
 }
 if [ "$QEMU_VIDEO" = "auto" ]; then
-    
-    
+
     QEMU_VIDEO="std"
     for model in virtio-gpu-pci virtio-vga; do
         if [[ "$QEMU_DEVICE_LIST" == *"name \"$model\""* ]]; then
@@ -92,9 +89,7 @@ case "$QEMU_VIDEO" in
             echo "Use EONOS_QEMU_VIDEO=std to boot, then check the host QEMU packages/core dump." >&2
             exit 2
         fi
-        
-        
-        
+
         VIDEO_ARGS=(-vga none -device "$QEMU_VIDEO,xres=1360,yres=765")
         ;;
     std) VIDEO_ARGS=(-device VGA,xres=1360,yres=765,xmax=1360,ymax=765) ;;
@@ -132,10 +127,9 @@ if [ "$NEEDS_BUILD" = "1" ]; then
 fi
 
 ARGS=(
-    
+
     -M q35,i8042=off
-    
-    
+
     -cpu max
     "${VIDEO_ARGS[@]}"
     -display gtk,zoom-to-fit=off

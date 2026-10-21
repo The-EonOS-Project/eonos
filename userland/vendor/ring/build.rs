@@ -1,24 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use std::{
     ffi::{OsStr, OsString},
     fs::{self, DirEntry},
@@ -30,10 +9,6 @@ use std::{
 mod env {
     use std::ffi::OsString;
 
-    
-    
-    
-    
     pub fn var_os(name: &'static str) -> Option<OsString> {
         println!("cargo:rerun-if-env-changed={}", name);
         std::env::var_os(name)
@@ -152,7 +127,7 @@ fn cpp_flags(compiler: &cc::Tool) -> &'static [&'static str] {
             "/Zc:wchar_t",
             "/Zc:forScope",
             "/Zc:inline",
-            
+
             "/Wall",
             "/wd4127", 
             "/wd4464", 
@@ -161,13 +136,11 @@ fn cpp_flags(compiler: &cc::Tool) -> &'static [&'static str] {
             "/wd4711", 
             "/wd4820", 
             "/wd5045",  
-  
+
         ];
         MSVC_FLAGS
     }
 }
-
-
 
 const ASM_TARGETS: &[AsmTarget] = &[
     AsmTarget {
@@ -223,13 +196,11 @@ const ASM_TARGETS: &[AsmTarget] = &[
 ];
 
 struct AsmTarget {
-    
+
     oss: &'static [&'static str],
 
-    
     arch: &'static str,
 
-    
     perlasm_format: &'static str,
 }
 
@@ -239,11 +210,8 @@ impl AsmTarget {
     }
 }
 
-
-
 const LINUX_ABI: &[&str] = &[
-    
-    
+
     "none",
     "android",
     "dragonfly",
@@ -262,20 +230,16 @@ const LINUX_ABI: &[&str] = &[
 const WIN32N: &str = "win32n";
 const NASM: &str = "nasm";
 
-
-
 const APPLE_ABI: &[&str] = &["ios", "macos", "tvos", "visionos", "watchos"];
 
 const WINDOWS: &str = "windows";
 
 fn main() {
-    
-    
+
     let c_root_dir = PathBuf::from(
         env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR should always be set"),
     );
 
-    
     let core_name_and_version = [
         &env::var("CARGO_PKG_NAME").unwrap(),
         "core",
@@ -285,7 +249,7 @@ fn main() {
         &env::var("CARGO_PKG_VERSION_PRE").unwrap(), 
     ]
     .join("_");
-    
+
     assert_eq!(
         &env::var("CARGO_MANIFEST_LINKS").unwrap(),
         &core_name_and_version
@@ -315,13 +279,8 @@ fn ring_build_rs_main(c_root_dir: &Path, core_name_and_version: &str) {
 
     let is_git = fs::metadata(c_root_dir.join(".git")).is_ok();
 
-    
     let is_debug = is_git && env::var("DEBUG").unwrap() != "false";
 
-    
-    
-    
-    
     let force_warnings_into_errors = is_git;
 
     let target = Target {
@@ -340,14 +299,6 @@ fn ring_build_rs_main(c_root_dir: &Path, core_name_and_version: &str) {
         None
     };
 
-    
-    
-    
-    
-    
-    
-    
-    
     let generated_dir = if !is_git {
         c_root_dir.join(PREGENERATED)
     } else {
@@ -397,9 +348,7 @@ fn generate_sources_and_preassemble<'a>(
         perlasm(&perl_exe, &perlasm_src_dsts, asm_target, c_root_dir);
 
         if asm_target.use_nasm() {
-            
-            
-            
+
             let srcs = asm_srcs(perlasm_src_dsts);
             for src in srcs {
                 nasm(&src, asm_target.arch, out_dir, out_dir, c_root_dir);
@@ -413,12 +362,8 @@ struct Target {
     os: String,
     env: String,
 
-    
-    
     is_debug: bool,
 
-    
-    
     force_warnings_into_errors: bool,
 }
 
@@ -436,8 +381,7 @@ fn build_c_code(
         let asm_srcs = asm_srcs(perlasm_src_dsts);
 
         if asm_target.use_nasm() {
-            
-            
+
             let obj_srcs = asm_srcs
                 .iter()
                 .map(|src| obj_path(generated_dir, src.as_path()))
@@ -455,8 +399,7 @@ fn build_c_code(
         .filter(|p| !is_perlasm(p))
         .filter(|p| {
             if let Some(extension) = p.extension() {
-                
-                
+
                 if extension == "S"
                     && (target.arch == X86_64 || target.arch == X86)
                     && target.os == WINDOWS
@@ -485,8 +428,6 @@ fn build_c_code(
         ),
     ];
 
-    
-    
     libs.iter()
         .for_each(|&(lib_name, srcs, asm_srcs, obj_srcs)| {
             let srcs = srcs.iter().chain(asm_srcs);
@@ -524,7 +465,6 @@ fn build_library<'a>(
 ) {
     let mut c = new_build(target, c_root_dir, include_dir);
 
-    
     srcs.for_each(|src| {
         c.file(c_root_dir.join(src));
     });
@@ -533,10 +473,8 @@ fn build_library<'a>(
         c.object(obj);
     });
 
-    
     let lib_path = PathBuf::from(out_dir).join(format!("lib{}.a", lib_name));
 
-    
     let _ = c.cargo_metadata(false);
 
     c.compile(
@@ -546,23 +484,19 @@ fn build_library<'a>(
             .expect("No filename"),
     );
 
-    
-    
     println!("cargo:rustc-link-lib=static={}", lib_name);
 }
 
 fn obj_path(out_dir: &Path, src: &Path) -> PathBuf {
     let mut out_path = out_dir.join(src.file_name().unwrap());
-    
-    
-    
+
     assert!(out_path.set_extension("o"));
     out_path
 }
 
 fn configure_cc(c: &mut cc::Build, target: &Target, c_root_dir: &Path, include_dir: &Path) {
     let compiler = c.get_compiler();
-    
+
     let compiler = if target.os == WINDOWS && target.arch == AARCH64 && !compiler.is_like_clang() {
         let _ = c.compiler("clang");
         c.get_compiler()
@@ -577,7 +511,7 @@ fn configure_cc(c: &mut cc::Build, target: &Target, c_root_dir: &Path, include_d
     }
 
     if APPLE_ABI.contains(&target.os.as_str()) {
-        
+
         let _ = c.flag("-gfull");
     } else if !compiler.is_like_msvc() {
         let _ = c.flag("-g3");
@@ -594,11 +528,10 @@ fn configure_cc(c: &mut cc::Build, target: &Target, c_root_dir: &Path, include_d
         }
     }
 
-    
     if (target.arch == WASM32)
         || (target.os == "linux" && target.env == "musl" && target.arch != X86_64)
     {
-        
+
         if compiler.is_like_clang() {
             let _ = c.flag("-nostdlibinc");
             let _ = c.define("RING_CORE_NOSTDLIBINC", "1");
@@ -618,7 +551,6 @@ fn nasm(file: &Path, arch: &str, include_dir: &Path, out_dir: &Path, c_root_dir:
         _ => panic!("unsupported arch: {}", arch),
     };
 
-    
     let mut include_dir = include_dir.as_os_str().to_os_string();
     include_dir.push(OsString::from(String::from(std::path::MAIN_SEPARATOR)));
 
@@ -671,10 +603,8 @@ fn perlasm_src_dsts(out_dir: &Path, asm_target: &AsmTarget) -> Vec<(PathBuf, Pat
         .map(|src| (src.clone(), asm_path(out_dir, src, asm_target)))
         .collect::<Vec<_>>();
 
-    
-    
     {
-        
+
         let mut maybe_synthesize = |concrete, synthesized| {
             let concrete_path = PathBuf::from(concrete);
             if srcs.contains(&concrete_path) {
@@ -726,8 +656,7 @@ fn perlasm(
         if asm_target.arch == X86 {
             args.push("-fPIC".into());
         }
-        
-        
+
         args.push(join_components_with_forward_slashes(dst));
         run_command_with_args(perl_exe, &args);
     }
@@ -746,8 +675,6 @@ fn get_command(var: &'static str, default: &str) -> PathBuf {
     PathBuf::from(env::var_os(var).unwrap_or_else(|| default.into()))
 }
 
-
-
 fn emit_rerun_if_changed() {
     for path in &["crypto", "include", "third_party/fiat"] {
         walk_dir(&PathBuf::from(path), &|entry| {
@@ -757,7 +684,7 @@ fn emit_rerun_if_changed() {
                     println!("cargo:rerun-if-changed={}", path.to_str().unwrap());
                 }
                 _ => {
-                    
+
                 }
             }
         })
@@ -777,10 +704,6 @@ fn walk_dir(dir: &Path, cb: &impl Fn(&DirEntry)) {
         }
     }
 }
-
-
-
-
 
 fn generate_prefix_symbols_headers(
     out_dir: &Path,
@@ -849,8 +772,7 @@ fn generate_prefix_symbols_header(
 }
 
 fn prefix_all_symbols(pp: char, prefix_prefix: &str, prefix: &str) -> String {
-    
-    
+
     static SYMBOLS_TO_RENAME: &[(&str, &str)] = &[
         ("ecp_nistz256_point_double", "p256_point_double"),
         ("ecp_nistz256_point_add", "p256_point_add"),

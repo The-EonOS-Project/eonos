@@ -1,20 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::testutil;
 use core::{marker::PhantomData, mem::size_of};
-
 
 #[derive(Clone, Copy)]
 pub struct NotSend(PhantomData<*mut ()>);

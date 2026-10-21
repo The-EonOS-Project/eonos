@@ -24,7 +24,7 @@ fn run() -> eonos_rt::Result<()> {
 
     let lower_y = 64 + box_h + gap;
     screen.fill_rect(20, lower_y as i32, width.saturating_sub(40), 18, 0x62D9C7)?;
-    
+
     screen.fill_rect(-10, height.saturating_sub(24) as i32, 80, 40, 0xC678DD)?;
     screen.present()?;
 

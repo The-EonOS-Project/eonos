@@ -1,23 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::{
     arithmetic::inout::{AliasingSlices2, AliasingSlices3},
     bb, c,
@@ -31,7 +11,6 @@ use crate::bits;
 
 #[cfg(feature = "alloc")]
 use core::num::Wrapping;
-
 
 pub type Limb = bb::Word;
 pub type LeakyLimb = bb::LeakyWord;
@@ -55,10 +34,7 @@ fn limbs_less_than_limbs(a: &[Limb], b: &[Limb]) -> Result<LimbMask, LenMismatch
         fn LIMBS_less_than(a: *const Limb, b: *const Limb, num_limbs: c::NonZero_size_t)
             -> LimbMask;
     }
-    
-    
-    
-    
+
     let len = NonZeroUsize::new(b.len()).ok_or_else(|| LenMismatchError::new(a.len()))?;
     if a.len() != len.get() {
         return Err(LenMismatchError::new(a.len()));
@@ -98,8 +74,6 @@ pub fn limbs_are_zero(limbs: &[Limb]) -> LimbMask {
     limb_is_zero(limbs.iter().fold(0, |a, b| a | b))
 }
 
-
-
 #[cfg(any(test, feature = "alloc"))]
 #[inline]
 pub fn limbs_reject_even_leak_bit(limbs: &[Limb]) -> Result<(), error::Unspecified> {
@@ -122,22 +96,11 @@ pub fn verify_limbs_equal_1_leak_bit(a: &[Limb]) -> Result<(), error::Unspecifie
     Err(error::Unspecified)
 }
 
-
-
-
-
-
-
-
 #[cfg(any(test, feature = "alloc"))]
 pub fn limbs_minimal_bits(a: &[Limb]) -> bits::BitLength {
     for num_limbs in (1..=a.len()).rev() {
         let high_limb = a[num_limbs - 1];
 
-        
-        
-        
-        
         for high_limb_num_bits in (1..=LIMB_BITS).rev() {
             let shifted = unsafe { LIMB_shr(high_limb, high_limb_num_bits - 1) };
             if shifted != 0 {
@@ -148,10 +111,8 @@ pub fn limbs_minimal_bits(a: &[Limb]) -> bits::BitLength {
         }
     }
 
-    
     bits::BitLength::from_bits(0)
 }
-
 
 #[inline]
 pub fn limbs_reduce_once(r: &mut [Limb], m: &[Limb]) -> Result<(), LenMismatchError> {
@@ -171,14 +132,6 @@ pub enum AllowZero {
     Yes,
 }
 
-
-
-
-
-
-
-
-
 pub fn parse_big_endian_in_range_and_pad_consttime(
     input: untrusted::Input,
     allow_zero: AllowZero,
@@ -194,9 +147,6 @@ pub fn parse_big_endian_in_range_and_pad_consttime(
     }
     Ok(())
 }
-
-
-
 
 pub fn parse_big_endian_and_pad_consttime(
     input: untrusted::Input,
@@ -230,32 +180,14 @@ pub fn big_endian_from_limbs(limbs: &[Limb], out: &mut [u8]) {
     });
 }
 
-
-
-
-
 pub fn unstripped_be_bytes(limbs: &[Limb]) -> impl ExactSizeIterator<Item = u8> + Clone + '_ {
-    
+
     ArrayFlatMap::new(limbs.iter().rev().copied(), Limb::to_be_bytes).unwrap()
 }
 
-
 pub type Window = bb::Word;
 
-
 pub type LeakyWindow = bb::LeakyWord;
-
-
-
-
-
-
-
-
-
-
-
-
 
 #[cfg(feature = "alloc")]
 pub fn fold_5_bit_windows<R, I: FnOnce(Window) -> R, F: Fn(R, Window) -> R>(
@@ -308,8 +240,7 @@ pub fn fold_5_bit_windows<R, I: FnOnce(Window) -> R, F: Fn(R, Window) -> R>(
         };
         while window_low_bit.0 < Wrapping(LIMB_BITS) {
             let window = unsafe { LIMBS_window5_unsplit_window(low_limb, window_low_bit) };
-            
-            
+
             window_low_bit.0 -= WINDOW_BITS;
             acc = fold(acc, window);
         }
@@ -326,7 +257,7 @@ pub(crate) fn limbs_add_assign_mod(
     m: &[Limb],
 ) -> Result<(), LenMismatchError> {
     prefixed_extern! {
-        
+
         fn LIMBS_add_mod(
             r: *mut Limb,
             a: *const Limb,
@@ -342,10 +273,9 @@ pub(crate) fn limbs_add_assign_mod(
     })
 }
 
-
 pub(crate) fn limbs_double_mod(r: &mut [Limb], m: &[Limb]) -> Result<(), LenMismatchError> {
     prefixed_extern! {
-        
+
         fn LIMBS_shl_mod(
             r: *mut Limb,
             a: *const Limb,
@@ -361,16 +291,13 @@ pub(crate) fn limbs_double_mod(r: &mut [Limb], m: &[Limb]) -> Result<(), LenMism
     })
 }
 
-
 pub(crate) fn limbs_negative_odd(r: &mut [Limb], a: &[Limb]) {
     debug_assert_eq!(r.len(), a.len());
-    
-    
+
     r.iter_mut().zip(a.iter()).for_each(|(r, &a)| {
         *r = !a;
     });
-    
-    
+
     r[0] |= 1;
 }
 
@@ -464,14 +391,13 @@ mod tests {
 
     #[test]
     fn test_limbs_equal_limb() {
-        
+
         static EQUAL: &[&[LeakyLimb]] = &[&[1], &[1, 0], &[1, 0, 0], &[1, 0, 0, 0, 0, 0, 0]];
         for a in EQUAL {
             let a = &Vec::from_iter(a.iter().copied().map(Limb::from));
             assert!(matches!(verify_limbs_equal_1_leak_bit(a), Ok(())));
         }
 
-        
         static UNEQUAL: &[&[LeakyLimb]] = &[
             &[0],
             &[2],
@@ -498,13 +424,12 @@ mod tests {
         const LIMBS: usize = 4;
 
         {
-            
+
             let inp = untrusted::Input::from(&[]);
             let mut result = [0; LIMBS].map(From::<LeakyLimb>::from);
             assert!(parse_big_endian_and_pad_consttime(inp, &mut result).is_err());
         }
 
-        
         {
             let inp = [1, 2, 3, 4, 5, 6, 7, 8, 9];
             let inp = untrusted::Input::from(&inp);
@@ -512,7 +437,6 @@ mod tests {
             assert!(parse_big_endian_and_pad_consttime(inp, &mut result[..]).is_err());
         }
 
-        
         {
             let inp = [0xfe];
             let inp = untrusted::Input::from(&inp);
@@ -524,7 +448,6 @@ mod tests {
             assert_eq!(&[0xfe, 0, 0, 0], &result);
         }
 
-        
         {
             let inp = [0xbe, 0xef, 0xf0, 0x0d];
             let inp = untrusted::Input::from(&inp);
@@ -578,7 +501,6 @@ mod tests {
                 panic!("Unsupported target_pointer_width");
             }
 
-            
         }
     }
 
@@ -615,12 +537,11 @@ mod tests {
     #[test]
     fn test_big_endian_from_limbs_fewer_limbs() {
         #[cfg(target_pointer_width = "32")]
-        
+
         let limbs = [
             0xbccddeef, 0x89900aab, 0x45566778, 0x01122334, 0xddeeff00, 0x99aabbcc,
         ];
 
-        
         #[cfg(target_pointer_width = "64")]
         let limbs = [
             0x8990_0aab_bccd_deef,

@@ -1,37 +1,8 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __D_ENGLSH__
 #define __D_ENGLSH__
 
-
-
-
-
-
-
-
 #define D_DEVSTR	"Development mode ON.\n"
 #define D_CDROM	"CD-ROM Version: default.cfg from c:\\doomdata\n"
-
-
-
 
 #define PRESSKEY 	"press a key."
 #define PRESSYN 	"press y or n."
@@ -70,9 +41,6 @@
 #define GAMMALVL3	"Gamma correction level 3"
 #define GAMMALVL4	"Gamma correction level 4"
 #define EMPTYSTRING	"empty slot"
-
-
-
 
 #define GOTARMOR	"Picked up the armor."
 #define GOTMEGA	"Picked up the MegaArmor!"
@@ -116,9 +84,6 @@
 #define GOTSHOTGUN	"You got the shotgun!"
 #define GOTSHOTGUN2	"You got the super shotgun!"
 
-
-
-
 #define PD_BLUEO	"You need a blue key to activate this object"
 #define PD_REDO	"You need a red key to activate this object"
 #define PD_YELLOWO	"You need a yellow key to activate this object"
@@ -126,13 +91,7 @@
 #define PD_REDK	"You need a red key to open this door"
 #define PD_YELLOWK	"You need a yellow key to open this door"
 
-
-
-
 #define GGSAVED	"game saved."
-
-
-
 
 #define HUSTR_MSGU	"[Message unsent]"
 
@@ -303,9 +262,6 @@
 
 #define HUSTR_MESSAGESENT	"[Message Sent]"
 
-
-
-
 #define HUSTR_PLRGREEN	"Green: "
 #define HUSTR_PLRINDIGO	"Indigo: "
 #define HUSTR_PLRBROWN	"Brown: "
@@ -316,10 +272,6 @@
 #define HUSTR_KEYBROWN	'b'
 #define HUSTR_KEYRED	'r'
 
-
-
-
-
 #define AMSTR_FOLLOWON	"Follow Mode ON"
 #define AMSTR_FOLLOWOFF	"Follow Mode OFF"
 
@@ -328,10 +280,6 @@
 
 #define AMSTR_MARKEDSPOT	"Marked Spot"
 #define AMSTR_MARKSCLEARED	"All Marks Cleared"
-
-
-
-
 
 #define STSTR_MUS		"Music Change"
 #define STSTR_NOMUS		"IMPOSSIBLE SELECTION"
@@ -350,9 +298,6 @@
 #define STSTR_CHOPPERS	"... doesn't suck - GM"
 #define STSTR_CLEV		"Changing Level..."
 
-
-
-
 #define E1TEXT \
 "Once you beat the big badasses and\n"\
 "clean out the moon base you're supposed\n"\
@@ -369,7 +314,6 @@
 "To continue the DOOM experience, play\n"\
 "The Shores of Hell and its amazing\n"\
 "sequel, Inferno!\n"
-
 
 #define E2TEXT \
 "You've done it! The hideous cyber-\n"\
@@ -390,7 +334,6 @@
 "Now, it's on to the final chapter of\n"\
 "DOOM! -- Inferno."
 
-
 #define E3TEXT \
 "The loathsome spiderdemon that\n"\
 "masterminded the invasion of the moon\n"\
@@ -410,7 +353,6 @@
 "spawn could have come through that\n"\
 "door with you ..."
 
-
 #define E4TEXT \
 "the spider mastermind must have sent forth\n"\
 "its legions of hellspawn before your\n"\
@@ -429,9 +371,6 @@
 "\n"\
 "next stop, hell on earth!"
 
-
-
-
 #define C1TEXT \
 "YOU HAVE ENTERED DEEPLY INTO THE INFESTED\n" \
 "STARPORT. BUT SOMETHING IS WRONG. THE\n" \
@@ -445,8 +384,6 @@
 "OF THE STARBASE AND FIND THE CONTROLLING\n" \
 "SWITCH WHICH HOLDS EARTH'S POPULATION\n" \
 "HOSTAGE."
-
-
 
 #define C2TEXT \
 "YOU HAVE WON! YOUR VICTORY HAS ENABLED\n" \
@@ -467,9 +404,6 @@
 "STARPORT.\" SLOWLY AND PAINFULLY YOU GET\n"\
 "UP AND RETURN TO THE FRAY."
 
-
-
-
 #define C3TEXT \
 "YOU ARE AT THE CORRUPT HEART OF THE CITY,\n"\
 "SURROUNDED BY THE CORPSES OF YOUR ENEMIES.\n"\
@@ -480,9 +414,6 @@
 "THERE MUST BE A WAY TO CLOSE IT ON THE\n"\
 "OTHER SIDE. WHAT DO YOU CARE IF YOU'VE\n"\
 "GOT TO GO THROUGH HELL TO GET TO IT?"
-
-
-
 
 #define C4TEXT \
 "THE HORRENDOUS VISAGE OF THE BIGGEST\n"\
@@ -501,10 +432,6 @@
 "HOME. REBUILDING EARTH OUGHT TO BE A\n"\
 "LOT MORE FUN THAN RUINING IT WAS.\n"
 
-
-
-
-
 #define C5TEXT \
 "CONGRATULATIONS, YOU'VE FOUND THE SECRET\n"\
 "LEVEL! LOOKS LIKE IT'S BEEN BUILT BY\n"\
@@ -512,16 +439,10 @@
 "WHO THE INMATES OF THIS CORNER OF HELL\n"\
 "WILL BE."
 
-
-
-
 #define C6TEXT \
 "CONGRATULATIONS, YOU'VE FOUND THE\n"\
 "SUPER SECRET LEVEL!  YOU'D BETTER\n"\
 "BLAZE THROUGH THIS ONE!\n"
-
-
-
 
 #define P1TEXT  \
 "You gloat over the steaming carcass of the\n"\
@@ -537,9 +458,6 @@
 "moving, keep fighting, keep killing.\n"\
 "Oh yes, keep living, too."
 
-
-
-
 #define P2TEXT \
 "Even the deadly Arch-Vile labyrinth could\n"\
 "not stop you, and you've gotten to the\n"\
@@ -547,9 +465,6 @@
 "efficiently and permanently deactivated.\n"\
 "\n"\
 "You're good at that kind of thing."
-
-
-
 
 #define P3TEXT \
 "You've bashed and battered your way into\n"\
@@ -562,8 +477,6 @@
 "Grinning evilly, you check your gear, and\n"\
 "get ready to give the bastard a little Hell\n"\
 "of your own making!"
-
-
 
 #define P4TEXT \
 "The Gatekeeper's evil face is splattered\n"\
@@ -579,21 +492,16 @@
 "when you die, you'll need it for some\n"\
 "final cleaning-up ..."
 
-
-
 #define P5TEXT \
 "You've found the second-hardest level we\n"\
 "got. Hope you have a saved game a level or\n"\
 "two previous.  If not, be prepared to die\n"\
 "aplenty. For master marines only."
 
-
-
 #define P6TEXT \
 "Betcha wondered just what WAS the hardest\n"\
 "level we had ready for ya?  Now you know.\n"\
 "No one gets out alive."
-
 
 #define T1TEXT \
 "You've fought your way out of the infested\n"\
@@ -609,7 +517,6 @@
 "complex still has some warlike ordnance\n"\
 "laying around."
 
-
 #define T2TEXT \
 "You hear the grinding of heavy machinery\n"\
 "ahead.  You sure hope they're not stamping\n"\
@@ -620,7 +527,6 @@
 "maniacs packed into one mad killer.\n"\
 "\n"\
 "You don't plan to go down easy."
-
 
 #define T3TEXT \
 "The vista opening ahead looks real damn\n"\
@@ -645,14 +551,12 @@
 "A blue light begins to glow inside the\n"\
 "ruined skull of the demon-spitter."
 
-
 #define T5TEXT \
 "What now? Looks totally different. Kind\n"\
 "of like King Tut's condo. Well,\n"\
 "whatever's here can't be any worse\n"\
 "than usual. Can it?  Or maybe it's best\n"\
 "to let sleeping gods lie.."
-
 
 #define T6TEXT \
 "Time for a vacation. You've burst the\n"\
@@ -665,11 +569,6 @@
 "\n"\
 "As you step off the transport, you hear\n"\
 "the stomp of a cyberdemon's iron shoe."
-
-
-
-
-
 
 #define CC_ZOMBIE	"ZOMBIEMAN"
 #define CC_SHOTGUN	"SHOTGUN GUY"
@@ -688,6 +587,5 @@
 #define CC_SPIDER	"THE SPIDER MASTERMIND"
 #define CC_CYBER	"THE CYBERDEMON"
 #define CC_HERO	"OUR HERO"
-
 
 #endif

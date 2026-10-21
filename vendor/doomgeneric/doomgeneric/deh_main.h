@@ -1,20 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef DEH_MAIN_H
 #define DEH_MAIN_H
 
@@ -22,10 +5,6 @@
 #include "doomfeatures.h"
 #include "deh_str.h"
 #include "sha1.h"
-
-
-
-
 
 #define DEH_VANILLA_NUMSTATES 966
 #define DEH_VANILLA_NUMSFX 107

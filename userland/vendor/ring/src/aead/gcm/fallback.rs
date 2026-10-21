@@ -1,27 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{ffi::U128, KeyValue, UpdateBlock, UpdateBlocks, Xi, BLOCK_LEN};
 use crate::polyfill::{slice::AsChunks, ArraySplitMap as _};
 
@@ -67,11 +43,6 @@ fn gcm_mul64_nohw(a: u64, b: u64) -> (u64, u64) {
         u128::from(a) * u128::from(b)
     }
 
-    
-    
-    
-    
-    
     let a0 = a & 0x1111111111111110;
     let a1 = a & 0x2222222222222220;
     let a2 = a & 0x4444444444444440;
@@ -87,7 +58,6 @@ fn gcm_mul64_nohw(a: u64, b: u64) -> (u64, u64) {
     let c2 = mul(a0, b2) ^ mul(a1, b1) ^ mul(a2, b0) ^ mul(a3, b3);
     let c3 = mul(a0, b3) ^ mul(a1, b2) ^ mul(a2, b1) ^ mul(a3, b0);
 
-    
     let a0_mask = 0u64.wrapping_sub(a & 1);
     let a1_mask = 0u64.wrapping_sub((a >> 1) & 1);
     let a2_mask = 0u64.wrapping_sub((a >> 2) & 1);
@@ -117,8 +87,6 @@ fn gcm_mul32_nohw(a: u32, b: u32) -> u64 {
         u64::from(a) * u64::from(b)
     }
 
-    
-    
     let a0 = a & 0x11111111;
     let a1 = a & 0x22222222;
     let a2 = a & 0x44444444;
@@ -155,7 +123,7 @@ fn gcm_mul64_nohw(a: u64, b: u64) -> (u64, u64) {
     let a1 = hi(a);
     let b0 = lo(b);
     let b1 = hi(b);
-    
+
     let lo = gcm_mul32_nohw(a0, b0);
     let hi = gcm_mul32_nohw(a1, b1);
     let mid = gcm_mul32_nohw(a0 ^ a1, b0 ^ b1) ^ lo ^ hi;
@@ -165,16 +133,6 @@ fn gcm_mul64_nohw(a: u64, b: u64) -> (u64, u64) {
 fn init(value: KeyValue) -> U128 {
     let xi = value.into_inner();
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     let mut lo = xi[1];
     let mut hi = xi[0];
 
@@ -185,19 +143,14 @@ fn init(value: KeyValue) -> U128 {
     hi |= lo >> 63;
     lo <<= 1;
 
-    
-    
     lo ^= carry & 1;
     hi ^= carry & 0xc200000000000000;
 
-    
     U128 { hi, lo }
 }
 
 fn gcm_polyval_nohw(xi: &mut [u64; 2], h: U128) {
-    
-    
-    
+
     let (r0, mut r1) = gcm_mul64_nohw(xi[0], h.lo);
     let (mut r2, mut r3) = gcm_mul64_nohw(xi[1], h.hi);
     let (mut mid0, mut mid1) = gcm_mul64_nohw(xi[0] ^ xi[1], h.hi ^ h.lo);
@@ -206,36 +159,19 @@ fn gcm_polyval_nohw(xi: &mut [u64; 2], h: U128) {
     r2 ^= mid1;
     r1 ^= mid0;
 
-    
-    
-    
-    
-    
-    
-    
-    
-
-    
-    
-    
-    
     r1 ^= (r0 << 63) ^ (r0 << 62) ^ (r0 << 57);
 
-    
     r2 ^= r0;
     r3 ^= r1;
 
-    
     r2 ^= r0 >> 1;
     r2 ^= r1 << 63;
     r3 ^= r1 >> 1;
 
-    
     r2 ^= r0 >> 2;
     r2 ^= r1 << 62;
     r3 ^= r1 >> 2;
 
-    
     r2 ^= r0 >> 7;
     r2 ^= r1 << 57;
     r3 ^= r1 >> 7;

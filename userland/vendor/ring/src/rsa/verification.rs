@@ -1,19 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{
     parse_public_key, public_key, PublicExponent, RsaParameters, PUBLIC_KEY_PUBLIC_MODULUS_MAX_LEN,
 };
@@ -51,8 +35,7 @@ macro_rules! rsa_params {
     ( $VERIFY_ALGORITHM:ident, $min_bits:expr, $PADDING_ALGORITHM:expr,
       $doc_str:expr ) => {
         #[doc=$doc_str]
-        
-        
+
         pub static $VERIFY_ALGORITHM: RsaParameters = RsaParameters {
             padding_alg: $PADDING_ALGORITHM,
             min_bits: bits::BitLength::from_bits($min_bits),
@@ -156,26 +139,7 @@ impl<B> super::PublicKeyComponents<B>
 where
     B: AsRef<[u8]>,
 {
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     pub fn verify(
         &self,
         params: &RsaParameters,
@@ -206,10 +170,6 @@ pub(crate) fn verify_rsa_(
         bits::BitLength::from_byte_len(PUBLIC_KEY_PUBLIC_MODULUS_MAX_LEN)
             .map_err(error::erase::<InputTooLongError>)?;
 
-    
-    
-    
-    
     let key = public_key::Inner::from_modulus_and_exponent(
         n,
         e,
@@ -219,11 +179,9 @@ pub(crate) fn verify_rsa_(
         cpu_features,
     )?;
 
-    
     let mut decoded = [0u8; PUBLIC_KEY_PUBLIC_MODULUS_MAX_LEN];
     let decoded = key.exponentiate(signature, &mut decoded, cpu_features)?;
 
-    
     let m_hash = digest::digest(params.padding_alg.digest_alg(), msg.as_slice_less_safe());
     untrusted::Input::from(decoded).read_all(error::Unspecified, |m| {
         params.padding_alg.verify(m_hash, m, key.n().len_bits())

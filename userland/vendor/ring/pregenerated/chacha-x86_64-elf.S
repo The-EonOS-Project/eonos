@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86_64) && defined(__ELF__)
@@ -66,12 +63,10 @@ _CET_ENDBR
 .cfi_adjust_cfa_offset	88
 .Lctr32_body:
 
-
 	movdqu	(%rcx),%xmm1
 	movdqu	16(%rcx),%xmm2
 	movdqu	(%r8),%xmm3
 	movdqa	.Lone(%rip),%xmm4
-
 
 	movdqa	%xmm1,16(%rsp)
 	movdqa	%xmm2,32(%rsp)
@@ -718,7 +713,6 @@ _CET_ENDBR
 	cmpq	$64,%rdx
 	jae	.L64_or_more4x
 
-
 	xorq	%r10,%r10
 
 	movdqa	%xmm12,16(%rsp)
@@ -875,15 +869,6 @@ _CET_ENDBR
 	subq	$0x280+8,%rsp
 	andq	$-32,%rsp
 	vzeroupper
-
-
-
-
-
-
-
-
-
 
 	vbroadcasti128	.Lsigma(%rip),%ymm11
 	vbroadcasti128	(%rcx),%ymm3

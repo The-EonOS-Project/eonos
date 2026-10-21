@@ -1,19 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 
 #include "doomtype.h"
@@ -21,10 +5,6 @@
 
 #include "m_config.h"
 #include "m_misc.h"
-
-
-
-
 
 int key_right = KEY_RIGHTARROW;
 int key_left = KEY_LEFTARROW;
@@ -37,10 +17,6 @@ int key_use = KEY_USE;
 int key_strafe = KEY_RALT;
 int key_speed = KEY_RSHIFT; 
 
-
-
-
- 
 int key_flyup = KEY_PGUP;
 int key_flydown = KEY_INS;
 int key_flycenter = KEY_HOME;
@@ -53,10 +29,6 @@ int key_invleft = '[';
 int key_invright = ']';
 int key_useartifact = KEY_ENTER;
 
-
-
-
-
 int key_jump = '/';
 
 int key_arti_all             = KEY_BACKSPACE;
@@ -68,15 +40,6 @@ int key_arti_teleportother   = '7';
 int key_arti_egg             = '6';
 int key_arti_invulnerability = '5';
 
-
-
-
-
-
-
-
-
-
 int key_usehealth = 'h';
 int key_invquery  = 'q';
 int key_mission   = 'w';
@@ -86,11 +49,6 @@ int key_invhome   = KEY_HOME;
 int key_invend    = KEY_END;
 int key_invuse    = KEY_ENTER;
 int key_invdrop   = KEY_BACKSPACE;
-
-
-
-
-
 
 int mousebfire = 0;
 int mousebstrafe = 1;
@@ -106,18 +64,13 @@ int mousebuse = -1;
 int mousebprevweapon = -1;
 int mousebnextweapon = -1;
 
-
 int key_message_refresh = KEY_ENTER;
 int key_pause = KEY_PAUSE;
 int key_demo_quit = 'q';
 int key_spy = KEY_F12;
 
-
-
 int key_multi_msg = 't';
 int key_multi_msgplayer[8];
-
-
 
 int key_weapon1 = '1';
 int key_weapon2 = '2';
@@ -129,8 +82,6 @@ int key_weapon7 = '7';
 int key_weapon8 = '8';
 int key_prevweapon = 0;
 int key_nextweapon = 0;
-
-
 
 int key_map_north     = KEY_UPARROW;
 int key_map_south     = KEY_DOWNARROW;
@@ -144,8 +95,6 @@ int key_map_follow    = 'f';
 int key_map_grid      = 'g';
 int key_map_mark      = 'm';
 int key_map_clearmark = 'c';
-
-
 
 int key_menu_activate  = KEY_ESCAPE;
 int key_menu_up        = KEY_UPARROW;
@@ -173,10 +122,6 @@ int key_menu_incscreen = KEY_EQUALS;
 int key_menu_decscreen = KEY_MINUS;
 int key_menu_screenshot = 0;
 
-
-
-
-
 int joybfire = 0;
 int joybstrafe = 1;
 int joybuse = 3;
@@ -192,14 +137,7 @@ int joybnextweapon = -1;
 
 int joybmenu = -1;
 
-
-
-
 int dclick_use = 1;
- 
-
-
-
 
 void M_BindBaseControls(void)
 {
@@ -224,8 +162,6 @@ void M_BindBaseControls(void)
     M_BindVariable("joyb_speed",         &joybspeed);
 
     M_BindVariable("joyb_menu_activate", &joybmenu);
-
-    
 
     M_BindVariable("joyb_strafeleft",    &joybstrafeleft);
     M_BindVariable("joyb_straferight",   &joybstraferight);
@@ -271,10 +207,9 @@ void M_BindHexenControls(void)
 
 void M_BindStrifeControls(void)
 {
-    
+
     key_message_refresh = '/';
 
-    
     key_jump     = 'a';
     key_lookup   = KEY_PGUP;
     key_lookdown = KEY_PGDN;
@@ -287,7 +222,6 @@ void M_BindStrifeControls(void)
     M_BindVariable("key_invLeft",        &key_invleft);
     M_BindVariable("key_invRight",       &key_invright);
 
-    
     M_BindVariable("key_useHealth",      &key_usehealth);
     M_BindVariable("key_invquery",       &key_invquery);
     M_BindVariable("key_mission",        &key_mission);
@@ -298,8 +232,6 @@ void M_BindStrifeControls(void)
     M_BindVariable("key_invUse",         &key_invuse);
     M_BindVariable("key_invDrop",        &key_invdrop);
 
-    
-    
     M_BindVariable("mouseb_jump",        &mousebjump);
     M_BindVariable("joyb_jump",          &joybjump);
 }
@@ -386,13 +318,8 @@ void M_BindChatControls(unsigned int num_players)
     }
 }
 
-
-
-
-
-
 void M_ApplyPlatformDefaults(void)
 {
-    
+
 }
 

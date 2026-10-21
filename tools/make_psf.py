@@ -39,8 +39,6 @@ for cp in range(NUM):
                     b |= 0x80 >> bit          
             glyphs.append(b)
 
-
-
 extra_glyphs = {
     "─": [0x00] * 7 + [0xff] + [0x00] * 8,
     "│": [0x08] * H,
@@ -52,7 +50,6 @@ if W != 8 or H != 16:
 for rows in extra_glyphs.values():
     glyphs.extend(rows)
 
-
 unicode_table = bytearray()
 for cp in range(NUM):
     if cp >= 32:
@@ -61,7 +58,6 @@ for cp in range(NUM):
 for char in extra_glyphs:
     unicode_table.extend(char.encode("utf-8"))
     unicode_table.append(0xff)
-
 
 count = NUM + len(extra_glyphs)
 hdr = struct.pack("<IIIIIIII", 0x864AB572, 0, 32, 1, count, charsize, H, W)

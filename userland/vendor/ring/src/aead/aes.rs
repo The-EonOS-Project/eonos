@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{nonce::Nonce, overlapping, quic::Sample, NONCE_LEN};
 use crate::{
     bb,
@@ -133,8 +119,6 @@ pub enum KeyBytes<'a> {
     AES_256(&'a [u8; AES_256_KEY_LEN]),
 }
 
-
-
 impl Counter {
     pub fn one(nonce: Nonce) -> Self {
         let mut value = [0u8; BLOCK_LEN];
@@ -158,9 +142,6 @@ impl Counter {
         [*c0, *c1, *c2, *c3] = u32::to_be_bytes(new_value);
     }
 }
-
-
-
 
 pub struct Iv(Block);
 
@@ -237,8 +218,6 @@ mod tests {
     }
 }
 
-
-
 #[cfg(test)]
 mod aes_gcm_tests {
     use super::{super::aes_gcm::MAX_IN_OUT_LEN, *};
@@ -273,8 +252,6 @@ mod aes_gcm_tests {
         assert_eq!(ctr32(&ctr), &[0, 0, 0, 2]);
         ctr.increment_by_less_safe(blocks);
 
-        
-        
         #[cfg(target_pointer_width = "64")]
         assert_eq!(ctr32(&ctr), expected_final_counter);
 

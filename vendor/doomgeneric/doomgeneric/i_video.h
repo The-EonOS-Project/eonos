@@ -1,37 +1,12 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __I_VIDEO__
 #define __I_VIDEO__
 
 #include "doomtype.h"
 
-
-
 #define SCREENWIDTH  320
 #define SCREENHEIGHT 200
 
-
-
 #define SCREENWIDTH_4_3 256
-
-
 
 #define SCREENHEIGHT_4_3 240
 
@@ -39,67 +14,24 @@
 
 typedef struct
 {
-    
 
     int width;
     int height;
 
-    
-    
-    
-    
-
     void (*InitMode)(byte *palette);
-    
-    
-    
 
     boolean (*DrawScreen)(int x1, int y1, int x2, int y2);
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 
     boolean poor_quality;
 } screen_mode_t;
 
 typedef boolean (*grabmouse_callback_t)(void);
 
-
-
-
 void I_InitGraphics (void);
 
 void I_GraphicsCheckCommandLine(void);
 
 void I_ShutdownGraphics(void);
-
 
 void I_SetPalette (byte* palette);
 int I_GetPaletteIndex(int r, int g, int b);
@@ -122,17 +54,9 @@ void I_BindVideoVariables(void);
 void I_InitWindowTitle(void);
 void I_InitWindowIcon(void);
 
-
-
-
 void I_StartFrame (void);
 
-
-
-
 void I_StartTic (void);
-
-
 
 void I_EnableLoadingDisk(void);
 
@@ -144,7 +68,6 @@ struct color {
     uint32_t r:8;
     uint32_t a:8;
 };
-
 
 extern char *video_driver;
 extern boolean screenvisible;

@@ -1,22 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{super::ops::*, eddsa_digest};
 use crate::{cpu, error, sealed, signature};
-
 
 pub struct EdDSAParameters;
 
@@ -25,11 +8,6 @@ impl core::fmt::Debug for EdDSAParameters {
         write!(f, "ring::signature::ED25519")
     }
 }
-
-
-
-
-
 
 pub static ED25519: EdDSAParameters = EdDSAParameters {};
 

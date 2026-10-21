@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![allow(missing_docs)]
 
 use ring::{
@@ -26,7 +12,6 @@ use wasm_bindgen_test::{wasm_bindgen_test as test, wasm_bindgen_test_configure};
 
 #[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
 wasm_bindgen_test_configure!(run_in_browser);
-
 
 #[test]
 fn test_signature_ed25519() {
@@ -48,18 +33,15 @@ fn test_signature_ed25519() {
             assert_eq!(&expected_sig[..], actual_sig.as_ref());
         }
 
-        
         #[allow(deprecated)]
         let rng = test::rand::FixedSliceRandom { bytes: &seed };
         let pkcs8 = Ed25519KeyPair::generate_pkcs8(&rng).unwrap();
         let key_pair = Ed25519KeyPair::from_pkcs8(pkcs8.as_ref()).unwrap();
         assert_eq!(public_key, key_pair.public_key().as_ref());
 
-        
         let actual_sig = key_pair.sign(&msg);
         assert_eq!(&expected_sig[..], actual_sig.as_ref());
 
-        
         test_signature_verification(&public_key, &msg, &expected_sig, Ok(()));
 
         let mut tampered_sig = expected_sig;
@@ -70,7 +52,6 @@ fn test_signature_ed25519() {
         Ok(())
     });
 }
-
 
 #[test]
 fn test_signature_ed25519_verify() {
@@ -112,13 +93,10 @@ fn test_ed25519_from_seed_and_public_key_misuse() {
 
     assert!(Ed25519KeyPair::from_seed_and_public_key(PRIVATE_KEY, PUBLIC_KEY).is_ok());
 
-    
     assert!(Ed25519KeyPair::from_seed_and_public_key(&PRIVATE_KEY[..31], PUBLIC_KEY).is_err());
 
-    
     assert!(Ed25519KeyPair::from_seed_and_public_key(PRIVATE_KEY, &PUBLIC_KEY[..31]).is_err());
 
-    
     assert!(Ed25519KeyPair::from_seed_and_public_key(PUBLIC_KEY, PRIVATE_KEY).is_err());
 }
 
@@ -144,7 +122,7 @@ fn test_ed25519_from_pkcs8_(
     variant: FromPkcs8Variant,
     f: impl Fn(&[u8]) -> Result<Ed25519KeyPair, error::KeyRejected>,
 ) {
-    
+
     test::run(
         test_file!("ed25519_from_pkcs8_tests.txt"),
         |section, test_case| {
@@ -199,8 +177,6 @@ fn ed25519_test_generate_pkcs8() {
 
     let _ronudtripped = Ed25519KeyPair::from_pkcs8(generated).unwrap();
 
-    
-    
     assert_eq!(generated.len(), 19 + 32 + 32);
     assert_eq!(&generated[..2], &[0x30, 0x51]);
 }
@@ -214,17 +190,13 @@ fn ed25519_test_public_key_coverage() {
 
     let key_pair = Ed25519KeyPair::from_pkcs8(PRIVATE_KEY).unwrap();
 
-    
     assert_eq!(key_pair.public_key().as_ref(), PUBLIC_KEY);
 
-    
     #[allow(clippy::clone_on_copy)]
     let _: <Ed25519KeyPair as KeyPair>::PublicKey = key_pair.public_key().clone();
 
-    
     let _: <Ed25519KeyPair as KeyPair>::PublicKey = *key_pair.public_key();
 
-    
     assert_eq!(PUBLIC_KEY_DEBUG, format!("{:?}", key_pair.public_key()));
     assert_eq!(
         format!(

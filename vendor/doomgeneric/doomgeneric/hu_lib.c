@@ -1,21 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <ctype.h>
 
 #include "doomdef.h"
@@ -27,7 +9,6 @@
 #include "hu_lib.h"
 #include "r_local.h"
 #include "r_draw.h"
-
 
 #define noterased viewwindowx
 
@@ -101,7 +82,6 @@ HUlib_drawTextLine
     int			x;
     unsigned char	c;
 
-    
     x = l->x;
     for (i=0;i<l->len;i++)
     {
@@ -124,7 +104,6 @@ HUlib_drawTextLine
 	}
     }
 
-    
     if (drawcursor
 	&& x + SHORT(l->f['_' - l->sc]->width) <= SCREENWIDTH)
     {
@@ -132,17 +111,11 @@ HUlib_drawTextLine
     }
 }
 
-
-
 void HUlib_eraseTextLine(hu_textline_t* l)
 {
     int			lh;
     int			y;
     int			yoffset;
-
-    
-    
-    
 
     if (!automapactive &&
 	viewwindowx && l->needsupdate)
@@ -156,7 +129,7 @@ void HUlib_eraseTextLine(hu_textline_t* l)
 	    {
 		R_VideoErase(yoffset, viewwindowx); 
 		R_VideoErase(yoffset + viewwindowx + viewwidth, viewwindowx);
-		
+
 	    }
 	}
     }
@@ -194,12 +167,10 @@ void HUlib_addLineToSText(hu_stext_t* s)
 
     int i;
 
-    
     if (++s->cl == s->h)
 	s->cl = 0;
     HUlib_clearTextLine(&s->l[s->cl]);
 
-    
     for (i=0 ; i<s->h ; i++)
 	s->l[i].needsupdate = 4;
 
@@ -228,16 +199,14 @@ void HUlib_drawSText(hu_stext_t* s)
     if (!*s->on)
 	return; 
 
-    
     for (i=0 ; i<s->h ; i++)
     {
 	idx = s->cl - i;
 	if (idx < 0)
 	    idx += s->h; 
-	
+
 	l = &s->l[idx];
 
-	
 	HUlib_drawTextLine(l, false); 
     }
 
@@ -273,8 +242,6 @@ HUlib_initIText
     HUlib_initTextLine(&it->l, x, y, font, startchar);
 }
 
-
-
 void HUlib_delCharFromIText(hu_itext_t* it)
 {
     if (it->l.len != it->lm)
@@ -286,7 +253,6 @@ void HUlib_eraseLineFromIText(hu_itext_t* it)
     while (it->lm != it->l.len)
 	HUlib_delCharFromTextLine(&it->l);
 }
-
 
 void HUlib_resetIText(hu_itext_t* it)
 {
@@ -303,8 +269,6 @@ HUlib_addPrefixToIText
 	HUlib_addCharToTextLine(&it->l, *(str++));
     it->lm = it->l.len;
 }
-
-
 
 boolean
 HUlib_keyInIText

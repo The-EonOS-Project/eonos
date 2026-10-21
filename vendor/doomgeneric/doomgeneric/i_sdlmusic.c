@@ -1,22 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -48,37 +29,20 @@
 #define FLAC_HEADER "fLaC"
 #define OGG_HEADER "OggS"
 
-
-
-
-
 #define LOOP_START_TAG "LOOP_START"
 #define LOOP_END_TAG   "LOOP_END"
-
 
 #define FLAC_STREAMINFO      0
 #define FLAC_VORBIS_COMMENT  4
 
-
 #define OGG_ID_HEADER        1
 #define OGG_COMMENT_HEADER   3
-
-
-
-
-
-
-
-
-
-
 
 typedef struct
 {
     sha1_digest_t hash;
     char *filename;
 } subst_music_t;
-
 
 typedef struct
 {
@@ -102,9 +66,6 @@ static const char *subst_config_filenames[] =
 
 static boolean music_initialized = false;
 
-
-
-
 static boolean sdl_was_initialized = false;
 
 static boolean musicpaused = false;
@@ -114,22 +75,14 @@ char *timidity_cfg_path = "";
 
 static char *temp_timidity_cfg = NULL;
 
-
-
 static boolean playing_substitute = false;
 static file_metadata_t file_metadata;
 
-
-
 static unsigned int current_track_pos;
-
 
 static Mix_Music *current_track_music = NULL;
 
-
 static boolean current_track_loop;
-
-
 
 static unsigned int ParseVorbisTime(unsigned int samplerate_hz, char *value)
 {
@@ -165,8 +118,6 @@ static unsigned int ParseVorbisTime(unsigned int samplerate_hz, char *value)
     return (result * 60 + atoi(num_start)) * samplerate_hz;
 }
 
-
-
 static void ParseVorbisComment(file_metadata_t *metadata, char *comment)
 {
     char *eq, *key, *value;
@@ -192,20 +143,17 @@ static void ParseVorbisComment(file_metadata_t *metadata, char *comment)
     }
 }
 
-
 static void ParseVorbisComments(file_metadata_t *metadata, FILE *fs)
 {
     uint32_t buf;
     unsigned int num_comments, i, comment_len;
     char *comment;
 
-    
     if (metadata->samplerate_hz == 0)
     {
 	return;
     }
 
-    
     if (fread(&buf, 4, 1, fs) < 1)
     {
         return;
@@ -215,17 +163,15 @@ static void ParseVorbisComments(file_metadata_t *metadata, FILE *fs)
 	return;
     }
 
-    
     if (fread(&buf, 4, 1, fs) < 1)
     {
         return;
     }
     num_comments = LONG(buf);
 
-    
     for (i = 0; i < num_comments; ++i)
     {
-        
+
         if (fread(&buf, 4, 1, fs) < 1)
 	{
             return;
@@ -233,7 +179,6 @@ static void ParseVorbisComments(file_metadata_t *metadata, FILE *fs)
 
         comment_len = LONG(buf);
 
-        
         comment = calloc(1, comment_len + 1);
         if (comment == NULL
          || fread(comment, 1, comment_len, fs) < comment_len)
@@ -242,7 +187,6 @@ static void ParseVorbisComments(file_metadata_t *metadata, FILE *fs)
             break;
         }
 
-        
         ParseVorbisComment(metadata, comment);
         free(comment);
     }
@@ -252,19 +196,14 @@ static void ParseFlacStreaminfo(file_metadata_t *metadata, FILE *fs)
 {
     byte buf[34];
 
-    
     if (fread(buf, sizeof(buf), 1, fs) < 1)
     {
         return;
     }
 
-    
     metadata->samplerate_hz = (buf[10] << 12) | (buf[11] << 4)
                             | (buf[12] >> 4);
-    
-    
-    
-    
+
 }
 
 static void ParseFlacFile(file_metadata_t *metadata, FILE *fs)
@@ -278,7 +217,6 @@ static void ParseFlacFile(file_metadata_t *metadata, FILE *fs)
     {
         long pos = -1;
 
-        
         if (fread(header, 4, 1, fs) < 1)
         {
             return;
@@ -308,7 +246,6 @@ static void ParseFlacFile(file_metadata_t *metadata, FILE *fs)
             break;
         }
 
-        
         if (fseek(fs, pos + block_len, SEEK_SET) != 0)
         {
             return;
@@ -334,15 +271,11 @@ static void ParseOggFile(file_metadata_t *metadata, FILE *fs)
     byte buf[7];
     unsigned int offset;
 
-    
-    
     memset(buf, 0, sizeof(buf));
 
     for (offset = 0; offset < 100 * 1024; ++offset)
     {
-	
-	
-	
+
         memmove(buf, buf + 1, sizeof(buf) - 1);
 
         if (fread(&buf[6], 1, 1, fs) < 1)
@@ -384,9 +317,6 @@ static void ReadLoopPoints(char *filename, file_metadata_t *metadata)
         return;
     }
 
-    
-    
-
     if (fread(header, 4, 1, fs) < 1)
     {
         fclose(fs);
@@ -404,12 +334,8 @@ static void ReadLoopPoints(char *filename, file_metadata_t *metadata)
 
     fclose(fs);
 
-    
     metadata->valid = metadata->samplerate_hz > 0;
 }
-
-
-
 
 static char *GetSubstituteMusicFile(void *data, size_t data_len)
 {
@@ -418,7 +344,6 @@ static char *GetSubstituteMusicFile(void *data, size_t data_len)
     char *filename;
     int i;
 
-    
     if (subst_music_len == 0)
     {
         return NULL;
@@ -428,11 +353,6 @@ static char *GetSubstituteMusicFile(void *data, size_t data_len)
     SHA1_Update(&context, data, data_len);
     SHA1_Final(hash, &context);
 
-    
-    
-    
-    
-
     filename = NULL;
 
     for (i = 0; i < subst_music_len; ++i)
@@ -441,10 +361,6 @@ static char *GetSubstituteMusicFile(void *data, size_t data_len)
         {
             filename = subst_music[i].filename;
 
-            
-            
-            
-            
             if (M_FileExists(filename))
             {
                 break;
@@ -454,8 +370,6 @@ static char *GetSubstituteMusicFile(void *data, size_t data_len)
 
     return filename;
 }
-
-
 
 static void AddSubstituteMusic(subst_music_t *subst)
 {
@@ -488,28 +402,21 @@ static char *GetFullPath(char *base_filename, char *path)
     char *basedir, *result;
     char *p;
 
-    
-    
     if (path[0] == DIR_SEPARATOR)
     {
         return strdup(path);
     }
 
 #ifdef _WIN32
-    
+
     if (isalpha(path[0]) && path[1] == ':' && path[2] == DIR_SEPARATOR)
     {
         return strdup(path);
     }
 #endif
 
-    
-    
-    
     path = M_StringReplace(path, "/", DIR_SEPARATOR_S);
 
-    
-    
     basedir = strdup(base_filename);
     p = strrchr(basedir, DIR_SEPARATOR);
     if (p != NULL)
@@ -527,16 +434,12 @@ static char *GetFullPath(char *base_filename, char *path)
     return result;
 }
 
-
-
-
 static char *ParseSubstituteLine(char *filename, char *line)
 {
     subst_music_t subst;
     char *p;
     int hash_index;
 
-    
     p = strchr(line, '#');
     if (p != NULL)
     {
@@ -547,17 +450,13 @@ static char *ParseSubstituteLine(char *filename, char *line)
         *p = '\0';
     }
 
-    
     for (p = line; *p != '\0' && isspace(*p); ++p);
 
-    
-    
     if (*p == '\0')
     {
         return NULL;
     }
 
-    
     hash_index = 0;
     while (*p != '\0' && *p != '=' && !isspace(*p))
     {
@@ -586,7 +485,6 @@ static char *ParseSubstituteLine(char *filename, char *line)
         return "SHA1 hash too short";
     }
 
-    
     for (; *p != '\0' && isspace(*p); ++p);
 
     if (*p != '=')
@@ -596,10 +494,8 @@ static char *ParseSubstituteLine(char *filename, char *line)
 
     ++p;
 
-    
     for (; *p != '\0' && isspace(*p); ++p);
 
-    
     while (strlen(p) > 0 && isspace(p[strlen(p) - 1]))
     {
         p[strlen(p) - 1] = '\0';
@@ -610,14 +506,11 @@ static char *ParseSubstituteLine(char *filename, char *line)
         return "No filename specified for music substitution";
     }
 
-    
     subst.filename = GetFullPath(filename, p);
     AddSubstituteMusic(&subst);
 
     return NULL;
 }
-
-
 
 static boolean ReadSubstituteConfig(char *filename)
 {
@@ -656,8 +549,6 @@ static boolean ReadSubstituteConfig(char *filename)
     return true;
 }
 
-
-
 static void LoadSubstituteConfigs(void)
 {
     char *musicdir;
@@ -673,10 +564,6 @@ static void LoadSubstituteConfigs(void)
         musicdir = M_StringJoin(configdir, "music", DIR_SEPARATOR_S, NULL);
     }
 
-    
-    
-    
-    
     for (i = 0; i < arrlen(subst_config_filenames); ++i)
     {
         path = M_StringJoin(musicdir, subst_config_filenames[i], NULL);
@@ -692,11 +579,6 @@ static void LoadSubstituteConfigs(void)
                subst_music_len);
     }
 }
-
-
-
-
-
 
 static boolean IsMusicLump(int lumpnum)
 {
@@ -717,9 +599,6 @@ static boolean IsMusicLump(int lumpnum)
 
     return result;
 }
-
-
-
 
 static void DumpSubstituteConfig(char *filename)
 {
@@ -751,14 +630,12 @@ static void DumpSubstituteConfig(char *filename)
             continue;
         }
 
-        
         data = W_CacheLumpNum(lumpnum, PU_STATIC);
         SHA1_Init(&context);
         SHA1_Update(&context, data, W_LumpLength(lumpnum));
         SHA1_Final(digest, &context);
         W_ReleaseLumpNum(lumpnum);
 
-        
         for (h = 0; h < sizeof(sha1_digest_t); ++h)
         {
             fprintf(fs, "%02x", digest[h]);
@@ -773,11 +650,6 @@ static void DumpSubstituteConfig(char *filename)
     printf("Substitute MIDI config file written to %s.\n", filename);
     I_Quit();
 }
-
-
-
-
-
 
 static boolean WriteWrapperTimidityConfig(char *write_path)
 {
@@ -820,9 +692,6 @@ void I_InitTimidityConfig(void)
 
     success = WriteWrapperTimidityConfig(temp_timidity_cfg);
 
-    
-    
-
     if (success)
     {
         env_string = M_StringJoin("TIMIDITY_CFG=", temp_timidity_cfg, NULL);
@@ -835,8 +704,6 @@ void I_InitTimidityConfig(void)
     }
 }
 
-
-
 static void RemoveTimidityConfig(void)
 {
     if (temp_timidity_cfg != NULL)
@@ -845,8 +712,6 @@ static void RemoveTimidityConfig(void)
         free(temp_timidity_cfg);
     }
 }
-
-
 
 static void I_SDL_ShutdownMusic(void)
 {
@@ -872,21 +737,15 @@ static boolean SDLIsInitialized(void)
     return Mix_QuerySpec(&freq, &format, &channels) != 0;
 }
 
-
 void TrackPositionCallback(int chan, void *stream, int len, void *udata)
 {
-    
+
     current_track_pos += len / 4;
 }
-
 
 static boolean I_SDL_InitMusic(void)
 {
     int i;
-
-    
-    
-    
 
 #ifdef __MACOSX__
     {
@@ -905,22 +764,12 @@ static boolean I_SDL_InitMusic(void)
     }
 #endif
 
-    
-    
-    
-    
-    
-    
-
     i = M_CheckParmWithArgs("-dumpsubstconfig", 1);
 
     if (i > 0)
     {
         DumpSubstituteConfig(myargv[i + 1]);
     }
-
-    
-    
 
     if (SDLIsInitialized())
     {
@@ -947,23 +796,15 @@ static boolean I_SDL_InitMusic(void)
         }
     }
 
-    
-    
-
     RemoveTimidityConfig();
-
-    
-    
 
     if (strlen(snd_musiccmd) > 0)
     {
         Mix_SetMusicCMD(snd_musiccmd);
     }
 
-    
     Mix_RegisterEffect(MIX_CHANNEL_POST, TrackPositionCallback, NULL, NULL);
 
-    
     if (snd_musicdevice == SNDDEVICE_GENMIDI)
     {
         LoadSubstituteConfigs();
@@ -971,11 +812,6 @@ static boolean I_SDL_InitMusic(void)
 
     return music_initialized;
 }
-
-
-
-
-
 
 static void UpdateMusicVolume(void)
 {
@@ -993,17 +829,13 @@ static void UpdateMusicVolume(void)
     Mix_VolumeMusic(vol);
 }
 
-
-
 static void I_SDL_SetMusicVolume(int volume)
 {
-    
+
     current_music_volume = volume;
 
     UpdateMusicVolume();
 }
-
-
 
 static void I_SDL_PlaySong(void *handle, boolean looping)
 {
@@ -1031,8 +863,6 @@ static void I_SDL_PlaySong(void *handle, boolean looping)
         loops = 1;
     }
 
-    
-    
     if (playing_substitute && file_metadata.valid)
     {
         loops = 1;
@@ -1097,8 +927,6 @@ static void I_SDL_UnRegisterSong(void *handle)
     Mix_FreeMusic(music);
 }
 
-
-
 static boolean IsMid(byte *mem, int len)
 {
     return len > 4 && !memcmp(mem, "MThd", 4);
@@ -1142,7 +970,6 @@ static void *I_SDL_RegisterSong(void *data, int len)
 
     playing_substitute = false;
 
-    
     filename = GetSubstituteMusicFile(data, len);
 
     if (filename != NULL)
@@ -1151,23 +978,18 @@ static void *I_SDL_RegisterSong(void *data, int len)
 
         if (music == NULL)
         {
-            
-            
+
             fprintf(stderr, "Failed to load substitute music file: %s: %s\n",
                     filename, Mix_GetError());
         }
         else
         {
-            
-            
+
             playing_substitute = true;
             ReadLoopPoints(filename, &file_metadata);
             return music;
         }
     }
-
-    
-    
 
     filename = M_TempFile("doom.mid");
 
@@ -1177,28 +999,17 @@ static void *I_SDL_RegisterSong(void *data, int len)
     }
     else
     {
-	
 
         ConvertMus(data, len, filename);
     }
-
-    
-    
-    
 
     music = Mix_LoadMUS(filename);
 
     if (music == NULL)
     {
-        
 
         fprintf(stderr, "Error loading midi: %s\n", Mix_GetError());
     }
-
-    
-    
-    
-    
 
     if (strlen(snd_musiccmd) == 0)
     {
@@ -1210,7 +1021,6 @@ static void *I_SDL_RegisterSong(void *data, int len)
     return music;
 }
 
-
 static boolean I_SDL_MusicIsPlaying(void)
 {
     if (!music_initialized)
@@ -1220,7 +1030,6 @@ static boolean I_SDL_MusicIsPlaying(void)
 
     return Mix_PlayingMusic();
 }
-
 
 static double GetMusicPosition(void)
 {
@@ -1241,11 +1050,9 @@ static void RestartCurrentTrack(void)
     double start = (double) file_metadata.start_time
                  / file_metadata.samplerate_hz;
 
-    
-    
     if (current_track_loop)
     {
-        
+
         if (current_track_music != NULL)
         {
             Mix_PlayMusic(current_track_music, 1);
@@ -1264,8 +1071,6 @@ static void RestartCurrentTrack(void)
     }
 }
 
-
-
 static void I_SDL_PollMusic(void)
 {
     if (playing_substitute && file_metadata.valid)
@@ -1273,13 +1078,11 @@ static void I_SDL_PollMusic(void)
         double end = (double) file_metadata.end_time
                    / file_metadata.samplerate_hz;
 
-        
         if (file_metadata.end_time >= 0 && GetMusicPosition() >= end)
         {
             RestartCurrentTrack();
         }
 
-        
         if (!Mix_PlayingMusic() && current_track_loop)
         {
             RestartCurrentTrack();

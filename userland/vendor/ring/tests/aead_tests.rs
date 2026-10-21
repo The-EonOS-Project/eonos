@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![allow(missing_docs)]
 
 #[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
@@ -24,10 +10,6 @@ use core::ops::RangeFrom;
 use ring::{aead, error};
 #[allow(deprecated)]
 use ring::{test, test_file};
-
-
-
-
 
 macro_rules! test_known_answer {
     ( $alg:ident, $test_file:expr, [ $( $test:ident ),+, ] ) => {
@@ -42,9 +24,6 @@ macro_rules! test_known_answer {
         )+
     }
 }
-
-
-
 
 macro_rules! test_aead {
     { $( { $alg:ident, $test_file:expr } ),+, } => {
@@ -201,7 +180,6 @@ fn test_open_in_place_seperate_tag(
     let mut in_out = Vec::from(tc.ciphertext);
     let tag = tc.tag.try_into().unwrap();
 
-    
     {
         let nonce = aead::Nonce::assume_unique_for_key(tc.nonce);
         let actual_plaintext =
@@ -211,7 +189,6 @@ fn test_open_in_place_seperate_tag(
         assert_eq!(&in_out[..tc.plaintext.len()], tc.plaintext);
     }
 
-    
     {
         let range = in_out.len()..;
         in_out.extend_from_slice(tc.ciphertext);
@@ -238,27 +215,18 @@ where
         RangeFrom<usize>,
     ) -> Result<&'a mut [u8], error::Unspecified>,
 {
-    
-    
-    
 
-    
-    
     static MINIMAL_IN_PREFIX_LENS: [usize; 36] = [
-        
-        
+
         0,
         1,
         2,
-        
+
         5,
         8,
-        
-        
-        
+
         5   + 8,  
-        
-        
+
         15,  
         16,  
         17,  
@@ -406,28 +374,20 @@ fn key_sizes(aead_alg: &'static aead::Algorithm) {
     let key_len = aead_alg.key_len();
     let key_data = vec![0u8; key_len * 2];
 
-    
     assert!(aead::UnboundKey::new(aead_alg, &key_data[..key_len]).is_ok());
 
-    
     assert!(aead::UnboundKey::new(aead_alg, &key_data[..(key_len - 1)]).is_err());
 
-    
     assert!(aead::UnboundKey::new(aead_alg, &key_data[..(key_len + 1)]).is_err());
 
-    
     assert!(aead::UnboundKey::new(aead_alg, &key_data[..(key_len / 2)]).is_err());
 
-    
     assert!(aead::UnboundKey::new(aead_alg, &key_data[..(key_len * 2)]).is_err());
 
-    
     assert!(aead::UnboundKey::new(aead_alg, &[]).is_err());
 
-    
     assert!(aead::UnboundKey::new(aead_alg, &[0]).is_err());
 }
-
 
 #[allow(clippy::range_plus_one)]
 #[test]
@@ -448,14 +408,12 @@ fn test_aead_nonce_sizes() {
 #[allow(clippy::range_plus_one)]
 #[test]
 fn aead_chacha20_poly1305_openssh() {
-    
 
     test::run(
         test_file!("aead_chacha20_poly1305_openssh_tests.txt"),
         |section, test_case| {
             assert_eq!(section, "");
 
-            
             let key_bytes = {
                 let as_vec = test_case.consume_bytes("KEY");
                 let mut as_array = [0u8; aead::chacha20_poly1305_openssh::KEY_LEN];
@@ -470,9 +428,6 @@ fn aead_chacha20_poly1305_openssh() {
             let plaintext = test_case.consume_bytes("IN");
             let ct = test_case.consume_bytes("CT");
             let expected_tag = test_case.consume_bytes("TAG");
-
-            
-            
 
             let mut tag = [0u8; aead::chacha20_poly1305_openssh::TAG_LEN];
             let mut s_in_out = plaintext.clone();
@@ -584,8 +539,6 @@ fn test_aead_lesssafekey_clone_for_algorithm(algorithm: &'static aead::Algorithm
         aead::LessSafeKey::new(aead::UnboundKey::new(algorithm, key_bytes).unwrap());
     let key2 = key1.clone();
 
-    
-    
     let mut buf1: Vec<u8> = (0..100).collect();
     let mut buf2 = buf1.clone();
     let tag1 = key1
@@ -639,8 +592,7 @@ fn make_less_safe_key(algorithm: &'static aead::Algorithm, key: &[u8]) -> aead::
 struct OneNonceSequence(Option<aead::Nonce>);
 
 impl OneNonceSequence {
-    
-    
+
     fn new(nonce: aead::Nonce) -> Self {
         Self(Some(nonce))
     }

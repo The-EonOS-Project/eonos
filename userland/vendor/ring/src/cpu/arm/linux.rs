@@ -1,41 +1,6 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::Neon;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 pub const FORCE_DYNAMIC_DETECTION: u32 = !Neon::mask();
-
-
 
 #[cfg(target_env = "uclibc")]
 pub fn detect_features() -> u32 {
@@ -52,7 +17,6 @@ pub fn detect_features() -> u32 {
 
     let mut features = 0;
 
-    
     const _ASSERT_NEON_DETECTED: () = assert!((CAPS_STATIC & Neon::mask()) == Neon::mask());
 
     let caps = unsafe { getauxval(AT_HWCAP) };
@@ -80,10 +44,6 @@ pub fn detect_features() -> u32 {
 pub fn detect_features() -> u32 {
     use super::CAPS_STATIC;
 
-    
-    
-    
-    
     use libc::c_ulong;
     extern "C" {
         pub fn getauxval(type_: c_ulong) -> c_ulong;
@@ -96,8 +56,6 @@ pub fn detect_features() -> u32 {
     if CAPS_STATIC & Neon::mask() != Neon::mask() {
         let caps = unsafe { getauxval(AT_HWCAP) };
 
-        
-        
         if caps & HWCAP_NEON == HWCAP_NEON {
             features |= Neon::mask();
         }

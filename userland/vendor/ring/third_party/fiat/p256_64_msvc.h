@@ -1,22 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdint.h>
 #include <intrin.h>
 #if defined(_M_X64)
@@ -28,11 +9,7 @@ typedef signed char fiat_p256_int1;
 
 #define FIAT_P256_FIAT_INLINE inline
 
-
-
 typedef uint64_t fiat_p256_montgomery_domain_field_element[4];
-
-
 
 typedef uint64_t fiat_p256_non_montgomery_domain_field_element[4];
 
@@ -41,22 +18,6 @@ typedef uint64_t fiat_p256_non_montgomery_domain_field_element[4];
 #endif
 
 #define fiat_p256_value_barrier_u64(x) (x)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 static FIAT_P256_FIAT_INLINE void fiat_p256_addcarryx_u64(uint64_t* out1, fiat_p256_uint1* out2, fiat_p256_uint1 arg1, uint64_t arg2, uint64_t arg3) {
 #if defined(_M_X64)
@@ -71,21 +32,6 @@ static FIAT_P256_FIAT_INLINE void fiat_p256_addcarryx_u64(uint64_t* out1, fiat_p
 #endif
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 static FIAT_P256_FIAT_INLINE void fiat_p256_subborrowx_u64(uint64_t* out1, fiat_p256_uint1* out2, fiat_p256_uint1 arg1, uint64_t arg2, uint64_t arg3) {
 #if defined(_M_X64)
   *out2 = _subborrow_u64(arg1, arg2, arg3, out1); 
@@ -94,20 +40,6 @@ static FIAT_P256_FIAT_INLINE void fiat_p256_subborrowx_u64(uint64_t* out1, fiat_
   *out2 = (arg2 < arg3) | ((arg2 == arg3) & arg1);
 #endif
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 static FIAT_P256_FIAT_INLINE void fiat_p256_mulx_u64(uint64_t* out1, uint64_t* out2, uint64_t arg1, uint64_t arg2) {
 
@@ -121,19 +53,6 @@ static FIAT_P256_FIAT_INLINE void fiat_p256_mulx_u64(uint64_t* out1, uint64_t* o
 #endif
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 static FIAT_P256_FIAT_INLINE void fiat_p256_cmovznz_u64(uint64_t* out1, fiat_p256_uint1 arg1, uint64_t arg2, uint64_t arg3) {
   fiat_p256_uint1 x1;
   uint64_t x2;
@@ -143,17 +62,6 @@ static FIAT_P256_FIAT_INLINE void fiat_p256_cmovznz_u64(uint64_t* out1, fiat_p25
   x3 = ((fiat_p256_value_barrier_u64(x2) & arg3) | (fiat_p256_value_barrier_u64((~x2)) & arg2));
   *out1 = x3;
 }
-
-
-
-
-
-
-
-
-
-
-
 
 static FIAT_P256_FIAT_INLINE void fiat_p256_mul(fiat_p256_montgomery_domain_field_element out1, const fiat_p256_montgomery_domain_field_element arg1, const fiat_p256_montgomery_domain_field_element arg2) {
   uint64_t x1;
@@ -452,16 +360,6 @@ static FIAT_P256_FIAT_INLINE void fiat_p256_mul(fiat_p256_montgomery_domain_fiel
   out1[3] = x187;
 }
 
-
-
-
-
-
-
-
-
-
-
 static FIAT_P256_FIAT_INLINE void fiat_p256_square(fiat_p256_montgomery_domain_field_element out1, const fiat_p256_montgomery_domain_field_element arg1) {
   uint64_t x1;
   uint64_t x2;
@@ -759,17 +657,6 @@ static FIAT_P256_FIAT_INLINE void fiat_p256_square(fiat_p256_montgomery_domain_f
   out1[3] = x187;
 }
 
-
-
-
-
-
-
-
-
-
-
-
 static FIAT_P256_FIAT_INLINE void fiat_p256_add(fiat_p256_montgomery_domain_field_element out1, const fiat_p256_montgomery_domain_field_element arg1, const fiat_p256_montgomery_domain_field_element arg2) {
   uint64_t x1;
   fiat_p256_uint1 x2;
@@ -812,17 +699,6 @@ static FIAT_P256_FIAT_INLINE void fiat_p256_add(fiat_p256_montgomery_domain_fiel
   out1[3] = x22;
 }
 
-
-
-
-
-
-
-
-
-
-
-
 static FIAT_P256_FIAT_INLINE void fiat_p256_sub(fiat_p256_montgomery_domain_field_element out1, const fiat_p256_montgomery_domain_field_element arg1, const fiat_p256_montgomery_domain_field_element arg2) {
   uint64_t x1;
   fiat_p256_uint1 x2;
@@ -856,16 +732,6 @@ static FIAT_P256_FIAT_INLINE void fiat_p256_sub(fiat_p256_montgomery_domain_fiel
   out1[3] = x16;
 }
 
-
-
-
-
-
-
-
-
-
-
 static FIAT_P256_FIAT_INLINE void fiat_p256_opp(fiat_p256_montgomery_domain_field_element out1, const fiat_p256_montgomery_domain_field_element arg1) {
   uint64_t x1;
   fiat_p256_uint1 x2;
@@ -898,16 +764,6 @@ static FIAT_P256_FIAT_INLINE void fiat_p256_opp(fiat_p256_montgomery_domain_fiel
   out1[2] = x14;
   out1[3] = x16;
 }
-
-
-
-
-
-
-
-
-
-
 
 static FIAT_P256_FIAT_INLINE void fiat_p256_from_montgomery(fiat_p256_non_montgomery_domain_field_element out1, const fiat_p256_montgomery_domain_field_element arg1) {
   uint64_t x1;
@@ -1053,16 +909,6 @@ static FIAT_P256_FIAT_INLINE void fiat_p256_from_montgomery(fiat_p256_non_montgo
   out1[2] = x89;
   out1[3] = x90;
 }
-
-
-
-
-
-
-
-
-
-
 
 static FIAT_P256_FIAT_INLINE void fiat_p256_to_montgomery(fiat_p256_montgomery_domain_field_element out1, const fiat_p256_non_montgomery_domain_field_element arg1) {
   uint64_t x1;
@@ -1330,37 +1176,11 @@ static FIAT_P256_FIAT_INLINE void fiat_p256_to_montgomery(fiat_p256_montgomery_d
   out1[3] = x170;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 static FIAT_P256_FIAT_INLINE void fiat_p256_nonzero(uint64_t* out1, const uint64_t arg1[4]) {
   uint64_t x1;
   x1 = ((arg1[0]) | ((arg1[1]) | ((arg1[2]) | (arg1[3]))));
   *out1 = x1;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 static FIAT_P256_FIAT_INLINE void fiat_p256_selectznz(uint64_t out1[4], fiat_p256_uint1 arg1, const uint64_t arg2[4], const uint64_t arg3[4]) {
   uint64_t x1;
@@ -1376,19 +1196,6 @@ static FIAT_P256_FIAT_INLINE void fiat_p256_selectznz(uint64_t out1[4], fiat_p25
   out1[2] = x3;
   out1[3] = x4;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 static FIAT_P256_FIAT_INLINE void fiat_p256_to_bytes(uint8_t out1[32], const uint64_t arg1[4]) {
   uint64_t x1;
@@ -1545,20 +1352,6 @@ static FIAT_P256_FIAT_INLINE void fiat_p256_to_bytes(uint8_t out1[32], const uin
   out1[31] = x60;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 static FIAT_P256_FIAT_INLINE void fiat_p256_from_bytes(uint64_t out1[4], const uint8_t arg1[32]) {
   uint64_t x1;
   uint64_t x2;
@@ -1686,30 +1479,12 @@ static FIAT_P256_FIAT_INLINE void fiat_p256_from_bytes(uint64_t out1[4], const u
   out1[3] = x60;
 }
 
-
-
-
-
-
-
-
-
 static FIAT_P256_FIAT_INLINE void fiat_p256_set_one(fiat_p256_montgomery_domain_field_element out1) {
   out1[0] = 0x1;
   out1[1] = UINT64_C(0xffffffff00000000);
   out1[2] = UINT64_C(0xffffffffffffffff);
   out1[3] = UINT32_C(0xfffffffe);
 }
-
-
-
-
-
-
-
-
-
-
 
 static FIAT_P256_FIAT_INLINE void fiat_p256_msat(uint64_t out1[5]) {
   out1[0] = UINT64_C(0xffffffffffffffff);
@@ -1718,36 +1493,6 @@ static FIAT_P256_FIAT_INLINE void fiat_p256_msat(uint64_t out1[5]) {
   out1[3] = UINT64_C(0xffffffff00000001);
   out1[4] = 0x0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 static FIAT_P256_FIAT_INLINE void fiat_p256_divstep(uint64_t* out1, uint64_t out2[5], uint64_t out3[5], uint64_t out4[4], uint64_t out5[4], uint64_t arg1, const uint64_t arg2[5], const uint64_t arg3[5], const uint64_t arg4[4], const uint64_t arg5[4]) {
   uint64_t x1;
@@ -1983,16 +1728,6 @@ static FIAT_P256_FIAT_INLINE void fiat_p256_divstep(uint64_t* out1, uint64_t out
   out5[2] = x125;
   out5[3] = x126;
 }
-
-
-
-
-
-
-
-
-
-
 
 static FIAT_P256_FIAT_INLINE void fiat_p256_divstep_precomp(uint64_t out1[4]) {
   out1[0] = UINT64_C(0x67ffffffb8000000);

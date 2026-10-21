@@ -1,19 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::digest_scalar::digest_scalar;
 use crate::{
     arithmetic::montgomery::*,
@@ -57,7 +41,6 @@ impl Eq for EcdsaSigningAlgorithm {}
 
 impl sealed::Sealed for EcdsaSigningAlgorithm {}
 
-
 pub struct EcdsaKeyPair {
     d: Scalar<R>,
     nonce_key: NonceRandomKey,
@@ -68,17 +51,7 @@ pub struct EcdsaKeyPair {
 derive_debug_via_field!(EcdsaKeyPair, stringify!(EcdsaKeyPair), public_key);
 
 impl EcdsaKeyPair {
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     pub fn generate_pkcs8(
         alg: &'static EcdsaSigningAlgorithm,
         rng: &dyn rand::SecureRandom,
@@ -93,16 +66,6 @@ impl EcdsaKeyPair {
         ))
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     pub fn from_pkcs8(
         alg: &'static EcdsaSigningAlgorithm,
         pkcs8: &[u8],
@@ -117,22 +80,6 @@ impl EcdsaKeyPair {
         Self::new(alg, key_pair, rng)
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     pub fn from_private_key_and_public_key(
         alg: &'static EcdsaSigningAlgorithm,
         private_key: &[u8],
@@ -169,7 +116,6 @@ impl EcdsaKeyPair {
         })
     }
 
-    
     pub fn sign(
         &self,
         rng: &dyn rand::SecureRandom,
@@ -177,12 +123,8 @@ impl EcdsaKeyPair {
     ) -> Result<signature::Signature, error::Unspecified> {
         let cpu = cpu::features();
 
-        
         let h = digest::digest(self.alg.digest_alg, message);
 
-        
-        
-        
         let nonce_rng = NonceRandom {
             key: &self.nonce_key,
             message_digest: &h,
@@ -198,43 +140,18 @@ impl EcdsaKeyPair {
         rng: &dyn rand::SecureRandom,
         message: &[u8],
     ) -> Result<signature::Signature, error::Unspecified> {
-        
+
         let h = digest::digest(self.alg.digest_alg, message);
 
         self.sign_digest(h, rng, cpu::features())
     }
 
-    
-    
     fn sign_digest(
         &self,
         h: digest::Digest,
         rng: &dyn rand::SecureRandom,
         cpu: cpu::Features,
     ) -> Result<signature::Signature, error::Unspecified> {
-        
-        
-
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
 
         let ops = self.alg.private_scalar_ops;
         let scalar_ops = ops.scalar_ops;
@@ -244,15 +161,12 @@ impl EcdsaKeyPair {
         let n = &scalar_ops.scalar_modulus(cpu);
 
         for _ in 0..100 {
-            
-            
+
             let k = private_key::random_scalar(self.alg.private_key_ops, n, rng)?;
             let k_inv = ops.scalar_inv_to_mont(&k, cpu);
 
-            
             let r = private_key_ops.point_mul_base(&k, cpu);
 
-            
             let r = {
                 let (x, _) = private_key::affine_from_jacobian(private_key_ops, q, &r)?;
                 let x = q.elem_unencoded(&x);
@@ -262,12 +176,8 @@ impl EcdsaKeyPair {
                 continue;
             }
 
-            
-
-            
             let e = digest_scalar(n, h);
 
-            
             let s = {
                 let mut e_plus_dr = scalar_ops.scalar_product(&self.d, &r, cpu);
                 n.add_assign(&mut e_plus_dr, &e);
@@ -277,7 +187,6 @@ impl EcdsaKeyPair {
                 continue;
             }
 
-            
             return Ok(signature::Signature::new(|sig_bytes| {
                 (self.alg.format_rs)(scalar_ops, &r, &s, sig_bytes)
             }));
@@ -286,8 +195,6 @@ impl EcdsaKeyPair {
         Err(error::Unspecified)
     }
 }
-
-
 
 struct NonceRandom<'a> {
     key: &'a NonceRandomKey,
@@ -303,23 +210,13 @@ impl core::fmt::Debug for NonceRandom<'_> {
 
 impl rand::sealed::SecureRandom for NonceRandom<'_> {
     fn fill_impl(&self, dest: &mut [u8]) -> Result<(), error::Unspecified> {
-        
-        
-        
-        
-        
-        
-        
+
         let digest_alg = self.key.0.algorithm();
         let mut ctx = digest::Context::new(digest_alg);
 
-        
         let key = self.key.0.as_ref();
         ctx.update(key);
 
-        
-        
-        
         assert!(key.len() <= digest_alg.block_len() / 2);
         {
             let mut rand = [0u8; digest::MAX_BLOCK_LEN];
@@ -333,8 +230,6 @@ impl rand::sealed::SecureRandom for NonceRandom<'_> {
 
         let nonce = ctx.finish();
 
-        
-        
         dest.copy_from_slice(nonce.as_ref());
 
         Ok(())
@@ -354,9 +249,6 @@ impl NonceRandomKey {
         let mut rand = [0; digest::MAX_OUTPUT_LEN];
         let rand = &mut rand[0..alg.curve.elem_scalar_seed_len];
 
-        
-        
-        
         rng.fill(rand)
             .map_err(|error::Unspecified| error::KeyRejected::rng_failed())?;
 
@@ -399,21 +291,16 @@ fn format_rs_fixed(ops: &'static ScalarOps, r: &Scalar, s: &Scalar, out: &mut [u
 }
 
 fn format_rs_asn1(ops: &'static ScalarOps, r: &Scalar, s: &Scalar, out: &mut [u8]) -> usize {
-    
-    
+
     fn format_integer_tlv(ops: &ScalarOps, a: &Scalar, out: &mut [u8]) -> usize {
         let mut fixed = [0u8; ec::SCALAR_MAX_BYTES + 1];
         let fixed = &mut fixed[..(ops.scalar_bytes_len() + 1)];
         limb::big_endian_from_limbs(ops.leak_limbs(a), &mut fixed[1..]);
 
-        
-        
         debug_assert_eq!(fixed[0], 0);
 
-        
         let first_index = fixed.iter().position(|b| *b != 0).unwrap();
 
-        
         let first_index = if fixed[first_index] & 0x80 != 0 {
             first_index - 1
         } else {
@@ -423,7 +310,6 @@ fn format_rs_asn1(ops: &'static ScalarOps, r: &Scalar, s: &Scalar, out: &mut [u8
 
         out[0] = der::Tag::Integer.into();
 
-        
         assert!(value.len() < 128);
         #[allow(clippy::cast_possible_truncation)]
         {
@@ -439,7 +325,6 @@ fn format_rs_asn1(ops: &'static ScalarOps, r: &Scalar, s: &Scalar, out: &mut [u8
     let r_tlv_len = format_integer_tlv(ops, r, &mut out[2..]);
     let s_tlv_len = format_integer_tlv(ops, s, &mut out[2..][r_tlv_len..]);
 
-    
     let value_len = r_tlv_len + s_tlv_len;
     assert!(value_len < 128);
     #[allow(clippy::cast_possible_truncation)]
@@ -449,11 +334,6 @@ fn format_rs_asn1(ops: &'static ScalarOps, r: &Scalar, s: &Scalar, out: &mut [u8
 
     2 + value_len
 }
-
-
-
-
-
 
 pub static ECDSA_P256_SHA256_FIXED_SIGNING: EcdsaSigningAlgorithm = EcdsaSigningAlgorithm {
     curve: &ec::suite_b::curve::P256,
@@ -465,11 +345,6 @@ pub static ECDSA_P256_SHA256_FIXED_SIGNING: EcdsaSigningAlgorithm = EcdsaSigning
     id: AlgorithmID::ECDSA_P256_SHA256_FIXED_SIGNING,
 };
 
-
-
-
-
-
 pub static ECDSA_P384_SHA384_FIXED_SIGNING: EcdsaSigningAlgorithm = EcdsaSigningAlgorithm {
     curve: &ec::suite_b::curve::P384,
     private_scalar_ops: &p384::PRIVATE_SCALAR_OPS,
@@ -480,11 +355,6 @@ pub static ECDSA_P384_SHA384_FIXED_SIGNING: EcdsaSigningAlgorithm = EcdsaSigning
     id: AlgorithmID::ECDSA_P384_SHA384_FIXED_SIGNING,
 };
 
-
-
-
-
-
 pub static ECDSA_P256_SHA256_ASN1_SIGNING: EcdsaSigningAlgorithm = EcdsaSigningAlgorithm {
     curve: &ec::suite_b::curve::P256,
     private_scalar_ops: &p256::PRIVATE_SCALAR_OPS,
@@ -494,11 +364,6 @@ pub static ECDSA_P256_SHA256_ASN1_SIGNING: EcdsaSigningAlgorithm = EcdsaSigningA
     format_rs: format_rs_asn1,
     id: AlgorithmID::ECDSA_P256_SHA256_ASN1_SIGNING,
 };
-
-
-
-
-
 
 pub static ECDSA_P384_SHA384_ASN1_SIGNING: EcdsaSigningAlgorithm = EcdsaSigningAlgorithm {
     curve: &ec::suite_b::curve::P384,

@@ -1,26 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
-
 
 #include "sounds.h"
 #include "m_fixed.h"
@@ -45,8 +24,6 @@ char *sprnames[] = {
     "COL5","TBLU","TGRN","TRED","SMBT","SMGT","SMRT","HDB1","HDB2","HDB3",
     "HDB4","HDB5","HDB6","POB1","POB2","BRS1","TLMP","TLP2", NULL
 };
-
-
 
 void  A_Light0();
 void A_WeaponReady();
@@ -122,7 +99,6 @@ void A_BrainSpit();
 void A_SpawnSound();
 void A_SpawnFly();
 void A_BrainExplode();
-
 
 state_t	states[NUMSTATES] = {
     {SPR_TROO,0,-1,{NULL},S_NULL,0,0},	
@@ -1093,7 +1069,6 @@ state_t	states[NUMSTATES] = {
     {SPR_TLP2,32770,4,{NULL},S_TECH2LAMP4,0,0},	
     {SPR_TLP2,32771,4,{NULL},S_TECH2LAMP,0,0}	
 };
-
 
 mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 

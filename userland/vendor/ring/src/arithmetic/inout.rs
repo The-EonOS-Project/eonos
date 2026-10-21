@@ -1,37 +1,8 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 pub(crate) use crate::error::LenMismatchError;
 use core::num::NonZeroUsize;
 
 pub(crate) trait AliasingSlices2<T> {
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     #[inline(always)]
     fn with_non_dangling_non_null_pointers_ra<R>(
         self,
@@ -44,14 +15,6 @@ pub(crate) trait AliasingSlices2<T> {
         self.with_potentially_dangling_non_null_pointers_ra(expected_len.get(), f)
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
     fn with_potentially_dangling_non_null_pointers_ra<R>(
         self,
         expected_len: usize,
@@ -91,22 +54,7 @@ impl<T> AliasingSlices2<T> for (&mut [T], &[T]) {
 }
 
 pub(crate) trait AliasingSlices3<T> {
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     #[inline(always)]
     fn with_non_dangling_non_null_pointers_rab<R>(
         self,
@@ -119,14 +67,6 @@ pub(crate) trait AliasingSlices3<T> {
         self.with_potentially_dangling_non_null_pointers_rab(expected_len.get(), f)
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
     fn with_potentially_dangling_non_null_pointers_rab<R>(
         self,
         expected_len: usize,

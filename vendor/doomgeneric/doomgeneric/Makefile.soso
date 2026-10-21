@@ -1,23 +1,14 @@
-
-
-
-
-
-
-
 ifeq ($(V),1)
 	VB=''
 else
 	VB=@
 endif
 
-
 CC=musl-clang  
 CFLAGS+=-O3
 LDFLAGS+=-static
 CFLAGS+=-Wall -DNORMALUNIX -DLINUX -DSNDSERV -D_DEFAULT_SOURCE 
 LIBS+=
-
 
 OBJDIR=build
 OUTPUT=fbdoom

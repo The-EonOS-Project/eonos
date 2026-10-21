@@ -1,37 +1,10 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::{cpu, ec, error, rand};
-
 
 macro_rules! suite_b_curve {
     ( $NAME:ident, $bits:expr, $private_key_ops:expr, $id:expr,
       $check_private_key_bytes:ident, $generate_private_key:ident,
       $public_from_private:ident) => {
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
         pub static $NAME: ec::Curve = ec::Curve {
             public_key_len: 1 + (2 * (($bits + 7) / 8)),
             elem_scalar_seed_len: ($bits + 7) / 8,

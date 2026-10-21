@@ -1,30 +1,9 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::{
     error::LenMismatchError,
     limb::{Limb, LIMB_BITS},
     polyfill::slice::{self, AsChunksMut},
 };
 use core::mem::{align_of, size_of};
-
-
-
-
-
-
-
 
 #[repr(C, align(64))]
 pub struct AlignedStorage<const N: usize>([Limb; N]);
@@ -40,7 +19,6 @@ impl<const N: usize> AlignedStorage<N> {
         Self([0; N])
     }
 
-    
     pub fn aligned_chunks_mut(
         &mut self,
         num_entries: usize,

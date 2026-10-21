@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{Aes, Neon, PMull, Sha256, Sha512, CAPS_STATIC};
 
 pub const FORCE_DYNAMIC_DETECTION: u32 = 0;
@@ -36,7 +22,6 @@ pub fn detect_features() -> u32 {
 
     let mut features = 0;
 
-    
     const _ASSERT_NEON_DETECTED: () = assert!((CAPS_STATIC & Neon::mask()) == Neon::mask());
 
     if rc == ZX_OK {

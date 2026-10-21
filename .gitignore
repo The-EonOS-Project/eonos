@@ -1,7 +1,5 @@
-
 /target/
 **/*.rs.bk
-
 
 *.iso
 *.img
@@ -12,15 +10,12 @@
 *.gz
 *.7z
 
-
 /isodir/
 /build/
 /dist/
 
-
 .DS_Store
 Thumbs.db
-
 
 .vscode/
 .idea/
@@ -29,10 +24,8 @@ iso_root/
 *.swp
 *.swo
 
-
 vars.fd
 
 **/target/
-
 
 /eon-apps/

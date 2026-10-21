@@ -9,10 +9,9 @@ pixel_t* DG_ScreenBuffer = NULL;
 void M_FindResponseFile(void);
 void D_DoomMain (void);
 
-
 void doomgeneric_Create(int argc, char **argv)
 {
-	
+
     myargc = argc;
     myargv = argv;
 

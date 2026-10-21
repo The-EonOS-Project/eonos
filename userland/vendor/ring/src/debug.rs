@@ -1,19 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 macro_rules! derive_debug_via_id {
     ($typename:ident) => {
         impl ::core::fmt::Debug for $typename {
@@ -39,8 +23,6 @@ macro_rules! derive_debug_via_field {
         }
     };
 }
-
-
 
 macro_rules! derive_debug_self_as_ref_hex_bytes {
     ($typename:ident) => {

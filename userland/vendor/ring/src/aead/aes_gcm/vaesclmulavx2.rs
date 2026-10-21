@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![cfg(target_arch = "x86_64")]
 
 use super::{aes, gcm, Counter, BLOCK_LEN};
@@ -37,8 +23,6 @@ pub(super) fn seal_whole_vaes_clmul_avx2(
 
     let in_out = in_out.as_flattened_mut();
 
-    
-    
     let blocks = u32::try_from(in_out.len() / BLOCK_LEN).unwrap();
 
     if let Some(blocks) = NonZeroU32::new(blocks) {
@@ -69,10 +53,8 @@ pub(super) fn open_whole_vaes_clmul_avx2(
             Xi: &mut gcm::Xi);
     }
 
-    
     assert_eq!(in_out.len() % BLOCK_LEN, 0);
-    
-    
+
     let blocks = u32::try_from(in_out.len() / BLOCK_LEN).unwrap();
 
     if let Some(blocks) = NonZeroU32::new(blocks) {

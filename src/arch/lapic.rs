@@ -1,33 +1,9 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![allow(dead_code)]
 
 use core::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 
 use crate::vmm;
 use crate::{log_fail, log_ok};
-
-
 
 const REG_ID: u32 = 0x020;
 const REG_VERSION: u32 = 0x030;
@@ -43,9 +19,6 @@ const REG_LVT_ERROR: u32 = 0x370;
 const SPURIOUS_APIC_ENABLE: u32 = 1 << 8;
 const LVT_MASKED: u32 = 1 << 16;
 
-
-
-
 pub const SPURIOUS_VECTOR: u8 = 0xFF;
 
 static LAPIC_BASE: AtomicU64 = AtomicU64::new(0);
@@ -53,13 +26,7 @@ static ENABLED: AtomicBool = AtomicBool::new(false);
 static APIC_ID: AtomicU64 = AtomicU64::new(0);
 
 fn cpuid(leaf: u32) -> (u32, u32, u32, u32) {
-    
-    
-    
-    
-    
-    
-    
+
     let eax_out: u32;
     let ebx_out: u32;
     let ecx_out: u32;
@@ -110,16 +77,6 @@ fn reg_write(reg: u32, val: u32) {
     unsafe { core::ptr::write_volatile((base + reg as u64) as *mut u32, val) };
 }
 
-
-
-
-
-
-
-
-
-
-
 pub fn init(madt_local_apic_addr: u64) -> bool {
     let (_, _, ecx1, edx1) = cpuid(1);
     let has_apic = edx1 & (1 << 9) != 0;
@@ -132,11 +89,7 @@ pub fn init(madt_local_apic_addr: u64) -> bool {
 
     let apic_base_msr = rdmsr(IA32_APIC_BASE);
     if apic_base_msr & APIC_BASE_EXTD != 0 {
-        
-        
-        
-        
-        
+
         log_fail!(
             "LAPIC",
             "Init",
@@ -161,10 +114,6 @@ pub fn init(madt_local_apic_addr: u64) -> bool {
         return false;
     }
 
-    
-    
-    
-    
     if apic_base_msr & APIC_BASE_EN == 0 {
         wrmsr(IA32_APIC_BASE, apic_base_msr | APIC_BASE_EN);
     }
@@ -172,10 +121,6 @@ pub fn init(madt_local_apic_addr: u64) -> bool {
     let virt_base = vmm::map_mmio(phys_base, 4096) as u64;
     LAPIC_BASE.store(virt_base, Ordering::Relaxed);
 
-    
-    
-    
-    
     let version = reg_read(REG_VERSION);
     let max_lvt = (version >> 16) & 0xff;
     reg_write(REG_LVT_TIMER, LVT_MASKED);
@@ -195,9 +140,6 @@ pub fn init(madt_local_apic_addr: u64) -> bool {
         reg_write(REG_LVT_ERROR, LVT_MASKED);
     }
 
-    
-    
-    
     reg_write(
         REG_SPURIOUS,
         (SPURIOUS_VECTOR as u32) | SPURIOUS_APIC_ENABLE,
@@ -221,19 +163,13 @@ pub fn init(madt_local_apic_addr: u64) -> bool {
     true
 }
 
-
 pub fn is_enabled() -> bool {
     ENABLED.load(Ordering::Acquire)
 }
 
-
 pub fn id() -> u8 {
     APIC_ID.load(Ordering::Acquire) as u8
 }
-
-
-
-
 
 pub fn end_of_interrupt() {
     reg_write(REG_EOI, 0);

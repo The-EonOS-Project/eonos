@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include "../../limbs/limbs.h"
 
 #include "ecp_nistz384.h"
@@ -19,11 +5,6 @@
 #include "../../internal.h"
 
 #include "../../limbs/limbs.inl"
-
- 
-
-
-
 
 typedef Limb Elem[P384_LIMBS];
 typedef Limb ScalarMont[P384_LIMBS];
@@ -75,8 +56,6 @@ static const BN_ULONG N_N0[] = {
   BN_MONT_CTX_N0(0x6ed46089, 0xe88fdc45)
 };
 
-
-
 #if defined(_MSC_VER) && !defined(__clang__) && defined(OPENSSL_X86)
 #define INLINE_IF_POSSIBLE __forceinline
 #else
@@ -98,7 +77,6 @@ static inline void copy_conditional(Elem r, const Elem a,
   }
 }
 
-
 static inline void elem_add(Elem r, const Elem a, const Elem b) {
   LIMBS_add_mod(r, a, b, Q, P384_LIMBS);
 }
@@ -108,50 +86,9 @@ static inline void elem_sub(Elem r, const Elem a, const Elem b) {
 }
 
 static void elem_div_by_2(Elem r, const Elem a) {
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   Limb is_odd = constant_time_is_nonzero_w(a[0] & 1);
 
-  
   Limb carry = a[P384_LIMBS - 1] & 1;
   r[P384_LIMBS - 1] = a[P384_LIMBS - 1] >> 1;
   for (size_t i = 1; i < P384_LIMBS; ++i) {
@@ -169,7 +106,7 @@ static void elem_div_by_2(Elem r, const Elem a) {
 }
 
 static inline void elem_mul_mont(Elem r, const Elem a, const Elem b) {
-  
+
   bn_mul_mont_small(r, a, b, Q, Q_N0, P384_LIMBS);
 }
 
@@ -178,14 +115,14 @@ static inline void elem_mul_by_2(Elem r, const Elem a) {
 }
 
 static INLINE_IF_POSSIBLE void elem_mul_by_3(Elem r, const Elem a) {
-  
+
   Elem doubled;
   elem_add(doubled, a, a);
   elem_add(r, doubled, a);
 }
 
 static inline void elem_sqr_mont(Elem r, const Elem a) {
-  
+
   elem_mul_mont(r, a, a);
 }
 
@@ -211,15 +148,11 @@ void p384_elem_neg(Elem r, const Elem a) {
   }
 }
 
-
 void p384_scalar_mul_mont(ScalarMont r, const ScalarMont a,
                               const ScalarMont b) {
-  
+
   bn_mul_mont_small(r, a, b, N, N_N0, P384_LIMBS);
 }
-
-
-
 
 static void p384_point_select_w5(P384_POINT *out,
                                      const P384_POINT table[16], size_t index) {
@@ -227,7 +160,6 @@ static void p384_point_select_w5(P384_POINT *out,
   Elem y; limbs_zero(y, P384_LIMBS);
   Elem z; limbs_zero(z, P384_LIMBS);
 
-  
   for (size_t i = 0; i < 16; ++i) {
     crypto_word_t equal = constant_time_eq_w(index, (crypto_word_t)i + 1);
     for (size_t j = 0; j < P384_LIMBS; ++j) {
@@ -241,6 +173,5 @@ static void p384_point_select_w5(P384_POINT *out,
   limbs_copy(out->Y, y, P384_LIMBS);
   limbs_copy(out->Z, z, P384_LIMBS);
 }
-
 
 #include "ecp_nistz384.inl"

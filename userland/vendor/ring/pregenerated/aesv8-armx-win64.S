@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_AARCH64) && defined(_WIN32)
@@ -24,7 +21,7 @@ Lrcon:
 .align	5
 aes_hw_set_encrypt_key:
 Lenc_key:
-	
+
 	AARCH64_VALID_CALL_TARGET
 	stp	x29,x30,[sp,#-16]!
 	add	x29,sp,#0
@@ -46,7 +43,7 @@ Lenc_key:
 	ld1	{v1.4s,v2.4s},[x3],#32
 
 	b.lt	Loop128
-	
+
 	b	L256
 
 .align	4
@@ -100,8 +97,6 @@ Loop128:
 
 	mov	w12,#10
 	b	Ldone
-
-
 
 .align	4
 L256:
@@ -157,7 +152,7 @@ Lenc_key_abort:
 .endef
 .align	5
 aes_hw_ctr32_encrypt_blocks:
-	
+
 	AARCH64_VALID_CALL_TARGET
 	stp	x29,x30,[sp,#-16]!
 	add	x29,sp,#0
@@ -179,19 +174,6 @@ aes_hw_ctr32_encrypt_blocks:
 	mov	w6,w5
 	csel	x12,xzr,x12,lo
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 #ifndef __AARCH64EB__
 	rev	w8, w8
 #endif
@@ -259,9 +241,7 @@ Loop3x_ctr32:
 	aesmc	v4.16b,v4.16b
 	aese	v5.16b,v21.16b
 	aesmc	v5.16b,v5.16b
-	 
-	 
-	 
+
 	eor	v19.16b,v19.16b,v7.16b
 	mov	v6.s[3], w9
 	aese	v17.16b,v21.16b

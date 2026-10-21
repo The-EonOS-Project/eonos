@@ -1,20 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -34,25 +17,13 @@
 #include "m_argv.h"
 #include "m_config.h"
 
-
-
 int snd_samplerate = 44100;
-
-
-
 
 int snd_cachesize = 64 * 1024 * 1024;
 
-
-
-
 int snd_maxslicetime_ms = 28;
 
-
-
 char *snd_musiccmd = "";
-
-
 
 static sound_module_t *sound_module = NULL;
 static music_module_t *music_module = NULL;
@@ -60,16 +31,10 @@ static music_module_t *music_module = NULL;
 int snd_musicdevice = SNDDEVICE_SB;
 int snd_sfxdevice = SNDDEVICE_SB;
 
-
-
-
-
 static int snd_sbport = 0;
 static int snd_sbirq = 0;
 static int snd_sbdma = 0;
 static int snd_mport = 0;
-
-
 
 static sound_module_t *sound_modules[] = 
 {
@@ -78,8 +43,6 @@ static sound_module_t *sound_modules[] =
     #endif
     NULL,
 };
-
-
 
 static boolean SndDeviceInList(snddevice_t device, snddevice_t *list,
                                int len)
@@ -97,9 +60,6 @@ static boolean SndDeviceInList(snddevice_t device, snddevice_t *list,
     return false;
 }
 
-
-
-
 static void InitSfxModule(boolean use_sfx_prefix)
 {
     int i;
@@ -108,14 +68,11 @@ static void InitSfxModule(boolean use_sfx_prefix)
 
     for (i=0; sound_modules[i] != NULL; ++i)
     {
-        
-        
 
         if (SndDeviceInList(snd_sfxdevice, 
                             sound_modules[i]->sound_devices,
                             sound_modules[i]->num_sound_devices))
         {
-            
 
             if (sound_modules[i]->Init(use_sfx_prefix))
             {
@@ -126,8 +83,6 @@ static void InitSfxModule(boolean use_sfx_prefix)
     }
 }
 
-
-
 static void InitMusicModule(void)
 {
 #ifdef FEATURE_SOUND
@@ -135,53 +90,24 @@ static void InitMusicModule(void)
 #endif 
 }
 
-
-
-
-
-
-
 void I_InitSound(boolean use_sfx_prefix)
 {  
     boolean nosound, nosfx, nomusic;
 
-    
-    
-    
-    
-    
-
     nosound = M_CheckParm("-nosound") > 0;
-
-    
-    
-    
-    
-    
 
     nosfx = M_CheckParm("-nosfx") > 0;
 
-    
-    
-    
-    
-    
-
     nomusic = M_CheckParm("-nomusic") > 0;
-
-    
 
     if (!nosound && !screensaver_mode)
     {
-        
-        
-        
 
         if (!nomusic
          && (snd_musicdevice == SNDDEVICE_GENMIDI
           || snd_musicdevice == SNDDEVICE_GUS))
         {
-            
+
         }
 
         if (!nosfx)
@@ -389,7 +315,7 @@ boolean I_MusicIsPlaying(void)
     {
         return false;
     }
-    
+
 }
 
 void I_BindSoundVariables(void)
@@ -413,8 +339,5 @@ void I_BindSoundVariables(void)
     M_BindVariable("libsamplerate_scale", &libsamplerate_scale);
 #endif
 
-    
-    
-    
 }
 

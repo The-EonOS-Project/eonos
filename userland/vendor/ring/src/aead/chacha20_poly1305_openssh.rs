@@ -1,34 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{
     chacha::{self, *},
     chacha20_poly1305, cpu, poly1305, Aad, Nonce, Tag,
@@ -39,46 +8,30 @@ use crate::{
     polyfill::slice,
 };
 
-
 pub struct SealingKey {
     key: Key,
 }
 
 impl SealingKey {
-    
+
     pub fn new(key_material: &[u8; KEY_LEN]) -> Self {
         Self {
             key: Key::new(key_material),
         }
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     pub fn seal_in_place(
         &self,
         sequence_number: u32,
         plaintext_in_ciphertext_out: &mut [u8],
         tag_out: &mut [u8; TAG_LEN],
     ) {
-        
+
         let (len_in_out, data_and_padding_in_out): (&mut [u8; PACKET_LENGTH_LEN], _) =
             slice::split_first_chunk_mut(plaintext_in_ciphertext_out).unwrap();
 
         let cpu = cpu::features();
-        
+
         let (counter, poly_key) = chacha20_poly1305::begin(
             &self.key.k_2,
             make_nonce(sequence_number),
@@ -103,23 +56,18 @@ impl SealingKey {
     }
 }
 
-
 pub struct OpeningKey {
     key: Key,
 }
 
 impl OpeningKey {
-    
+
     pub fn new(key_material: &[u8; KEY_LEN]) -> Self {
         Self {
             key: Key::new(key_material),
         }
     }
 
-    
-    
-    
-    
     pub fn decrypt_packet_length(
         &self,
         sequence_number: u32,
@@ -135,15 +83,6 @@ impl OpeningKey {
         packet_length
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
     pub fn open_in_place<'a>(
         &self,
         sequence_number: u32,
@@ -163,13 +102,9 @@ impl OpeningKey {
         )
         .map_err(error::erase::<InputTooLongError>)?;
 
-        
-        
-        
         let calculated_tag = poly1305::sign(poly_key, ciphertext_in_plaintext_out, cpu);
         bb::verify_slices_are_equal(calculated_tag.as_ref(), tag)?;
 
-        
         let after_packet_length = &mut ciphertext_in_plaintext_out[PACKET_LENGTH_LEN..];
 
         self.key
@@ -187,7 +122,7 @@ struct Key {
 
 impl Key {
     fn new(key_material: &[u8; KEY_LEN]) -> Self {
-        
+
         let (k_2, k_1) = key_material.split_at(chacha::KEY_LEN);
         Self {
             k_1: chacha::Key::new(k_1.try_into().unwrap()),
@@ -202,11 +137,8 @@ fn make_nonce(sequence_number: u32) -> Nonce {
     Nonce::assume_unique_for_key(nonce)
 }
 
-
 pub const KEY_LEN: usize = chacha::KEY_LEN * 2;
 
-
 pub const PACKET_LENGTH_LEN: usize = 4; 
-
 
 pub const TAG_LEN: usize = super::TAG_LEN;

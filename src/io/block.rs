@@ -1,5 +1,3 @@
-
-
 #![allow(dead_code)]
 
 use crate::fat32::SECTOR_SIZE;
@@ -15,7 +13,6 @@ pub struct RegisteredDevice {
 
 static DEVICES: IrqMutex<Vec<RegisteredDevice>> = IrqMutex::new(Vec::new());
 
-
 pub fn register_device(name: &'static str, device: &'static dyn BlockDevice) {
     let mut devices = DEVICES.lock();
     if devices.iter().any(|entry| entry.name == name) {
@@ -27,7 +24,6 @@ pub fn register_device(name: &'static str, device: &'static dyn BlockDevice) {
 pub fn devices() -> Vec<RegisteredDevice> {
     DEVICES.lock().clone()
 }
-
 
 pub fn find_device(name: &str) -> Option<&'static dyn BlockDevice> {
     DEVICES
@@ -50,13 +46,11 @@ pub trait BlockDevice: Send + Sync {
     fn write_sector(&self, _lba: u64, _data: &[u8; SECTOR_SIZE]) -> Result<(), BlockError> {
         Err(BlockError::ReadOnly)
     }
-    
+
     fn flush(&self) -> Result<(), BlockError> {
         Err(BlockError::ReadOnly)
     }
 }
-
-
 
 pub struct PartitionDevice {
     parent: &'static dyn BlockDevice,
@@ -101,8 +95,6 @@ impl BlockDevice for PartitionDevice {
         self.parent.flush()
     }
 }
-
-
 
 pub struct MemoryBlockDevice {
     bytes: &'static [u8],

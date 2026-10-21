@@ -1,51 +1,6 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_AARCH64) && defined(__APPLE__)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #ifndef	__KERNEL__
 #endif
@@ -104,7 +59,7 @@ Loop:
 	eor	x17,x6,x17,ror#34	
 	add	x27,x27,x28			
 	ldr	x28,[x30],#8		
-	
+
 #ifndef	__AARCH64EB__
 	rev	x4,x4			
 #endif
@@ -129,7 +84,7 @@ Loop:
 	eor	x17,x7,x17,ror#34	
 	add	x26,x26,x19			
 	ldr	x19,[x30],#8		
-	
+
 #ifndef	__AARCH64EB__
 	rev	x5,x5			
 #endif
@@ -153,7 +108,7 @@ Loop:
 	eor	x17,x8,x17,ror#34	
 	add	x25,x25,x28			
 	ldr	x28,[x30],#8		
-	
+
 #ifndef	__AARCH64EB__
 	rev	x6,x6			
 #endif
@@ -178,7 +133,7 @@ Loop:
 	eor	x17,x9,x17,ror#34	
 	add	x24,x24,x19			
 	ldr	x19,[x30],#8		
-	
+
 #ifndef	__AARCH64EB__
 	rev	x7,x7			
 #endif
@@ -202,7 +157,7 @@ Loop:
 	eor	x17,x10,x17,ror#34	
 	add	x23,x23,x28			
 	ldr	x28,[x30],#8		
-	
+
 #ifndef	__AARCH64EB__
 	rev	x8,x8			
 #endif
@@ -227,7 +182,7 @@ Loop:
 	eor	x17,x11,x17,ror#34	
 	add	x22,x22,x19			
 	ldr	x19,[x30],#8		
-	
+
 #ifndef	__AARCH64EB__
 	rev	x9,x9			
 #endif
@@ -251,7 +206,7 @@ Loop:
 	eor	x17,x12,x17,ror#34	
 	add	x21,x21,x28			
 	ldr	x28,[x30],#8		
-	
+
 #ifndef	__AARCH64EB__
 	rev	x10,x10			
 #endif
@@ -276,7 +231,7 @@ Loop:
 	eor	x17,x13,x17,ror#34	
 	add	x20,x20,x19			
 	ldr	x19,[x30],#8		
-	
+
 #ifndef	__AARCH64EB__
 	rev	x11,x11			
 #endif
@@ -300,7 +255,7 @@ Loop:
 	eor	x17,x14,x17,ror#34	
 	add	x27,x27,x28			
 	ldr	x28,[x30],#8		
-	
+
 #ifndef	__AARCH64EB__
 	rev	x12,x12			
 #endif
@@ -325,7 +280,7 @@ Loop:
 	eor	x17,x15,x17,ror#34	
 	add	x26,x26,x19			
 	ldr	x19,[x30],#8		
-	
+
 #ifndef	__AARCH64EB__
 	rev	x13,x13			
 #endif
@@ -349,7 +304,7 @@ Loop:
 	eor	x17,x0,x17,ror#34	
 	add	x25,x25,x28			
 	ldr	x28,[x30],#8		
-	
+
 #ifndef	__AARCH64EB__
 	rev	x14,x14			
 #endif
@@ -375,7 +330,7 @@ Loop:
 	eor	x17,x6,x17,ror#34	
 	add	x24,x24,x19			
 	ldr	x19,[x30],#8		
-	
+
 #ifndef	__AARCH64EB__
 	rev	x15,x15			
 #endif
@@ -400,7 +355,7 @@ Loop:
 	eor	x17,x7,x17,ror#34	
 	add	x23,x23,x28			
 	ldr	x28,[x30],#8		
-	
+
 #ifndef	__AARCH64EB__
 	rev	x0,x0			
 #endif
@@ -426,7 +381,7 @@ Loop:
 	eor	x17,x8,x17,ror#34	
 	add	x22,x22,x19			
 	ldr	x19,[x30],#8		
-	
+
 #ifndef	__AARCH64EB__
 	rev	x1,x1			
 #endif
@@ -452,7 +407,7 @@ Loop:
 	eor	x17,x9,x17,ror#34	
 	add	x21,x21,x28			
 	ldr	x28,[x30],#8		
-	
+
 #ifndef	__AARCH64EB__
 	rev	x2,x2			
 #endif
@@ -1021,7 +976,6 @@ Loop_16_xx:
 	AARCH64_VALIDATE_LINK_REGISTER
 	ret
 
-
 .section	__TEXT,__const
 .align	6
 
@@ -1078,7 +1032,7 @@ LK512:
 
 .align	6
 _sha512_block_data_order_hw:
-	
+
 	AARCH64_VALID_CALL_TARGET
 	stp	x29,x30,[sp,#-16]!
 	add	x29,sp,#0

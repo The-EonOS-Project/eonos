@@ -1,19 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 pub use self::{key_rejected::KeyRejected, unspecified::Unspecified};
 
 pub(crate) use self::{
@@ -35,17 +19,7 @@ pub(crate) fn erase<T>(_: T) -> Unspecified {
 cold_exhaustive_error! {
     struct too_much_output_requested::TooMuchOutputRequestedError
         with pub(crate) constructor {
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
         imprecise_output_length: usize
     }
 }

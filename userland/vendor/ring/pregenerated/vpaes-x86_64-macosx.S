@@ -1,26 +1,7 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86_64) && defined(__APPLE__)
 .text	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 .p2align	4
 _vpaes_encrypt_core:
@@ -95,7 +76,6 @@ L$enc_entry:
 	pxor	%xmm1,%xmm3
 	jnz	L$enc_loop
 
-
 	movdqa	-96(%r10),%xmm4
 	movdqa	-80(%r10),%xmm0
 .byte	102,15,56,0,226
@@ -105,38 +85,6 @@ L$enc_entry:
 	pxor	%xmm4,%xmm0
 .byte	102,15,56,0,193
 	ret
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 .p2align	4
 _vpaes_encrypt_core_2x:
@@ -262,7 +210,6 @@ L$enc2x_entry:
 	pxor	%xmm7,%xmm11
 	jnz	L$enc2x_loop
 
-
 	movdqa	-96(%r10),%xmm4
 	movdqa	-80(%r10),%xmm0
 	movdqa	%xmm4,%xmm12
@@ -281,26 +228,12 @@ L$enc2x_entry:
 .byte	102,15,56,0,241
 	ret
 
-
-
-
-
-
-
-
-
 .p2align	4
 _vpaes_schedule_core:
-
-
-
-
-
 
 	call	_vpaes_preheat
 	movdqa	L$k_rcon(%rip),%xmm8
 	movdqu	(%rdi),%xmm0
-
 
 	movdqa	%xmm0,%xmm3
 	leaq	L$k_ipt(%rip),%r11
@@ -309,22 +242,11 @@ _vpaes_schedule_core:
 
 	leaq	L$k_sr(%rip),%r10
 
-
 	movdqu	%xmm0,(%rdx)
 
 L$schedule_go:
 	cmpl	$192,%esi
 	ja	L$schedule_256
-
-
-
-
-
-
-
-
-
-
 
 L$schedule_128:
 	movl	$10,%esi
@@ -336,16 +258,6 @@ L$oop_schedule_128:
 	call	_vpaes_schedule_mangle
 	jmp	L$oop_schedule_128
 
-
-
-
-
-
-
-
-
-
-
 .p2align	4
 L$schedule_256:
 	movdqu	16(%rdi),%xmm0
@@ -356,12 +268,10 @@ L$oop_schedule_256:
 	call	_vpaes_schedule_mangle
 	movdqa	%xmm0,%xmm6
 
-
 	call	_vpaes_schedule_round
 	decq	%rsi
 	jz	L$schedule_mangle_last
 	call	_vpaes_schedule_mangle
-
 
 	pshufd	$0xFF,%xmm0,%xmm0
 	movdqa	%xmm7,%xmm5
@@ -371,22 +281,10 @@ L$oop_schedule_256:
 
 	jmp	L$oop_schedule_256
 
-
-
-
-
-
-
-
-
-
-
-
 .p2align	4
 L$schedule_mangle_last:
 
 	leaq	L$k_deskew(%rip),%r11
-
 
 	movdqa	(%r8,%r10,1),%xmm1
 .byte	102,15,56,0,193
@@ -399,7 +297,6 @@ L$schedule_mangle_last_dec:
 	call	_vpaes_schedule_transform
 	movdqu	%xmm0,(%rdx)
 
-
 	pxor	%xmm0,%xmm0
 	pxor	%xmm1,%xmm1
 	pxor	%xmm2,%xmm2
@@ -410,42 +307,16 @@ L$schedule_mangle_last_dec:
 	pxor	%xmm7,%xmm7
 	ret
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .p2align	4
 _vpaes_schedule_round:
-
 
 	pxor	%xmm1,%xmm1
 .byte	102,65,15,58,15,200,15
 .byte	102,69,15,58,15,192,15
 	pxor	%xmm1,%xmm7
 
-
 	pshufd	$0xFF,%xmm0,%xmm0
 .byte	102,15,58,15,192,1
-
-
-
 
 _vpaes_schedule_low_round:
 
@@ -456,7 +327,6 @@ _vpaes_schedule_low_round:
 	pslldq	$8,%xmm7
 	pxor	%xmm1,%xmm7
 	pxor	L$k_s63(%rip),%xmm7
-
 
 	movdqa	%xmm9,%xmm1
 	pandn	%xmm0,%xmm1
@@ -483,22 +353,9 @@ _vpaes_schedule_low_round:
 .byte	102,15,56,0,195
 	pxor	%xmm4,%xmm0
 
-
 	pxor	%xmm7,%xmm0
 	movdqa	%xmm0,%xmm7
 	ret
-
-
-
-
-
-
-
-
-
-
-
-
 
 .p2align	4
 _vpaes_schedule_transform:
@@ -514,38 +371,11 @@ _vpaes_schedule_transform:
 	pxor	%xmm2,%xmm0
 	ret
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .p2align	4
 _vpaes_schedule_mangle:
 
 	movdqa	%xmm0,%xmm4
 	movdqa	L$k_mc_forward(%rip),%xmm5
-
 
 	addq	$16,%rdx
 	pxor	L$k_s63(%rip),%xmm4
@@ -563,11 +393,6 @@ L$schedule_mangle_both:
 	andq	$0x30,%r8
 	movdqu	%xmm3,(%rdx)
 	ret
-
-
-
-
-
 
 .globl	_vpaes_set_encrypt_key
 .private_extern _vpaes_set_encrypt_key
@@ -592,7 +417,6 @@ _CET_ENDBR
 	xorl	%eax,%eax
 	ret
 
-
 .globl	_vpaes_ctr32_encrypt_blocks
 .private_extern _vpaes_ctr32_encrypt_blocks
 
@@ -614,8 +438,6 @@ _CET_ENDBR
 	testq	$1,%rcx
 	jz	L$ctr32_prep_loop
 
-
-
 	movdqu	(%rdi),%xmm7
 	call	_vpaes_encrypt_core
 	pxor	%xmm7,%xmm0
@@ -626,7 +448,6 @@ _CET_ENDBR
 	jz	L$ctr32_done
 
 L$ctr32_prep_loop:
-
 
 	movdqa	%xmm6,%xmm14
 	movdqa	%xmm6,%xmm15
@@ -656,14 +477,6 @@ L$ctr32_done:
 L$ctr32_abort:
 	ret
 
-
-
-
-
-
-
-
-
 .p2align	4
 _vpaes_preheat:
 
@@ -676,13 +489,6 @@ _vpaes_preheat:
 	movdqa	80(%r10),%xmm15
 	movdqa	96(%r10),%xmm14
 	ret
-
-
-
-
-
-
-
 
 .section	__DATA,__const
 .p2align	6
@@ -740,10 +546,8 @@ L$k_deskew:
 .quad	0x07E4A34047A4E300, 0x1DFEB95A5DBEF91A
 .quad	0x5F36B5DC83EA6900, 0x2841C2ABF49D1E77
 
-
 L$rev_ctr:
 .quad	0x0706050403020100, 0x0c0d0e0f0b0a0908
-
 
 L$ctr_add_one:
 .quad	0x0000000000000000, 0x0000000100000000

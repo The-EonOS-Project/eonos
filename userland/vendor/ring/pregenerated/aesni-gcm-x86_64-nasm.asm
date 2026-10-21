@@ -1,6 +1,3 @@
-
-
-
 %ifidn __OUTPUT_FORMAT__, win64
 default	rel
 %define XMMWORD
@@ -10,8 +7,6 @@ default	rel
 
 %include "ring_core_generated/prefix_symbols_nasm.inc"
 section	.text code align=64
-
-
 
 ALIGN	32
 _aesni_ctr32_ghash_6x:
@@ -44,22 +39,6 @@ $L$resume_ctr32:
 	vpxor	xmm12,xmm12,xmm15
 	vmovups	xmm2,XMMWORD[((16-128))+r9]
 	vpclmulqdq	xmm6,xmm7,xmm3,0x01
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	xor	r12,r12
 	cmp	r15,r14
@@ -239,7 +218,6 @@ $L$resume_ctr32:
 	vaesenc	xmm14,xmm14,xmm1
 	vmovups	xmm1,XMMWORD[((192-128))+r9]
 
-
 	vaesenc	xmm9,xmm9,xmm15
 	vaesenc	xmm10,xmm10,xmm15
 	vaesenc	xmm11,xmm11,xmm15
@@ -344,7 +322,6 @@ $L$6x_done:
 
 	ret
 
-
 global	aesni_gcm_decrypt
 
 ALIGN	32
@@ -353,8 +330,6 @@ aesni_gcm_decrypt:
 $L$SEH_begin_aesni_gcm_decrypt_1:
 _CET_ENDBR
 	xor	rax,rax
-
-
 
 	cmp	r8,0x60
 	jb	NEAR $L$gcm_dec_abort
@@ -382,8 +357,6 @@ $L$SEH_prologue_aesni_gcm_decrypt_7:
 	lea	rsp,[((-168))+rsp]
 $L$SEH_prologue_aesni_gcm_decrypt_8:
 $L$SEH_prologue_aesni_gcm_decrypt_9:
-
-
 
 	mov	QWORD[16+rbp],rdi
 $L$SEH_prologue_aesni_gcm_decrypt_10:
@@ -442,12 +415,6 @@ $L$dec_no_key_aliasing:
 	vmovdqu	xmm7,XMMWORD[80+rcx]
 	mov	r14,rcx
 	vmovdqu	xmm4,XMMWORD[64+rcx]
-
-
-
-
-
-
 
 	lea	r15,[((-192))+r8*1+rcx]
 
@@ -512,8 +479,6 @@ $L$dec_no_key_aliasing:
 $L$gcm_dec_abort:
 	ret
 $L$SEH_end_aesni_gcm_decrypt_23:
-
-
 
 ALIGN	32
 _aesni_ctr32_6x:
@@ -605,8 +570,6 @@ $L$handle_ctr32_2:
 	vpxor	xmm14,xmm14,xmm4
 	jmp	NEAR $L$oop_ctr32
 
-
-
 global	aesni_gcm_encrypt
 
 ALIGN	32
@@ -619,9 +582,6 @@ EXTERN	BORINGSSL_function_hit
 	mov	BYTE[((BORINGSSL_function_hit+2))],1
 %endif
 	xor	rax,rax
-
-
-
 
 	cmp	r8,0x60*3
 	jb	NEAR $L$gcm_enc_abort
@@ -649,8 +609,6 @@ $L$SEH_prologue_aesni_gcm_encrypt_7:
 	lea	rsp,[((-168))+rsp]
 $L$SEH_prologue_aesni_gcm_encrypt_8:
 $L$SEH_prologue_aesni_gcm_encrypt_9:
-
-
 
 	mov	QWORD[16+rbp],rdi
 $L$SEH_prologue_aesni_gcm_encrypt_10:
@@ -703,13 +661,6 @@ $L$SEH_endprologue_aesni_gcm_encrypt_22:
 $L$enc_no_key_aliasing:
 
 	mov	r14,rdx
-
-
-
-
-
-
-
 
 	lea	r15,[((-192))+r8*1+rdx]
 
@@ -945,7 +896,6 @@ $L$gcm_enc_abort:
 	ret
 $L$SEH_end_aesni_gcm_encrypt_23:
 
-
 section	.rdata rdata align=8
 ALIGN	64
 $L$bswap_mask:
@@ -974,7 +924,6 @@ ALIGN	4
 	DD	$L$SEH_begin_aesni_gcm_encrypt_1 wrt ..imagebase
 	DD	$L$SEH_end_aesni_gcm_encrypt_23 wrt ..imagebase
 	DD	$L$SEH_info_aesni_gcm_encrypt_0 wrt ..imagebase
-
 
 section	.xdata rdata align=8
 ALIGN	4

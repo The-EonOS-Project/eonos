@@ -1,19 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdlib.h>
 #include <ctype.h>
 #include <math.h>
@@ -43,10 +27,7 @@
 
 int vanilla_keyboard_mapping = 1;
 
-
-
 static int shiftdown = 0;
-
 
 static const char at_to_doom[] =
 {
@@ -180,8 +161,6 @@ static const char at_to_doom[] =
      KEY_FIRE, 
 };
 
-
-
 static const char shiftxform[] =
 {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
@@ -221,29 +200,15 @@ static const char shiftxform[] =
     '{', '|', '}', '~', 127
 };
 
-
 static unsigned char TranslateKey(unsigned char key)
 {
 	return key;
 
-	
-
-
-
-
-
-
-    
-    
 }
-
-
 
 static unsigned char GetTypedChar(unsigned char key)
 {
     key = TranslateKey(key);
-
-    
 
     if (shiftdown > 0)
     {
@@ -275,24 +240,19 @@ static void UpdateShiftStatus(int pressed, unsigned char key)
     }
 }
 
-
 void I_GetEvent(void)
 {
     event_t event;
     int pressed;
     unsigned char key;
 
-    
 	while (DG_GetKey(&pressed, &key))
     {
         UpdateShiftStatus(pressed, key);
 
-        
-        
         if (pressed)
         {
-            
-            
+
             event.type = ev_keydown;
             event.data1 = TranslateKey(key);
             event.data2 = GetTypedChar(key);
@@ -307,12 +267,6 @@ void I_GetEvent(void)
             event.type = ev_keyup;
             event.data1 = TranslateKey(key);
 
-            
-            
-            
-            
-            
-
             event.data2 = 0;
 
             if (event.data1 != 0)
@@ -322,16 +276,6 @@ void I_GetEvent(void)
             break;
         }
     }
-
-
-                
-
-
-
-
-
-
-
 
 }
 

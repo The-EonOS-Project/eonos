@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use alloc::{boxed::Box, vec::Vec};
 
 pub trait Accumulator {

@@ -1,21 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::Positive;
 use crate::error;
 
@@ -54,7 +36,6 @@ impl From<Tag> for u8 {
     }
 }
 
-
 impl Tag {
     pub const fn into(self) -> u8 {
         self as u8
@@ -80,9 +61,6 @@ pub fn read_tag_and_get_value<'a>(
         return Err(error::Unspecified); 
     }
 
-    
-    
-    
     let length = match input.read_byte()? {
         n if (n & 0x80) == 0 => usize::from(n),
         0x81 => {
@@ -130,8 +108,6 @@ pub(crate) fn bit_string_tagged_with_no_unused_bits<'a>(
     })
 }
 
-
-
 pub fn nested<'a, F, R, E: Copy>(
     input: &mut untrusted::Reader<'a>,
     tag: Tag,
@@ -154,25 +130,23 @@ pub(crate) fn nonnegative_integer<'a>(
         .split_first()
         .ok_or(error::Unspecified)?
     {
-        
+
         (0, rest) => {
             match rest.first() {
-                
+
                 None => Ok(value),
-                
+
                 Some(&second) if second & 0x80 == 0x80 => Ok(untrusted::Input::from(rest)),
-                
+
                 _ => Err(error::Unspecified),
             }
         }
-        
+
         (first, _) if first & 0x80 == 0 => Ok(value),
-        
+
         (_, _) => Err(error::Unspecified),
     }
 }
-
-
 
 #[inline]
 pub fn small_nonnegative_integer(input: &mut untrusted::Reader) -> Result<u8, error::Unspecified> {
@@ -182,8 +156,6 @@ pub fn small_nonnegative_integer(input: &mut untrusted::Reader) -> Result<u8, er
         _ => Err(error::Unspecified),
     }
 }
-
-
 
 pub fn positive_integer<'a>(
     input: &mut untrusted::Reader<'a>,
@@ -211,8 +183,7 @@ mod tests {
         (&[0x02, 0x01, 0x02], 0x02),
         (&[0x02, 0x01, 0x7e], 0x7e),
         (&[0x02, 0x01, 0x7f], 0x7f),
-        
-        
+
         (&[0x02, 0x02, 0x00, 0x80], 0x80),
         (&[0x02, 0x02, 0x00, 0x81], 0x81),
         (&[0x02, 0x02, 0x00, 0xfe], 0xfe),
@@ -224,8 +195,7 @@ mod tests {
         (&[0x02, 0x02, 0x02, 0x01], &[0x02, 0x01]),
         (&[0x02, 0x02, 0x7e, 0xfe], &[0x7e, 0xfe]),
         (&[0x02, 0x02, 0x7f, 0xff], &[0x7f, 0xff]),
-        
-        
+
         (&[0x02, 0x03, 0x00, 0x80, 0x00], &[0x80, 0x00]),
         (&[0x02, 0x03, 0x00, 0x81, 0x01], &[0x81, 0x01]),
         (&[0x02, 0x03, 0x00, 0xfe, 0xfe], &[0xfe, 0xfe]),
@@ -236,19 +206,19 @@ mod tests {
         &[],           
         &[0x02],       
         &[0x02, 0x00], 
-        
+
         &[0x02, 0x00, 0x01],
         &[0x02, 0x01],
-        
+
         &[0x02, 0x01, 0x00, 0x01],
         &[0x02, 0x01, 0x01, 0x00], 
         &[0x02, 0x02, 0x01],
-        
+
         &[0x02, 0x01, 0x80],
         &[0x02, 0x01, 0x81],
         &[0x02, 0x01, 0xfe],
         &[0x02, 0x01, 0xff],
-        
+
         &[0x02, 0x02, 0x00, 0x00],
         &[0x02, 0x02, 0x00, 0x01],
         &[0x02, 0x02, 0x00, 0x02],

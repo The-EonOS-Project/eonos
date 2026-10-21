@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![cfg(target_arch = "x86_64")]
 
 use super::super::super::{
@@ -77,9 +63,7 @@ pub(in super::super::super) fn sqr_mont5(
     maybe_adx_bmi2: Option<(Adx, Bmi2)>,
 ) -> Result<(), LimbSliceError> {
     prefixed_extern! {
-        
-        
-        
+
         fn bn_sqr8x_mont(
             rp: *mut Limb,
             ap: *const Limb,
@@ -93,12 +77,10 @@ pub(in super::super::super) fn sqr_mont5(
     let n = n.as_flattened();
     let num_limbs = NonZeroUsize::new(n.len()).ok_or_else(|| LimbSliceError::too_short(n.len()))?;
 
-    
     if num_limbs.get() > MAX_LIMBS {
         return Err(LimbSliceError::too_long(num_limbs.get()));
     }
 
-    
     let mulx_adx_capable = match maybe_adx_bmi2 {
         Some(_) => Limb::from(true),
         None => Limb::from(false),
@@ -119,8 +101,7 @@ pub(in super::super::super) fn scatter5(
     power: LeakyWindow,
 ) -> Result<(), LimbSliceError> {
     prefixed_extern! {
-        
-        
+
         fn bn_scatter5(
             inp: *const Limb,
             num: c::NonZero_size_t,
@@ -136,7 +117,6 @@ pub(in super::super::super) fn scatter5(
     Ok(())
 }
 
-
 #[inline(always)]
 pub(in super::super::super) unsafe fn gather5(
     mut r: AsChunksMut<Limb, 8>,
@@ -144,8 +124,7 @@ pub(in super::super::super) unsafe fn gather5(
     power: Window,
 ) -> Result<(), LimbSliceError> {
     prefixed_extern! {
-        
-        
+
         fn bn_gather5(
             out: *mut Limb,
             num: c::NonZero_size_t,
@@ -155,12 +134,10 @@ pub(in super::super::super) unsafe fn gather5(
     let num_limbs = check_common(r.as_ref(), table)?;
     let r = r.as_flattened_mut();
     let table = table.as_flattened();
-    
-    
+
     unsafe { bn_gather5(r.as_mut_ptr(), num_limbs, table.as_ptr(), power) };
     Ok(())
 }
-
 
 #[inline(always)]
 pub(in super::super::super) unsafe fn mul_mont_gather5_amm(
@@ -173,8 +150,7 @@ pub(in super::super::super) unsafe fn mul_mont_gather5_amm(
     maybe_adx_bmi1_bmi2: Option<(Adx, Bmi1, Bmi2)>,
 ) -> Result<(), LimbSliceError> {
     prefixed_extern! {
-        
-        
+
         fn bn_mul4x_mont_gather5(
             rp: *mut Limb,
             ap: *const Limb,
@@ -184,8 +160,7 @@ pub(in super::super::super) unsafe fn mul_mont_gather5_amm(
             num: c::NonZero_size_t,
             power: Window,
         );
-        
-        
+
         fn bn_mulx4x_mont_gather5(
             rp: *mut Limb,
             ap: *const Limb,
@@ -208,8 +183,7 @@ pub(in super::super::super) unsafe fn mul_mont_gather5_amm(
     let table = table.as_ptr();
     let n = n.as_flattened();
     let n = n.as_ptr();
-    
-    
+
     if maybe_adx_bmi1_bmi2.is_some() {
         unsafe { bn_mulx4x_mont_gather5(r, a, table, n, n0, num_limbs, power) }
     } else {
@@ -217,7 +191,6 @@ pub(in super::super::super) unsafe fn mul_mont_gather5_amm(
     };
     Ok(())
 }
-
 
 #[inline(always)]
 pub(in super::super::super) unsafe fn power5_amm(
@@ -229,8 +202,7 @@ pub(in super::super::super) unsafe fn power5_amm(
     maybe_adx_bmi1_bmi2: Option<(Adx, Bmi1, Bmi2)>,
 ) -> Result<(), LimbSliceError> {
     prefixed_extern! {
-        
-        
+
         fn bn_power5_nohw(
             rp: *mut Limb,
             ap: *const Limb,
@@ -240,8 +212,7 @@ pub(in super::super::super) unsafe fn power5_amm(
             num: c::NonZero_size_t,
             power: Window,
         );
-        
-        
+
         fn bn_powerx5(
             rp: *mut Limb,
             ap: *const Limb,
@@ -260,8 +231,7 @@ pub(in super::super::super) unsafe fn power5_amm(
     let table = table.as_ptr();
     let n = n.as_flattened();
     let n = n.as_ptr();
-    
-    
+
     if maybe_adx_bmi1_bmi2.is_some() {
         unsafe { bn_powerx5(r, a, table, n, n0, num_limbs, power) }
     } else {
@@ -269,10 +239,6 @@ pub(in super::super::super) unsafe fn power5_amm(
     };
     Ok(())
 }
-
-
-
-
 
 #[inline(always)]
 fn check_common(
@@ -300,9 +266,7 @@ fn check_common_with_n(
     table: AsChunks<Limb, 8>,
     n: AsChunks<Limb, 8>,
 ) -> Result<NonZeroUsize, LimbSliceError> {
-    
-    
-    
+
     let num_limbs = check_common(a, table)?;
     let n = n.as_flattened();
     if n.len() != num_limbs.get() {

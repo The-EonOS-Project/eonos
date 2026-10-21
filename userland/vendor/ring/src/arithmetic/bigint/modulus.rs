@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{
     super::montgomery::Unencoded, unwrap_impossible_len_mismatch_error, BoxedLimbs, Elem,
     OwnedModulusValue, PublicModulus, Storage, N0,
@@ -24,48 +10,9 @@ use crate::{
 };
 use core::marker::PhantomData;
 
-
-
-
-
 pub struct OwnedModulus<M> {
     inner: OwnedModulusValue<M>,
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     n0: N0,
 }
 
@@ -80,20 +27,17 @@ impl<M: PublicModulus> Clone for OwnedModulus<M> {
 
 impl<M> OwnedModulus<M> {
     pub(crate) fn from(n: OwnedModulusValue<M>) -> Self {
-        
-        
+
         #[allow(clippy::useless_conversion)]
         let n0 = {
             prefixed_extern! {
                 fn bn_neg_inv_mod_r_u64(n: u64) -> u64;
             }
 
-            
             let mut n_mod_r: u64 = u64::from(n.limbs()[0]);
 
             if N0::LIMBS_USED == 2 {
-                
-                
+
                 debug_assert_eq!(LIMB_BITS, 32);
                 n_mod_r |= u64::from(n.limbs()[1]) << 32;
             }
@@ -148,33 +92,24 @@ impl<M> Modulus<'_, M> {
 
         let r = self.limbs.len() * LIMB_BITS;
 
-        
         limb::limbs_negative_odd(out, self.limbs);
 
         let lg_m = self.len_bits().as_bits();
         let leading_zero_bits_in_m = r - lg_m;
 
-        
-        
-        
         if leading_zero_bits_in_m != 0 {
             debug_assert!(leading_zero_bits_in_m < LIMB_BITS);
-            
-            
+
             *out.last_mut().unwrap() &= (!0) >> leading_zero_bits_in_m;
 
-            
-            
             for _ in 0..leading_zero_bits_in_m {
                 limb::limbs_double_mod(out, self.limbs)
                     .unwrap_or_else(unwrap_impossible_len_mismatch_error);
             }
         }
 
-        
     }
 
-    
     pub fn alloc_zero(&self) -> Storage<M> {
         Storage {
             limbs: BoxedLimbs::zero(self.limbs.len()),

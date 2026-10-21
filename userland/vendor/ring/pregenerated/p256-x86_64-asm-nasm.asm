@@ -1,6 +1,3 @@
-
-
-
 %ifidn __OUTPUT_FORMAT__, win64
 default	rel
 %define XMMWORD
@@ -10,8 +7,6 @@ default	rel
 
 %include "ring_core_generated/prefix_symbols_nasm.inc"
 section	.text code align=64
-
-
 
 section	.rdata rdata align=8
 ALIGN	64
@@ -27,15 +22,11 @@ $L$Three:
 $L$ONE_mont:
 	DQ	0x0000000000000001,0xffffffff00000000,0xffffffffffffffff,0x00000000fffffffe
 
-
 $L$ord:
 	DQ	0xf3b9cac2fc632551,0xbce6faada7179e84,0xffffffffffffffff,0xffffffff00000000
 $L$ordK:
 	DQ	0xccd1c8aaee00bc4f
 section	.text
-
-
-
 
 global	ecp_nistz256_neg
 
@@ -47,8 +38,6 @@ ecp_nistz256_neg:
 $L$SEH_begin_ecp_nistz256_neg:
 	mov	rdi,rcx
 	mov	rsi,rdx
-
-
 
 _CET_ENDBR
 	push	r12
@@ -102,11 +91,6 @@ $L$neg_epilogue:
 
 $L$SEH_end_ecp_nistz256_neg:
 
-
-
-
-
-
 global	ecp_nistz256_ord_mul_mont_nohw
 
 ALIGN	32
@@ -118,8 +102,6 @@ $L$SEH_begin_ecp_nistz256_ord_mul_mont_nohw:
 	mov	rdi,rcx
 	mov	rsi,rdx
 	mov	rdx,r8
-
-
 
 _CET_ENDBR
 	push	rbp
@@ -140,7 +122,6 @@ $L$ord_mul_body:
 	mov	rbx,rdx
 	lea	r14,[$L$ord]
 	mov	r15,QWORD[$L$ordK]
-
 
 	mov	rcx,rax
 	mul	QWORD[rsi]
@@ -168,7 +149,6 @@ $L$ord_mul_body:
 	mov	rax,r8
 	adc	rdx,0
 	mov	r12,rdx
-
 
 	mul	QWORD[r14]
 	mov	rbp,r8
@@ -198,7 +178,6 @@ $L$ord_mul_body:
 	add	r11,r8
 	adc	r12,rbp
 	adc	r13,0
-
 
 	mov	rcx,rax
 	mul	QWORD[rsi]
@@ -235,7 +214,6 @@ $L$ord_mul_body:
 	adc	r13,rdx
 	adc	r8,0
 
-
 	mul	QWORD[r14]
 	mov	rbp,r9
 	add	rcx,rax
@@ -263,7 +241,6 @@ $L$ord_mul_body:
 	add	r12,r9
 	adc	r13,rbp
 	adc	r8,0
-
 
 	mov	rcx,rax
 	mul	QWORD[rsi]
@@ -300,7 +277,6 @@ $L$ord_mul_body:
 	adc	r8,rdx
 	adc	r9,0
 
-
 	mul	QWORD[r14]
 	mov	rbp,r10
 	add	rcx,rax
@@ -328,7 +304,6 @@ $L$ord_mul_body:
 	add	r13,r10
 	adc	r8,rbp
 	adc	r9,0
-
 
 	mov	rcx,rax
 	mul	QWORD[rsi]
@@ -365,7 +340,6 @@ $L$ord_mul_body:
 	adc	r9,rdx
 	adc	r10,0
 
-
 	mul	QWORD[r14]
 	mov	rbp,r11
 	add	rcx,rax
@@ -392,7 +366,6 @@ $L$ord_mul_body:
 	add	r8,r11
 	adc	r9,rbp
 	adc	r10,0
-
 
 	mov	rsi,r12
 	sub	r12,QWORD[r14]
@@ -435,12 +408,6 @@ $L$ord_mul_epilogue:
 
 $L$SEH_end_ecp_nistz256_ord_mul_mont_nohw:
 
-
-
-
-
-
-
 global	ecp_nistz256_ord_sqr_mont_nohw
 
 ALIGN	32
@@ -452,8 +419,6 @@ $L$SEH_begin_ecp_nistz256_ord_sqr_mont_nohw:
 	mov	rdi,rcx
 	mov	rsi,rdx
 	mov	rdx,r8
-
-
 
 _CET_ENDBR
 	push	rbp
@@ -502,12 +467,10 @@ DB	102,73,15,110,223
 	adc	rdx,0
 	mov	r12,rdx
 
-
 	mul	r14
 	mov	r13,rax
 	mov	rax,r14
 	mov	r14,rdx
-
 
 	mul	rbp
 	add	r11,rax
@@ -523,7 +486,6 @@ DB	102,73,15,110,223
 	adc	r13,rdx
 	adc	r14,0
 
-
 	xor	r15,r15
 	mov	rax,r8
 	add	r9,r9
@@ -533,7 +495,6 @@ DB	102,73,15,110,223
 	adc	r13,r13
 	adc	r14,r14
 	adc	r15,0
-
 
 	mul	rax
 	mov	r8,rax
@@ -562,7 +523,6 @@ DB	102,72,15,126,216
 	adc	r14,rax
 	mov	rax,QWORD[rsi]
 	adc	r15,rdx
-
 
 	mul	r8
 	mov	rbp,r8
@@ -594,7 +554,6 @@ DB	102,72,15,126,216
 	add	r11,rbp
 	adc	r8,0
 
-
 	mul	r9
 	mov	rbp,r9
 	add	rcx,rax
@@ -624,7 +583,6 @@ DB	102,72,15,126,216
 
 	add	r8,rbp
 	adc	r9,0
-
 
 	mul	r10
 	mov	rbp,r10
@@ -656,7 +614,6 @@ DB	102,72,15,126,216
 	add	r9,rbp
 	adc	r10,0
 
-
 	mul	r11
 	mov	rbp,r11
 	add	rcx,rax
@@ -683,7 +640,6 @@ DB	102,72,15,126,216
 	add	r10,rbp
 	adc	r11,0
 
-
 	xor	rdx,rdx
 	add	r8,r12
 	adc	r9,r13
@@ -692,7 +648,6 @@ DB	102,72,15,126,216
 	adc	r11,r15
 	mov	rax,r9
 	adc	rdx,0
-
 
 	sub	r8,QWORD[rsi]
 	mov	r14,r10
@@ -751,8 +706,6 @@ $L$SEH_begin_ecp_nistz256_ord_mul_mont_adx:
 	mov	rsi,rdx
 	mov	rdx,r8
 
-
-
 $L$ecp_nistz256_ord_mul_mont_adx:
 _CET_ENDBR
 	push	rbp
@@ -779,7 +732,6 @@ $L$ord_mulx_body:
 	lea	r14,[(($L$ord-128))]
 	mov	r15,QWORD[$L$ordK]
 
-
 	mulx	r9,r8,r9
 	mulx	r10,rcx,r10
 	mulx	r11,rbp,r11
@@ -790,7 +742,6 @@ $L$ord_mulx_body:
 	adc	r10,rbp
 	adc	r11,rcx
 	adc	r12,0
-
 
 	xor	r13,r13
 	mulx	rbp,rcx,QWORD[((0+128))+r14]
@@ -812,7 +763,6 @@ $L$ord_mulx_body:
 	adcx	r12,r8
 	adox	r13,r8
 	adc	r13,0
-
 
 	mulx	rbp,rcx,QWORD[((0+128))+rsi]
 	adcx	r9,rcx
@@ -836,7 +786,6 @@ $L$ord_mulx_body:
 	adox	r8,r8
 	adc	r8,0
 
-
 	mulx	rbp,rcx,QWORD[((0+128))+r14]
 	adcx	r9,rcx
 	adox	r10,rbp
@@ -856,7 +805,6 @@ $L$ord_mulx_body:
 	adcx	r13,r9
 	adox	r8,r9
 	adc	r8,0
-
 
 	mulx	rbp,rcx,QWORD[((0+128))+rsi]
 	adcx	r10,rcx
@@ -880,7 +828,6 @@ $L$ord_mulx_body:
 	adox	r9,r9
 	adc	r9,0
 
-
 	mulx	rbp,rcx,QWORD[((0+128))+r14]
 	adcx	r10,rcx
 	adox	r11,rbp
@@ -900,7 +847,6 @@ $L$ord_mulx_body:
 	adcx	r8,r10
 	adox	r9,r10
 	adc	r9,0
-
 
 	mulx	rbp,rcx,QWORD[((0+128))+rsi]
 	adcx	r11,rcx
@@ -924,7 +870,6 @@ $L$ord_mulx_body:
 	adox	r10,r10
 	adc	r10,0
 
-
 	mulx	rbp,rcx,QWORD[((0+128))+r14]
 	adcx	r11,rcx
 	adox	r12,rbp
@@ -946,8 +891,6 @@ $L$ord_mulx_body:
 	adcx	r9,r11
 	adox	r10,r11
 	adc	r10,0
-
-
 
 	mov	rcx,r8
 	sub	r12,QWORD[r14]
@@ -999,8 +942,6 @@ $L$SEH_begin_ecp_nistz256_ord_sqr_mont_adx:
 	mov	rdi,rcx
 	mov	rsi,rdx
 	mov	rdx,r8
-
-
 
 _CET_ENDBR
 $L$ecp_nistz256_ord_sqr_mont_adx:
@@ -1059,7 +1000,6 @@ DB	102,73,15,110,216
 	adcx	r10,r10
 	adox	r14,r15
 
-
 	mulx	rbp,r8,rdx
 DB	102,72,15,126,202
 	adcx	r11,r11
@@ -1081,7 +1021,6 @@ DB	102,72,15,126,218
 	adox	r14,rcx
 	adox	r15,rax
 
-
 	mov	rdx,r8
 	mulx	rcx,rdx,QWORD[32+rsi]
 
@@ -1100,7 +1039,6 @@ DB	102,72,15,126,218
 	adox	r8,rbp
 	adcx	r8,rax
 
-
 	mov	rdx,r9
 	mulx	rcx,rdx,QWORD[32+rsi]
 
@@ -1117,7 +1055,6 @@ DB	102,72,15,126,218
 	adox	r8,rcx
 	adcx	r9,rbp
 	adox	r9,rax
-
 
 	mov	rdx,r10
 	mulx	rcx,rdx,QWORD[32+rsi]
@@ -1136,7 +1073,6 @@ DB	102,72,15,126,218
 	adox	r10,rbp
 	adcx	r10,rax
 
-
 	mov	rdx,r11
 	mulx	rcx,rdx,QWORD[32+rsi]
 
@@ -1154,7 +1090,6 @@ DB	102,72,15,126,218
 	adcx	r11,rbp
 	adox	r11,rax
 
-
 	add	r12,r8
 	adc	r9,r13
 	mov	rdx,r12
@@ -1162,7 +1097,6 @@ DB	102,72,15,126,218
 	adc	r11,r15
 	mov	r14,r9
 	adc	rax,0
-
 
 	sub	r12,QWORD[rsi]
 	mov	r15,r10
@@ -1209,11 +1143,6 @@ $L$ord_sqrx_epilogue:
 
 $L$SEH_end_ecp_nistz256_ord_sqr_mont_adx:
 
-
-
-
-
-
 global	ecp_nistz256_mul_mont_nohw
 
 ALIGN	32
@@ -1225,8 +1154,6 @@ $L$SEH_begin_ecp_nistz256_mul_mont_nohw:
 	mov	rdi,rcx
 	mov	rsi,rdx
 	mov	rdx,r8
-
-
 
 _CET_ENDBR
 	push	rbp
@@ -1272,11 +1199,8 @@ $L$mul_epilogue:
 
 $L$SEH_end_ecp_nistz256_mul_mont_nohw:
 
-
 ALIGN	32
 __ecp_nistz256_mul_montq:
-
-
 
 	mov	rbp,rax
 	mul	r9
@@ -1305,15 +1229,6 @@ __ecp_nistz256_mul_montq:
 	xor	r13,r13
 	mov	r12,rdx
 
-
-
-
-
-
-
-
-
-
 	mov	rbp,r8
 	shl	r8,32
 	mul	r15
@@ -1325,8 +1240,6 @@ __ecp_nistz256_mul_montq:
 	adc	r12,rdx
 	adc	r13,0
 	xor	r8,r8
-
-
 
 	mov	rbp,rax
 	mul	QWORD[rsi]
@@ -1359,8 +1272,6 @@ __ecp_nistz256_mul_montq:
 	adc	r13,rdx
 	adc	r8,0
 
-
-
 	mov	rbp,r9
 	shl	r9,32
 	mul	r15
@@ -1372,8 +1283,6 @@ __ecp_nistz256_mul_montq:
 	adc	r13,rdx
 	adc	r8,0
 	xor	r9,r9
-
-
 
 	mov	rbp,rax
 	mul	QWORD[rsi]
@@ -1406,8 +1315,6 @@ __ecp_nistz256_mul_montq:
 	adc	r8,rdx
 	adc	r9,0
 
-
-
 	mov	rbp,r10
 	shl	r10,32
 	mul	r15
@@ -1419,8 +1326,6 @@ __ecp_nistz256_mul_montq:
 	adc	r8,rdx
 	adc	r9,0
 	xor	r10,r10
-
-
 
 	mov	rbp,rax
 	mul	QWORD[rsi]
@@ -1453,8 +1358,6 @@ __ecp_nistz256_mul_montq:
 	adc	r9,rdx
 	adc	r10,0
 
-
-
 	mov	rbp,r11
 	shl	r11,32
 	mul	r15
@@ -1466,8 +1369,6 @@ __ecp_nistz256_mul_montq:
 	adc	r9,rdx
 	mov	rbp,r13
 	adc	r10,0
-
-
 
 	sub	r12,-1
 	mov	rbx,r8
@@ -1488,15 +1389,6 @@ __ecp_nistz256_mul_montq:
 
 	ret
 
-
-
-
-
-
-
-
-
-
 global	ecp_nistz256_sqr_mont_nohw
 
 ALIGN	32
@@ -1507,8 +1399,6 @@ ecp_nistz256_sqr_mont_nohw:
 $L$SEH_begin_ecp_nistz256_sqr_mont_nohw:
 	mov	rdi,rcx
 	mov	rsi,rdx
-
-
 
 _CET_ENDBR
 	push	rbp
@@ -1552,7 +1442,6 @@ $L$sqr_epilogue:
 
 $L$SEH_end_ecp_nistz256_sqr_mont_nohw:
 
-
 ALIGN	32
 __ecp_nistz256_sqr_montq:
 
@@ -1574,7 +1463,6 @@ __ecp_nistz256_sqr_montq:
 	adc	rdx,0
 	mov	r12,rdx
 
-
 	mul	r14
 	add	r11,rax
 	mov	rax,r8
@@ -1588,7 +1476,6 @@ __ecp_nistz256_sqr_montq:
 	add	r12,rbp
 	mov	r13,rdx
 	adc	r13,0
-
 
 	mul	r15
 	xor	r15,r15
@@ -1633,9 +1520,6 @@ __ecp_nistz256_sqr_montq:
 	mov	rsi,QWORD[(($L$poly+8))]
 	mov	rbp,QWORD[(($L$poly+24))]
 
-
-
-
 	mov	rcx,r8
 	shl	r8,32
 	mul	rbp
@@ -1645,8 +1529,6 @@ __ecp_nistz256_sqr_montq:
 	adc	r11,rax
 	mov	rax,r9
 	adc	rdx,0
-
-
 
 	mov	rcx,r9
 	shl	r9,32
@@ -1659,8 +1541,6 @@ __ecp_nistz256_sqr_montq:
 	mov	rax,r10
 	adc	rdx,0
 
-
-
 	mov	rcx,r10
 	shl	r10,32
 	mov	r9,rdx
@@ -1672,8 +1552,6 @@ __ecp_nistz256_sqr_montq:
 	mov	rax,r11
 	adc	rdx,0
 
-
-
 	mov	rcx,r11
 	shl	r11,32
 	mov	r10,rdx
@@ -1684,8 +1562,6 @@ __ecp_nistz256_sqr_montq:
 	adc	r10,rax
 	adc	rdx,0
 	xor	r11,r11
-
-
 
 	add	r12,r8
 	adc	r13,r9
@@ -1714,7 +1590,6 @@ __ecp_nistz256_sqr_montq:
 
 	ret
 
-
 global	ecp_nistz256_mul_mont_adx
 
 ALIGN	32
@@ -1726,8 +1601,6 @@ $L$SEH_begin_ecp_nistz256_mul_mont_adx:
 	mov	rdi,rcx
 	mov	rsi,rdx
 	mov	rdx,r8
-
-
 
 _CET_ENDBR
 	push	rbp
@@ -1774,11 +1647,8 @@ $L$mulx_epilogue:
 
 $L$SEH_end_ecp_nistz256_mul_mont_adx:
 
-
 ALIGN	32
 __ecp_nistz256_mul_montx:
-
-
 
 	mulx	r9,r8,r9
 	mulx	r10,rcx,r10
@@ -1795,8 +1665,6 @@ __ecp_nistz256_mul_montx:
 	shrx	rcx,r8,r14
 	adc	r12,0
 
-
-
 	add	r9,rbp
 	adc	r10,rcx
 
@@ -1806,8 +1674,6 @@ __ecp_nistz256_mul_montx:
 	adc	r12,rbp
 	adc	r13,0
 	xor	r8,r8
-
-
 
 	mulx	rbp,rcx,QWORD[((0+128))+rsi]
 	adcx	r9,rcx
@@ -1832,8 +1698,6 @@ __ecp_nistz256_mul_montx:
 	adox	r8,r8
 	adc	r8,0
 
-
-
 	add	r10,rcx
 	adc	r11,rbp
 
@@ -1843,8 +1707,6 @@ __ecp_nistz256_mul_montx:
 	adc	r13,rbp
 	adc	r8,0
 	xor	r9,r9
-
-
 
 	mulx	rbp,rcx,QWORD[((0+128))+rsi]
 	adcx	r10,rcx
@@ -1869,8 +1731,6 @@ __ecp_nistz256_mul_montx:
 	adox	r9,r9
 	adc	r9,0
 
-
-
 	add	r11,rcx
 	adc	r12,rbp
 
@@ -1880,8 +1740,6 @@ __ecp_nistz256_mul_montx:
 	adc	r8,rbp
 	adc	r9,0
 	xor	r10,r10
-
-
 
 	mulx	rbp,rcx,QWORD[((0+128))+rsi]
 	adcx	r11,rcx
@@ -1906,8 +1764,6 @@ __ecp_nistz256_mul_montx:
 	adox	r10,r10
 	adc	r10,0
 
-
-
 	add	r12,rcx
 	adc	r13,rbp
 
@@ -1918,8 +1774,6 @@ __ecp_nistz256_mul_montx:
 	mov	rdx,r13
 	adc	r9,rbp
 	adc	r10,0
-
-
 
 	xor	eax,eax
 	mov	rcx,r8
@@ -1941,8 +1795,6 @@ __ecp_nistz256_mul_montx:
 
 	ret
 
-
-
 global	ecp_nistz256_sqr_mont_adx
 
 ALIGN	32
@@ -1953,8 +1805,6 @@ ecp_nistz256_sqr_mont_adx:
 $L$SEH_begin_ecp_nistz256_sqr_mont_adx:
 	mov	rdi,rcx
 	mov	rsi,rdx
-
-
 
 _CET_ENDBR
 	push	rbp
@@ -1999,7 +1849,6 @@ $L$sqrx_epilogue:
 
 $L$SEH_end_ecp_nistz256_sqr_mont_adx:
 
-
 ALIGN	32
 __ecp_nistz256_sqr_montx:
 
@@ -2013,7 +1862,6 @@ __ecp_nistz256_sqr_montx:
 	adc	r12,0
 	xor	r13,r13
 
-
 	mulx	rbp,rcx,r15
 	adcx	r11,rcx
 	adox	r12,rbp
@@ -2023,7 +1871,6 @@ __ecp_nistz256_sqr_montx:
 	adcx	r12,rcx
 	adox	r13,rbp
 	adc	r13,0
-
 
 	mulx	r14,rcx,r8
 	mov	rdx,QWORD[((0+128))+rsi]
@@ -2060,7 +1907,6 @@ __ecp_nistz256_sqr_montx:
 	shrx	rax,r8,rsi
 	mov	rbp,rdx
 
-
 	add	r9,rcx
 	adc	r10,rax
 
@@ -2069,7 +1915,6 @@ __ecp_nistz256_sqr_montx:
 	shlx	rcx,r9,rsi
 	adc	r8,0
 	shrx	rax,r9,rsi
-
 
 	add	r10,rcx
 	adc	r11,rax
@@ -2080,7 +1925,6 @@ __ecp_nistz256_sqr_montx:
 	adc	r9,0
 	shrx	rax,r10,rsi
 
-
 	add	r11,rcx
 	adc	r8,rax
 
@@ -2089,7 +1933,6 @@ __ecp_nistz256_sqr_montx:
 	shlx	rcx,r11,rsi
 	adc	r10,0
 	shrx	rax,r11,rsi
-
 
 	add	r8,rcx
 	adc	r9,rax
@@ -2126,9 +1969,6 @@ __ecp_nistz256_sqr_montx:
 	mov	QWORD[24+rdi],r15
 
 	ret
-
-
-
 
 global	ecp_nistz256_select_w5_nohw
 
@@ -2214,9 +2054,6 @@ $L$select_loop_sse_w5:
 
 $L$SEH_end_ecp_nistz256_select_w5_nohw:
 
-
-
-
 global	ecp_nistz256_select_w7_nohw
 
 ALIGN	32
@@ -2289,8 +2126,6 @@ $L$select_loop_sse_w7:
 	ret
 
 $L$SEH_end_ecp_nistz256_select_w7_nohw:
-
-
 
 global	ecp_nistz256_select_w5_avx2
 
@@ -2379,9 +2214,6 @@ $L$select_loop_avx2_w5:
 
 $L$SEH_end_ecp_nistz256_select_w5_avx2:
 
-
-
-
 global	ecp_nistz256_select_w7_avx2
 
 ALIGN	32
@@ -2414,7 +2246,6 @@ $L$SEH_begin_ecp_nistz256_select_w7_avx2:
 
 	vmovd	xmm1,r8d
 	vpermd	ymm1,ymm2,ymm1
-
 
 	mov	rax,21
 $L$select_loop_avx2_w7:
@@ -2454,7 +2285,6 @@ $L$select_loop_avx2_w7:
 	dec	rax
 	jnz	NEAR $L$select_loop_avx2_w7
 
-
 	vmovdqa	ymm5,YMMWORD[rdx]
 	vmovdqa	ymm6,YMMWORD[32+rdx]
 
@@ -2483,7 +2313,6 @@ $L$select_loop_avx2_w7:
 	ret
 
 $L$SEH_end_ecp_nistz256_select_w7_avx2:
-
 
 ALIGN	32
 __ecp_nistz256_add_toq:
@@ -2516,9 +2345,6 @@ __ecp_nistz256_add_toq:
 
 	ret
 
-
-
-
 ALIGN	32
 __ecp_nistz256_sub_fromq:
 
@@ -2549,9 +2375,6 @@ __ecp_nistz256_sub_fromq:
 
 	ret
 
-
-
-
 ALIGN	32
 __ecp_nistz256_subq:
 
@@ -2577,9 +2400,6 @@ __ecp_nistz256_subq:
 	cmovnz	r9,r10
 
 	ret
-
-
-
 
 ALIGN	32
 __ecp_nistz256_mul_by_2q:
@@ -2612,7 +2432,6 @@ __ecp_nistz256_mul_by_2q:
 
 	ret
 
-
 global	ecp_nistz256_point_double_nohw
 
 ALIGN	32
@@ -2623,8 +2442,6 @@ ecp_nistz256_point_double_nohw:
 $L$SEH_begin_ecp_nistz256_point_double_nohw:
 	mov	rdi,rcx
 	mov	rsi,rdx
-
-
 
 _CET_ENDBR
 	push	rbp
@@ -2858,8 +2675,6 @@ $L$SEH_begin_ecp_nistz256_point_add_nohw:
 	mov	rsi,rdx
 	mov	rdx,r8
 
-
-
 _CET_ENDBR
 	push	rbp
 
@@ -3027,15 +2842,8 @@ DB	102,73,15,126,217
 	DB	0x3e
 	jnz	NEAR $L$add_proceedq
 
-
-
 	test	r9,r9
 	jz	NEAR $L$add_doubleq
-
-
-
-
-
 
 DB	102,72,15,126,199
 	pxor	xmm0,xmm0
@@ -3054,7 +2862,6 @@ DB	102,72,15,126,199
 	add	rsp,416
 
 	jmp	NEAR $L$point_double_shortcutq
-
 
 ALIGN	32
 $L$add_proceedq:
@@ -3113,9 +2920,6 @@ $L$add_proceedq:
 	mov	r12,QWORD[((24+32))+rsp]
 	lea	rdi,[192+rsp]
 	call	__ecp_nistz256_mul_montq
-
-
-
 
 	xor	r11,r11
 	add	r12,r12
@@ -3295,8 +3099,6 @@ $L$SEH_begin_ecp_nistz256_point_add_affine_nohw:
 	mov	rsi,rdx
 	mov	rdx,r8
 
-
-
 _CET_ENDBR
 	push	rbp
 
@@ -3448,9 +3250,6 @@ DB	102,72,15,110,199
 	mov	r12,QWORD[((24+128))+rsp]
 	lea	rdi,[rsp]
 	call	__ecp_nistz256_mul_montq
-
-
-
 
 	xor	r11,r11
 	add	r12,r12
@@ -3650,9 +3449,6 @@ __ecp_nistz256_add_tox:
 
 	ret
 
-
-
-
 ALIGN	32
 __ecp_nistz256_sub_fromx:
 
@@ -3685,9 +3481,6 @@ __ecp_nistz256_sub_fromx:
 
 	ret
 
-
-
-
 ALIGN	32
 __ecp_nistz256_subx:
 
@@ -3715,9 +3508,6 @@ __ecp_nistz256_subx:
 	cmovc	r9,r10
 
 	ret
-
-
-
 
 ALIGN	32
 __ecp_nistz256_mul_by_2x:
@@ -3751,7 +3541,6 @@ __ecp_nistz256_mul_by_2x:
 
 	ret
 
-
 global	ecp_nistz256_point_double_adx
 
 ALIGN	32
@@ -3762,8 +3551,6 @@ ecp_nistz256_point_double_adx:
 $L$SEH_begin_ecp_nistz256_point_double_adx:
 	mov	rdi,rcx
 	mov	rsi,rdx
-
-
 
 _CET_ENDBR
 	push	rbp
@@ -3997,8 +3784,6 @@ $L$SEH_begin_ecp_nistz256_point_add_adx:
 	mov	rsi,rdx
 	mov	rdx,r8
 
-
-
 _CET_ENDBR
 	push	rbp
 
@@ -4166,15 +3951,8 @@ DB	102,73,15,126,217
 	DB	0x3e
 	jnz	NEAR $L$add_proceedx
 
-
-
 	test	r9,r9
 	jz	NEAR $L$add_doublex
-
-
-
-
-
 
 DB	102,72,15,126,199
 	pxor	xmm0,xmm0
@@ -4193,7 +3971,6 @@ DB	102,72,15,126,199
 	add	rsp,416
 
 	jmp	NEAR $L$point_double_shortcutx
-
 
 ALIGN	32
 $L$add_proceedx:
@@ -4252,9 +4029,6 @@ $L$add_proceedx:
 	mov	r12,QWORD[((24+32))+rsp]
 	lea	rdi,[192+rsp]
 	call	__ecp_nistz256_mul_montx
-
-
-
 
 	xor	r11,r11
 	add	r12,r12
@@ -4434,8 +4208,6 @@ $L$SEH_begin_ecp_nistz256_point_add_affine_adx:
 	mov	rsi,rdx
 	mov	rdx,r8
 
-
-
 _CET_ENDBR
 	push	rbp
 
@@ -4587,9 +4359,6 @@ DB	102,72,15,110,199
 	mov	r12,QWORD[((24+128))+rsp]
 	lea	rdi,[rsp]
 	call	__ecp_nistz256_mul_montx
-
-
-
 
 	xor	r11,r11
 	add	r12,r12
@@ -4758,7 +4527,6 @@ $L$add_affinex_epilogue:
 $L$SEH_end_ecp_nistz256_point_add_affine_adx:
 EXTERN	__imp_RtlVirtualUnwind
 
-
 ALIGN	16
 short_handler:
 	push	rsi
@@ -4798,8 +4566,6 @@ short_handler:
 	mov	QWORD[224+r8],r13
 
 	jmp	NEAR $L$common_seh_tail
-
-
 
 ALIGN	16
 full_handler:
@@ -4886,7 +4652,6 @@ $L$common_seh_tail:
 	pop	rdi
 	pop	rsi
 	ret
-
 
 section	.pdata rdata align=4
 ALIGN	4

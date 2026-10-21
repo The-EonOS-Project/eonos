@@ -1,22 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 pub const fn unwrap_const<T>(x: Option<T>) -> T
 where
     T: Copy,

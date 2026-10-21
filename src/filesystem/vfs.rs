@@ -1,6 +1,3 @@
-
-
-
 #![allow(dead_code)]
 
 use alloc::string::{String, ToString};
@@ -55,7 +52,6 @@ fn normalize(path: &str) -> Result<String, FsError> {
     Ok(out)
 }
 
-
 pub fn resolve_path(path: &str, cwd: &str) -> Result<String, FsError> {
     if path.starts_with('/') {
         normalize(path)
@@ -91,7 +87,6 @@ fn route<'m, 'p>(mounts: &'m [Mount], path: &'p str) -> Option<(&'m Mount, &'p s
         .max_by_key(|(m, _)| m.prefix.len())
 }
 
-
 pub fn init() {
     let mut mounts = MOUNTS.lock();
     mounts.clear();
@@ -102,11 +97,9 @@ pub fn init() {
     });
 }
 
-
 pub fn mount_fat32(prefix: &str, device: &'static dyn BlockDevice) -> Result<(), FsError> {
     mount_fat32_inner(prefix, None, device)
 }
-
 
 pub fn mount_fat32_device(
     prefix: &str,
@@ -144,7 +137,6 @@ fn mount_fat32_inner(
     Ok(())
 }
 
-
 pub fn mountpoint_for_device(device_name: &str) -> Option<String> {
     MOUNTS
         .lock()
@@ -152,7 +144,6 @@ pub fn mountpoint_for_device(device_name: &str) -> Option<String> {
         .find(|mount| mount.source_device.as_deref() == Some(device_name))
         .map(|mount| mount.prefix.clone())
 }
-
 
 pub fn mount_listing() -> String {
     use core::fmt::Write;
@@ -170,14 +161,12 @@ pub fn mount_listing() -> String {
     output
 }
 
-
 pub fn is_writable_mountpoint(prefix: &str) -> bool {
     let Ok(prefix) = normalize(prefix) else { return false; };
     MOUNTS.lock().iter().any(|mount| {
         mount.prefix == prefix && matches!(&mount.fs, Filesystem::Fat32(_))
     })
 }
-
 
 pub fn mount_fat32_partition(
     prefix: &str,
@@ -292,9 +281,6 @@ pub fn write_at(path: &str, offset: usize, data: &[u8]) -> Result<usize, FsError
     }
 }
 
-
-
-
 pub fn try_write_crashlog(data: &[u8]) -> Result<(), FsError> {
     let mounts = MOUNTS.try_lock().ok_or(FsError::Io)?;
     let mount = mounts
@@ -341,7 +327,6 @@ pub fn file_size(path: &str) -> Result<usize, FsError> {
     }
 }
 
-
 pub fn sync() -> Result<(), FsError> {
     let mounts = MOUNTS.lock();
     for mount in mounts.iter() {
@@ -349,8 +334,7 @@ pub fn sync() -> Result<(), FsError> {
             flush_filesystem(fs)?;
         }
     }
-    
-    
+
     Ok(())
 }
 
@@ -400,7 +384,7 @@ pub fn list(path: &str) -> Result<Vec<DirEntry>, FsError> {
             Ok(out)
         }
     }?;
-    
+
     for child_mount in mounts.iter() {
         if child_mount.prefix == path {
             continue;
@@ -425,7 +409,6 @@ pub fn list(path: &str) -> Result<Vec<DirEntry>, FsError> {
     }
     Ok(out)
 }
-
 
 pub fn list_files() -> Vec<String> {
     fn walk(path: &str, out: &mut Vec<String>, depth: usize) {

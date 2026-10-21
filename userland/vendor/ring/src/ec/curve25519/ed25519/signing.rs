@@ -1,19 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{super::ops::*, eddsa_digest, ED25519_PUBLIC_KEY_LEN};
 use crate::{
     cpu, digest, error,
@@ -22,30 +6,19 @@ use crate::{
     signature::{self, KeyPair as SigningKeyPair},
 };
 
-
 pub struct Ed25519KeyPair {
-    
+
     private_scalar: Scalar,
 
-    
     private_prefix: Prefix,
 
-    
     public_key: PublicKey,
 }
 
 derive_debug_via_field!(Ed25519KeyPair, stringify!(Ed25519KeyPair), public_key);
 
 impl Ed25519KeyPair {
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     pub fn generate_pkcs8(
         rng: &dyn rand::SecureRandom,
     ) -> Result<pkcs8::Document, error::Unspecified> {
@@ -59,25 +32,6 @@ impl Ed25519KeyPair {
         ))
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     pub fn from_pkcs8(pkcs8: &[u8]) -> Result<Self, error::KeyRejected> {
         let version = pkcs8::Version::V2Only(pkcs8::PublicKeyOptions {
             accept_legacy_ed25519_public_key_tag: true,
@@ -89,25 +43,6 @@ impl Ed25519KeyPair {
         )
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     pub fn from_pkcs8_maybe_unchecked(pkcs8: &[u8]) -> Result<Self, error::KeyRejected> {
         let version = pkcs8::Version::V1OrV2(pkcs8::PublicKeyOptions {
             accept_legacy_ed25519_public_key_tag: true,
@@ -123,25 +58,12 @@ impl Ed25519KeyPair {
         }
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     pub fn from_seed_and_public_key(
         seed: &[u8],
         public_key: &[u8],
     ) -> Result<Self, error::KeyRejected> {
         let pair = Self::from_seed_unchecked(seed)?;
 
-        
-        
-        
         if public_key != pair.public_key.as_ref() {
             let err = if public_key.len() != pair.public_key.as_ref().len() {
                 error::KeyRejected::invalid_encoding()
@@ -154,15 +76,6 @@ impl Ed25519KeyPair {
         Ok(pair)
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
     pub fn from_seed_unchecked(seed: &[u8]) -> Result<Self, error::KeyRejected> {
         let seed = seed
             .try_into()
@@ -186,7 +99,6 @@ impl Ed25519KeyPair {
         }
     }
 
-    
     pub fn sign(&self, msg: &[u8]) -> signature::Signature {
         let cpu_features = cpu::features();
         signature::Signature::new(|signature_bytes| {

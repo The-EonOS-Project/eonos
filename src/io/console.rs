@@ -64,9 +64,6 @@ impl Font {
             &data[end..end]
         };
 
-        
-        
-        
         let mut ascii_glyphs = [u16::MAX; 128];
         if has_unicode_table {
             let mut pos = 0;
@@ -243,9 +240,6 @@ impl Console {
         }
     }
 
-    
-    
-    
     fn flush_rect(&self, x: usize, y: usize, w: usize, h: usize) {
         let x_end = x.saturating_add(w).min(self.width);
         let y_end = y.saturating_add(h).min(self.height);
@@ -282,8 +276,7 @@ impl Console {
     }
 
     fn flush_pending(&mut self) {
-        
-        
+
         if self.graphics_owner.is_some() {
             return;
         }
@@ -306,9 +299,6 @@ impl Console {
         });
     }
 
-    
-    
-    
     pub fn graphics_enter(&mut self, owner: u64) -> Result<(usize, usize), GraphicsError> {
         if self.graphics_owner.is_some() {
             return Err(GraphicsError::Busy);
@@ -390,7 +380,6 @@ impl Console {
         true
     }
 
-    
     pub fn graphics_image(&mut self, owner: u64, x: i64, y: i64, width: usize, pixels: &[u32]) -> bool {
         if self.graphics_owner != Some(owner) || width == 0 || pixels.len() % width != 0 { return false; }
         let height = pixels.len() / width;
@@ -415,8 +404,6 @@ impl Console {
         true
     }
 
-    
-    
     pub fn graphics_blit_scaled(&mut self, owner: u64, source_width: usize, source_height: usize, pixels: &[u32]) -> bool {
         if self.graphics_owner != Some(owner) || source_width == 0 || source_height == 0
             || source_width.checked_mul(source_height) != Some(pixels.len()) { return false; }
@@ -434,11 +421,6 @@ impl Console {
         let bpp = self.bytes_per_pixel;
         let surface = self.graphics_shadow.as_mut().unwrap();
 
-        
-        
-        
-        
-        
         if bpp == 4 && dest_w % source_w == 0 && dest_h % source_h == 0
             && dest_w / source_w == dest_h / source_h
         {
@@ -464,12 +446,6 @@ impl Console {
             return true;
         }
 
-        
-        
-        
-        
-        
-        
         if bpp == 4 {
             let out_w = dest_w as usize;
             let out_h = dest_h as usize;
@@ -532,9 +508,6 @@ impl Console {
         true
     }
 
-    
-    
-    
     pub fn graphics_text(&mut self, owner: u64, x: i64, y: i64, color: u32, text: &str) -> bool {
         if self.graphics_owner != Some(owner) {
             return false;
@@ -611,9 +584,7 @@ impl Console {
             self.copy_cursor_rect(cursor.0, cursor.1, true);
             self.presented_cursor = Some(cursor);
         } else if dirty.is_some_and(|rect| Self::rect_intersects_cursor(rect, cursor)) {
-            
-            
-            
+
             self.copy_cursor_rect(cursor.0, cursor.1, true);
         }
         true
@@ -707,7 +678,6 @@ impl Console {
         }
     }
 
-    
     pub fn graphics_exit(&mut self, owner: u64) -> bool {
         if self.graphics_owner != Some(owner) {
             return false;
@@ -721,8 +691,6 @@ impl Console {
         true
     }
 
-    
-    
     pub fn begin_batch(&mut self) {
         self.batch_depth += 1;
     }
@@ -907,12 +875,7 @@ impl Console {
                         self.esc = EscState::Normal;
                     }
                     'D' => {
-                        
-                        
-                        
-                        
-                        
-                        
+
                         self.push_param();
                         let n = if self.nparams > 0 {
                             self.params[0] as usize
@@ -923,16 +886,7 @@ impl Console {
                         self.esc = EscState::Normal;
                     }
                     'J' => {
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
+
                         self.push_param();
                         self.clear();
                         self.esc = EscState::Normal;
@@ -958,14 +912,6 @@ impl Console {
         }
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
     fn backspace(&mut self) {
         if self.cursor_col == 0 {
             return;
@@ -974,19 +920,10 @@ impl Console {
         self.draw_glyph(' ', self.cursor_col, self.cursor_row);
     }
 
-    
-    
-    
-    
-    
-    
     pub fn cursor_left(&mut self, n: usize) {
         self.cursor_col = self.cursor_col.saturating_sub(n);
     }
 }
-
-
-
 
 unsafe fn copy_framebuffer_row(source: *const u8, destination: *mut u8, len: usize, bpp: usize) {
     #[cfg(target_arch = "x86_64")]

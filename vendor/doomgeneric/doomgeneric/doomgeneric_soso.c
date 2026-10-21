@@ -1,5 +1,3 @@
-
-
 #include "doomkeys.h"
 #include "m_argv.h"
 #include "doomgeneric.h"
@@ -90,7 +88,6 @@ static unsigned char convertToDoomKey(unsigned char scancode)
 
 static void addKeyToQueue(int pressed, unsigned char keyCode)
 {
-	
 
         unsigned char key = convertToDoomKey(keyCode);
 
@@ -101,12 +98,11 @@ static void addKeyToQueue(int pressed, unsigned char keyCode)
         s_KeyQueueWriteIndex %= KEYQUEUE_SIZE;
 }
 
-
 struct termios orig_termios;
 
 void disableRawMode()
 {
-  
+
   tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
 }
 
@@ -162,7 +158,7 @@ void DG_Init()
 
     if (KeyboardFd >= 0)
     {
-        
+
         ioctl(KeyboardFd, 1, (void*)1);
     }
 
@@ -196,8 +192,6 @@ static void handleKeyInput()
         unsigned char keyRelease = (0x80 & scancode);
 
         scancode = (0x7F & scancode);
-
-        
 
         if (0 == keyRelease)
         {
@@ -242,7 +236,6 @@ int DG_GetKey(int* pressed, unsigned char* doomKey)
 {
     if (s_KeyQueueReadIndex == s_KeyQueueWriteIndex)
     {
-        
 
         return 0;
     }
@@ -271,7 +264,6 @@ int main(int argc, char **argv)
     {
         doomgeneric_Tick();
     }
-    
 
     return 0;
 }

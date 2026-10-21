@@ -232,7 +232,7 @@ $inout6="%xmm8";	$inout7="%xmm9";
 
 $in2="%xmm6";		$in1="%xmm7";	# used in CBC decrypt, CTR, ...
 $in0="%xmm8";		$iv="%xmm9";
-
+
 # Inline version of internal aesni_[en|de]crypt1.
 #
 # Why folded loop? Because aes[enc|dec] is slow enough to accommodate
@@ -264,7 +264,7 @@ $code.=<<___;
 	aes${p}last	$rndkey1,$inout
 ___
 }}
-
+
 # _aesni_[en|de]cryptN are private interfaces, N denotes interleave
 # factor. Why 3x subroutine were originally used in loops? Even though
 # aes[enc|dec] latency was originally 6, it could be scheduled only
@@ -553,7 +553,7 @@ ___
 &aesni_generate4("enc") if ($PREFIX eq "aes_hw");
 &aesni_generate6("enc") if ($PREFIX eq "aes_hw");
 &aesni_generate8("enc") if ($PREFIX eq "aes_hw");
-
+
 if ($PREFIX eq "aes_hw") {
 {
 ######################################################################

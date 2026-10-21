@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 pub(crate) use self::features::Features;
 use core::mem::size_of;
 
@@ -65,9 +51,7 @@ macro_rules! impl_get_feature {
             #[cfg(any(all(target_arch = "aarch64", target_endian = "little"),
                      all(target_arch = "arm", target_endian = "little"),
                      target_arch = "x86", target_arch = "x86_64"))]
-            
-            
-            
+
             Initialized,
         }
     }
@@ -131,9 +115,6 @@ pub(crate) fn features() -> Features {
 mod features {
     use crate::polyfill::NotSend;
 
-    
-    
-    
     #[derive(Copy, Clone)]
     pub(crate) struct Features(NotSend);
 
@@ -150,8 +131,7 @@ mod features {
         if #[cfg(any(all(target_arch = "aarch64", target_endian = "little"), all(target_arch = "arm", target_endian = "little"),
                      target_arch = "x86", target_arch = "x86_64"))] {
             impl Features {
-                
-                
+
                 pub(super) unsafe fn new_after_feature_flags_written_and_synced_unchecked() -> Self {
                     Self(NotSend::VALUE)
                 }

@@ -20,20 +20,6 @@ static inline void fe4_mul(fe4 out, const fe4 x, const fe4 y) { fiat_curve25519_
 __attribute__((target("adx,bmi2")))
 static inline void fe4_sq(fe4 out, const fe4 x) { fiat_curve25519_adx_square(out, x); }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 __attribute__((target("adx,bmi2")))
 static inline void fiat_mulx_u64(uint64_t* out1, uint64_t* out2, uint64_t arg1, uint64_t arg2) {
 
@@ -50,21 +36,6 @@ static inline void fiat_mulx_u64(uint64_t* out1, uint64_t* out2, uint64_t arg1, 
   *out2 = (t >> 64);
 #endif
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 __attribute__((target("adx,bmi2")))
 static inline void fiat_addcarryx_u64(uint64_t* out1, fiat_uint1* out2, fiat_uint1 arg1, uint64_t arg2, uint64_t arg3) {
@@ -93,21 +64,6 @@ static inline void fiat_addcarryx_u64(uint64_t* out1, fiat_uint1* out2, fiat_uin
 #undef addcarry64
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 __attribute__((target("adx,bmi2")))
 static inline void fiat_subborrowx_u64(uint64_t* out1, fiat_uint1* out2, fiat_uint1 arg1, uint64_t arg2, uint64_t arg3) {
 #if defined(__has_builtin)
@@ -130,19 +86,6 @@ static inline void fiat_subborrowx_u64(uint64_t* out1, fiat_uint1* out2, fiat_ui
 #undef subborrow64
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 __attribute__((target("adx,bmi2")))
 static inline void fiat_cmovznz_u64(uint64_t* out1, fiat_uint1 arg1, uint64_t arg2, uint64_t arg3) {
   fiat_uint1 x1;
@@ -153,13 +96,6 @@ static inline void fiat_cmovznz_u64(uint64_t* out1, fiat_uint1 arg1, uint64_t ar
   x3 = ((fiat_value_barrier_u64(x2) & arg3) | (fiat_value_barrier_u64((~x2)) & arg2));
   *out1 = x3;
 }
-
-
-
-
-
-
-
 
 __attribute__((target("adx,bmi2")))
 static void fe4_add(uint64_t out1[4], const uint64_t arg1[4], const uint64_t arg2[4]) {
@@ -199,13 +135,6 @@ static void fe4_add(uint64_t out1[4], const uint64_t arg1[4], const uint64_t arg
   out1[2] = x14;
   out1[3] = x16;
 }
-
-
-
-
-
-
-
 
 __attribute__((target("adx,bmi2")))
 static void fe4_sub(uint64_t out1[4], const uint64_t arg1[4], const uint64_t arg2[4]) {
@@ -253,13 +182,6 @@ static void fe4_sub(uint64_t out1[4], const uint64_t arg1[4], const uint64_t arg
   out1[2] = x18;
   out1[3] = x20;
 }
-
-
-
-
-
-
-
 
 __attribute__((target("adx,bmi2")))
 static void fe4_scmul(uint64_t out1[4], const uint64_t arg1[4], uint64_t arg2) {
@@ -310,12 +232,6 @@ static void fe4_scmul(uint64_t out1[4], const uint64_t arg1[4], uint64_t arg2) {
   out1[3] = x23;
 }
 
-
-
-
-
-
-
 __attribute__((target("adx,bmi2")))
 static void fe4_canon(uint64_t out1[4], const uint64_t arg1[4]) {
   uint64_t x1;
@@ -364,15 +280,6 @@ static void fe4_canon(uint64_t out1[4], const uint64_t arg1[4]) {
   out1[3] = x24;
 }
 
-
-
-
-
-
-
-
-
-
 __attribute__((target("adx,bmi2")))
 static void fe4_cswap(uint64_t out1[4], uint64_t out2[4], fiat_uint1 arg1, const uint64_t arg2[4], const uint64_t arg3[4]) {
   uint64_t x1;
@@ -383,7 +290,7 @@ static void fe4_cswap(uint64_t out1[4], uint64_t out2[4], fiat_uint1 arg1, const
   uint64_t x6;
   uint64_t x7;
   uint64_t x8;
-  
+
   fiat_cmovznz_u64(&x1, arg1, (arg2[0]), (arg3[0]));
   fiat_cmovznz_u64(&x2, arg1, (arg2[1]), (arg3[1]));
   fiat_cmovznz_u64(&x3, arg1, (arg2[2]), (arg3[2]));
@@ -401,11 +308,6 @@ static void fe4_cswap(uint64_t out1[4], uint64_t out2[4], fiat_uint1 arg1, const
   out2[2] = x7;
   out2[3] = x8;
 }
-
-
-
-
-
 
 __attribute__((target("adx,bmi2")))
 static void fe4_invert(fe4 out, const fe4 z) {
@@ -476,23 +378,6 @@ void x25519_scalar_mult_adx(uint8_t out[32], const uint8_t scalar[32],
   e[31] &= 127;
   e[31] |= 64;
 
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   fe4 x1, x2 = {1}, z2 = {0}, x3, z3 = {1}, tmp0, tmp1;
   OPENSSL_memcpy(x1, point, sizeof(fe4));
   x1[3] &= (uint64_t)(-1)>>1;
@@ -501,22 +386,13 @@ void x25519_scalar_mult_adx(uint8_t out[32], const uint8_t scalar[32],
   unsigned swap = 0;
   int pos;
   for (pos = 254; pos >= 0; --pos) {
-    
-    
-    
-    
-    
-    
+
     unsigned b = 1 & (e[pos / 8] >> (pos & 7));
     swap ^= b;
     fe4_cswap(x2, x3, swap, x2, x3);
     fe4_cswap(z2, z3, swap, z2, z3);
     swap = b;
-    
-    
-    
-    
-    
+
     fe4_sub(tmp0, x3, z3);
     fe4_sub(tmp1, x2, z2);
     fe4_add(x2, x2, z2);
@@ -536,7 +412,7 @@ void x25519_scalar_mult_adx(uint8_t out[32], const uint8_t scalar[32],
     fe4_mul(z3, x1, z2);
     fe4_mul(z2, tmp1, tmp0);
   }
-  
+
   fe4_cswap(x2, x3, swap, x2, x3);
   fe4_cswap(z2, z3, swap, z2, z3);
 
@@ -561,8 +437,7 @@ typedef struct {
 
 __attribute__((target("adx,bmi2")))
 static void inline_x25519_ge_dbl_4(ge_p3_4 *r, const ge_p3_4 *p, bool skip_t) {
-  
-  
+
   fe4 trX, trZ, trT, t0, cX, cY, cZ, cT;
   fe4_sq(trX, p->X);
   fe4_sq(trZ, p->Y);
@@ -587,8 +462,7 @@ __attribute__((always_inline))
 static inline void
 ge_p3_add_p3_precomp_4(ge_p3_4 *r, const ge_p3_4 *p, const ge_precomp_4 *q) {
   fe4 A, B, C, YplusX, YminusX, D, X3, Y3, Z3, T3;
-  
-  
+
   fe4_add(YplusX, p->Y, p->X);
   fe4_sub(YminusX, p->Y, p->X);
   fe4_mul(A, YplusX, q->yplusx);
@@ -625,7 +499,6 @@ static inline void table_select_4(ge_precomp_4 *t, const int pos,
 
   OPENSSL_STATIC_ASSERT(sizeof(t_bytes) == sizeof(ge_precomp_4), "");
 
-  
   OPENSSL_memcpy(t, t_bytes, sizeof(ge_precomp_4));
 
   fe4 xy2d_neg = {0};
@@ -637,12 +510,6 @@ static inline void table_select_4(ge_precomp_4 *t, const int pos,
   constant_time_conditional_memcpy(t->xy2d, xy2d_neg, sizeof(fe4), bnegative);
 }
 
-
-
-
-
-
-
 RING_NOINLINE 
 __attribute__((target("adx,bmi2")))
 void x25519_ge_scalarmult_base_adx(uint8_t h[4][32], const uint8_t a[32]) {
@@ -653,8 +520,6 @@ void x25519_ge_scalarmult_base_adx(uint8_t h[4][32], const uint8_t a[32]) {
     e[2 * i + 0] = (a[i] >> 0) & 15;
     e[2 * i + 1] = (a[i] >> 4) & 15;
   }
-  
-  
 
   carry = 0;
   for (unsigned i = 0; i < 63; ++i) {
@@ -664,7 +529,6 @@ void x25519_ge_scalarmult_base_adx(uint8_t h[4][32], const uint8_t a[32]) {
     e[i] -= carry << 4;
   }
   e[63] += carry;
-  
 
   ge_p3_4 r = {{0}, {1}, {1}, {0}};
   for (unsigned i = 1; i < 64; i += 2) {
@@ -684,8 +548,6 @@ void x25519_ge_scalarmult_base_adx(uint8_t h[4][32], const uint8_t a[32]) {
     ge_p3_add_p3_precomp_4(&r, &r, &t);
   }
 
-  
-  
   fe4_canon(r.X, r.X);
   fe4_canon(r.Y, r.Y);
   fe4_canon(r.Z, r.Z);

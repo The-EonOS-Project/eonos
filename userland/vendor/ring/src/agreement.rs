@@ -1,72 +1,9 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::{cpu, debug, ec, error, rand};
 
 pub use crate::ec::{
     curve25519::x25519::X25519,
     suite_b::ecdh::{ECDH_P256, ECDH_P384},
 };
-
 
 pub struct Algorithm {
     pub(crate) curve: &'static ec::Curve,
@@ -87,9 +24,6 @@ impl PartialEq for Algorithm {
     }
 }
 
-
-
-
 pub struct EphemeralPrivateKey {
     private_key: ec::Seed,
     algorithm: &'static Algorithm,
@@ -102,17 +36,13 @@ derive_debug_via_field!(
 );
 
 impl EphemeralPrivateKey {
-    
+
     pub fn generate(
         alg: &'static Algorithm,
         rng: &dyn rand::SecureRandom,
     ) -> Result<Self, error::Unspecified> {
         let cpu_features = cpu::features();
 
-        
-        
-        
-        
         let private_key = ec::Seed::generate(alg.curve, rng, cpu_features)?;
         Ok(Self {
             private_key,
@@ -120,14 +50,9 @@ impl EphemeralPrivateKey {
         })
     }
 
-    
     #[inline(always)]
     pub fn compute_public_key(&self) -> Result<PublicKey, error::Unspecified> {
-        
-        
-        
-        
-        
+
         self.private_key
             .compute_public_key(cpu::features())
             .map(|public_key| PublicKey {
@@ -136,13 +61,11 @@ impl EphemeralPrivateKey {
             })
     }
 
-    
     #[inline]
     pub fn algorithm(&self) -> &'static Algorithm {
         self.algorithm
     }
 
-    
     #[deprecated]
     #[cfg(test)]
     pub fn bytes(&self) -> &[u8] {
@@ -154,7 +77,6 @@ impl EphemeralPrivateKey {
         self.private_key.bytes_less_safe()
     }
 }
-
 
 #[derive(Clone)]
 pub struct PublicKey {
@@ -178,13 +100,12 @@ impl core::fmt::Debug for PublicKey {
 }
 
 impl PublicKey {
-    
+
     #[inline]
     pub fn algorithm(&self) -> &'static Algorithm {
         self.algorithm
     }
 }
-
 
 #[derive(Clone, Copy)]
 pub struct UnparsedPublicKey<B> {
@@ -214,40 +135,21 @@ where
 }
 
 impl<B> UnparsedPublicKey<B> {
-    
+
     pub fn new(algorithm: &'static Algorithm, bytes: B) -> Self {
         Self { algorithm, bytes }
     }
 
-    
     #[inline]
     pub fn algorithm(&self) -> &'static Algorithm {
         self.algorithm
     }
 
-    
     #[inline]
     pub fn bytes(&self) -> &B {
         &self.bytes
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #[inline]
 pub fn agree_ephemeral<B: AsRef<[u8]>, R>(
@@ -268,34 +170,16 @@ fn agree_ephemeral_<R>(
     kdf: impl FnOnce(&[u8]) -> R,
     cpu: cpu::Features,
 ) -> Result<R, error::Unspecified> {
-    
-    
-    
-    
-    
+
     if peer_public_key.algorithm != my_private_key.algorithm {
         return Err(error::Unspecified);
     }
 
     let alg = &my_private_key.algorithm;
 
-    
-    
-
-    
-    
-    
-
-    
-    
-
     let mut shared_key = [0u8; ec::ELEM_MAX_BYTES];
     let shared_key = &mut shared_key[..alg.curve.elem_scalar_seed_len];
 
-    
-    
-    
-    
     (alg.ecdh)(
         shared_key,
         &my_private_key.private_key,
@@ -303,9 +187,5 @@ fn agree_ephemeral_<R>(
         cpu,
     )?;
 
-    
-    
-    
-    
     Ok(kdf(shared_key))
 }

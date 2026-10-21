@@ -1,4 +1,3 @@
-
 %ifndef ring_core_generated_PREFIX_SYMBOLS_NASM_INC
 %define ring_core_generated_PREFIX_SYMBOLS_NASM_INC
 

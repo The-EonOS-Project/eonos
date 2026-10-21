@@ -1,5 +1,3 @@
-
-
 OUTPUT_FORMAT(elf64-x86-64)
 ENTRY(_start)
 
@@ -13,13 +11,8 @@ PHDRS
 
 SECTIONS
 {
-    
 
     . = 0xffffffff80000000;
-
-    
-
-
 
     PROVIDE(__kernel_text_start = .);
     .text : {
@@ -32,8 +25,6 @@ SECTIONS
     PROVIDE(__kernel_rodata_start = .);
     .rodata : {
         *(.rodata .rodata.*)
-
-        
 
         . = ALIGN(8);
         KEEP(*(.requests_start_marker))

@@ -1,66 +1,25 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{ops::*, verify_affine_point_is_on_the_curve};
 use crate::{arithmetic::montgomery::*, error};
-
-
-
-
-
-
-
-
 
 pub(super) fn parse_uncompressed_point(
     ops: &PublicKeyOps,
     q: &Modulus<Q>,
     input: untrusted::Input,
 ) -> Result<(Elem<R>, Elem<R>), error::Unspecified> {
-    
-    
-    
-    
+
     let (x, y) = input.read_all(error::Unspecified, |input| {
-        
+
         let encoding = input.read_byte()?;
         if encoding != 4 {
             return Err(error::Unspecified);
         }
 
-        
-        
         let x = ops.elem_parse(q, input)?;
         let y = ops.elem_parse(q, input)?;
         Ok((x, y))
     })?;
 
-    
-    
-    
     verify_affine_point_is_on_the_curve(q, (&x, &y))?;
-
-    
-    
-    
-    
-    
-    
-    
 
     Ok((x, y))
 }
@@ -90,9 +49,6 @@ mod tests {
 
                 let result = parse_uncompressed_point(curve_ops, q, public_key);
                 assert_eq!(is_valid, result.is_ok());
-
-                
-                
 
                 Ok(())
             },

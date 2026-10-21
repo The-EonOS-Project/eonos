@@ -177,7 +177,6 @@ $_end="16*$SZ+2*8(%rsp)";
 $_rsp="`16*$SZ+3*8`(%rsp)";
 $framesz="16*$SZ+4*8";
 
-
 sub ROUND_00_15()
 { my ($i,$a,$b,$c,$d,$e,$f,$g,$h) = @_;
   my $STRIDE=$SZ;

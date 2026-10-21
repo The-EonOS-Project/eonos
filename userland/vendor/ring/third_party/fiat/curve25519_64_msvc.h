@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdint.h>
 #include <intrin.h>
 #if defined(_M_X64)
@@ -23,11 +9,7 @@ typedef signed char fiat_25519_int1;
 
 #define FIAT_25519_FIAT_INLINE inline
 
-
-
 typedef uint64_t fiat_25519_loose_field_element[5];
-
-
 
 typedef uint64_t fiat_25519_tight_field_element[5];
 
@@ -36,21 +18,6 @@ typedef uint64_t fiat_25519_tight_field_element[5];
 #endif
 
 #define fiat_25519_value_barrier_u64(x) (x)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 static FIAT_25519_FIAT_INLINE void fiat_25519_addcarryx_u64(uint64_t* out1, fiat_25519_uint1* out2, fiat_25519_uint1 arg1, uint64_t arg2, uint64_t arg3) {
 
@@ -66,21 +33,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_addcarryx_u64(uint64_t* out1, fiat
 #endif
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 static FIAT_25519_FIAT_INLINE void fiat_25519_subborrowx_u64(uint64_t* out1, fiat_25519_uint1* out2, fiat_25519_uint1 arg1, uint64_t arg2, uint64_t arg3) {
 #if defined(_M_X64)
   *out2 = _subborrow_u64(arg1, arg2, arg3, out1); 
@@ -89,21 +41,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_subborrowx_u64(uint64_t* out1, fia
   *out2 = (arg2 < arg3) | ((arg2 == arg3) & arg1);
 #endif
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 static FIAT_25519_FIAT_INLINE void fiat_25519_addcarryx_u51(uint64_t* out1, fiat_25519_uint1* out2, fiat_25519_uint1 arg1, uint64_t arg2, uint64_t arg3) {
   uint64_t x1;
@@ -116,21 +53,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_addcarryx_u51(uint64_t* out1, fiat
   *out2 = x3;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 static FIAT_25519_FIAT_INLINE void fiat_25519_subborrowx_u51(uint64_t* out1, fiat_25519_uint1* out2, fiat_25519_uint1 arg1, uint64_t arg2, uint64_t arg3) {
   int64_t x1;
   fiat_25519_int1 x2;
@@ -141,20 +63,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_subborrowx_u51(uint64_t* out1, fia
   *out1 = x3;
   *out2 = (fiat_25519_uint1)(0x0 - x2);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 static FIAT_25519_FIAT_INLINE void fiat_25519_mulx_u64(uint64_t* out1, uint64_t* out2, uint64_t arg1, uint64_t arg2) {
 
@@ -168,19 +76,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_mulx_u64(uint64_t* out1, uint64_t*
 #endif
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 static FIAT_25519_FIAT_INLINE void fiat_25519_cmovznz_u64(uint64_t* out1, fiat_25519_uint1 arg1, uint64_t arg2, uint64_t arg3) {
   fiat_25519_uint1 x1;
   uint64_t x2;
@@ -190,13 +85,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_cmovznz_u64(uint64_t* out1, fiat_2
   x3 = ((fiat_25519_value_barrier_u64(x2) & arg3) | (fiat_25519_value_barrier_u64((~x2)) & arg2));
   *out1 = x3;
 }
-
-
-
-
-
-
-
 
 static FIAT_25519_FIAT_INLINE void fiat_25519_carry_mul(fiat_25519_tight_field_element out1, const fiat_25519_loose_field_element arg1, const fiat_25519_loose_field_element arg2) {
   uint64_t x1;
@@ -457,13 +345,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_carry_mul(fiat_25519_tight_field_e
   out1[4] = x152;
 }
 
-
-
-
-
-
-
-
 static FIAT_25519_FIAT_INLINE void fiat_25519_carry_square(fiat_25519_tight_field_element out1, const fiat_25519_loose_field_element arg1) {
   uint64_t x1;
   uint64_t x2;
@@ -649,13 +530,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_carry_square(fiat_25519_tight_fiel
   out1[4] = x100;
 }
 
-
-
-
-
-
-
-
 static FIAT_25519_FIAT_INLINE void fiat_25519_carry(fiat_25519_tight_field_element out1, const fiat_25519_loose_field_element arg1) {
   uint64_t x1;
   uint64_t x2;
@@ -688,13 +562,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_carry(fiat_25519_tight_field_eleme
   out1[4] = x12;
 }
 
-
-
-
-
-
-
-
 static FIAT_25519_FIAT_INLINE void fiat_25519_add(fiat_25519_loose_field_element out1, const fiat_25519_tight_field_element arg1, const fiat_25519_tight_field_element arg2) {
   uint64_t x1;
   uint64_t x2;
@@ -712,13 +579,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_add(fiat_25519_loose_field_element
   out1[3] = x4;
   out1[4] = x5;
 }
-
-
-
-
-
-
-
 
 static FIAT_25519_FIAT_INLINE void fiat_25519_sub(fiat_25519_loose_field_element out1, const fiat_25519_tight_field_element arg1, const fiat_25519_tight_field_element arg2) {
   uint64_t x1;
@@ -738,13 +598,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_sub(fiat_25519_loose_field_element
   out1[4] = x5;
 }
 
-
-
-
-
-
-
-
 static FIAT_25519_FIAT_INLINE void fiat_25519_opp(fiat_25519_loose_field_element out1, const fiat_25519_tight_field_element arg1) {
   uint64_t x1;
   uint64_t x2;
@@ -762,15 +615,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_opp(fiat_25519_loose_field_element
   out1[3] = x4;
   out1[4] = x5;
 }
-
-
-
-
-
-
-
-
-
 
 static FIAT_25519_FIAT_INLINE void fiat_25519_to_bytes(uint8_t out1[32], const fiat_25519_tight_field_element arg1) {
   uint64_t x1;
@@ -979,15 +823,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_to_bytes(uint8_t out1[32], const f
   out1[31] = x91;
 }
 
-
-
-
-
-
-
-
-
-
 static FIAT_25519_FIAT_INLINE void fiat_25519_from_bytes(fiat_25519_tight_field_element out1, const uint8_t arg1[32]) {
   uint64_t x1;
   uint64_t x2;
@@ -1137,13 +972,6 @@ static FIAT_25519_FIAT_INLINE void fiat_25519_from_bytes(fiat_25519_tight_field_
   out1[3] = x64;
   out1[4] = x71;
 }
-
-
-
-
-
-
-
 
 static FIAT_25519_FIAT_INLINE void fiat_25519_carry_scmul_121666(fiat_25519_tight_field_element out1, const fiat_25519_loose_field_element arg1) {
   uint64_t x1;

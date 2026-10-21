@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86_64) && defined(__APPLE__)
@@ -32,20 +29,9 @@ L$mul4x_prologue:
 
 .byte	0x67
 
-
-
 	shll	$3,%r9d
 	leaq	(%r9,%r9,2),%r10
 	negq	%r9
-
-
-
-
-
-
-
-
-
 
 	leaq	-320(%rsp,%r9,2),%r11
 	movq	%rsp,%rbp
@@ -111,9 +97,6 @@ L$mul4x_body:
 
 L$mul4x_epilogue:
 	ret
-
-
-
 
 .p2align	5
 mul4x_internal:
@@ -642,7 +625,6 @@ L$inner4x:
 	movq	24(%rbp),%r15
 	jmp	L$sqr4x_sub_entry
 
-
 .globl	_bn_power5_nohw
 .private_extern _bn_power5_nohw
 
@@ -666,20 +648,10 @@ _CET_ENDBR
 
 L$power5_prologue:
 
-
-
-
 	shll	$3,%r9d
 	leal	(%r9,%r9,2),%r10d
 	negq	%r9
 	movq	(%r8),%r8
-
-
-
-
-
-
-
 
 	leaq	-320(%rsp,%r9,2),%r11
 	movq	%rsp,%rbp
@@ -719,15 +691,6 @@ L$pwr_page_walk_done:
 
 	movq	%r9,%r10
 	negq	%r9
-
-
-
-
-
-
-
-
-
 
 	movq	%r8,32(%rsp)
 	movq	%rax,40(%rsp)
@@ -777,8 +740,6 @@ L$power5_body:
 L$power5_epilogue:
 	ret
 
-
-
 .globl	_bn_sqr8x_internal
 .private_extern _bn_sqr8x_internal
 .private_extern	_bn_sqr8x_internal
@@ -789,83 +750,10 @@ __bn_sqr8x_internal:
 
 _CET_ENDBR
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	leaq	32(%r10),%rbp
 	leaq	(%rsi,%r9,1),%rsi
 
 	movq	%r9,%rcx
-
 
 	movq	-32(%rsi,%rbp,1),%r14
 	leaq	48+8(%rsp,%r9,2),%rdi
@@ -886,7 +774,6 @@ _CET_ENDBR
 	adcq	$0,%rdx
 	movq	%r11,-16(%rdi,%rbp,1)
 	movq	%rdx,%r10
-
 
 	movq	-8(%rsi,%rbp,1),%rbx
 	mulq	%r15
@@ -923,7 +810,6 @@ L$sqr4x_1st:
 	addq	%r13,%r11
 	adcq	$0,%r10
 
-
 	mulq	%r15
 	addq	%rax,%r12
 	movq	%rbx,%rax
@@ -955,7 +841,6 @@ L$sqr4x_1st:
 	adcq	$0,%r10
 	addq	%r13,%r11
 	adcq	$0,%r10
-
 
 	mulq	%r15
 	addq	%rax,%r12
@@ -1094,7 +979,6 @@ L$sqr4x_inner:
 
 	addq	$16,%rbp
 	jnz	L$sqr4x_outer
-
 
 	movq	-32(%rsi),%r14
 	leaq	48+8(%rsp,%r9,2),%rdi
@@ -1563,8 +1447,6 @@ L$8x_no_tail:
 	jb	L$8x_reduction_loop
 	ret
 
-
-
 .p2align	5
 __bn_post4x_internal:
 
@@ -1619,7 +1501,6 @@ L$sqr4x_sub_entry:
 	negq	%r9
 	ret
 
-
 .globl	_bn_mulx4x_mont_gather5
 .private_extern _bn_mulx4x_mont_gather5
 
@@ -1643,22 +1524,10 @@ _CET_ENDBR
 
 L$mulx4x_prologue:
 
-
-
-
 	shll	$3,%r9d
 	leaq	(%r9,%r9,2),%r10
 	negq	%r9
 	movq	(%r8),%r8
-
-
-
-
-
-
-
-
-
 
 	leaq	-320(%rsp,%r9,2),%r11
 	movq	%rsp,%rbp
@@ -1695,18 +1564,6 @@ L$mulx4x_page_walk:
 	ja	L$mulx4x_page_walk
 L$mulx4x_page_walk_done:
 
-
-
-
-
-
-
-
-
-
-
-
-
 	movq	%r8,32(%rsp)
 	movq	%rax,40(%rsp)
 
@@ -1733,9 +1590,6 @@ L$mulx4x_body:
 
 L$mulx4x_epilogue:
 	ret
-
-
-
 
 .p2align	5
 mulx4x_internal:
@@ -2161,7 +2015,6 @@ L$mulx4x_inner:
 	movq	24(%rbp),%r15
 	jmp	L$sqrx4x_sub_entry
 
-
 .globl	_bn_powerx5
 .private_extern _bn_powerx5
 
@@ -2185,20 +2038,10 @@ _CET_ENDBR
 
 L$powerx5_prologue:
 
-
-
-
 	shll	$3,%r9d
 	leaq	(%r9,%r9,2),%r10
 	negq	%r9
 	movq	(%r8),%r8
-
-
-
-
-
-
-
 
 	leaq	-320(%rsp,%r9,2),%r11
 	movq	%rsp,%rbp
@@ -2238,17 +2081,6 @@ L$pwrx_page_walk_done:
 
 	movq	%r9,%r10
 	negq	%r9
-
-
-
-
-
-
-
-
-
-
-
 
 	pxor	%xmm0,%xmm0
 .byte	102,72,15,110,207
@@ -2300,8 +2132,6 @@ L$powerx5_body:
 L$powerx5_epilogue:
 	ret
 
-
-
 .globl	_bn_sqrx8x_internal
 .private_extern _bn_sqrx8x_internal
 .private_extern	_bn_sqrx8x_internal
@@ -2311,45 +2141,6 @@ _bn_sqrx8x_internal:
 __bn_sqrx8x_internal:
 
 _CET_ENDBR
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	leaq	48+8(%rsp),%rdi
 	leaq	(%rsi,%r9,1),%rbp
@@ -2415,7 +2206,6 @@ L$sqrx8x_outer_loop:
 	movq	%r9,16(%rdi)
 	sbbq	%rcx,%rcx
 	xorq	%rbp,%rbp
-
 
 	mulxq	16(%rsi),%r8,%rbx
 	mulxq	24(%rsi),%r9,%rax
@@ -2530,7 +2320,6 @@ L$sqrx8x_outer_loop:
 	movq	-64(%rsi),%rdx
 	movq	%rax,16+8(%rsp)
 	movq	%rdi,24+8(%rsp)
-
 
 	xorl	%eax,%eax
 	jmp	L$sqrx8x_loop
@@ -2654,7 +2443,6 @@ L$sqrx8x_outer_break:
 	adoxq	%r11,%r11
 	movq	16(%rdi),%r12
 	movq	24(%rdi),%r13
-
 
 .p2align	5
 L$sqrx4x_shift_n_add:
@@ -2923,7 +2711,6 @@ L$sqrx8x_no_tail:
 	jb	L$sqrx8x_reduction_loop
 	ret
 
-
 .p2align	5
 
 __bn_postx4x_internal:
@@ -2976,7 +2763,6 @@ L$sqrx4x_sub_entry:
 
 	ret
 
-
 .globl	_bn_scatter5
 .private_extern _bn_scatter5
 
@@ -2986,14 +2772,6 @@ _bn_scatter5:
 _CET_ENDBR
 	cmpl	$0,%esi
 	jz	L$scatter_epilogue
-
-
-
-
-
-
-
-
 
 	leaq	(%rdx,%rcx,8),%rdx
 L$scatter:
@@ -3005,8 +2783,6 @@ L$scatter:
 	jnz	L$scatter
 L$scatter_epilogue:
 	ret
-
-
 
 .globl	_bn_gather5
 .private_extern _bn_gather5
@@ -3176,7 +2952,6 @@ L$gather:
 
 	ret
 L$SEH_end_bn_gather5:
-
 
 .section	__DATA,__const
 .p2align	6

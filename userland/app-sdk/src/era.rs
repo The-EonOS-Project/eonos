@@ -1,46 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use alloc::string::String;
 use alloc::vec::Vec;
 use eonos_rt::{Error, Result};
@@ -68,7 +25,6 @@ pub enum Event {
     Pointer { x: i32, y: i32, buttons: u8 },
     Close,
 }
-
 
 pub struct Window {
     title: String,
@@ -99,8 +55,7 @@ pub struct Window {
 }
 
 impl Window {
-    
-    
+
     pub fn open(title: &str, width: u32, height: u32) -> Result<Self> {
         if title.is_empty() || title.len() > 80 || width == 0 || height == 0 || width > 1920 || height > 1080 {
             return Err(Error(22));
@@ -147,7 +102,6 @@ impl Window {
     pub fn title(&self) -> &str { &self.title }
     pub fn dimensions(&self) -> (u32, u32) { (self.width, self.height) }
 
-    
     pub fn fill_rect(&mut self, x: i32, y: i32, width: u32, height: u32, color: u32) -> Result<()> {
         if self.command_count >= MAX_COMMANDS || self.frame.len() + 21 > MAX_FRAME_BYTES { return Err(Error(7)); }
         self.frame.push(1);
@@ -160,7 +114,6 @@ impl Window {
         Ok(())
     }
 
-    
     pub fn text(&mut self, x: i32, y: i32, color: u32, value: &str) -> Result<()> {
         if value.len() > MAX_TEXT_BYTES || self.command_count >= MAX_COMMANDS
             || self.frame.len().saturating_add(11 + value.len()) > MAX_FRAME_BYTES {
@@ -176,10 +129,6 @@ impl Window {
         Ok(())
     }
 
-    
-    
-    
-    
     pub fn button(&mut self, x: i32, y: i32, width: u32, height: u32, label: &str) -> Result<bool> {
         if width < 12 || height < 18 { return Err(Error(22)); }
         let index = self.register_widget();
@@ -198,9 +147,6 @@ impl Window {
         Ok(clicked)
     }
 
-    
-    
-    
     pub fn dropdown(&mut self, x: i32, y: i32, width: u32, height: u32, options: &[&str], selected: &mut usize) -> Result<bool> {
         if width < 24 || height < 18 || options.is_empty() || options.len() > 16 { return Err(Error(22)); }
         if *selected >= options.len() { *selected = 0; }
@@ -264,8 +210,6 @@ impl Window {
         Ok(changed)
     }
 
-    
-    
     pub fn checkbox(&mut self, x: i32, y: i32, label: &str, checked: &mut bool) -> Result<bool> {
         if label.len() > MAX_TEXT_BYTES { return Err(Error(7)); }
         let index = self.register_widget();
@@ -289,31 +233,22 @@ impl Window {
         Ok(activated)
     }
 
-    
-    
-    
-    
     pub fn confirm_dialog(&mut self, title: &str, message: &str) -> Result<bool> {
         self.run_dialog(title, message, true)
     }
 
-    
     pub fn message_dialog(&mut self, title: &str, message: &str) -> Result<()> {
         self.run_dialog(title, message, false).map(|_| ())
     }
 
-    
     pub fn error_dialog(&mut self, message: &str) -> Result<()> {
         self.message_dialog("Error", message)
     }
 
-    
     pub fn text_input_dialog(&mut self, title: &str, prompt: &str, initial: &str) -> Result<Option<String>> {
         self.run_input_dialog(title, prompt, initial)
     }
 
-    
-    
     pub fn number_input_dialog(&mut self, title: &str, prompt: &str, initial: i64) -> Result<Option<i64>> {
         let mut value = alloc::format!("{}", initial);
         loop {
@@ -328,9 +263,6 @@ impl Window {
         }
     }
 
-    
-    
-    
     pub fn save_file_dialog(&mut self, directory: &str, suggested_name: &str) -> Result<Option<String>> {
         if self.width < 320 || self.height < 250 || suggested_name.len() > MAX_INPUT_BYTES {
             return Err(Error(22));
@@ -495,13 +427,10 @@ impl Window {
         Ok(selected_path.map(|(path, _)| path))
     }
 
-    
     pub fn toast(&mut self, message: &str) -> Result<()> {
         self.toast_for(message, 2500)
     }
 
-    
-    
     pub fn toast_for(&mut self, message: &str, duration_ms: u64) -> Result<()> {
         if message.is_empty() || message.len() > 256 { return Err(Error(22)); }
         let deadline = crate::system::uptime_ms().saturating_add(duration_ms.clamp(250, 15_000));
@@ -509,9 +438,6 @@ impl Window {
         Ok(())
     }
 
-    
-    
-    
     pub fn begin_progress<'a>(&'a mut self, title: &str, message: &str) -> Result<ProgressDialog<'a>> {
         if title.is_empty() || title.len() > 80 || message.len() > 256 {
             return Err(Error(22));
@@ -585,8 +511,6 @@ impl Window {
             }
         })();
 
-        
-        
         self.frame.clear();
         self.frame.extend_from_slice(&background);
         self.command_count = background_commands;
@@ -740,9 +664,6 @@ impl Window {
         self.text(x + 8, y + 9, 0x101010, &text)
     }
 
-    
-    
-    
     pub fn text_input(&mut self, x: i32, y: i32, width: u32, height: u32, value: &mut String, placeholder: &str) -> Result<bool> {
         if width < 40 || height < 24 || value.len() > MAX_INPUT_BYTES { return Err(Error(22)); }
         let index = self.register_widget();
@@ -839,7 +760,6 @@ impl Window {
         Ok(changed)
     }
 
-    
     pub fn present(&mut self) -> Result<()> {
         self.draw_active_toast()?;
         let mut payload = Vec::with_capacity(self.frame.len() + 2);
@@ -865,7 +785,6 @@ impl Window {
         Ok(())
     }
 
-    
     pub fn poll_event(&mut self) -> Result<Option<Event>> {
         let mut chunk = [0u8; 256];
         let amount = eonos_rt::pipe_read_available(0, &mut chunk)?;
@@ -907,7 +826,6 @@ impl Window {
         Ok(event)
     }
 
-    
     pub fn close(self) -> Result<()> { send_packet(PACKET_CLOSE, &[]) }
 
     fn take_click(&mut self, x: i32, y: i32, width: u32, height: u32) -> bool {
@@ -951,8 +869,6 @@ impl Window {
     }
 }
 
-
-
 pub struct ProgressDialog<'a> {
     window: &'a mut Window,
     title: String,
@@ -963,8 +879,7 @@ pub struct ProgressDialog<'a> {
 }
 
 impl ProgressDialog<'_> {
-    
-    
+
     pub fn update(&mut self, percent: u8, message: &str) -> Result<bool> {
         if self.cancelled { return Ok(true); }
         if message.len() > 256 { return Err(Error(22)); }
@@ -998,7 +913,6 @@ impl ProgressDialog<'_> {
         Ok(self.cancelled)
     }
 
-    
     pub fn finish(mut self) -> Result<()> {
         let result = self.restore();
         self.finished = true;

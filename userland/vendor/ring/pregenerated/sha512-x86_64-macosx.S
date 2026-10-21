@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86_64) && defined(__APPLE__)
@@ -1718,7 +1715,6 @@ L$rounds_16_xx:
 L$epilogue:
 	ret
 
-
 .section	__DATA,__const
 .p2align	6
 
@@ -2973,6 +2969,5 @@ L$avx_00_47:
 
 L$epilogue_avx:
 	ret
-
 
 #endif

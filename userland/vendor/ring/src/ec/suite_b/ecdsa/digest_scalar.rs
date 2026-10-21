@@ -1,46 +1,4 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::{digest, ec::suite_b::ops::*};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 pub(super) fn digest_scalar(n: &Modulus<N>, msg: digest::Digest) -> Scalar {
     digest_scalar_(n, msg.as_ref())
@@ -50,8 +8,6 @@ pub(super) fn digest_scalar(n: &Modulus<N>, msg: digest::Digest) -> Scalar {
 pub(super) fn digest_bytes_scalar(n: &Modulus<N>, digest: &[u8]) -> Scalar {
     digest_scalar_(n, digest)
 }
-
-
 
 fn digest_scalar_(n: &Modulus<N>, digest: &[u8]) -> Scalar {
     let len = n.bytes_len();

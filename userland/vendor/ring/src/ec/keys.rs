@@ -93,5 +93,4 @@ impl AsRef<[u8]> for PublicKey {
     }
 }
 
-
 pub const PUBLIC_KEY_MAX_LEN: usize = 1 + (2 * ELEM_MAX_BYTES);

@@ -1,21 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![allow(dead_code)]
 
 use core::sync::atomic::{AtomicBool, Ordering};
@@ -51,10 +33,6 @@ const KB_RESET_PASS: u8 = 0xAA;
 
 const IRQ_LINE: u8 = 1;
 
-
-
-
-
 const BUFFER_CAP: usize = 256;
 
 struct RingBuffer {
@@ -76,9 +54,7 @@ impl RingBuffer {
 
     fn push(&mut self, byte: u8) {
         if self.len == BUFFER_CAP {
-            
-            
-            
+
             self.tail = (self.tail + 1) % BUFFER_CAP;
             self.len -= 1;
         }
@@ -113,9 +89,6 @@ unsafe fn inb(port: u16) -> u8 {
     val
 }
 
-
-
-
 unsafe fn wait_input_clear() -> bool {
     for _ in 0..100_000 {
         if inb(STATUS_PORT) & STATUS_INPUT_FULL == 0 {
@@ -124,7 +97,6 @@ unsafe fn wait_input_clear() -> bool {
     }
     false
 }
-
 
 unsafe fn wait_output_full() -> bool {
     for _ in 0..100_000 {
@@ -158,17 +130,9 @@ unsafe fn read_data() -> Option<u8> {
     Some(inb(DATA_PORT))
 }
 
-
-
-
-
-
 pub fn init() {
     unsafe {
-        
-        
-        
-        
+
         if inb(STATUS_PORT) == 0xFF {
             log_ok!(
                 "PS2",
@@ -178,14 +142,9 @@ pub fn init() {
             return;
         }
 
-        
-        
-        
         write_command(CMD_DISABLE_PORT1);
         write_command(CMD_DISABLE_PORT2);
 
-        
-        
         for _ in 0..100_000 {
             if inb(STATUS_PORT) & STATUS_OUTPUT_FULL == 0 {
                 break;
@@ -247,9 +206,6 @@ pub fn init() {
             }
         }
 
-        
-        
-        
         if !write_command(CMD_READ_CONFIG) {
             log_fail!(
                 "PS2",
@@ -277,9 +233,6 @@ pub fn init() {
             return;
         }
 
-        
-        
-        
         if !write_data(KB_CMD_RESET) {
             log_fail!("PS2", "Init", "Failed to send reset to keyboard");
             return;
@@ -315,22 +268,15 @@ pub fn init() {
     );
 }
 
-
-
-
 pub fn is_ready() -> bool {
     READY.load(Ordering::Acquire)
 }
 
 fn on_key_irq() {
-    
-    
+
     let scancode = unsafe { inb(DATA_PORT) };
     handle_scancode(scancode);
 }
-
-
-
 
 #[rustfmt::skip]
 const SET1_UNSHIFTED: [u8; 0x60] = [
@@ -369,18 +315,12 @@ const SCANCODE_RSHIFT: u8 = 0x36;
 const SCANCODE_LCTRL: u8 = 0x1D;
 const SCANCODE_CAPS_LOCK: u8 = 0x3A;
 
-
-
-
-
-
 const BREAK_BIT: u8 = 0x80;
 const EXTENDED_PREFIX: u8 = 0xE0;
 
 static EXPECT_EXTENDED: AtomicBool = AtomicBool::new(false);
 static CTRL_HELD: core::sync::atomic::AtomicU8 = core::sync::atomic::AtomicU8::new(0);
 static ALT_HELD: core::sync::atomic::AtomicU8 = core::sync::atomic::AtomicU8::new(0);
-
 
 const EXT_UP: u8 = 0x48;
 const EXT_DOWN: u8 = 0x50;
@@ -441,11 +381,6 @@ fn modifier_mask() -> u8 {
     if alt & 2 != 0 { bits |= 1 << 6; }
     bits
 }
-
-
-
-
-
 
 fn push_escape(seq: &[u8]) {
     let mut q = ASCII_QUEUE.lock();
@@ -534,10 +469,6 @@ fn handle_scancode(code: u8) {
         return;
     }
 
-    
-    
-    
-    
     if caps && ascii.is_ascii_lowercase() {
         ascii = ascii.to_ascii_uppercase();
     } else if caps && ascii.is_ascii_uppercase() && shift {
@@ -550,9 +481,6 @@ fn handle_scancode(code: u8) {
 
     ASCII_QUEUE.lock().push(ascii);
 }
-
-
-
 
 pub fn try_read_byte() -> Option<u8> {
     ASCII_QUEUE.lock().pop()

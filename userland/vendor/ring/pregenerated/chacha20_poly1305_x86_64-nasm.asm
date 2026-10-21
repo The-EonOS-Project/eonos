@@ -1,6 +1,3 @@
-
-
-
 %ifidn __OUTPUT_FORMAT__, win64
 default	rel
 %define XMMWORD
@@ -50,11 +47,8 @@ $L$and_masks:
 	DB	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff
 section	.text code align=64
 
-
-
 ALIGN	64
 poly_hash_ad_internal:
-
 
 	xor	r10,r10
 	xor	r11,r11
@@ -212,11 +206,8 @@ $L$hash_ad_tail_loop:
 	adc	r11,r9
 	adc	r12,0
 
-
 $L$hash_ad_done:
 	ret
-
-
 
 global	chacha20_poly1305_open_sse41
 
@@ -233,8 +224,6 @@ $L$SEH_begin_chacha20_poly1305_open_sse41:
 	mov	r8,QWORD[40+rsp]
 	mov	r9,QWORD[48+rsp]
 
-
-
 _CET_ENDBR
 	push	rbp
 
@@ -248,12 +237,9 @@ _CET_ENDBR
 
 	push	r15
 
-
-
 	push	r9
 
 	sub	rsp,288 + 160 + 32
-
 
 	lea	rbp,[32+rsp]
 	and	rbp,-32
@@ -371,8 +357,6 @@ $L$open_sse_main_loop:
 	movdqa	XMMWORD[(160+112)+rbp],xmm13
 	movdqa	XMMWORD[(160+128)+rbp],xmm14
 	movdqa	XMMWORD[(160+144)+rbp],xmm15
-
-
 
 	mov	rcx,4
 	mov	r8,rsi
@@ -1701,7 +1685,6 @@ $L$open_sse_tail_256_hash:
 	lea	rsi,[192+rsi]
 	lea	rdi,[192+rdi]
 
-
 $L$open_sse_tail_64_dec_loop:
 	cmp	rbx,16
 	jb	NEAR $L$open_sse_tail_16_init
@@ -1718,12 +1701,9 @@ $L$open_sse_tail_64_dec_loop:
 $L$open_sse_tail_16_init:
 	movdqa	xmm1,xmm0
 
-
 $L$open_sse_tail_16:
 	test	rbx,rbx
 	jz	NEAR $L$open_sse_finalize
-
-
 
 	pxor	xmm3,xmm3
 	lea	rsi,[((-1))+rbx*1+rsi]
@@ -1739,7 +1719,6 @@ DB	102,73,15,126,221
 	pextrq	r14,xmm3,1
 
 	pxor	xmm3,xmm1
-
 
 $L$open_sse_tail_16_extract:
 	pextrb	XMMWORD[rdi],xmm3,0
@@ -1789,7 +1768,6 @@ $L$open_sse_tail_16_extract:
 	adc	r11,r9
 	adc	r12,0
 
-
 $L$open_sse_finalize:
 	add	r10,QWORD[((0+160+32))+rbp]
 	adc	r11,QWORD[((8+160+32))+rbp]
@@ -1832,7 +1810,6 @@ $L$open_sse_finalize:
 	adc	r11,r9
 	adc	r12,0
 
-
 	mov	r13,r10
 	mov	r14,r11
 	mov	r15,r12
@@ -1857,9 +1834,7 @@ $L$open_sse_finalize:
 	movaps	xmm14,XMMWORD[((128+0))+rbp]
 	movaps	xmm15,XMMWORD[((144+0))+rbp]
 
-
 	add	rsp,288 + 160 + 32
-
 
 	pop	r9
 
@@ -2058,7 +2033,6 @@ $L$open_sse_128_xor_hash:
 	adc	r11,QWORD[((8+0))+rsi]
 	adc	r12,1
 
-
 	movdqu	xmm3,XMMWORD[rsi]
 	pxor	xmm1,xmm3
 	movdqu	XMMWORD[rdi],xmm1
@@ -2102,7 +2076,6 @@ $L$open_sse_128_xor_hash:
 	adc	r11,r9
 	adc	r12,0
 
-
 	movdqa	xmm1,xmm5
 	movdqa	xmm5,xmm9
 	movdqa	xmm9,xmm13
@@ -2112,13 +2085,6 @@ $L$open_sse_128_xor_hash:
 	movdqa	xmm10,xmm14
 	jmp	NEAR $L$open_sse_128_xor_hash
 $L$SEH_end_chacha20_poly1305_open_sse41:
-
-
-
-
-
-
-
 
 global	chacha20_poly1305_seal_sse41
 
@@ -2135,8 +2101,6 @@ $L$SEH_begin_chacha20_poly1305_seal_sse41:
 	mov	r8,QWORD[40+rsp]
 	mov	r9,QWORD[48+rsp]
 
-
-
 _CET_ENDBR
 	push	rbp
 
@@ -2149,8 +2113,6 @@ _CET_ENDBR
 	push	r14
 
 	push	r15
-
-
 
 	push	r9
 
@@ -2411,7 +2373,6 @@ DB	102,69,15,58,15,228,4
 	paddd	xmm4,XMMWORD[((160+48))+rbp]
 	paddd	xmm8,XMMWORD[((160+64))+rbp]
 	paddd	xmm12,XMMWORD[((160+96))+rbp]
-
 
 	pand	xmm3,XMMWORD[$L$clamp]
 	movdqa	XMMWORD[(160+0)+rbp],xmm3
@@ -3608,7 +3569,6 @@ $L$seal_sse_128_tail_xor:
 	adc	r11,r9
 	adc	r12,0
 
-
 	movdqa	xmm0,xmm4
 	movdqa	xmm4,xmm8
 	movdqa	xmm8,xmm12
@@ -3633,9 +3593,7 @@ $L$seal_sse_tail_16_compose:
 	dec	rcx
 	jne	NEAR $L$seal_sse_tail_16_compose
 
-
 	pxor	xmm15,xmm0
-
 
 	mov	rcx,rbx
 	movdqu	xmm0,xmm15
@@ -3645,13 +3603,6 @@ $L$seal_sse_tail_16_extract:
 	add	rdi,1
 	sub	rcx,1
 	jnz	NEAR $L$seal_sse_tail_16_extract
-
-
-
-
-
-
-
 
 	mov	r9,QWORD[((288 + 160 + 32))+rsp]
 	mov	r14,QWORD[56+r9]
@@ -3668,19 +3619,14 @@ $L$seal_sse_tail_16_extract:
 
 $L$load_extra_in:
 
-
 	lea	rsi,[((-1))+r15*1+r13]
-
 
 	add	r13,r15
 	sub	r14,r15
 	mov	QWORD[48+r9],r13
 	mov	QWORD[56+r9],r14
 
-
-
 	add	r8,r15
-
 
 	pxor	xmm11,xmm11
 $L$load_extra_load_loop:
@@ -3690,9 +3636,6 @@ $L$load_extra_load_loop:
 	sub	r15,1
 	jnz	NEAR $L$load_extra_load_loop
 
-
-
-
 	mov	r15,rbx
 
 $L$load_extra_shift_loop:
@@ -3700,17 +3643,11 @@ $L$load_extra_shift_loop:
 	sub	r15,1
 	jnz	NEAR $L$load_extra_shift_loop
 
-
-
-
 	lea	r15,[$L$and_masks]
 	shl	rbx,4
 	pand	xmm15,XMMWORD[((-16))+rbx*1+r15]
 
-
 	por	xmm15,xmm11
-
-
 
 DB	102,77,15,126,253
 	pextrq	r14,xmm15,1
@@ -3754,7 +3691,6 @@ DB	102,77,15,126,253
 	add	r10,r15
 	adc	r11,r9
 	adc	r12,0
-
 
 $L$process_blocks_of_extra_in:
 
@@ -3871,7 +3807,6 @@ DB	102,77,15,126,253
 	adc	r11,r9
 	adc	r12,0
 
-
 $L$do_length_block:
 	add	r10,QWORD[((0+160+32))+rbp]
 	adc	r11,QWORD[((8+160+32))+rbp]
@@ -3914,7 +3849,6 @@ $L$do_length_block:
 	adc	r11,r9
 	adc	r12,0
 
-
 	mov	r13,r10
 	mov	r14,r11
 	mov	r15,r12
@@ -3939,9 +3873,7 @@ $L$do_length_block:
 	movaps	xmm14,XMMWORD[((128+0))+rbp]
 	movaps	xmm15,XMMWORD[((144+0))+rbp]
 
-
 	add	rsp,288 + 160 + 32
-
 
 	pop	r9
 
@@ -4135,8 +4067,6 @@ DB	102,69,15,58,15,246,4
 	jmp	NEAR $L$seal_sse_128_tail_xor
 $L$SEH_end_chacha20_poly1305_seal_sse41:
 
-
-
 global	chacha20_poly1305_open_avx2
 
 ALIGN	64
@@ -4152,8 +4082,6 @@ $L$SEH_begin_chacha20_poly1305_open_avx2:
 	mov	r8,QWORD[40+rsp]
 	mov	r9,QWORD[48+rsp]
 
-
-
 _CET_ENDBR
 	push	rbp
 
@@ -4167,12 +4095,9 @@ _CET_ENDBR
 
 	push	r15
 
-
-
 	push	r9
 
 	sub	rsp,288 + 160 + 32
-
 
 	lea	rbp,[32+rsp]
 	and	rbp,-32
@@ -6089,7 +6014,6 @@ $L$open_avx2_short_hash_and_xor_loop:
 	adc	r11,r9
 	adc	r12,0
 
-
 	vpxor	ymm0,ymm0,YMMWORD[rsi]
 	vmovdqu	YMMWORD[rdi],ymm0
 	lea	rsi,[32+rsi]
@@ -6323,8 +6247,6 @@ $L$open_avx2_320_rounds:
 	jmp	NEAR $L$open_avx2_short
 $L$SEH_end_chacha20_poly1305_open_avx2:
 
-
-
 global	chacha20_poly1305_seal_avx2
 
 ALIGN	64
@@ -6340,8 +6262,6 @@ $L$SEH_begin_chacha20_poly1305_seal_avx2:
 	mov	r8,QWORD[40+rsp]
 	mov	r9,QWORD[48+rsp]
 
-
-
 _CET_ENDBR
 	push	rbp
 
@@ -6354,8 +6274,6 @@ _CET_ENDBR
 	push	r14
 
 	push	r15
-
-
 
 	push	r9
 
@@ -8411,42 +8329,8 @@ $L$seal_avx2_tail_512_rounds_and_2xhash:
 	vpalignr	ymm8,ymm8,ymm8,8
 	vpalignr	ymm12,ymm12,ymm12,4
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	add	r15,rax
 	adc	r9,rdx
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	mov	r10,r13
 	mov	r11,r14

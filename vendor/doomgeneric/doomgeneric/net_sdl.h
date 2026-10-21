@@ -1,20 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef NET_SDL_H
 #define NET_SDL_H
 

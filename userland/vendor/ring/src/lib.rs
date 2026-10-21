@@ -1,54 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![allow(
     clippy::collapsible_if,
     clippy::identity_op,
@@ -154,18 +103,7 @@ pub mod signature;
 mod tests;
 
 mod sealed {
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     pub trait Sealed {}
 }
 

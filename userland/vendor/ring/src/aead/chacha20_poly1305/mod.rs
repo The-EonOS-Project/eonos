@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{
     chacha::{self, Counter, Overlapping},
     poly1305, Aad, Nonce, Tag,
@@ -122,15 +108,11 @@ fn check_input_lengths(aad: Aad<&[u8]>, input: &[u8]) -> Result<(), InputTooLong
         return Err(InputTooLongError::new(input.len()));
     }
 
-    
-    
-    
     const _USIZE_BOUNDED_BY_U64: u64 = u64_from_usize(usize::MAX);
     let _ = aad;
 
     Ok(())
 }
-
 
 pub(super) fn begin(
     key: &chacha::Key,

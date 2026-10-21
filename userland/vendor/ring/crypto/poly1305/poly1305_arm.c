@@ -1,27 +1,8 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <ring-core/base.h>
 
 #include "../internal.h"
 
-
 #pragma GCC diagnostic ignored "-Wsign-conversion"
-
 
 typedef struct {
   uint32_t v[12];  
@@ -103,8 +84,6 @@ static void freeze(fe1305x2 *r) {
 
 static void store32(uint8_t out[4], uint32_t v) { OPENSSL_memcpy(out, &v, 4); }
 
-
-
 static uint32_t load32(const uint8_t t[4]) {
   uint32_t tmp;
   OPENSSL_memcpy(&tmp, t, sizeof(tmp));
@@ -173,7 +152,6 @@ static void fe1305x2_frombytearray(fe1305x2 *r, const uint8_t *x, size_t xlen) {
 }
 
 static const alignas(16) fe1305x2 zero;
-
 
 struct poly1305_state_st {
   alignas(16) fe1305x2 r;

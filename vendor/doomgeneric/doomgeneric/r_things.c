@@ -1,27 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
-
 
 #include "deh_main.h"
 #include "doomdef.h"
@@ -35,52 +13,27 @@
 
 #include "doomstat.h"
 
-
-
 #define MINZ				(FRACUNIT*4)
 #define BASEYCENTER			100
-
-
-
-
-
 
 typedef struct
 {
     int		x1;
     int		x2;
-	
+
     int		column;
     int		topclip;
     int		bottomclip;
 
 } maskdraw_t;
 
-
-
-
-
-
-
-
-
-
 fixed_t		pspritescale;
 fixed_t		pspriteiscale;
 
 lighttable_t**	spritelights;
 
-
-
 short		negonearray[SCREENWIDTH];
 short		screenheightarray[SCREENWIDTH];
-
-
-
-
-
-
-
 
 spritedef_t*	sprites;
 int		numsprites;
@@ -88,13 +41,6 @@ int		numsprites;
 spriteframe_t	sprtemp[29];
 int		maxframe;
 char*		spritename;
-
-
-
-
-
-
-
 
 void
 R_InstallSpriteLump
@@ -104,17 +50,17 @@ R_InstallSpriteLump
   boolean	flipped )
 {
     int		r;
-	
+
     if (frame >= 29 || rotation > 8)
 	I_Error("R_InstallSpriteLump: "
 		"Bad frame characters in lump %i", lump);
-	
+
     if ((int)frame > maxframe)
 	maxframe = frame;
-		
+
     if (rotation == 0)
     {
-	
+
 	if (sprtemp[frame].rotate == false)
 	    I_Error ("R_InitSprites: Sprite %s frame %c has "
 		     "multip rot=0 lump", spritename, 'A'+frame);
@@ -122,7 +68,7 @@ R_InstallSpriteLump
 	if (sprtemp[frame].rotate == true)
 	    I_Error ("R_InitSprites: Sprite %s frame %c has rotations "
 		     "and a rot=0 lump", spritename, 'A'+frame);
-			
+
 	sprtemp[frame].rotate = false;
 	for (r=0 ; r<8 ; r++)
 	{
@@ -131,42 +77,22 @@ R_InstallSpriteLump
 	}
 	return;
     }
-	
-    
+
     if (sprtemp[frame].rotate == false)
 	I_Error ("R_InitSprites: Sprite %s frame %c has rotations "
 		 "and a rot=0 lump", spritename, 'A'+frame);
-		
+
     sprtemp[frame].rotate = true;
 
-    
     rotation--;		
     if (sprtemp[frame].lump[rotation] != -1)
 	I_Error ("R_InitSprites: Sprite %s : %c : %c "
 		 "has two lumps mapped to it",
 		 spritename, 'A'+frame, '1'+rotation);
-		
+
     sprtemp[frame].lump[rotation] = lump - firstspritelump;
     sprtemp[frame].flip[rotation] = (byte)flipped;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 void R_InitSpriteDefs (char** namelist) 
 { 
@@ -178,34 +104,28 @@ void R_InitSpriteDefs (char** namelist)
     int		start;
     int		end;
     int		patched;
-		
-    
+
     check = namelist;
     while (*check != NULL)
 	check++;
 
     numsprites = check-namelist;
-	
+
     if (!numsprites)
 	return;
-		
+
     sprites = Z_Malloc(numsprites *sizeof(*sprites), PU_STATIC, NULL);
-	
+
     start = firstspritelump-1;
     end = lastspritelump+1;
-	
-    
-    
-    
+
     for (i=0 ; i<numsprites ; i++)
     {
 	spritename = DEH_String(namelist[i]);
 	memset (sprtemp,-1, sizeof(sprtemp));
-		
+
 	maxframe = -1;
-	
-	
-	
+
 	for (l=start+1 ; l<end ; l++)
 	{
 	    if (!strncasecmp(lumpinfo[l].name, spritename, 4))
@@ -228,32 +148,31 @@ void R_InitSpriteDefs (char** namelist)
 		}
 	    }
 	}
-	
-	
+
 	if (maxframe == -1)
 	{
 	    sprites[i].numframes = 0;
 	    continue;
 	}
-		
+
 	maxframe++;
-	
+
 	for (frame = 0 ; frame < maxframe ; frame++)
 	{
 	    switch ((int)sprtemp[frame].rotate)
 	    {
 	      case -1:
-		
+
 		I_Error ("R_InitSprites: No patches found "
 			 "for %s frame %c", spritename, frame+'A');
 		break;
-		
+
 	      case 0:
-		
+
 		break;
-			
+
 	      case 1:
-		
+
 		for (rotation=0 ; rotation<8 ; rotation++)
 		    if (sprtemp[frame].lump[rotation] == -1)
 			I_Error ("R_InitSprites: Sprite %s frame %c "
@@ -262,8 +181,7 @@ void R_InitSpriteDefs (char** namelist)
 		break;
 	    }
 	}
-	
-	
+
 	sprites[i].numframes = maxframe;
 	sprites[i].spriteframes = 
 	    Z_Malloc (maxframe * sizeof(spriteframe_t), PU_STATIC, NULL);
@@ -272,48 +190,26 @@ void R_InitSpriteDefs (char** namelist)
 
 }
 
-
-
-
-
-
-
 vissprite_t	vissprites[MAXVISSPRITES];
 vissprite_t*	vissprite_p;
 int		newvissprite;
 
-
-
-
-
-
-
 void R_InitSprites (char** namelist)
 {
     int		i;
-	
+
     for (i=0 ; i<SCREENWIDTH ; i++)
     {
 	negonearray[i] = -1;
     }
-	
+
     R_InitSpriteDefs (namelist);
 }
-
-
-
-
-
-
 
 void R_ClearSprites (void)
 {
     vissprite_p = vissprites;
 }
-
-
-
-
 
 vissprite_t	overflowsprite;
 
@@ -321,18 +217,10 @@ vissprite_t* R_NewVisSprite (void)
 {
     if (vissprite_p == &vissprites[MAXVISSPRITES])
 	return &overflowsprite;
-    
+
     vissprite_p++;
     return vissprite_p-1;
 }
-
-
-
-
-
-
-
-
 
 short*		mfloorclip;
 short*		mceilingclip;
@@ -345,19 +233,18 @@ void R_DrawMaskedColumn (column_t* column)
     int		topscreen;
     int 	bottomscreen;
     fixed_t	basetexturemid;
-	
+
     basetexturemid = dc_texturemid;
-	
+
     for ( ; column->topdelta != 0xff ; ) 
     {
-	
-	
+
 	topscreen = sprtopscreen + spryscale*column->topdelta;
 	bottomscreen = topscreen + spryscale*column->length;
 
 	dc_yl = (topscreen+FRACUNIT-1)>>FRACBITS;
 	dc_yh = (bottomscreen-1)>>FRACBITS;
-		
+
 	if (dc_yh >= mfloorclip[dc_x])
 	    dc_yh = mfloorclip[dc_x]-1;
 	if (dc_yl <= mceilingclip[dc_x])
@@ -367,23 +254,14 @@ void R_DrawMaskedColumn (column_t* column)
 	{
 	    dc_source = (byte *)column + 3;
 	    dc_texturemid = basetexturemid - (column->topdelta<<FRACBITS);
-	    
 
-	    
-	    
 	    colfunc ();	
 	}
 	column = (column_t *)(  (byte *)column + column->length + 4);
     }
-	
+
     dc_texturemid = basetexturemid;
 }
-
-
-
-
-
-
 
 void
 R_DrawVisSprite
@@ -395,15 +273,14 @@ R_DrawVisSprite
     int			texturecolumn;
     fixed_t		frac;
     patch_t*		patch;
-	
-	
+
     patch = W_CacheLumpNum (vis->patch+firstspritelump, PU_CACHE);
 
     dc_colormap = vis->colormap;
-    
+
     if (!dc_colormap)
     {
-	
+
 	colfunc = fuzzcolfunc;
     }
     else if (vis->mobjflags & MF_TRANSLATION)
@@ -412,13 +289,13 @@ R_DrawVisSprite
 	dc_translation = translationtables - 256 +
 	    ( (vis->mobjflags & MF_TRANSLATION) >> (MF_TRANSSHIFT-8) );
     }
-	
+
     dc_iscale = abs(vis->xiscale)>>detailshift;
     dc_texturemid = vis->texturemid;
     frac = vis->startfrac;
     spryscale = vis->scale;
     sprtopscreen = centeryfrac - FixedMul(dc_texturemid,spryscale);
-	
+
     for (dc_x=vis->x1 ; dc_x<=vis->x2 ; dc_x++, frac += vis->xiscale)
     {
 	texturecolumn = frac>>FRACBITS;
@@ -434,67 +311,56 @@ R_DrawVisSprite
     colfunc = basecolfunc;
 }
 
-
-
-
-
-
-
-
 void R_ProjectSprite (mobj_t* thing)
 {
     fixed_t		tr_x;
     fixed_t		tr_y;
-    
+
     fixed_t		gxt;
     fixed_t		gyt;
-    
+
     fixed_t		tx;
     fixed_t		tz;
 
     fixed_t		xscale;
-    
+
     int			x1;
     int			x2;
 
     spritedef_t*	sprdef;
     spriteframe_t*	sprframe;
     int			lump;
-    
+
     unsigned		rot;
     boolean		flip;
-    
+
     int			index;
 
     vissprite_t*	vis;
-    
+
     angle_t		ang;
     fixed_t		iscale;
-    
-    
+
     tr_x = thing->x - viewx;
     tr_y = thing->y - viewy;
-	
+
     gxt = FixedMul(tr_x,viewcos); 
     gyt = -FixedMul(tr_y,viewsin);
-    
+
     tz = gxt-gyt; 
 
-    
     if (tz < MINZ)
 	return;
-    
+
     xscale = FixedDiv(projection, tz);
-	
+
     gxt = -FixedMul(tr_x,viewsin); 
     gyt = FixedMul(tr_y,viewcos); 
     tx = -(gyt+gxt); 
 
-    
     if (abs(tx)>(tz<<2))
 	return;
-    
-    
+
 #ifdef RANGECHECK
     if ((unsigned int) thing->sprite >= (unsigned int) numsprites)
 	I_Error ("R_ProjectSprite: invalid sprite number %i ",
@@ -510,7 +376,7 @@ void R_ProjectSprite (mobj_t* thing)
 
     if (sprframe->rotate)
     {
-	
+
 	ang = R_PointToAngle (thing->x, thing->y);
 	rot = (ang-thing->angle+(unsigned)(ANG45/2)*9)>>29;
 	lump = sprframe->lump[rot];
@@ -518,27 +384,23 @@ void R_ProjectSprite (mobj_t* thing)
     }
     else
     {
-	
+
 	lump = sprframe->lump[0];
 	flip = (boolean)sprframe->flip[0];
     }
-    
-    
+
     tx -= spriteoffset[lump];	
     x1 = (centerxfrac + FixedMul (tx,xscale) ) >>FRACBITS;
 
-    
     if (x1 > viewwidth)
 	return;
-    
+
     tx +=  spritewidth[lump];
     x2 = ((centerxfrac + FixedMul (tx,xscale) ) >>FRACBITS) - 1;
 
-    
     if (x2 < 0)
 	return;
-    
-    
+
     vis = R_NewVisSprite ();
     vis->mobjflags = thing->flags;
     vis->scale = xscale<<detailshift;
@@ -565,27 +427,26 @@ void R_ProjectSprite (mobj_t* thing)
     if (vis->x1 > x1)
 	vis->startfrac += vis->xiscale*(vis->x1-x1);
     vis->patch = lump;
-    
-    
+
     if (thing->flags & MF_SHADOW)
     {
-	
+
 	vis->colormap = NULL;
     }
     else if (fixedcolormap)
     {
-	
+
 	vis->colormap = fixedcolormap;
     }
     else if (thing->frame & FF_FULLBRIGHT)
     {
-	
+
 	vis->colormap = colormaps;
     }
-    
+
     else
     {
-	
+
 	index = xscale>>(LIGHTSCALESHIFT-detailshift);
 
 	if (index >= MAXLIGHTSCALE) 
@@ -595,28 +456,16 @@ void R_ProjectSprite (mobj_t* thing)
     }	
 }
 
-
-
-
-
-
-
-
 void R_AddSprites (sector_t* sec)
 {
     mobj_t*		thing;
     int			lightnum;
 
-    
-    
-    
-    
     if (sec->validcount == validcount)
 	return;		
 
-    
     sec->validcount = validcount;
-	
+
     lightnum = (sec->lightlevel >> LIGHTSEGSHIFT)+extralight;
 
     if (lightnum < 0)		
@@ -626,14 +475,9 @@ void R_AddSprites (sector_t* sec)
     else
 	spritelights = scalelight[lightnum];
 
-    
     for (thing = sec->thinglist ; thing ; thing = thing->snext)
 	R_ProjectSprite (thing);
 }
-
-
-
-
 
 void R_DrawPSprite (pspdef_t* psp)
 {
@@ -646,8 +490,7 @@ void R_DrawPSprite (pspdef_t* psp)
     boolean		flip;
     vissprite_t*	vis;
     vissprite_t		avis;
-    
-    
+
 #ifdef RANGECHECK
     if ( (unsigned)psp->state->sprite >= (unsigned int) numsprites)
 	I_Error ("R_ProjectSprite: invalid sprite number %i ",
@@ -663,32 +506,28 @@ void R_DrawPSprite (pspdef_t* psp)
 
     lump = sprframe->lump[0];
     flip = (boolean)sprframe->flip[0];
-    
-    
+
     tx = psp->sx-160*FRACUNIT;
-	
+
     tx -= spriteoffset[lump];	
     x1 = (centerxfrac + FixedMul (tx,pspritescale) ) >>FRACBITS;
 
-    
     if (x1 > viewwidth)
 	return;		
 
     tx +=  spritewidth[lump];
     x2 = ((centerxfrac + FixedMul (tx, pspritescale) ) >>FRACBITS) - 1;
 
-    
     if (x2 < 0)
 	return;
-    
-    
+
     vis = &avis;
     vis->mobjflags = 0;
     vis->texturemid = (BASEYCENTER<<FRACBITS)+FRACUNIT/2-(psp->sy-spritetopoffset[lump]);
     vis->x1 = x1 < 0 ? 0 : x1;
     vis->x2 = x2 >= viewwidth ? viewwidth-1 : x2;	
     vis->scale = pspritescale<<detailshift;
-    
+
     if (flip)
     {
 	vis->xiscale = -pspriteiscale;
@@ -699,7 +538,7 @@ void R_DrawPSprite (pspdef_t* psp)
 	vis->xiscale = pspriteiscale;
 	vis->startfrac = 0;
     }
-    
+
     if (vis->x1 > x1)
 	vis->startfrac += vis->xiscale*(vis->x1-x1);
 
@@ -708,40 +547,34 @@ void R_DrawPSprite (pspdef_t* psp)
     if (viewplayer->powers[pw_invisibility] > 4*32
 	|| viewplayer->powers[pw_invisibility] & 8)
     {
-	
+
 	vis->colormap = NULL;
     }
     else if (fixedcolormap)
     {
-	
+
 	vis->colormap = fixedcolormap;
     }
     else if (psp->state->frame & FF_FULLBRIGHT)
     {
-	
+
 	vis->colormap = colormaps;
     }
     else
     {
-	
+
 	vis->colormap = spritelights[MAXLIGHTSCALE-1];
     }
-	
+
     R_DrawVisSprite (vis, vis->x1, vis->x2);
 }
-
-
-
-
-
 
 void R_DrawPlayerSprites (void)
 {
     int		i;
     int		lightnum;
     pspdef_t*	psp;
-    
-    
+
     lightnum =
 	(viewplayer->mo->subsector->sector->lightlevel >> LIGHTSEGSHIFT) 
 	+extralight;
@@ -752,12 +585,10 @@ void R_DrawPlayerSprites (void)
 	spritelights = scalelight[LIGHTLEVELS-1];
     else
 	spritelights = scalelight[lightnum];
-    
-    
+
     mfloorclip = screenheightarray;
     mceilingclip = negonearray;
-    
-    
+
     for (i=0, psp=viewplayer->psprites;
 	 i<NUMPSPRITES;
 	 i++,psp++)
@@ -767,14 +598,7 @@ void R_DrawPlayerSprites (void)
     }
 }
 
-
-
-
-
-
-
 vissprite_t	vsprsortedhead;
-
 
 void R_SortVisSprites (void)
 {
@@ -786,24 +610,22 @@ void R_SortVisSprites (void)
     fixed_t		bestscale;
 
     count = vissprite_p - vissprites;
-	
+
     unsorted.next = unsorted.prev = &unsorted;
 
     if (!count)
 	return;
-		
+
     for (ds=vissprites ; ds<vissprite_p ; ds++)
     {
 	ds->next = ds+1;
 	ds->prev = ds-1;
     }
-    
+
     vissprites[0].prev = &unsorted;
     unsorted.next = &vissprites[0];
     (vissprite_p-1)->next = &unsorted;
     unsorted.prev = vissprite_p-1;
-    
-    
 
     vsprsortedhead.next = vsprsortedhead.prev = &vsprsortedhead;
     for (i=0 ; i<count ; i++)
@@ -827,11 +649,6 @@ void R_SortVisSprites (void)
     }
 }
 
-
-
-
-
-
 static short		clipbot[SCREENWIDTH];
 static short		cliptop[SCREENWIDTH];
 void R_DrawSprite (vissprite_t* spr)
@@ -843,25 +660,22 @@ void R_DrawSprite (vissprite_t* spr)
     fixed_t		scale;
     fixed_t		lowscale;
     int			silhouette;
-		
+
     for (x = spr->x1 ; x<=spr->x2 ; x++)
 	clipbot[x] = cliptop[x] = -2;
-    
-    
-    
-    
+
     for (ds=ds_p-1 ; ds >= drawsegs ; ds--)
     {
-	
+
 	if (ds->x1 > spr->x2
 	    || ds->x2 < spr->x1
 	    || (!ds->silhouette
 		&& !ds->maskedtexturecol) )
 	{
-	    
+
 	    continue;
 	}
-			
+
 	r1 = ds->x1 < spr->x1 ? spr->x1 : ds->x1;
 	r2 = ds->x2 > spr->x2 ? spr->x2 : ds->x2;
 
@@ -875,45 +689,43 @@ void R_DrawSprite (vissprite_t* spr)
 	    lowscale = ds->scale1;
 	    scale = ds->scale2;
 	}
-		
+
 	if (scale < spr->scale
 	    || ( lowscale < spr->scale
 		 && !R_PointOnSegSide (spr->gx, spr->gy, ds->curline) ) )
 	{
-	    
+
 	    if (ds->maskedtexturecol)	
 		R_RenderMaskedSegRange (ds, r1, r2);
-	    
+
 	    continue;			
 	}
 
-	
-	
 	silhouette = ds->silhouette;
-	
+
 	if (spr->gz >= ds->bsilheight)
 	    silhouette &= ~SIL_BOTTOM;
 
 	if (spr->gzt <= ds->tsilheight)
 	    silhouette &= ~SIL_TOP;
-			
+
 	if (silhouette == 1)
 	{
-	    
+
 	    for (x=r1 ; x<=r2 ; x++)
 		if (clipbot[x] == -2)
 		    clipbot[x] = ds->sprbottomclip[x];
 	}
 	else if (silhouette == 2)
 	{
-	    
+
 	    for (x=r1 ; x<=r2 ; x++)
 		if (cliptop[x] == -2)
 		    cliptop[x] = ds->sprtopclip[x];
 	}
 	else if (silhouette == 3)
 	{
-	    
+
 	    for (x=r1 ; x<=r2 ; x++)
 	    {
 		if (clipbot[x] == -2)
@@ -922,12 +734,9 @@ void R_DrawSprite (vissprite_t* spr)
 		    cliptop[x] = ds->sprtopclip[x];
 	    }
 	}
-		
-    }
-    
-    
 
-    
+    }
+
     for (x = spr->x1 ; x<=spr->x2 ; x++)
     {
 	if (clipbot[x] == -2)		
@@ -936,47 +745,36 @@ void R_DrawSprite (vissprite_t* spr)
 	if (cliptop[x] == -2)
 	    cliptop[x] = -1;
     }
-		
+
     mfloorclip = clipbot;
     mceilingclip = cliptop;
     R_DrawVisSprite (spr, spr->x1, spr->x2);
 }
 
-
-
-
-
-
-
 void R_DrawMasked (void)
 {
     vissprite_t*	spr;
     drawseg_t*		ds;
-	
+
     R_SortVisSprites ();
 
     if (vissprite_p > vissprites)
     {
-	
+
 	for (spr = vsprsortedhead.next ;
 	     spr != &vsprsortedhead ;
 	     spr=spr->next)
 	{
-	    
+
 	    R_DrawSprite (spr);
 	}
     }
-    
-    
+
     for (ds=ds_p-1 ; ds >= drawsegs ; ds--)
 	if (ds->maskedtexturecol)
 	    R_RenderMaskedSegRange (ds, ds->x1, ds->x2);
-    
-    
-    
+
     if (!viewangleoffset)		
 	R_DrawPlayerSprites ();
 }
-
-
 

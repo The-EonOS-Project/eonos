@@ -1,6 +1,3 @@
-
-
-
 %ifidn __OUTPUT_FORMAT__, win64
 default	rel
 %define XMMWORD
@@ -10,7 +7,6 @@ default	rel
 
 %include "ring_core_generated/prefix_symbols_nasm.inc"
 section	.text code align=64
-
 
 global	bn_mul4x_mont_gather5
 
@@ -26,8 +22,6 @@ $L$SEH_begin_bn_mul4x_mont_gather5:
 	mov	rcx,r9
 	mov	r8,QWORD[40+rsp]
 	mov	r9,QWORD[48+rsp]
-
-
 
 _CET_ENDBR
 	DB	0x67
@@ -49,20 +43,9 @@ $L$mul4x_prologue:
 
 	DB	0x67
 
-
-
 	shl	r9d,3
 	lea	r10,[r9*2+r9]
 	neg	r9
-
-
-
-
-
-
-
-
-
 
 	lea	r11,[((-320))+r9*2+rsp]
 	mov	rbp,rsp
@@ -132,7 +115,6 @@ $L$mul4x_epilogue:
 	ret
 
 $L$SEH_end_bn_mul4x_mont_gather5:
-
 
 ALIGN	32
 mul4x_internal:
@@ -661,7 +643,6 @@ $L$inner4x:
 	mov	r15,QWORD[24+rbp]
 	jmp	NEAR $L$sqr4x_sub_entry
 
-
 global	bn_power5_nohw
 
 ALIGN	32
@@ -676,8 +657,6 @@ $L$SEH_begin_bn_power5_nohw:
 	mov	rcx,r9
 	mov	r8,QWORD[40+rsp]
 	mov	r9,QWORD[48+rsp]
-
-
 
 _CET_ENDBR
 	mov	rax,rsp
@@ -696,20 +675,10 @@ _CET_ENDBR
 
 $L$power5_prologue:
 
-
-
-
 	shl	r9d,3
 	lea	r10d,[r9*2+r9]
 	neg	r9
 	mov	r8,QWORD[r8]
-
-
-
-
-
-
-
 
 	lea	r11,[((-320))+r9*2+rsp]
 	mov	rbp,rsp
@@ -749,15 +718,6 @@ $L$pwr_page_walk_done:
 
 	mov	r10,r9
 	neg	r9
-
-
-
-
-
-
-
-
-
 
 	mov	QWORD[32+rsp],r8
 	mov	QWORD[40+rsp],rax
@@ -813,90 +773,16 @@ $L$SEH_end_bn_power5_nohw:
 
 global	bn_sqr8x_internal
 
-
 ALIGN	32
 bn_sqr8x_internal:
 __bn_sqr8x_internal:
 
 _CET_ENDBR
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	lea	rbp,[32+r10]
 	lea	rsi,[r9*1+rsi]
 
 	mov	rcx,r9
-
 
 	mov	r14,QWORD[((-32))+rbp*1+rsi]
 	lea	rdi,[((48+8))+r9*2+rsp]
@@ -917,7 +803,6 @@ _CET_ENDBR
 	adc	rdx,0
 	mov	QWORD[((-16))+rbp*1+rdi],r11
 	mov	r10,rdx
-
 
 	mov	rbx,QWORD[((-8))+rbp*1+rsi]
 	mul	r15
@@ -954,7 +839,6 @@ $L$sqr4x_1st:
 	add	r11,r13
 	adc	r10,0
 
-
 	mul	r15
 	add	r12,rax
 	mov	rax,rbx
@@ -986,7 +870,6 @@ $L$sqr4x_1st:
 	adc	r10,0
 	add	r11,r13
 	adc	r10,0
-
 
 	mul	r15
 	add	r12,rax
@@ -1125,7 +1008,6 @@ $L$sqr4x_inner:
 
 	add	rbp,16
 	jnz	NEAR $L$sqr4x_outer
-
 
 	mov	r14,QWORD[((-32))+rsi]
 	lea	rdi,[((48+8))+r9*2+rsp]
@@ -1594,8 +1476,6 @@ DB	102,73,15,126,217
 	jb	NEAR $L$8x_reduction_loop
 	ret
 
-
-
 ALIGN	32
 __bn_post4x_internal:
 
@@ -1650,7 +1530,6 @@ $L$sqr4x_sub_entry:
 	neg	r9
 	ret
 
-
 global	bn_mulx4x_mont_gather5
 
 ALIGN	32
@@ -1665,8 +1544,6 @@ $L$SEH_begin_bn_mulx4x_mont_gather5:
 	mov	rcx,r9
 	mov	r8,QWORD[40+rsp]
 	mov	r9,QWORD[48+rsp]
-
-
 
 _CET_ENDBR
 	mov	rax,rsp
@@ -1685,22 +1562,10 @@ _CET_ENDBR
 
 $L$mulx4x_prologue:
 
-
-
-
 	shl	r9d,3
 	lea	r10,[r9*2+r9]
 	neg	r9
 	mov	r8,QWORD[r8]
-
-
-
-
-
-
-
-
-
 
 	lea	r11,[((-320))+r9*2+rsp]
 	mov	rbp,rsp
@@ -1737,18 +1602,6 @@ $L$mulx4x_page_walk:
 	ja	NEAR $L$mulx4x_page_walk
 $L$mulx4x_page_walk_done:
 
-
-
-
-
-
-
-
-
-
-
-
-
 	mov	QWORD[32+rsp],r8
 	mov	QWORD[40+rsp],rax
 
@@ -1779,7 +1632,6 @@ $L$mulx4x_epilogue:
 	ret
 
 $L$SEH_end_bn_mulx4x_mont_gather5:
-
 
 ALIGN	32
 mulx4x_internal:
@@ -2205,7 +2057,6 @@ $L$mulx4x_inner:
 	mov	r15,QWORD[24+rbp]
 	jmp	NEAR $L$sqrx4x_sub_entry
 
-
 global	bn_powerx5
 
 ALIGN	32
@@ -2220,8 +2071,6 @@ $L$SEH_begin_bn_powerx5:
 	mov	rcx,r9
 	mov	r8,QWORD[40+rsp]
 	mov	r9,QWORD[48+rsp]
-
-
 
 _CET_ENDBR
 	mov	rax,rsp
@@ -2240,20 +2089,10 @@ _CET_ENDBR
 
 $L$powerx5_prologue:
 
-
-
-
 	shl	r9d,3
 	lea	r10,[r9*2+r9]
 	neg	r9
 	mov	r8,QWORD[r8]
-
-
-
-
-
-
-
 
 	lea	r11,[((-320))+r9*2+rsp]
 	mov	rbp,rsp
@@ -2293,17 +2132,6 @@ $L$pwrx_page_walk_done:
 
 	mov	r10,r9
 	neg	r9
-
-
-
-
-
-
-
-
-
-
-
 
 	pxor	xmm0,xmm0
 DB	102,72,15,110,207
@@ -2361,51 +2189,11 @@ $L$SEH_end_bn_powerx5:
 
 global	bn_sqrx8x_internal
 
-
 ALIGN	32
 bn_sqrx8x_internal:
 __bn_sqrx8x_internal:
 
 _CET_ENDBR
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	lea	rdi,[((48+8))+rsp]
 	lea	rbp,[r9*1+rsi]
@@ -2471,7 +2259,6 @@ $L$sqrx8x_outer_loop:
 	mov	QWORD[16+rdi],r9
 	sbb	rcx,rcx
 	xor	rbp,rbp
-
 
 	mulx	rbx,r8,QWORD[16+rsi]
 	mulx	rax,r9,QWORD[24+rsi]
@@ -2586,7 +2373,6 @@ $L$sqrx8x_outer_loop:
 	mov	rdx,QWORD[((-64))+rsi]
 	mov	QWORD[((16+8))+rsp],rax
 	mov	QWORD[((24+8))+rsp],rdi
-
 
 	xor	eax,eax
 	jmp	NEAR $L$sqrx8x_loop
@@ -2710,7 +2496,6 @@ DB	102,72,15,126,217
 	adox	r11,r11
 	mov	r12,QWORD[16+rdi]
 	mov	r13,QWORD[24+rdi]
-
 
 ALIGN	32
 $L$sqrx4x_shift_n_add:
@@ -2979,7 +2764,6 @@ DB	102,72,15,126,213
 	jb	NEAR $L$sqrx8x_reduction_loop
 	ret
 
-
 ALIGN	32
 
 __bn_postx4x_internal:
@@ -3032,7 +2816,6 @@ $L$sqrx4x_sub_entry:
 
 	ret
 
-
 global	bn_scatter5
 
 ALIGN	16
@@ -3041,14 +2824,6 @@ bn_scatter5:
 _CET_ENDBR
 	cmp	edx,0
 	jz	NEAR $L$scatter_epilogue
-
-
-
-
-
-
-
-
 
 	lea	r8,[r9*8+r8]
 $L$scatter:
@@ -3060,8 +2835,6 @@ $L$scatter:
 	jnz	NEAR $L$scatter
 $L$scatter_epilogue:
 	ret
-
-
 
 global	bn_gather5
 
@@ -3231,7 +3004,6 @@ $L$gather:
 	ret
 $L$SEH_end_bn_gather5:
 
-
 section	.rdata rdata align=8
 ALIGN	64
 $L$inc:
@@ -3346,7 +3118,6 @@ $L$common_seh_tail:
 	pop	rdi
 	pop	rsi
 	ret
-
 
 section	.pdata rdata align=4
 ALIGN	4

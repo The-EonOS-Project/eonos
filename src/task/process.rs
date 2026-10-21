@@ -1,18 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![allow(dead_code)]
 
 use alloc::string::String;
@@ -25,20 +10,11 @@ use crate::sync::IrqMutex;
 use crate::{heap, pit, scheduler, vfs, vmm};
 use crate::{log_debug, log_fail, log_ok};
 
-
-
 pub const USER_STACK_TOP: u64 = 0x0000_7fff_ffff_f000;
-
-
 
 const USER_STACK_PAGES: u64 = 16; 
 
-
 const INIT_PATH: &str = "/init";
-
-
-
-
 
 const WAIT_FOR_INIT: bool = false;
 const INIT_TIMEOUT_MS: u64 = 5000;
@@ -49,10 +25,9 @@ struct Record {
     name: String,
     cwd: String,
     sandboxed: bool,
-    
+
     status: Option<i64>,
 }
-
 
 pub struct ProcessInfo {
     pub pid: u64,
@@ -64,14 +39,14 @@ static PROCS: IrqMutex<Vec<Record>> = IrqMutex::new(Vec::new());
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum SpawnError {
-    
+
     NotFound,
-    
+
     DiskNotMounted,
-    
+
     Elf(ElfError),
     NoMemory,
-    
+
     NoThread,
 }
 
@@ -88,7 +63,6 @@ impl fmt::Display for SpawnError {
         }
     }
 }
-
 
 fn register(pid: u64, parent: u64, name: &str, cwd: String, sandboxed: bool) {
     let mut procs = PROCS.lock();
@@ -109,9 +83,6 @@ fn register(pid: u64, parent: u64, name: &str, cwd: String, sandboxed: bool) {
         }),
     }
 }
-
-
-
 
 pub fn exit_current(code: i64) -> ! {
     let pid = scheduler::current_id();
@@ -151,7 +122,6 @@ pub fn exit_current(code: i64) -> ! {
     scheduler::exit()
 }
 
-
 pub fn cwd(pid: u64) -> String {
     PROCS
         .lock()
@@ -161,7 +131,6 @@ pub fn cwd(pid: u64) -> String {
         .unwrap_or_else(|| String::from("/"))
 }
 
-
 pub fn is_sandboxed(pid: u64) -> bool {
     PROCS
         .lock()
@@ -169,7 +138,6 @@ pub fn is_sandboxed(pid: u64) -> bool {
         .find(|record| record.pid == pid)
         .is_some_and(|record| record.sandboxed)
 }
-
 
 pub fn set_cwd(pid: u64, cwd: String) -> bool {
     let mut procs = PROCS.lock();
@@ -183,7 +151,6 @@ pub fn set_cwd(pid: u64, cwd: String) -> bool {
     true
 }
 
-
 pub fn take_exit_status(pid: u64) -> Option<i64> {
     let mut procs = PROCS.lock();
     let i = procs
@@ -191,7 +158,6 @@ pub fn take_exit_status(pid: u64) -> Option<i64> {
         .position(|r| r.pid == pid && r.status.is_some())?;
     procs.swap_remove(i).status
 }
-
 
 pub fn take_child_exit_status(parent: u64, pid: u64) -> Result<Option<(u64, i64)>, ()> {
     let mut procs = PROCS.lock();
@@ -211,14 +177,12 @@ pub fn take_child_exit_status(parent: u64, pid: u64) -> Result<Option<(u64, i64)
     }))
 }
 
-
 pub fn has_child(parent: u64, pid: u64) -> bool {
     PROCS
         .lock()
         .iter()
         .any(|record| record.parent == parent && record.pid == pid)
 }
-
 
 pub fn terminate_child(parent: u64, pid: u64, status: i64) -> bool {
     let saved = crate::sync::irq_save();
@@ -252,8 +216,6 @@ pub fn terminate_child(parent: u64, pid: u64, status: i64) -> bool {
     true
 }
 
-
-
 pub fn list() -> Vec<ProcessInfo> {
     PROCS
         .lock()
@@ -266,8 +228,6 @@ pub fn list() -> Vec<ProcessInfo> {
         .collect()
 }
 
-
-
 pub fn try_copy_name(pid: u64, output: &mut [u8]) -> Option<usize> {
     let processes = PROCS.try_lock()?;
     let process = processes
@@ -277,21 +237,6 @@ pub fn try_copy_name(pid: u64, output: &mut [u8]) -> Option<usize> {
     output[..length].copy_from_slice(&process.name.as_bytes()[..length]);
     Some(length)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 fn build_stack(aspace: &vmm::AddressSpace, argv: &[String], env: &[String]) -> Option<u64> {
     let mut top_frame = 0u64;
@@ -303,8 +248,6 @@ fn build_stack(aspace: &vmm::AddressSpace, argv: &[String], env: &[String]) -> O
         }
     }
 
-    
-    
     let page_base = USER_STACK_TOP - PAGE_SIZE;
     let page = pmm::phys_to_virt(top_frame);
     let write = |virt: u64, bytes: &[u8]| {
@@ -348,20 +291,15 @@ fn build_stack(aspace: &vmm::AddressSpace, argv: &[String], env: &[String]) -> O
     Some(sp)
 }
 
-
-
 pub fn spawn(path: &str) -> Result<u64, SpawnError> {
     let mut argv = Vec::new();
     argv.push(String::from(path));
     spawn_with(path, &argv, &[])
 }
 
-
 pub fn spawn_with(path: &str, argv: &[String], env: &[String]) -> Result<u64, SpawnError> {
     spawn_with_io(path, argv, env, None, None)
 }
-
-
 
 pub fn spawn_with_io(
     path: &str,
@@ -372,8 +310,6 @@ pub fn spawn_with_io(
 ) -> Result<u64, SpawnError> {
     spawn_with_io_policy(path, argv, env, stdin_fd, stdout_fd, false)
 }
-
-
 
 pub fn spawn_sandboxed_with_io(
     path: &str,
@@ -402,17 +338,10 @@ fn spawn_with_io_policy(
     let entry = elf::load(&image, &aspace).map_err(SpawnError::Elf)?;
     let rsp = build_stack(&aspace, argv, env).ok_or(SpawnError::NoMemory)?;
 
-    
-    
-    
-    
-    
     let irq_state = crate::sync::irq_save();
     let parent = scheduler::current_id();
     let cwd = cwd(parent);
-    
-    
-    
+
     let sandboxed = force_sandbox
         || is_sandboxed(parent)
         || path.starts_with("/apps/bin/")
@@ -429,7 +358,6 @@ fn spawn_with_io_policy(
     crate::sync::irq_restore(irq_state);
     Ok(pid)
 }
-
 
 pub fn start_init() {
     let frames_before = pmm::free_frame_count();
@@ -467,9 +395,6 @@ pub fn start_init() {
         scheduler::yield_now();
     };
 
-    
-    
-    
     scheduler::sleep_ms(20);
 
     let heap_growth = (heap::heap_size().saturating_sub(heap_before) as u64 / PAGE_SIZE) as i64;
@@ -503,17 +428,10 @@ pub fn start_init() {
     }
 }
 
-
-
-
-
 const TEST_CODE_VIRT: u64 = 0x0040_0000;
 
 const TEST_DATA: [u8; 4] = [0xDE, 0xAD, 0xBE, 0xEF];
 const TEST_MEMSZ: u64 = 2 * PAGE_SIZE;
-
-
-
 
 fn make_test_elf(entry: u64, vaddr: u64, filesz: u64, memsz: u64, flags: u32) -> [u8; 124] {
     let mut b = [0u8; 124];
@@ -529,7 +447,7 @@ fn make_test_elf(entry: u64, vaddr: u64, filesz: u64, memsz: u64, flags: u32) ->
     b[52..54].copy_from_slice(&64u16.to_le_bytes()); 
     b[54..56].copy_from_slice(&56u16.to_le_bytes()); 
     b[56..58].copy_from_slice(&1u16.to_le_bytes()); 
-    
+
     b[64..68].copy_from_slice(&1u32.to_le_bytes()); 
     b[68..72].copy_from_slice(&flags.to_le_bytes());
     b[72..80].copy_from_slice(&120u64.to_le_bytes()); 
@@ -542,8 +460,6 @@ fn make_test_elf(entry: u64, vaddr: u64, filesz: u64, memsz: u64, flags: u32) ->
     b
 }
 
-
-
 fn try_load(image: &[u8]) -> Option<Result<u64, ElfError>> {
     let aspace = vmm::create_address_space()?;
     Some(elf::load(image, &aspace))
@@ -553,7 +469,6 @@ pub fn self_test() {
     let frames_before = pmm::free_frame_count();
     let heap_before = heap::heap_size();
 
-    
     let good = make_test_elf(TEST_CODE_VIRT, TEST_CODE_VIRT, 4, TEST_MEMSZ, 5); 
 
     let mut bad_magic = good;
@@ -622,7 +537,6 @@ pub fn self_test() {
         }
     }
 
-    
     let Some(aspace) = vmm::create_address_space() else {
         log_fail!(
             "Process",
@@ -667,8 +581,7 @@ pub fn self_test() {
         for (i, &expected) in TEST_DATA.iter().enumerate() {
             ok &= first.add(i).read() == expected;
         }
-        
-        
+
         for i in TEST_DATA.len()..PAGE_SIZE as usize {
             ok &= first.add(i).read() == 0 && second.add(i).read() == 0;
         }
@@ -684,7 +597,6 @@ pub fn self_test() {
     }
     drop(aspace);
 
-    
     let heap_growth = (heap::heap_size().saturating_sub(heap_before) as u64 / PAGE_SIZE) as i64;
     let leaked = frames_before as i64 - pmm::free_frame_count() as i64 - heap_growth;
     if leaked != 0 {

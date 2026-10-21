@@ -1,26 +1,14 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86_64) && defined(__APPLE__)
 .section	__DATA,__const
 .p2align	4
 
-
 L$bswap_mask:
 .quad	0x08090a0b0c0d0e0f, 0x0001020304050607
 
-
-
-
-
-
-
-
 L$gfpoly:
 .quad	1, 0xc200000000000000
-
 
 L$gfpoly_and_internal_carrybit:
 .quad	1, 0xc200000000000001
@@ -41,18 +29,9 @@ L$inc_2blocks:
 .p2align	5
 _gcm_init_vpclmulqdq_avx2:
 
-
 _CET_ENDBR
 
-
-
-
-
 	vpshufd	$0x4e,(%rsi),%xmm3
-
-
-
-
 
 	vpshufd	$0xd3,%xmm3,%xmm0
 	vpsrad	$31,%xmm0,%xmm0
@@ -61,7 +40,6 @@ _CET_ENDBR
 	vpxor	%xmm0,%xmm3,%xmm3
 
 	vbroadcasti128	L$gfpoly(%rip),%ymm6
-
 
 	vpclmulqdq	$0x00,%xmm3,%xmm3,%xmm0
 	vpclmulqdq	$0x01,%xmm3,%xmm3,%xmm1
@@ -77,11 +55,8 @@ _CET_ENDBR
 	vpxor	%xmm1,%xmm5,%xmm5
 	vpxor	%xmm0,%xmm5,%xmm5
 
-
-
 	vinserti128	$1,%xmm3,%ymm5,%ymm3
 	vinserti128	$1,%xmm5,%ymm5,%ymm5
-
 
 .byte	0xc4,0xe3,0x65,0x44,0xc5,0x00
 .byte	0xc4,0xe3,0x65,0x44,0xcd,0x01
@@ -97,18 +72,13 @@ _CET_ENDBR
 	vpxor	%ymm1,%ymm4,%ymm4
 	vpxor	%ymm0,%ymm4,%ymm4
 
-
-
 	vmovdqu	%ymm3,96(%rdi)
 	vmovdqu	%ymm4,64(%rdi)
-
-
 
 	vpunpcklqdq	%ymm3,%ymm4,%ymm0
 	vpunpckhqdq	%ymm3,%ymm4,%ymm1
 	vpxor	%ymm1,%ymm0,%ymm0
 	vmovdqu	%ymm0,128+32(%rdi)
-
 
 .byte	0xc4,0xe3,0x5d,0x44,0xc5,0x00
 .byte	0xc4,0xe3,0x5d,0x44,0xcd,0x01
@@ -141,8 +111,6 @@ _CET_ENDBR
 	vmovdqu	%ymm3,32(%rdi)
 	vmovdqu	%ymm4,0(%rdi)
 
-
-
 	vpunpcklqdq	%ymm3,%ymm4,%ymm0
 	vpunpckhqdq	%ymm3,%ymm4,%ymm1
 	vpxor	%ymm1,%ymm0,%ymm0
@@ -151,30 +119,19 @@ _CET_ENDBR
 	vzeroupper
 	ret
 
-
-
 .globl	_gcm_ghash_vpclmulqdq_avx2_1
 .private_extern _gcm_ghash_vpclmulqdq_avx2_1
 
 .p2align	5
 _gcm_ghash_vpclmulqdq_avx2_1:
 
-
 _CET_ENDBR
-
-
-
-
-
 
 	vmovdqu	L$bswap_mask(%rip),%xmm6
 	vmovdqu	L$gfpoly(%rip),%xmm7
 
-
 	vmovdqu	(%rdi),%xmm5
 	vpshufb	%xmm6,%xmm5,%xmm5
-
-
 
 L$ghash_lastblock:
 	vmovdqu	(%rdx),%xmm0
@@ -195,7 +152,6 @@ L$ghash_lastblock:
 	vpxor	%xmm2,%xmm5,%xmm5
 	vpxor	%xmm1,%xmm5,%xmm5
 
-
 L$ghash_done:
 
 	vpshufb	%xmm6,%xmm5,%xmm5
@@ -204,18 +160,14 @@ L$ghash_done:
 	vzeroupper
 	ret
 
-
-
 .globl	_aes_gcm_enc_update_vaes_avx2
 .private_extern _aes_gcm_enc_update_vaes_avx2
 
 .p2align	5
 _aes_gcm_enc_update_vaes_avx2:
 
-
 _CET_ENDBR
 	pushq	%r12
-
 
 	movq	16(%rsp),%r12
 #ifdef BORINGSSL_DISPATCH_TEST
@@ -224,37 +176,25 @@ _CET_ENDBR
 #endif
 	vbroadcasti128	L$bswap_mask(%rip),%ymm0
 
-
-
 	vmovdqu	(%r12),%xmm1
 	vpshufb	%xmm0,%xmm1,%xmm1
 	vbroadcasti128	(%r8),%ymm11
 	vpshufb	%ymm0,%ymm11,%ymm11
 
-
-
 	movl	240(%rcx),%r10d
 	leal	-20(,%r10,4),%r10d
-
-
-
 
 	leaq	96(%rcx,%r10,4),%r11
 	vbroadcasti128	(%rcx),%ymm9
 	vbroadcasti128	(%r11),%ymm10
 
-
 	vpaddd	L$ctr_pattern(%rip),%ymm11,%ymm11
-
-
 
 	cmpq	$127,%rdx
 	jbe	L$crypt_loop_4x_done__func1
 
 	vmovdqu	128(%r9),%ymm7
 	vmovdqu	128+32(%r9),%ymm8
-
-
 
 	vmovdqu	L$inc_2blocks(%rip),%ymm2
 	vpshufb	%ymm0,%ymm11,%ymm12
@@ -265,7 +205,6 @@ _CET_ENDBR
 	vpaddd	%ymm2,%ymm11,%ymm11
 	vpshufb	%ymm0,%ymm11,%ymm15
 	vpaddd	%ymm2,%ymm11,%ymm11
-
 
 	vpxor	%ymm9,%ymm12,%ymm12
 	vpxor	%ymm9,%ymm13,%ymm13
@@ -303,9 +242,6 @@ L$vaesenc_loop_first_4_vecs__func1:
 .p2align	4
 L$crypt_loop_4x__func1:
 
-
-
-
 	vmovdqu	L$inc_2blocks(%rip),%ymm2
 	vpshufb	%ymm0,%ymm11,%ymm12
 	vpaddd	%ymm2,%ymm11,%ymm11
@@ -315,7 +251,6 @@ L$crypt_loop_4x__func1:
 	vpaddd	%ymm2,%ymm11,%ymm11
 	vpshufb	%ymm0,%ymm11,%ymm15
 	vpaddd	%ymm2,%ymm11,%ymm11
-
 
 	vpxor	%ymm9,%ymm12,%ymm12
 	vpxor	%ymm9,%ymm13,%ymm13
@@ -371,13 +306,11 @@ L$aes128__func1:
 .byte	0xc4,0x62,0x0d,0xdc,0xf2
 .byte	0xc4,0x62,0x05,0xdc,0xfa
 
-
 	vbroadcasti128	-128(%r11),%ymm2
 .byte	0xc4,0x62,0x1d,0xdc,0xe2
 .byte	0xc4,0x62,0x15,0xdc,0xea
 .byte	0xc4,0x62,0x0d,0xdc,0xf2
 .byte	0xc4,0x62,0x05,0xdc,0xfa
-
 
 	vmovdqu	32(%rsi),%ymm3
 	vpshufb	%ymm0,%ymm3,%ymm3
@@ -396,7 +329,6 @@ L$aes128__func1:
 .byte	0xc4,0x62,0x15,0xdc,0xea
 .byte	0xc4,0x62,0x0d,0xdc,0xf2
 .byte	0xc4,0x62,0x05,0xdc,0xfa
-
 
 	vmovdqu	64(%rsi),%ymm3
 	vpshufb	%ymm0,%ymm3,%ymm3
@@ -424,7 +356,6 @@ L$aes128__func1:
 .byte	0xc4,0xc3,0x6d,0x44,0xd0,0x00
 	vpxor	%ymm2,%ymm6,%ymm6
 
-
 	vmovdqu	96(%rsi),%ymm3
 	vpshufb	%ymm0,%ymm3,%ymm3
 
@@ -450,10 +381,8 @@ L$aes128__func1:
 .byte	0xc4,0x62,0x0d,0xdc,0xf2
 .byte	0xc4,0x62,0x05,0xdc,0xfa
 
-
 	vpxor	%ymm5,%ymm6,%ymm6
 	vpxor	%ymm1,%ymm6,%ymm6
-
 
 	vbroadcasti128	L$gfpoly(%rip),%ymm4
 .byte	0xc4,0xe3,0x5d,0x44,0xd5,0x01
@@ -466,7 +395,6 @@ L$aes128__func1:
 .byte	0xc4,0x62,0x15,0xdc,0xea
 .byte	0xc4,0x62,0x0d,0xdc,0xf2
 .byte	0xc4,0x62,0x05,0xdc,0xfa
-
 
 .byte	0xc4,0xe3,0x5d,0x44,0xd6,0x01
 	vpshufd	$0x4e,%ymm6,%ymm6
@@ -481,7 +409,6 @@ L$aes128__func1:
 
 	vextracti128	$1,%ymm1,%xmm2
 	vpxor	%xmm2,%xmm1,%xmm1
-
 
 	subq	$-128,%rsi
 	vpxor	0(%rdi),%ymm10,%ymm2
@@ -538,7 +465,6 @@ L$ghash_last_ciphertext_4x__func1:
 .byte	0xc4,0xc3,0x6d,0x44,0xd0,0x00
 	vpxor	%ymm2,%ymm6,%ymm6
 
-
 	vmovdqu	96(%rsi),%ymm3
 	vpshufb	%ymm0,%ymm3,%ymm3
 	vmovdqu	96(%r9),%ymm4
@@ -553,7 +479,6 @@ L$ghash_last_ciphertext_4x__func1:
 
 	vpxor	%ymm5,%ymm6,%ymm6
 	vpxor	%ymm1,%ymm6,%ymm6
-
 
 	vbroadcasti128	L$gfpoly(%rip),%ymm4
 .byte	0xc4,0xe3,0x5d,0x44,0xd5,0x01
@@ -574,13 +499,8 @@ L$crypt_loop_4x_done__func1:
 	testq	%rdx,%rdx
 	jz	L$done__func1
 
-
-
-
-
 	leaq	128(%r9),%r8
 	subq	%rdx,%r8
-
 
 	vpxor	%xmm5,%xmm5,%xmm5
 	vpxor	%xmm6,%xmm6,%xmm6
@@ -588,7 +508,6 @@ L$crypt_loop_4x_done__func1:
 
 	cmpq	$64,%rdx
 	jb	L$lessthan64bytes__func1
-
 
 	vpshufb	%ymm0,%ymm11,%ymm12
 	vpaddd	L$inc_2blocks(%rip),%ymm11,%ymm11
@@ -607,14 +526,12 @@ L$vaesenc_loop_tail_1__func1:
 .byte	0xc4,0x42,0x1d,0xdd,0xe2
 .byte	0xc4,0x42,0x15,0xdd,0xea
 
-
 	vmovdqu	0(%rdi),%ymm2
 	vmovdqu	32(%rdi),%ymm3
 	vpxor	%ymm2,%ymm12,%ymm12
 	vpxor	%ymm3,%ymm13,%ymm13
 	vmovdqu	%ymm12,0(%rsi)
 	vmovdqu	%ymm13,32(%rsi)
-
 
 	vpshufb	%ymm0,%ymm12,%ymm12
 	vpshufb	%ymm0,%ymm13,%ymm13
@@ -643,7 +560,6 @@ L$vaesenc_loop_tail_1__func1:
 
 	vpxor	%xmm1,%xmm1,%xmm1
 
-
 L$lessthan64bytes__func1:
 	vpshufb	%ymm0,%ymm11,%ymm12
 	vpaddd	L$inc_2blocks(%rip),%ymm11,%ymm11
@@ -660,9 +576,6 @@ L$vaesenc_loop_tail_2__func1:
 	jne	L$vaesenc_loop_tail_2__func1
 .byte	0xc4,0x42,0x1d,0xdd,0xe2
 .byte	0xc4,0x42,0x15,0xdd,0xea
-
-
-
 
 	cmpq	$32,%rdx
 	jb	L$xor_one_block__func1
@@ -742,45 +655,31 @@ L$done__func1:
 
 	ret
 
-
-
 .globl	_aes_gcm_dec_update_vaes_avx2
 .private_extern _aes_gcm_dec_update_vaes_avx2
 
 .p2align	5
 _aes_gcm_dec_update_vaes_avx2:
 
-
 _CET_ENDBR
 	pushq	%r12
 
-
 	movq	16(%rsp),%r12
 	vbroadcasti128	L$bswap_mask(%rip),%ymm0
-
-
 
 	vmovdqu	(%r12),%xmm1
 	vpshufb	%xmm0,%xmm1,%xmm1
 	vbroadcasti128	(%r8),%ymm11
 	vpshufb	%ymm0,%ymm11,%ymm11
 
-
-
 	movl	240(%rcx),%r10d
 	leal	-20(,%r10,4),%r10d
-
-
-
 
 	leaq	96(%rcx,%r10,4),%r11
 	vbroadcasti128	(%rcx),%ymm9
 	vbroadcasti128	(%r11),%ymm10
 
-
 	vpaddd	L$ctr_pattern(%rip),%ymm11,%ymm11
-
-
 
 	cmpq	$127,%rdx
 	jbe	L$crypt_loop_4x_done__func2
@@ -789,9 +688,6 @@ _CET_ENDBR
 	vmovdqu	128+32(%r9),%ymm8
 .p2align	4
 L$crypt_loop_4x__func2:
-
-
-
 
 	vmovdqu	L$inc_2blocks(%rip),%ymm2
 	vpshufb	%ymm0,%ymm11,%ymm12
@@ -802,7 +698,6 @@ L$crypt_loop_4x__func2:
 	vpaddd	%ymm2,%ymm11,%ymm11
 	vpshufb	%ymm0,%ymm11,%ymm15
 	vpaddd	%ymm2,%ymm11,%ymm11
-
 
 	vpxor	%ymm9,%ymm12,%ymm12
 	vpxor	%ymm9,%ymm13,%ymm13
@@ -858,13 +753,11 @@ L$aes128__func2:
 .byte	0xc4,0x62,0x0d,0xdc,0xf2
 .byte	0xc4,0x62,0x05,0xdc,0xfa
 
-
 	vbroadcasti128	-128(%r11),%ymm2
 .byte	0xc4,0x62,0x1d,0xdc,0xe2
 .byte	0xc4,0x62,0x15,0xdc,0xea
 .byte	0xc4,0x62,0x0d,0xdc,0xf2
 .byte	0xc4,0x62,0x05,0xdc,0xfa
-
 
 	vmovdqu	32(%rdi),%ymm3
 	vpshufb	%ymm0,%ymm3,%ymm3
@@ -883,7 +776,6 @@ L$aes128__func2:
 .byte	0xc4,0x62,0x15,0xdc,0xea
 .byte	0xc4,0x62,0x0d,0xdc,0xf2
 .byte	0xc4,0x62,0x05,0xdc,0xfa
-
 
 	vmovdqu	64(%rdi),%ymm3
 	vpshufb	%ymm0,%ymm3,%ymm3
@@ -911,7 +803,6 @@ L$aes128__func2:
 .byte	0xc4,0xc3,0x6d,0x44,0xd0,0x00
 	vpxor	%ymm2,%ymm6,%ymm6
 
-
 	vmovdqu	96(%rdi),%ymm3
 	vpshufb	%ymm0,%ymm3,%ymm3
 
@@ -937,10 +828,8 @@ L$aes128__func2:
 .byte	0xc4,0x62,0x0d,0xdc,0xf2
 .byte	0xc4,0x62,0x05,0xdc,0xfa
 
-
 	vpxor	%ymm5,%ymm6,%ymm6
 	vpxor	%ymm1,%ymm6,%ymm6
-
 
 	vbroadcasti128	L$gfpoly(%rip),%ymm4
 .byte	0xc4,0xe3,0x5d,0x44,0xd5,0x01
@@ -953,7 +842,6 @@ L$aes128__func2:
 .byte	0xc4,0x62,0x15,0xdc,0xea
 .byte	0xc4,0x62,0x0d,0xdc,0xf2
 .byte	0xc4,0x62,0x05,0xdc,0xfa
-
 
 .byte	0xc4,0xe3,0x5d,0x44,0xd6,0x01
 	vpshufd	$0x4e,%ymm6,%ymm6
@@ -968,8 +856,6 @@ L$aes128__func2:
 
 	vextracti128	$1,%ymm1,%xmm2
 	vpxor	%xmm2,%xmm1,%xmm1
-
-
 
 	vpxor	0(%rdi),%ymm10,%ymm2
 	vpxor	32(%rdi),%ymm10,%ymm3
@@ -994,13 +880,8 @@ L$crypt_loop_4x_done__func2:
 	testq	%rdx,%rdx
 	jz	L$done__func2
 
-
-
-
-
 	leaq	128(%r9),%r8
 	subq	%rdx,%r8
-
 
 	vpxor	%xmm5,%xmm5,%xmm5
 	vpxor	%xmm6,%xmm6,%xmm6
@@ -1008,7 +889,6 @@ L$crypt_loop_4x_done__func2:
 
 	cmpq	$64,%rdx
 	jb	L$lessthan64bytes__func2
-
 
 	vpshufb	%ymm0,%ymm11,%ymm12
 	vpaddd	L$inc_2blocks(%rip),%ymm11,%ymm11
@@ -1027,14 +907,12 @@ L$vaesenc_loop_tail_1__func2:
 .byte	0xc4,0x42,0x1d,0xdd,0xe2
 .byte	0xc4,0x42,0x15,0xdd,0xea
 
-
 	vmovdqu	0(%rdi),%ymm2
 	vmovdqu	32(%rdi),%ymm3
 	vpxor	%ymm2,%ymm12,%ymm12
 	vpxor	%ymm3,%ymm13,%ymm13
 	vmovdqu	%ymm12,0(%rsi)
 	vmovdqu	%ymm13,32(%rsi)
-
 
 	vpshufb	%ymm0,%ymm2,%ymm12
 	vpshufb	%ymm0,%ymm3,%ymm13
@@ -1063,7 +941,6 @@ L$vaesenc_loop_tail_1__func2:
 
 	vpxor	%xmm1,%xmm1,%xmm1
 
-
 L$lessthan64bytes__func2:
 	vpshufb	%ymm0,%ymm11,%ymm12
 	vpaddd	L$inc_2blocks(%rip),%ymm11,%ymm11
@@ -1080,9 +957,6 @@ L$vaesenc_loop_tail_2__func2:
 	jne	L$vaesenc_loop_tail_2__func2
 .byte	0xc4,0x42,0x1d,0xdd,0xe2
 .byte	0xc4,0x42,0x15,0xdd,0xea
-
-
-
 
 	cmpq	$32,%rdx
 	jb	L$xor_one_block__func2
@@ -1161,7 +1035,5 @@ L$done__func2:
 	popq	%r12
 
 	ret
-
-
 
 #endif

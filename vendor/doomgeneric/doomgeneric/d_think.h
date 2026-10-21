@@ -1,36 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __D_THINK__
 #define __D_THINK__
-
-
-
-
-
-
-
-
-
-
 
 typedef  void (*actionf_v)();
 typedef  void (*actionf_p1)( void* );
@@ -44,25 +13,14 @@ typedef union
 
 } actionf_t;
 
-
-
-
-
-
-
-
 typedef actionf_t  think_t;
-
-
 
 typedef struct thinker_s
 {
     struct thinker_s*	prev;
     struct thinker_s*	next;
     think_t		function;
-    
+
 } thinker_t;
-
-
 
 #endif

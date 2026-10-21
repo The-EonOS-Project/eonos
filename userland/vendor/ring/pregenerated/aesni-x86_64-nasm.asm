@@ -1,6 +1,3 @@
-
-
-
 %ifidn __OUTPUT_FORMAT__, win64
 default	rel
 %define XMMWORD
@@ -10,7 +7,6 @@ default	rel
 
 %include "ring_core_generated/prefix_symbols_nasm.inc"
 section	.text code align=64
-
 
 ALIGN	16
 _aesni_encrypt2:
@@ -40,8 +36,6 @@ $L$enc_loop2:
 	DB	102,15,56,221,208
 	DB	102,15,56,221,216
 	ret
-
-
 
 ALIGN	16
 _aesni_encrypt3:
@@ -76,8 +70,6 @@ $L$enc_loop3:
 	DB	102,15,56,221,216
 	DB	102,15,56,221,224
 	ret
-
-
 
 ALIGN	16
 _aesni_encrypt4:
@@ -118,8 +110,6 @@ $L$enc_loop4:
 	DB	102,15,56,221,224
 	DB	102,15,56,221,232
 	ret
-
-
 
 ALIGN	16
 _aesni_encrypt6:
@@ -174,8 +164,6 @@ $L$enc_loop6_enter:
 	DB	102,15,56,221,240
 	DB	102,15,56,221,248
 	ret
-
-
 
 ALIGN	16
 _aesni_encrypt8:
@@ -241,7 +229,6 @@ $L$enc_loop8_enter:
 	DB	102,68,15,56,221,200
 	ret
 
-
 global	aes_hw_ctr32_encrypt_blocks
 
 ALIGN	16
@@ -256,16 +243,12 @@ $L$SEH_begin_aes_hw_ctr32_encrypt_blocks:
 	mov	rcx,r9
 	mov	r8,QWORD[40+rsp]
 
-
-
 _CET_ENDBR
 %ifdef BORINGSSL_DISPATCH_TEST
 	mov	BYTE[BORINGSSL_function_hit],1
 %endif
 	cmp	rdx,1
 	jne	NEAR $L$ctr32_bulk
-
-
 
 	movups	xmm2,XMMWORD[r8]
 	movups	xmm3,XMMWORD[rdi]
@@ -308,9 +291,6 @@ $L$ctr32_bulk:
 	movaps	XMMWORD[(-40)+r11],xmm14
 	movaps	XMMWORD[(-24)+r11],xmm15
 $L$ctr32_body:
-
-
-
 
 	movdqu	xmm2,XMMWORD[r8]
 	movdqu	xmm0,XMMWORD[rcx]
@@ -516,7 +496,6 @@ $L$ctr32_loop8:
 	DB	102,68,15,56,220,200
 	movups	xmm0,XMMWORD[((192-128))+rcx]
 
-
 	DB	102,15,56,220,209
 	DB	102,15,56,220,217
 	DB	102,15,56,220,225
@@ -608,12 +587,10 @@ $L$ctr32_enc_done:
 
 $L$ctr32_tail:
 
-
 	lea	rcx,[16+rcx]
 	cmp	rdx,4
 	jb	NEAR $L$ctr32_loop3
 	je	NEAR $L$ctr32_loop4
-
 
 	shl	eax,4
 	movdqa	xmm8,XMMWORD[96+rsp]
@@ -784,7 +761,6 @@ $L$SEH_endprologue_aes_hw_set_encrypt_key_base_3:
 	cmp	edx,256
 	je	NEAR $L$14rounds
 
-
 	cmp	edx,128
 	jne	NEAR $L$bad_keybits
 
@@ -816,8 +792,6 @@ $L$10rounds:
 	mov	DWORD[80+rax],edx
 	xor	eax,eax
 	jmp	NEAR $L$enc_key_ret
-
-
 
 ALIGN	16
 $L$14rounds:
@@ -888,7 +862,6 @@ $L$key_expansion_128_cold:
 	xorps	xmm0,xmm1
 	ret
 
-
 ALIGN	16
 $L$key_expansion_256a:
 
@@ -903,7 +876,6 @@ $L$key_expansion_256a_cold:
 	xorps	xmm0,xmm1
 	ret
 
-
 ALIGN	16
 $L$key_expansion_256b:
 
@@ -917,8 +889,6 @@ $L$key_expansion_256b:
 	shufps	xmm1,xmm1,170
 	xorps	xmm2,xmm1
 	ret
-
-
 
 global	aes_hw_set_encrypt_key_alt
 
@@ -1008,8 +978,6 @@ DB	102,15,56,0,197
 	mov	DWORD[96+rax],edx
 	xor	eax,eax
 	jmp	NEAR $L$enc_key_ret_alt
-
-
 
 ALIGN	16
 $L$14rounds_alt:
@@ -1153,7 +1121,6 @@ ctr_xts_se_handler:
 	mov	rbp,QWORD[((-8))+rax]
 	mov	QWORD[160+r8],rbp
 
-
 $L$common_seh_tail:
 	mov	rdi,QWORD[8+rax]
 	mov	rsi,QWORD[16+rax]
@@ -1193,7 +1160,6 @@ $L$common_seh_tail:
 	pop	rsi
 	ret
 
-
 section	.pdata rdata align=4
 ALIGN	4
 	DD	$L$SEH_begin_aes_hw_ctr32_encrypt_blocks wrt ..imagebase
@@ -1214,7 +1180,6 @@ ALIGN	4
 	DD	$L$SEH_begin_aes_hw_set_encrypt_key_alt_1 wrt ..imagebase
 	DD	$L$SEH_end_aes_hw_set_encrypt_key_alt_4 wrt ..imagebase
 	DD	$L$SEH_info_aes_hw_set_encrypt_key_alt_0 wrt ..imagebase
-
 
 section	.xdata
 ALIGN	4

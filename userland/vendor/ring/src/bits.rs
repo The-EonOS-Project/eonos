@@ -1,32 +1,11 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::{error::InputTooLongError, polyfill};
-
-
-
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, PartialOrd)]
 #[repr(transparent)]
 pub struct BitLength<T = usize>(T);
 
 pub(crate) trait FromByteLen<T>: Sized {
-    
-    
-    
+
     fn from_byte_len(bytes: T) -> Result<Self, InputTooLongError<T>>;
 }
 
@@ -61,7 +40,7 @@ impl FromByteLen<usize> for BitLength<u64> {
 }
 
 impl<T> BitLength<T> {
-    
+
     #[inline]
     pub const fn from_bits(bits: T) -> Self {
         Self(bits)
@@ -69,14 +48,12 @@ impl<T> BitLength<T> {
 }
 
 impl<T: Copy> BitLength<T> {
-    
+
     #[inline]
     pub fn as_bits(self) -> T {
         self.0
     }
 }
-
-
 
 impl BitLength<usize> {
     #[cfg(feature = "alloc")]
@@ -86,13 +63,9 @@ impl BitLength<usize> {
         Self((self.0 / 2) + round_up)
     }
 
-    
     #[inline]
     pub const fn as_usize_bytes_rounded_up(&self) -> usize {
-        
-        
 
-        
         let round_up = ((self.0 >> 2) | (self.0 >> 1) | self.0) & 1;
 
         (self.0 / 8) + round_up

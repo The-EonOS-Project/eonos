@@ -1,20 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef NET_DEFS_H
 #define NET_DEFS_H 
 
@@ -24,23 +7,11 @@
 #include "d_ticcmd.h"
 #include "sha1.h"
 
-
-
-
-
 #define MAXNETNODES 16
-
-
-
-
 
 #define NET_MAXPLAYERS 8
 
-
-
 #define MAXPLAYERNAME 30
-
-
 
 #define BACKUPTICS 128
 
@@ -59,38 +30,21 @@ struct _net_packet_s
 
 struct _net_module_s
 {
-    
 
     boolean (*InitClient)(void);
 
-    
-
     boolean (*InitServer)(void);
-
-    
 
     void (*SendPacket)(net_addr_t *addr, net_packet_t *packet);
 
-    
-    
-    
-
     boolean (*RecvPacket)(net_addr_t **addr, net_packet_t **packet);
-
-    
 
     void (*AddrToString)(net_addr_t *addr, char *buffer, int buffer_len);
 
-    
-
     void (*FreeAddress)(net_addr_t *addr);
-
-    
 
     net_addr_t *(*ResolveAddress)(char *addr);
 };
-
-
 
 struct _net_addr_s
 {
@@ -98,15 +52,9 @@ struct _net_addr_s
     void *handle;
 };
 
-
-
 #define NET_MAGIC_NUMBER 3436803284U
 
-
-
 #define NET_RELIABLE_PACKET (1 << 15)
-
-
 
 typedef enum
 {
@@ -142,8 +90,6 @@ typedef enum
     NET_MASTER_PACKET_TYPE_SIGN_END_RESPONSE,
 } net_master_packet_type_t;
 
-
-
 typedef struct
 {
     int gamemode;
@@ -156,9 +102,6 @@ typedef struct
     sha1_digest_t deh_sha1sum;
     int player_class;
 } net_connect_data_t;
-
-
-
 
 typedef struct
 {
@@ -178,13 +121,8 @@ typedef struct
     int loadgame;
     int random;  
 
-    
-    
-
     int num_players;
     int consoleplayer;
-
-    
 
     int player_classes[NET_MAXPLAYERS];
 
@@ -205,8 +143,6 @@ typedef struct
     ticcmd_t cmd;
 } net_ticdiff_t;
 
-
-
 typedef struct 
 {
     signed int latency;
@@ -214,8 +150,6 @@ typedef struct
     boolean playeringame[NET_MAXPLAYERS];
     net_ticdiff_t cmds[NET_MAXPLAYERS];
 } net_full_ticcmd_t;
-
-
 
 typedef struct
 {
@@ -227,8 +161,6 @@ typedef struct
     int gamemission;
     char *description;
 } net_querydata_t;
-
-
 
 typedef struct
 {

@@ -1,33 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{Aad, Algorithm, BoundKey, LessSafeKey, NonceSequence, Tag, UnboundKey};
 use crate::error;
-
-
-
-
-
 
 pub struct SealingKey<N: NonceSequence> {
     key: LessSafeKey,
@@ -55,15 +27,7 @@ impl<N: NonceSequence> core::fmt::Debug for SealingKey<N> {
 }
 
 impl<N: NonceSequence> SealingKey<N> {
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     #[inline]
     pub fn seal_in_place_append_tag<A, InOut>(
         &mut self,
@@ -78,17 +42,6 @@ impl<N: NonceSequence> SealingKey<N> {
             .seal_in_place_append_tag(self.nonce_sequence.advance()?, aad, in_out)
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     #[inline]
     pub fn seal_in_place_separate_tag<A>(
         &mut self,

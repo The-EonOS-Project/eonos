@@ -1,23 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include "dstrings.h"
 
 char *doom1_endmsg[] =
@@ -34,7 +14,7 @@ char *doom1_endmsg[] =
 
 char *doom2_endmsg[] =
 {
-  
+
   "are you sure you want to\nquit this great game?",
   "you want to quit?\nthen, thou hast lost an eighth!",
   "don't go now, there's a \ndimensional shambler waiting\nat the dos prompt!",
@@ -47,27 +27,5 @@ char *doom2_endmsg[] =
 
 #if 0 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #endif
-
-  
-
 

@@ -1,34 +1,9 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include "stdlib.h"
 
 #include "doomtype.h"
 #include "i_system.h"
 
 #include "m_fixed.h"
-
-
-
-
-
 
 fixed_t
 FixedMul
@@ -37,12 +12,6 @@ FixedMul
 {
     return ((int64_t) a * (int64_t) b) >> FRACBITS;
 }
-
-
-
-
-
-
 
 fixed_t FixedDiv(fixed_t a, fixed_t b)
 {

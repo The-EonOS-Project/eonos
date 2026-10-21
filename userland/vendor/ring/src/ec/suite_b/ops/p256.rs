@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{
     elem::{binary_op, binary_op_assign},
     elem_sqr_mul, elem_sqr_mul_acc, PublicModulus, *,
@@ -50,11 +36,6 @@ pub static PRIVATE_KEY_OPS: PrivateKeyOps = PrivateKeyOps {
 };
 
 fn p256_elem_inv_squared(q: &Modulus<Q>, a: &Elem<R>) -> Elem<R> {
-    
-    
-    
-    
-    
 
     #[inline]
     fn sqr_mul(q: &Modulus<Q>, a: &Elem<R>, squarings: LeakyWord, b: &Elem<R>) -> Elem<R> {
@@ -75,19 +56,14 @@ fn p256_elem_inv_squared(q: &Modulus<Q>, a: &Elem<R>) -> Elem<R> {
     let fffffff_11 = sqr_mul(q, &fff_111, 15, &fff_111);
     let ffffffff = sqr_mul(q, &fffffff_11, 2, &b_11);
 
-    
     let mut acc = sqr_mul(q, &ffffffff, 31 + 1, b_1);
 
-    
     sqr_mul_acc(q, &mut acc, 96 + 32, &ffffffff);
 
-    
     sqr_mul_acc(q, &mut acc, 32, &ffffffff);
 
-    
     sqr_mul_acc(q, &mut acc, 30, &fffffff_11);
 
-    
     q.elem_square(&mut acc);
     q.elem_square(&mut acc);
 
@@ -138,7 +114,6 @@ pub static PUBLIC_SCALAR_OPS: PublicScalarOps = PublicScalarOps {
 
     q_minus_n: PublicElem::from_hex("4319055358e8617b0c46353d039cdaae"),
 
-    
     scalar_inv_to_mont_vartime: |s, cpu| PRIVATE_SCALAR_OPS.scalar_inv_to_mont(s, cpu),
 };
 
@@ -185,14 +160,6 @@ pub static PRIVATE_SCALAR_OPS: PrivateScalarOps = PrivateScalarOps {
 
 #[allow(clippy::just_underscores_and_digits)]
 fn p256_scalar_inv_to_mont(a: Scalar<R>, _cpu: cpu::Features) -> Scalar<R> {
-    
-    
-    
-    
-    
-    
-    
-    
 
     #[inline]
     fn mul(a: &Scalar<R>, b: &Scalar<R>) -> Scalar<R> {
@@ -206,7 +173,6 @@ fn p256_scalar_inv_to_mont(a: Scalar<R>, _cpu: cpu::Features) -> Scalar<R> {
         tmp
     }
 
-    
     fn sqr_mul(a: &Scalar<R>, squarings: LeakyWord, b: &Scalar<R>) -> Scalar<R> {
         debug_assert!(squarings >= 1);
         let mut tmp = Scalar::zero();
@@ -214,7 +180,6 @@ fn p256_scalar_inv_to_mont(a: Scalar<R>, _cpu: cpu::Features) -> Scalar<R> {
         mul(&tmp, b)
     }
 
-    
     fn sqr_mul_acc(acc: &mut Scalar<R>, squarings: LeakyWord, b: &Scalar<R>) {
         debug_assert!(squarings >= 1);
         unsafe { p256_scalar_sqr_rep_mont(acc.limbs.as_mut_ptr(), acc.limbs.as_ptr(), squarings) }
@@ -247,16 +212,9 @@ fn p256_scalar_inv_to_mont(a: Scalar<R>, _cpu: cpu::Features) -> Scalar<R> {
     let ffff = sqr_mul(&ff, 0 + 8, &ff);
     let ffffffff = sqr_mul(&ffff, 0 + 16, &ffff);
 
-    
     let mut acc = sqr_mul(&ffffffff, 32 + 32, &ffffffff);
 
-    
     sqr_mul_acc(&mut acc, 0 + 32, &ffffffff);
-
-    
-    
-    
-    
 
     sqr_mul_acc(&mut acc, 6, &_101111);
     sqr_mul_acc(&mut acc, 2 + 3, &_111);

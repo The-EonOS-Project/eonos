@@ -1,27 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 static const char
 rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
 
@@ -48,8 +24,6 @@ rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
 
 #include <sys/types.h>
 
-
-
 struct FB_BitField
 {
 	uint32_t offset;			
@@ -64,8 +38,7 @@ struct FB_ScreenInfo
 	uint32_t yres_virtual;
 
 	uint32_t bits_per_pixel;		
-	
-							
+
 	struct FB_BitField red;		
 	struct FB_BitField green;	
 	struct FB_BitField blue;
@@ -76,7 +49,6 @@ static struct FB_ScreenInfo s_Fb;
 int fb_scaling = 1;
 int usemouse = 0;
 
-
 #ifdef CMAP256
 
 boolean palette_changed;
@@ -86,38 +58,18 @@ struct color colors[256];
 
 static struct color colors[256];
 
-
 #endif  
-
 
 void I_GetEvent(void);
 
-
-
 byte *I_VideoBuffer = NULL;
-
-
 
 boolean screensaver_mode = false;
 
-
-
-
 boolean screenvisible;
-
-
-
-
-
-
-
-
-
 
 float mouse_acceleration = 2.0;
 int mouse_threshold = 10;
-
-
 
 int usegamma = 0;
 
@@ -127,8 +79,6 @@ typedef struct
 	byte g;
 	byte b;
 } col_t;
-
-
 
 static uint16_t rgb565_palette[256];
 
@@ -165,7 +115,7 @@ void cmap_to_fb(uint8_t *out, uint8_t *in, int in_pixels)
 
         if (s_Fb.bits_per_pixel == 16)
         {
-            
+
             uint16_t p = ((c.r & 0xF8) << 8) |
                          ((c.g & 0xFC) << 3) |
                          (c.b >> 3);
@@ -180,7 +130,7 @@ void cmap_to_fb(uint8_t *out, uint8_t *in, int in_pixels)
         }
         else if (s_Fb.bits_per_pixel == 32)
         {
-            
+
             pix = (c.r << s_Fb.red.offset) |
                   (c.g << s_Fb.green.offset) |
                   (c.b << s_Fb.blue.offset);
@@ -194,7 +144,7 @@ void cmap_to_fb(uint8_t *out, uint8_t *in, int in_pixels)
             }
         }
         else {
-            
+
             I_Error("No idea how to convert %d bpp pixels", s_Fb.bits_per_pixel);
         }
 
@@ -225,13 +175,12 @@ void I_InitGraphics (void)
 		mode = myargv[gfxmodeparm + 1];
 	}
 	else {
-		
-		
+
 		mode = "rgba8888";
 	}
 
 	if (strcmp(mode, "rgba8888") == 0) {
-		
+
 		s_Fb.bits_per_pixel = 32;
 
 		s_Fb.blue.length = 8;
@@ -261,7 +210,6 @@ void I_InitGraphics (void)
 	else
 		I_Error("Unknown gfxmode value: %s\n", mode);
 
-
 #endif  
 
     printf("I_InitGraphics: framebuffer: x_res: %d, y_res: %d, x_virtual: %d, y_virtual: %d, bpp: %d\n",
@@ -271,7 +219,6 @@ void I_InitGraphics (void)
             s_Fb.red.length, s_Fb.green.length, s_Fb.blue.length, s_Fb.transp.length, s_Fb.red.offset, s_Fb.green.offset, s_Fb.blue.offset, s_Fb.transp.offset);
 
     printf("I_InitGraphics: DOOM screen size: w x h: %d x %d\n", SCREENWIDTH, SCREENHEIGHT);
-
 
     i = M_CheckParmWithArgs("-scaling", 1);
     if (i > 0) {
@@ -285,8 +232,6 @@ void I_InitGraphics (void)
         printf("I_InitGraphics: Auto-scaling factor: %d\n", fb_scaling);
     }
 
-
-    
 	I_VideoBuffer = (byte*)Z_Malloc (SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);  
 
 	screenvisible = true;
@@ -314,26 +259,17 @@ void I_UpdateNoBlit (void)
 {
 }
 
-
-
-
-
 void I_FinishUpdate (void)
 {
     int y;
     int x_offset, y_offset, x_offset_end;
     unsigned char *line_in, *line_out;
 
-    
-    
-    
-    
     y_offset     = (((s_Fb.yres - (SCREENHEIGHT * fb_scaling)) * s_Fb.bits_per_pixel/8)) / 2;
     x_offset     = (((s_Fb.xres - (SCREENWIDTH  * fb_scaling)) * s_Fb.bits_per_pixel/8)) / 2; 
-    
+
     x_offset_end = ((s_Fb.xres - (SCREENWIDTH  * fb_scaling)) * s_Fb.bits_per_pixel/8) - x_offset;
 
-    
     line_in  = (unsigned char *) I_VideoBuffer;
     line_out = (unsigned char *) DG_ScreenBuffer;
 
@@ -358,7 +294,7 @@ void I_FinishUpdate (void)
                 }
             }
 #else
-            
+
             cmap_to_fb((void*)line_out, (void*)line_in, SCREENWIDTH);
 #endif
             line_out += (SCREENWIDTH * fb_scaling * (s_Fb.bits_per_pixel/8)) + x_offset_end;
@@ -369,16 +305,10 @@ void I_FinishUpdate (void)
 	DG_DrawFrame();
 }
 
-
-
-
 void I_ReadScreen (byte* scr)
 {
     memcpy (scr, I_VideoBuffer, SCREENWIDTH * SCREENHEIGHT);
 }
-
-
-
 
 #define GFX_RGB565(r, g, b)			((((r & 0xF8) >> 3) << 11) | (((g & 0xFC) >> 2) << 5) | ((b & 0xF8) >> 3))
 #define GFX_RGB565_R(color)			((0xF800 & color) >> 11)
@@ -388,22 +318,6 @@ void I_ReadScreen (byte* scr)
 void I_SetPalette (byte* palette)
 {
 	int i;
-	
-
-	
-	
-	
-
-	
-	
-	
-
-	
-	
-    
-
-    
-
 
     for (i=0; i<256; ++i ) {
         colors[i].a = 0;
@@ -418,8 +332,6 @@ void I_SetPalette (byte* palette)
 
 #endif  
 }
-
-
 
 int I_GetPaletteIndex (int r, int g, int b)
 {

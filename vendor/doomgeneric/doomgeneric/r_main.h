@@ -1,41 +1,14 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __R_MAIN__
 #define __R_MAIN__
 
 #include "d_player.h"
 #include "r_data.h"
 
-
-
-
-
-
-
 extern fixed_t		viewcos;
 extern fixed_t		viewsin;
 
 extern int		viewwindowx;
 extern int		viewwindowy;
-
-
 
 extern int		centerx;
 extern int		centery;
@@ -48,15 +21,6 @@ extern int		validcount;
 
 extern int		linecount;
 extern int		loopcount;
-
-
-
-
-
-
-
-
-
 
 #define LIGHTLEVELS	        16
 #define LIGHTSEGSHIFT	         4
@@ -73,21 +37,9 @@ extern lighttable_t*	zlight[LIGHTLEVELS][MAXLIGHTZ];
 extern int		extralight;
 extern lighttable_t*	fixedcolormap;
 
-
-
-
 #define NUMCOLORMAPS		32
 
-
-
-
-
 extern	int		detailshift;	
-
-
-
-
-
 
 extern void		(*colfunc) (void);
 extern void		(*transcolfunc) (void);
@@ -95,9 +47,6 @@ extern void		(*basecolfunc) (void);
 extern void		(*fuzzcolfunc) (void);
 
 extern void		(*spanfunc) (void);
-
-
-
 
 int
 R_PointOnSide
@@ -128,7 +77,6 @@ R_PointToDist
 ( fixed_t	x,
   fixed_t	y );
 
-
 fixed_t R_ScaleFromGlobalAngle (angle_t visangle);
 
 subsector_t*
@@ -142,18 +90,9 @@ R_AddPointToBox
   int		y,
   fixed_t*	box );
 
-
-
-
-
-
-
-
 void R_RenderPlayerView (player_t *player);
 
-
 void R_Init (void);
-
 
 void R_SetViewSize (int blocks, int detail);
 

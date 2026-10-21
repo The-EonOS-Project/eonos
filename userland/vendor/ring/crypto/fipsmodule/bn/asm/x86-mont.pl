@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 # ====================================================================
 # Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
 # project.
@@ -136,7 +135,7 @@ $frame=32;				# size of above frame rounded up to 16n
 	&lea	($num,&DWP(-3,"edi"));	# num=num-1 to assist modulo-scheduling
 	#&mov	($_num,$num);		# redundant as $num is not reused
 	&mov	($_sp,"edx");		# saved stack pointer!
-
+
 if($sse2) {
 $acc0="mm0";	# mmx register bank layout
 $acc1="mm1";
@@ -212,7 +211,7 @@ $mask="mm7";
 
 	&paddq	($car1,$car0);
 	&movq	(&QWP($frame,"esp",$num,4),$car1);	# tp[num].tp[num-1]
-
+
 	&inc	($i);				# i++
 &set_label("outer");
 	&xor	($j,$j);			# j=0
@@ -289,7 +288,7 @@ $mask="mm7";
 	&emms	();				# done with mmx bank
 	&jmp	(&label("common_tail"));
 }
-
+
 &set_label("common_tail",16);
 	&mov	($np,$_np);			# load modulus pointer
 	&mov	($rp,$_rp);			# load result pointer

@@ -1,24 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include "doomdef.h"
 
 #include "m_bbox.h"
@@ -29,13 +8,8 @@
 #include "r_plane.h"
 #include "r_things.h"
 
-
 #include "doomstat.h"
 #include "r_state.h"
-
-
-
-
 
 seg_t*		curline;
 side_t*		sidedef;
@@ -46,52 +20,27 @@ sector_t*	backsector;
 drawseg_t	drawsegs[MAXDRAWSEGS];
 drawseg_t*	ds_p;
 
-
 void
 R_StoreWallRange
 ( int	start,
   int	stop );
-
-
-
-
-
-
 
 void R_ClearDrawSegs (void)
 {
     ds_p = drawsegs;
 }
 
-
-
-
-
-
-
-
 typedef	struct
 {
     int	first;
     int last;
-    
-} cliprange_t;
 
+} cliprange_t;
 
 #define MAXSEGS		32
 
-
 cliprange_t*	newend;
 cliprange_t	solidsegs[MAXSEGS];
-
-
-
-
-
-
-
-
-
 
 void
 R_ClipSolidWallSegment
@@ -101,8 +50,6 @@ R_ClipSolidWallSegment
     cliprange_t*	next;
     cliprange_t*	start;
 
-    
-    
     start = solidsegs;
     while (start->last < first-1)
 	start++;
@@ -111,12 +58,11 @@ R_ClipSolidWallSegment
     {
 	if (last < start->first-1)
 	{
-	    
-	    
+
 	    R_StoreWallRange (first, last);
 	    next = newend;
 	    newend++;
-	    
+
 	    while (next != start)
 	    {
 		*next = *(next-1);
@@ -126,65 +72,49 @@ R_ClipSolidWallSegment
 	    next->last = last;
 	    return;
 	}
-		
-	
+
 	R_StoreWallRange (first, start->first - 1);
-	
+
 	start->first = first;	
     }
 
-    
     if (last <= start->last)
 	return;			
-		
+
     next = start;
     while (last >= (next+1)->first-1)
     {
-	
+
 	R_StoreWallRange (next->last + 1, (next+1)->first - 1);
 	next++;
-	
+
 	if (last <= next->last)
 	{
-	    
-	    
+
 	    start->last = next->last;	
 	    goto crunch;
 	}
     }
-	
-    
+
     R_StoreWallRange (next->last + 1, last);
-    
+
     start->last = last;
-	
-    
-    
+
   crunch:
     if (next == start)
     {
-	
+
 	return;
     }
-    
 
     while (next++ != newend)
     {
-	
+
 	*++start = *next;
     }
 
     newend = start+1;
 }
-
-
-
-
-
-
-
-
-
 
 void
 R_ClipPassWallSegment
@@ -193,8 +123,6 @@ R_ClipPassWallSegment
 {
     cliprange_t*	start;
 
-    
-    
     start = solidsegs;
     while (start->last < first-1)
 	start++;
@@ -203,37 +131,29 @@ R_ClipPassWallSegment
     {
 	if (last < start->first-1)
 	{
-	    
+
 	    R_StoreWallRange (first, last);
 	    return;
 	}
-		
-	
+
 	R_StoreWallRange (first, start->first - 1);
     }
 
-    
     if (last <= start->last)
 	return;			
-		
+
     while (last >= (start+1)->first-1)
     {
-	
+
 	R_StoreWallRange (start->last + 1, (start+1)->first - 1);
 	start++;
-	
+
 	if (last <= start->last)
 	    return;
     }
-	
-    
+
     R_StoreWallRange (start->last + 1, last);
 }
-
-
-
-
-
 
 void R_ClearClipSegs (void)
 {
@@ -244,11 +164,6 @@ void R_ClearClipSegs (void)
     newend = solidsegs+2;
 }
 
-
-
-
-
-
 void R_AddLine (seg_t*	line)
 {
     int			x1;
@@ -257,35 +172,29 @@ void R_AddLine (seg_t*	line)
     angle_t		angle2;
     angle_t		span;
     angle_t		tspan;
-    
+
     curline = line;
 
-    
     angle1 = R_PointToAngle (line->v1->x, line->v1->y);
     angle2 = R_PointToAngle (line->v2->x, line->v2->y);
-    
-    
-    
+
     span = angle1 - angle2;
-    
-    
+
     if (span >= ANG180)
 	return;		
 
-    
     rw_angle1 = angle1;
     angle1 -= viewangle;
     angle2 -= viewangle;
-	
+
     tspan = angle1 + clipangle;
     if (tspan > 2*clipangle)
     {
 	tspan -= 2*clipangle;
 
-	
 	if (tspan >= span)
 	    return;
-	
+
 	angle1 = clipangle;
     }
     tspan = clipangle - angle2;
@@ -293,44 +202,32 @@ void R_AddLine (seg_t*	line)
     {
 	tspan -= 2*clipangle;
 
-	
 	if (tspan >= span)
 	    return;	
 	angle2 = -clipangle;
     }
-    
-    
-    
+
     angle1 = (angle1+ANG90)>>ANGLETOFINESHIFT;
     angle2 = (angle2+ANG90)>>ANGLETOFINESHIFT;
     x1 = viewangletox[angle1];
     x2 = viewangletox[angle2];
 
-    
     if (x1 == x2)
 	return;				
-	
+
     backsector = line->backsector;
 
-    
     if (!backsector)
 	goto clipsolid;		
 
-    
     if (backsector->ceilingheight <= frontsector->floorheight
 	|| backsector->floorheight >= frontsector->ceilingheight)
 	goto clipsolid;		
 
-    
     if (backsector->ceilingheight != frontsector->ceilingheight
 	|| backsector->floorheight != frontsector->floorheight)
 	goto clippass;	
-		
-    
-    
-    
-    
-    
+
     if (backsector->ceilingpic == frontsector->ceilingpic
 	&& backsector->floorpic == frontsector->floorpic
 	&& backsector->lightlevel == frontsector->lightlevel
@@ -338,22 +235,14 @@ void R_AddLine (seg_t*	line)
     {
 	return;
     }
-    
-				
+
   clippass:
     R_ClipPassWallSegment (x1, x2-1);	
     return;
-		
+
   clipsolid:
     R_ClipSolidWallSegment (x1, x2-1);
 }
-
-
-
-
-
-
-
 
 int	checkcoord[12][4] =
 {
@@ -370,7 +259,6 @@ int	checkcoord[12][4] =
     {2,1,3,0}
 };
 
-
 boolean R_CheckBBox (fixed_t*	bspcoord)
 {
     int			boxx;
@@ -381,59 +269,54 @@ boolean R_CheckBBox (fixed_t*	bspcoord)
     fixed_t		y1;
     fixed_t		x2;
     fixed_t		y2;
-    
+
     angle_t		angle1;
     angle_t		angle2;
     angle_t		span;
     angle_t		tspan;
-    
+
     cliprange_t*	start;
 
     int			sx1;
     int			sx2;
-    
-    
-    
+
     if (viewx <= bspcoord[BOXLEFT])
 	boxx = 0;
     else if (viewx < bspcoord[BOXRIGHT])
 	boxx = 1;
     else
 	boxx = 2;
-		
+
     if (viewy >= bspcoord[BOXTOP])
 	boxy = 0;
     else if (viewy > bspcoord[BOXBOTTOM])
 	boxy = 1;
     else
 	boxy = 2;
-		
+
     boxpos = (boxy<<2)+boxx;
     if (boxpos == 5)
 	return true;
-	
+
     x1 = bspcoord[checkcoord[boxpos][0]];
     y1 = bspcoord[checkcoord[boxpos][1]];
     x2 = bspcoord[checkcoord[boxpos][2]];
     y2 = bspcoord[checkcoord[boxpos][3]];
-    
-    
+
     angle1 = R_PointToAngle (x1, y1) - viewangle;
     angle2 = R_PointToAngle (x2, y2) - viewangle;
-	
+
     span = angle1 - angle2;
 
-    
     if (span >= ANG180)
 	return true;
-    
+
     tspan = angle1 + clipangle;
 
     if (tspan > 2*clipangle)
     {
 	tspan -= 2*clipangle;
 
-	
 	if (tspan >= span)
 	    return false;	
 
@@ -444,55 +327,41 @@ boolean R_CheckBBox (fixed_t*	bspcoord)
     {
 	tspan -= 2*clipangle;
 
-	
 	if (tspan >= span)
 	    return false;
-	
+
 	angle2 = -clipangle;
     }
 
-
-    
-    
-    
     angle1 = (angle1+ANG90)>>ANGLETOFINESHIFT;
     angle2 = (angle2+ANG90)>>ANGLETOFINESHIFT;
     sx1 = viewangletox[angle1];
     sx2 = viewangletox[angle2];
 
-    
     if (sx1 == sx2)
 	return false;			
     sx2--;
-	
+
     start = solidsegs;
     while (start->last < sx2)
 	start++;
-    
+
     if (sx1 >= start->first
 	&& sx2 <= start->last)
     {
-	
+
 	return false;
     }
 
     return true;
 }
 
-
-
-
-
-
-
-
-
 void R_Subsector (int num)
 {
     int			count;
     seg_t*		line;
     subsector_t*	sub;
-	
+
 #ifdef RANGECHECK
     if (num>=numsubsectors)
 	I_Error ("R_Subsector: ss %i with numss = %i",
@@ -514,7 +383,7 @@ void R_Subsector (int num)
     }
     else
 	floorplane = NULL;
-    
+
     if (frontsector->ceilingheight > viewz 
 	|| frontsector->ceilingpic == skyflatnum)
     {
@@ -524,7 +393,7 @@ void R_Subsector (int num)
     }
     else
 	ceilingplane = NULL;
-		
+
     R_AddSprites (frontsector);	
 
     while (count--)
@@ -534,20 +403,11 @@ void R_Subsector (int num)
     }
 }
 
-
-
-
-
-
-
-
-
 void R_RenderBSPNode (int bspnum)
 {
     node_t*	bsp;
     int		side;
 
-    
     if (bspnum & NF_SUBSECTOR)
     {
 	if (bspnum == -1)			
@@ -556,18 +416,14 @@ void R_RenderBSPNode (int bspnum)
 	    R_Subsector (bspnum&(~NF_SUBSECTOR));
 	return;
     }
-		
+
     bsp = &nodes[bspnum];
-    
-    
+
     side = R_PointOnSide (viewx, viewy, bsp);
 
-    
     R_RenderBSPNode (bsp->children[side]); 
 
-    
     if (R_CheckBBox (bsp->bbox[side^1]))	
 	R_RenderBSPNode (bsp->children[side^1]);
 }
-
 

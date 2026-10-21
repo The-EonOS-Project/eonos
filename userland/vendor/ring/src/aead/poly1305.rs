@@ -1,19 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{Tag, TAG_LEN};
 #[cfg(all(target_arch = "arm", target_endian = "little"))]
 use crate::cpu::GetFeature as _;
@@ -21,7 +5,6 @@ use crate::{cpu, polyfill::slice::AsChunks};
 
 mod ffi_arm_neon;
 mod ffi_fallback;
-
 
 pub(super) struct Key {
     key_and_nonce: [u8; KEY_LEN],
@@ -80,10 +63,6 @@ impl Context {
     }
 }
 
-
-
-
-
 pub(super) fn sign(key: Key, input: &[u8], cpu_features: cpu::Features) -> Tag {
     let ctx = Context::from_key(key, cpu_features);
     ctx.finish(input)
@@ -94,7 +73,6 @@ mod tests {
     use super::*;
     use crate::testutil as test;
 
-    
     #[test]
     pub fn test_poly1305() {
         let cpu_features = cpu::features();

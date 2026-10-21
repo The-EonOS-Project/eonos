@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 # require 'x86asm.pl';
 # &asm_init(<flavor>[,$i386only]);
 # &function_begin("foo");

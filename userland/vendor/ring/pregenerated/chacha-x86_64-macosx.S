@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86_64) && defined(__APPLE__)
@@ -60,12 +57,10 @@ _CET_ENDBR
 
 L$ctr32_body:
 
-
 	movdqu	(%rcx),%xmm1
 	movdqu	16(%rcx),%xmm2
 	movdqu	(%r8),%xmm3
 	movdqa	L$one(%rip),%xmm4
-
 
 	movdqa	%xmm1,16(%rsp)
 	movdqa	%xmm2,32(%rsp)
@@ -313,7 +308,6 @@ L$done:
 
 L$no_data:
 	ret
-
 
 .globl	_ChaCha20_ctr32_ssse3_4x
 .private_extern _ChaCha20_ctr32_ssse3_4x
@@ -712,7 +706,6 @@ L$tail4x:
 	cmpq	$64,%rdx
 	jae	L$64_or_more4x
 
-
 	xorq	%r10,%r10
 
 	movdqa	%xmm12,16(%rsp)
@@ -856,7 +849,6 @@ L$done4x:
 L$4x_epilogue:
 	ret
 
-
 .globl	_ChaCha20_ctr32_avx2
 .private_extern _ChaCha20_ctr32_avx2
 
@@ -869,15 +861,6 @@ _CET_ENDBR
 	subq	$0x280+8,%rsp
 	andq	$-32,%rsp
 	vzeroupper
-
-
-
-
-
-
-
-
-
 
 	vbroadcasti128	L$sigma(%rip),%ymm11
 	vbroadcasti128	(%rcx),%ymm3
@@ -1463,6 +1446,5 @@ L$done8x:
 
 L$8x_epilogue:
 	ret
-
 
 #endif

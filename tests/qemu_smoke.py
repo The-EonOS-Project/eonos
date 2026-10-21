@@ -15,10 +15,8 @@ import tempfile
 import time
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 PROMPT = b"superuser@eonos:/# "
-
 
 def qemu_display_starts(qemu: str, model: str) -> bool:
     def disable_core_dumps() -> None:
@@ -45,7 +43,6 @@ def qemu_display_starts(qemu: str, model: str) -> bool:
     except subprocess.TimeoutExpired:
         return True
     return False
-
 
 class SmokeTest:
     def __init__(self, process: subprocess.Popen[bytes], monitor_path: Path, timeout: float = 30.0):
@@ -174,7 +171,6 @@ class SmokeTest:
     def fail(self, message: str) -> None:
         output = bytes(self.output).decode("utf-8", errors="replace")
         raise RuntimeError(f"{message}\n--- QEMU serial output ---\n{output[-12000:]}")
-
 
 def run() -> None:
     qemu = shutil.which("qemu-system-x86_64")
@@ -430,7 +426,6 @@ def run() -> None:
             second.command("sync", (b"sync: storage reports durable writes",))
             second.command("smoke-unknown", (b"smoke-unknown: command not found",))
 
-            
             assert second.process.stdin is not None
             panic_start = len(second.output)
             second.process.stdin.write(b"panic\n")
@@ -442,7 +437,6 @@ def run() -> None:
             stop(second)
 
     print("QEMU smoke test passed")
-
 
 if __name__ == "__main__":
     try:

@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include "internal.h"
 #if defined(BORINGSSL_FE25519_ADX)
 

@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_AARCH64) && defined(__ELF__)
@@ -30,7 +27,6 @@ gcm_init_clmul:
 	eor	v20.16b,v3.16b,v16.16b		
 	st1	{v20.2d},[x0],#16		
 
-	
 	ext	v16.16b,v20.16b,v20.16b,#8		
 	pmull	v0.1q,v20.1d,v20.1d
 	eor	v16.16b,v16.16b,v20.16b
@@ -56,7 +52,7 @@ gcm_init_clmul:
 	eor	v17.16b,v17.16b,v22.16b
 	ext	v21.16b,v16.16b,v17.16b,#8		
 	st1	{v21.2d,v22.2d},[x0],#32	
-	
+
 	pmull	v0.1q,v20.1d, v22.1d
 	pmull	v5.1q,v22.1d,v22.1d
 	pmull2	v2.1q,v20.2d, v22.2d

@@ -1,34 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -48,16 +17,11 @@ void SHA1_Init(sha1_context_t *hd)
     hd->count = 0;
 }
 
-
-
-
-
 static void Transform(sha1_context_t *hd, byte *data)
 {
     uint32_t a,b,c,d,e,tm;
     uint32_t x[16];
 
-    
     a = hd->h0;
     b = hd->h1;
     c = hd->h2;
@@ -79,7 +43,6 @@ static void Transform(sha1_context_t *hd, byte *data)
         }
     }
 #endif
-
 
 #define K1  0x5A827999L
 #define K2  0x6ED9EBA1L
@@ -183,7 +146,6 @@ static void Transform(sha1_context_t *hd, byte *data)
     R( c, d, e, a, b, F4, K4, M(78) );
     R( b, c, d, e, a, F4, K4, M(79) );
 
-    
     hd->h0 += a;
     hd->h1 += b;
     hd->h2 += c;
@@ -191,15 +153,11 @@ static void Transform(sha1_context_t *hd, byte *data)
     hd->h4 += e;
 }
 
-
-
-
-
 void SHA1_Update(sha1_context_t *hd, byte *inbuf, size_t inlen)
 {
     if (hd->count == 64)
     {
-        
+
 	Transform(hd, hd->buf);
 	hd->count = 0;
 	hd->nblocks++;
@@ -227,14 +185,6 @@ void SHA1_Update(sha1_context_t *hd, byte *inbuf, size_t inlen)
 	hd->buf[hd->count++] = *inbuf++;
 }
 
-
-
-
-
-
-
-
-
 void SHA1_Final(sha1_digest_t digest, sha1_context_t *hd)
 {
     uint32_t t, msb, lsb;
@@ -243,14 +193,14 @@ void SHA1_Final(sha1_digest_t digest, sha1_context_t *hd)
     SHA1_Update(hd, NULL, 0); ;
 
     t = hd->nblocks;
-    
+
     lsb = t << 6;
     msb = t >> 26;
-    
+
     t = lsb;
     if ((lsb += hd->count) < t)
 	msb++;
-    
+
     t = lsb;
     lsb <<= 3;
     msb <<= 3;
@@ -258,21 +208,21 @@ void SHA1_Final(sha1_digest_t digest, sha1_context_t *hd)
 
     if (hd->count < 56)
     {
-        
+
 	hd->buf[hd->count++] = 0x80; 
 	while (hd->count < 56)
 	    hd->buf[hd->count++] = 0;  
     }
     else
     {
-        
+
 	hd->buf[hd->count++] = 0x80; 
 	while (hd->count < 64)
 	    hd->buf[hd->count++] = 0;
 	SHA1_Update(hd, NULL, 0);  ;
 	memset(hd->buf, 0, 56 ); 
     }
-    
+
     hd->buf[56] = msb >> 24;
     hd->buf[57] = msb >> 16;
     hd->buf[58] = msb >>  8;

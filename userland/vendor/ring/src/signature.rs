@@ -1,260 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::{cpu, debug, ec, error, sealed};
 
 pub use crate::ec::{
@@ -294,10 +37,8 @@ pub use crate::rsa::{
     RsaParameters,
 };
 
-
 #[cfg(feature = "alloc")]
 pub type RsaKeyPair = crate::rsa::KeyPair;
-
 
 #[derive(Clone, Copy)]
 pub struct Signature {
@@ -306,7 +47,7 @@ pub struct Signature {
 }
 
 impl Signature {
-    
+
     pub(crate) fn new<F>(fill: F) -> Self
     where
         F: FnOnce(&mut [u8; MAX_LEN]) -> usize,
@@ -326,26 +67,18 @@ impl AsRef<[u8]> for Signature {
     }
 }
 
-
 pub trait KeyPair: core::fmt::Debug + Send + Sized + Sync {
-    
+
     type PublicKey: AsRef<[u8]> + core::fmt::Debug + Clone + Send + Sized + Sync;
 
-    
     fn public_key(&self) -> &Self::PublicKey;
 }
-
-
-
-
 
 pub(crate) const MAX_LEN: usize = 1    + 2    +
     (2 * (1    + 1    + 1    + ec::SCALAR_MAX_BYTES));
 
-
 pub trait VerificationAlgorithm: core::fmt::Debug + Sync + sealed::Sealed {
-    
-    
+
     fn verify(
         &self,
         public_key: untrusted::Input,
@@ -353,7 +86,6 @@ pub trait VerificationAlgorithm: core::fmt::Debug + Sync + sealed::Sealed {
         signature: untrusted::Input,
     ) -> Result<(), error::Unspecified>;
 }
-
 
 #[derive(Clone, Copy)]
 pub struct UnparsedPublicKey<B> {
@@ -383,18 +115,12 @@ where
 }
 
 impl<B> UnparsedPublicKey<B> {
-    
-    
-    
+
     #[inline]
     pub fn new(algorithm: &'static dyn VerificationAlgorithm, bytes: B) -> Self {
         Self { algorithm, bytes }
     }
 
-    
-    
-    
-    
     pub fn verify(&self, message: &[u8], signature: &[u8]) -> Result<(), error::Unspecified>
     where
         B: AsRef<[u8]>,

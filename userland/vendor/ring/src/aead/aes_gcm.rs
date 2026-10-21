@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{
     aes::{self, Counter, Overlapping, OverlappingPartialBlock, BLOCK_LEN, ZERO_BLOCK},
     gcm,
@@ -82,7 +68,7 @@ impl DynKey {
 
         #[cfg(target_arch = "x86_64")]
         if let Some((aes, gcm)) = cpu.get_feature() {
-            
+
             let aes_key = aes::hw::Key::new(key, aes, cpu.get_feature())?;
             let gcm_key_value = derive_gcm_key_value(&aes_key);
             let combo = if let Some(cpu) = cpu.get_feature() {
@@ -98,7 +84,6 @@ impl DynKey {
             return Ok(combo);
         }
 
-        
         #[cfg(any(
             all(target_arch = "aarch64", target_endian = "little"),
             target_arch = "x86"
@@ -482,18 +467,11 @@ fn finish<A: aes::EncryptBlock, G: gcm::UpdateBlock>(
     gcm_ctx: gcm::Context<G>,
     tag_iv: aes::Iv,
 ) -> Tag {
-    
+
     gcm_ctx.pre_finish(|pre_tag| Tag(aes_key.encrypt_iv_xor_block(tag_iv, pre_tag)))
 }
 
 pub(super) const MAX_IN_OUT_LEN: usize = super::max_input_len(BLOCK_LEN, 2);
-
-
-
-
-
-
-
 
 const _MAX_INPUT_LEN_BOUNDED_BY_NIST: () =
     assert!(MAX_IN_OUT_LEN == usize_from_u64_saturated(((1u64 << 39) - 256) / 8));

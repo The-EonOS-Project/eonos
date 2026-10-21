@@ -1,33 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use self::ops::*;
 use crate::{arithmetic::montgomery::*, cpu, ec, error, io::der, pkcs8};
-
-
-
-
-
-
-
-
-
-
-
-
 
 fn verify_affine_point_is_on_the_curve(
     q: &Modulus<Q>,
@@ -36,69 +8,17 @@ fn verify_affine_point_is_on_the_curve(
     verify_affine_point_is_on_the_curve_scaled(q, (x, y), &Elem::from(q.a()), &Elem::from(q.b()))
 }
 
-
-
-
-
-
-
-
-
-
 fn verify_jacobian_point_is_on_the_curve(
     q: &Modulus<Q>,
     p: &Point,
 ) -> Result<Elem<R>, error::Unspecified> {
     let z = q.point_z(p);
 
-    
     q.elem_verify_is_not_zero(&z)?;
 
     let x = q.point_x(p);
     let y = q.point_y(p);
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     let z2 = q.elem_squared(&z);
     let z4 = q.elem_squared(&z2);
     let z4_a = q.elem_product(&z4, &Elem::from(q.a()));
@@ -107,31 +27,6 @@ fn verify_jacobian_point_is_on_the_curve(
     verify_affine_point_is_on_the_curve_scaled(q, (&x, &y), &z4_a, &z6_b)?;
     Ok(z2)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 fn verify_affine_point_is_on_the_curve_scaled(
     q: &Modulus<Q>,
@@ -162,7 +57,7 @@ pub(crate) fn key_pair_from_pkcs8(
     let (ec_private_key, _) = pkcs8::unwrap_key(template, pkcs8::Version::V1Only, input)?;
     let (private_key, public_key) =
         ec_private_key.read_all(error::KeyRejected::invalid_encoding(), |input| {
-            
+
             der::nested(
                 input,
                 der::Tag::Sequence,
@@ -186,7 +81,6 @@ fn key_pair_from_pkcs8_<'a>(
     let private_key = der::expect_tag_and_get_value(input, der::Tag::OctetString)
         .map_err(|error::Unspecified| error::KeyRejected::invalid_encoding())?;
 
-    
     if input.peek(u8::from(der::Tag::ContextSpecificConstructed0)) {
         let actual_alg_id =
             der::expect_tag_and_get_value(input, der::Tag::ContextSpecificConstructed0)
@@ -196,8 +90,6 @@ fn key_pair_from_pkcs8_<'a>(
         }
     }
 
-    
-    
     let public_key = der::nested(
         input,
         der::Tag::ContextSpecificConstructed1,

@@ -19,9 +19,6 @@ unsafe impl Send for FbInfo {}
 
 pub static FRAMEBUFFER: Mutex<Option<FbInfo>> = Mutex::new(None);
 
-
-
-
 pub fn use_gpu_backing(addr: *mut u8, width: u64, height: u64, pitch: u64) {
     *FRAMEBUFFER.lock() = Some(FbInfo {
         addr,
@@ -99,8 +96,6 @@ pub fn self_test() {
             row = row.add(fb.pitch as usize);
         }
 
-        
-        
         row = fb.addr;
         for y in 0..8 {
             let mut ptr = row;
@@ -128,11 +123,6 @@ unsafe fn rdtsc() -> u64 {
     core::arch::asm!("rdtsc", out("eax") lo, out("edx") hi, options(nomem, nostack));
     ((hi as u64) << 32) | lo as u64
 }
-
-
-
-
-
 
 pub fn bench(label: &str) {
     let guard = FRAMEBUFFER.lock();
@@ -163,16 +153,12 @@ pub fn bench(label: &str) {
     }
     const N: usize = 4096;
 
-    
-    
-    
     let y0 = 16.min(height.saturating_sub(1));
     let writes = N.min(height.saturating_sub(y0).saturating_mul(width));
     let mut original = [0u32; N];
 
     unsafe {
-        
-        
+
         let mut offset = y0 * fb.pitch as usize;
         let mut x = 0usize;
         for i in 0..writes {
@@ -232,10 +218,6 @@ pub fn bench(label: &str) {
             cycles / writes.max(1) as u64
         );
 
-        
-        
-        
-        
         if bytes_per_pixel == 4 {
             core::arch::asm!("sfence", options(nostack, preserves_flags));
             let start = rdtsc();

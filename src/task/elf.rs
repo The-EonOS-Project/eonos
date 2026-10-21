@@ -1,30 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![allow(dead_code)]
 
 use alloc::collections::BTreeMap;
@@ -34,15 +7,12 @@ use core::fmt;
 use crate::pmm::{self, PAGE_SIZE};
 use crate::vmm::{self, AddressSpace};
 
-
-
 pub const LOAD_MIN: u64 = 0x1000;
 
 pub const LOAD_MAX: u64 = 0x0000_4000_0000_0000;
 
 const MAX_SEGMENTS: usize = 16;
 const MAX_PHDRS: u16 = 64;
-
 
 const MAX_PAGES: u64 = 16 * 1024;
 
@@ -60,38 +30,37 @@ const PF_W: u32 = 2;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum ElfError {
-    
+
     TooShort,
-    
+
     BadMagic,
-    
+
     NotElf64Le,
-    
+
     NotExecutable,
-    
+
     WrongArch,
-    
+
     BadHeader,
-    
+
     Dynamic,
-    
+
     Truncated,
-    
-    
+
     BadSegment,
-    
+
     TooManySegments,
-    
+
     Overlap,
-    
+
     WritableExecutable,
-    
+
     TooLarge,
-    
+
     NoLoadable,
-    
+
     BadEntry,
-    
+
     NoMemory,
 }
 
@@ -124,7 +93,6 @@ impl fmt::Display for ElfError {
     }
 }
 
-
 struct Segment {
     vaddr: u64,
     offset: u64,
@@ -132,7 +100,6 @@ struct Segment {
     memsz: u64,
     flags: u32,
 }
-
 
 struct Page {
     phys: u64,
@@ -147,7 +114,6 @@ const fn align_down(v: u64) -> u64 {
 const fn align_up(v: u64) -> u64 {
     (v + PAGE_SIZE - 1) & !(PAGE_SIZE - 1)
 }
-
 
 fn rd16(b: &[u8], o: usize) -> u16 {
     u16::from_le_bytes([b[o], b[o + 1]])
@@ -170,8 +136,6 @@ fn rd64(b: &[u8], o: usize) -> u64 {
     ])
 }
 
-
-
 fn parse(image: &[u8]) -> Result<(u64, Vec<Segment>), ElfError> {
     if image.len() < EHDR_SIZE {
         return Err(ElfError::TooShort);
@@ -179,7 +143,7 @@ fn parse(image: &[u8]) -> Result<(u64, Vec<Segment>), ElfError> {
     if &image[0..4] != b"\x7fELF" {
         return Err(ElfError::BadMagic);
     }
-    
+
     if image[4] != 2 || image[5] != 1 {
         return Err(ElfError::NotElf64Le);
     }
@@ -260,8 +224,6 @@ fn parse(image: &[u8]) -> Result<(u64, Vec<Segment>), ElfError> {
         return Err(ElfError::NoLoadable);
     }
 
-    
-    
     for i in 0..segments.len() {
         for j in (i + 1)..segments.len() {
             let a = &segments[i];
@@ -282,11 +244,6 @@ fn parse(image: &[u8]) -> Result<(u64, Vec<Segment>), ElfError> {
     Ok((entry, segments))
 }
 
-
-
-
-
-
 fn populate(
     image: &[u8],
     segments: &[Segment],
@@ -300,7 +257,7 @@ fn populate(
         let last = align_up(seg.vaddr + seg.memsz);
         while va < last {
             if let Some(page) = pages.get_mut(&va) {
-                
+
                 page.writable |= writable;
                 page.executable |= executable;
             } else {
@@ -337,8 +294,6 @@ fn populate(
         }
     }
 
-    
-    
     if pages.values().any(|p| p.writable && p.executable) {
         return Err(ElfError::WritableExecutable);
     }
@@ -351,8 +306,6 @@ fn free_pages(pages: &BTreeMap<u64, Page>) {
     }
 }
 
-
-
 pub fn load(image: &[u8], aspace: &AddressSpace) -> Result<u64, ElfError> {
     let (entry, segments) = parse(image)?;
 
@@ -362,13 +315,12 @@ pub fn load(image: &[u8], aspace: &AddressSpace) -> Result<u64, ElfError> {
         return Err(e);
     }
 
-    
     for (&va, page) in pages.iter() {
         let flags = match (page.writable, page.executable) {
             (false, false) => vmm::USER_RO,
             (true, false) => vmm::USER_RW,
             (false, true) => vmm::USER_RX,
-            
+
             (true, true) => vmm::USER_RO,
         };
         aspace.map(va, page.phys, flags);

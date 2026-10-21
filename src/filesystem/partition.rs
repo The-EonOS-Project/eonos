@@ -1,5 +1,3 @@
-
-
 use alloc::vec::Vec;
 
 use crate::block::BlockDevice;
@@ -16,7 +14,7 @@ pub struct Partition {
     pub index: u32,
     pub start_lba: u64,
     pub sectors: u64,
-    
+
     pub type_tag: u32,
     pub table: TableKind,
 }
@@ -44,8 +42,6 @@ fn u64le(b: &[u8], at: usize) -> u64 {
         b[at + 7],
     ])
 }
-
-
 
 pub fn scan(device: &dyn BlockDevice) -> Result<Vec<Partition>, PartitionError> {
     if device.sector_count() < 2 {

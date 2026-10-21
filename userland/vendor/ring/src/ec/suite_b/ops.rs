@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::{
     arithmetic::limbs_from_hex,
     arithmetic::montgomery::*,
@@ -24,26 +10,20 @@ use core::marker::PhantomData;
 
 use elem::{mul_mont, unary_op, unary_op_assign, unary_op_from_binary_op_assign};
 
-
-
 pub type Elem<E> = elem::Elem<Q, E>;
 type PublicElem<E> = elem::PublicElem<Q, E>;
-
 
 #[derive(Clone, Copy)]
 pub enum Q {}
 
-
-
 pub type Scalar<E = Unencoded> = elem::Elem<N, E>;
 type PublicScalar<E> = elem::PublicElem<N, E>;
-
 
 #[derive(Clone, Copy)]
 pub enum N {}
 
 pub(super) struct Modulus<M> {
-    
+
     limbs: &'static [Limb; elem::NumLimbs::MAX],
     num_limbs: elem::NumLimbs,
     cops: &'static CommonOps,
@@ -52,11 +32,7 @@ pub(super) struct Modulus<M> {
 }
 
 pub struct Point {
-    
-    
-    
-    
-    
+
     xyz: [Limb; 3 * elem::NumLimbs::MAX],
 }
 
@@ -68,7 +44,6 @@ impl Point {
     }
 }
 
-
 pub struct CommonOps {
     num_limbs: elem::NumLimbs,
     q: PublicModulus,
@@ -77,7 +52,6 @@ pub struct CommonOps {
     pub a: PublicElem<R>, 
     pub b: PublicElem<R>,
 
-    
     elem_mul_mont: unsafe extern "C" fn(r: *mut Limb, a: *const Limb, b: *const Limb),
     elem_sqr_mont: unsafe extern "C" fn(r: *mut Limb, a: *const Limb),
 }
@@ -85,7 +59,7 @@ pub struct CommonOps {
 impl CommonOps {
     pub(super) fn elem_modulus(&'static self, cpu_features: cpu::Features) -> Modulus<Q> {
         Modulus {
-            
+
             limbs: &self.q.p,
             num_limbs: self.num_limbs,
             cops: self,
@@ -96,7 +70,7 @@ impl CommonOps {
 
     pub(super) fn scalar_modulus(&'static self, cpu_features: cpu::Features) -> Modulus<N> {
         Modulus {
-            
+
             limbs: &self.n.limbs,
             num_limbs: self.num_limbs,
             cops: self,
@@ -105,10 +79,8 @@ impl CommonOps {
         }
     }
 
-    
-    
     pub fn len(&self) -> usize {
-        
+
         self.num_limbs.into() * LIMB_BYTES
     }
 
@@ -123,7 +95,6 @@ impl<M> Modulus<M> {
         self.cpu
     }
 
-    
     pub fn bytes_len(&self) -> usize {
         self.num_limbs.into() * LIMB_BYTES
     }
@@ -283,7 +254,6 @@ struct PublicModulus {
     rr: PublicElem<RR>,
 }
 
-
 pub struct PrivateKeyOps {
     pub common: &'static CommonOps,
     elem_inv_squared: fn(q: &Modulus<Q>, a: &Elem<R>) -> Elem<R>,
@@ -332,18 +302,12 @@ impl PrivateKeyOps {
     }
 }
 
-
-
 pub struct PublicKeyOps {
     pub common: &'static CommonOps,
 }
 
 impl PublicKeyOps {
-    
-    
-    
-    
-    
+
     pub(super) fn elem_parse(
         &self,
         q: &Modulus<Q>,
@@ -354,8 +318,7 @@ impl PublicKeyOps {
         let parsed = elem_parse_big_endian_fixed_consttime(q, encoded_value)?;
         let mut r = Elem::zero();
         let rr = Elem::from(&self.common.q.rr);
-        
-        
+
         unsafe {
             (self.common.elem_mul_mont)(
                 r.limbs.as_mut_ptr(),
@@ -366,8 +329,6 @@ impl PublicKeyOps {
         Ok(r)
     }
 }
-
-
 
 pub struct ScalarOps {
     pub common: &'static CommonOps,
@@ -380,7 +341,6 @@ impl ScalarOps {
         self.common.scalar_modulus(cpu_features)
     }
 
-    
     pub fn scalar_bytes_len(&self) -> usize {
         self.common.len()
     }
@@ -404,7 +364,6 @@ impl ScalarOps {
         mul_mont(self.scalar_mul_mont, a, b)
     }
 }
-
 
 pub struct PublicScalarOps {
     pub scalar_ops: &'static ScalarOps,
@@ -467,15 +426,12 @@ impl PrivateScalarOps {
             .scalar_product(s, &Scalar::from(&self.oneRR_mod_n), cpu)
     }
 
-    
     pub(super) fn scalar_inv_to_mont(&self, a: &Scalar, cpu: cpu::Features) -> Scalar<R> {
         assert!(!self.scalar_ops.common.is_zero(a));
         let a = self.to_mont(a, cpu);
         (self.scalar_inv_to_mont)(a, cpu)
     }
 }
-
-
 
 fn twin_mul_inefficient(
     ops: &PrivateKeyOps,
@@ -488,7 +444,6 @@ fn twin_mul_inefficient(
     let scaled_p = ops.point_mul(p_scalar, p_xy, cpu);
     ops.point_sum(&scaled_g, &scaled_p, cpu)
 }
-
 
 impl Modulus<N> {
     pub fn elem_reduced_to_scalar(&self, elem: &Elem<Unencoded>) -> Scalar<Unencoded> {
@@ -504,7 +459,6 @@ impl Modulus<N> {
     }
 }
 
-
 fn elem_sqr_mul(
     ops: &CommonOps,
     a: &Elem<R>,
@@ -519,7 +473,6 @@ fn elem_sqr_mul(
     }
     ops.elem_product(&tmp, b, cpu)
 }
-
 
 fn elem_sqr_mul_acc(
     ops: &CommonOps,
@@ -694,9 +647,6 @@ mod tests {
         })
     }
 
-    
-    
-
     #[test]
     fn p384_elem_sub_test() {
         prefixed_extern! {
@@ -746,9 +696,6 @@ mod tests {
         })
     }
 
-    
-    
-
     #[test]
     fn p384_elem_div_by_2_test() {
         prefixed_extern! {
@@ -783,7 +730,6 @@ mod tests {
         })
     }
 
-    
     #[cfg(target_arch = "x86_64")]
     #[test]
     fn p256_elem_neg_test() {
@@ -821,7 +767,6 @@ mod tests {
             let a = consume_elem(q, test_case, "a");
             let b = consume_elem(q, test_case, "b");
 
-            
             {
                 let mut actual_result = Elem::<R>::zero();
                 unsafe {
@@ -830,7 +775,6 @@ mod tests {
                 assert_limbs_are_equal(ops, &actual_result.limbs, &b.limbs);
             }
 
-            
             {
                 let mut actual_result = Elem::<R>::zero();
                 unsafe {
@@ -917,9 +861,6 @@ mod tests {
             test_vector_file!("ops/p256_scalar_square_tests.txt"),
         );
     }
-
-    
-    
 
     fn scalar_square_test(
         ops: &ScalarOps,
@@ -1017,8 +958,6 @@ mod tests {
         );
     }
 
-    
-
     fn point_sum_mixed_test(
         ops: &PrivateKeyOps,
         point_add_affine: unsafe extern "C" fn(
@@ -1101,7 +1040,6 @@ mod tests {
         });
     }
 
-    
     #[test]
     fn p256_point_mul_test() {
         let generator = (
@@ -1115,7 +1053,6 @@ mod tests {
         );
     }
 
-    
     #[test]
     fn p384_point_mul_test() {
         let generator = (
@@ -1297,7 +1234,7 @@ mod tests {
         let bytes = test::from_hex(elems[i]).unwrap();
         let bytes = untrusted::Input::from(&bytes);
         let r: Elem<Unencoded> = elem_parse_big_endian_fixed_consttime(q, bytes).unwrap();
-        
+
         limbs_out[(i * num_limbs)..((i + 1) * num_limbs)].copy_from_slice(&r.limbs[..num_limbs]);
     }
 
@@ -1317,7 +1254,7 @@ mod tests {
             let bytes = untrusted::Input::from(&bytes);
             let unencoded: Elem<Unencoded> =
                 elem_parse_big_endian_fixed_consttime(q, bytes).unwrap();
-            
+
             Elem {
                 limbs: unencoded.limbs,
                 m: PhantomData,
@@ -1370,7 +1307,7 @@ mod tests {
 
         let bytes = untrusted::Input::from(&bytes);
         let r: Elem<Unencoded> = elem_parse_big_endian_fixed_consttime(q, bytes).unwrap();
-        
+
         Elem {
             limbs: r.limbs,
             m: PhantomData,
@@ -1392,7 +1329,7 @@ mod tests {
         let bytes = test_case.consume_bytes(name);
         let bytes = untrusted::Input::from(&bytes);
         let s = scalar_parse_big_endian_variable(n, AllowZero::Yes, bytes).unwrap();
-        
+
         Scalar {
             limbs: s.limbs,
             m: PhantomData,

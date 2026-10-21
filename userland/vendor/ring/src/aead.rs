@@ -1,26 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::{
     cpu, error,
     polyfill::{u64_from_usize, usize_from_u64_saturated},
@@ -35,45 +12,23 @@ pub use self::{
     unbound_key::UnboundKey,
 };
 
-
-
-
-
-
-
-
-
-
 pub trait NonceSequence {
-    
-    
-    
-    
-    
-    
-    
+
     fn advance(&mut self) -> Result<Nonce, error::Unspecified>;
 }
 
-
 pub trait BoundKey<N: NonceSequence>: core::fmt::Debug {
-    
+
     fn new(key: UnboundKey, nonce_sequence: N) -> Self;
 
-    
     fn algorithm(&self) -> &'static Algorithm;
 }
-
-
-
-
-
 
 #[derive(Clone, Copy)]
 pub struct Aad<A>(A);
 
 impl<A: AsRef<[u8]>> Aad<A> {
-    
+
     #[inline]
     pub fn from(aad: A) -> Self {
         Self(aad)
@@ -90,7 +45,7 @@ where
 }
 
 impl Aad<[u8; 0]> {
-    
+
     pub fn empty() -> Self {
         Self::from([])
     }
@@ -125,13 +80,11 @@ enum KeyInner {
 }
 
 const fn max_input_len(block_len: usize, overhead_blocks_per_nonce: usize) -> usize {
-    
-    
+
     usize_from_u64_saturated(
         ((1u64 << 32) - u64_from_usize(overhead_blocks_per_nonce)) * u64_from_usize(block_len),
     )
 }
-
 
 #[must_use]
 #[repr(C)]
@@ -162,9 +115,7 @@ impl From<[u8; TAG_LEN]> for Tag {
 
 const MAX_KEY_LEN: usize = 32;
 
-
 const TAG_LEN: usize = 16;
-
 
 pub const MAX_TAG_LEN: usize = TAG_LEN;
 

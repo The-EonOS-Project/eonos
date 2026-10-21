@@ -1,21 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 
 #include "doomtype.h"
@@ -29,7 +11,6 @@
 #define MIDI_PERCUSSION_CHAN 9
 #define MUS_PERCUSSION_CHAN 15
 
-
 typedef enum
 {
     mus_releasekey = 0x00,
@@ -39,7 +20,6 @@ typedef enum
     mus_changecontroller = 0x40,
     mus_scoreend = 0x60
 } musevent;
-
 
 typedef enum
 {
@@ -52,7 +32,6 @@ typedef enum
     midi_pitchwheel = 0xE0
 } midievent;
 
-
 typedef struct 
 {
     byte id[4];
@@ -62,7 +41,6 @@ typedef struct
     unsigned short secondarychannels;
     unsigned short instrumentcount;
 } musheader;
-
 
 static const byte midiheader[] =
 {
@@ -75,18 +53,13 @@ static const byte midiheader[] =
     0x00, 0x00, 0x00, 0x00  
 };
 
-
 static byte channelvelocities[] =
 {
     127, 127, 127, 127, 127, 127, 127, 127,
     127, 127, 127, 127, 127, 127, 127, 127
 };
 
-
-
 static unsigned int queuedtime = 0;
-
-
 
 static unsigned int tracksize;
 
@@ -97,8 +70,6 @@ static const byte controller_map[] =
 };
 
 static int channel_map[NUM_CHANNELS];
-
-
 
 static boolean WriteTime(unsigned int time, MEMFILE *midioutput)
 {
@@ -134,8 +105,6 @@ static boolean WriteTime(unsigned int time, MEMFILE *midioutput)
     }
 }
 
-
-
 static boolean WriteEndTrack(MEMFILE *midioutput)
 {
     byte endtrack[] = {0xFF, 0x2F, 0x00};
@@ -153,7 +122,6 @@ static boolean WriteEndTrack(MEMFILE *midioutput)
     tracksize += 3;
     return false;
 }
-
 
 static boolean WritePressKey(byte channel, byte key,
                              byte velocity, MEMFILE *midioutput)
@@ -189,7 +157,6 @@ static boolean WritePressKey(byte channel, byte key,
     return false;
 }
 
-
 static boolean WriteReleaseKey(byte channel, byte key,
                                MEMFILE *midioutput)
 {
@@ -224,7 +191,6 @@ static boolean WriteReleaseKey(byte channel, byte key,
     return false;
 }
 
-
 static boolean WritePitchWheel(byte channel, short wheel,
                                MEMFILE *midioutput)
 {
@@ -258,7 +224,6 @@ static boolean WritePitchWheel(byte channel, short wheel,
     return false;
 }
 
-
 static boolean WriteChangePatch(byte channel, byte patch,
                                 MEMFILE *midioutput)
 {
@@ -286,8 +251,6 @@ static boolean WriteChangePatch(byte channel, byte patch,
     return false;
 }
 
-
-
 static boolean WriteChangeController_Valued(byte channel,
                                             byte control,
                                             byte value,
@@ -312,13 +275,7 @@ static boolean WriteChangeController_Valued(byte channel,
         return true;
     }
 
-    
-    
-
     working = value; 
-
-    
-    
 
     if (working & 0x80)
     {
@@ -335,7 +292,6 @@ static boolean WriteChangeController_Valued(byte channel,
     return false;
 }
 
-
 static boolean WriteChangeController_Valueless(byte channel,
                                                byte control,
                                                MEMFILE *midioutput)
@@ -344,15 +300,11 @@ static boolean WriteChangeController_Valueless(byte channel,
                                              midioutput);
 }
 
-
-
 static int AllocateMIDIChannel(void)
 {
     int result;
     int max;
     int i;
-
-    
 
     max = -1;
 
@@ -364,13 +316,7 @@ static int AllocateMIDIChannel(void)
         }
     }
 
-    
-    
-    
-
     result = max + 1;
-
-    
 
     if (result == MIDI_PERCUSSION_CHAN)
     {
@@ -380,13 +326,8 @@ static int AllocateMIDIChannel(void)
     return result;
 }
 
-
-
-
 static int GetMIDIChannel(int mus_channel, MEMFILE *midioutput)
 {
-    
-    
 
     if (mus_channel == MUS_PERCUSSION_CHAN)
     {
@@ -394,16 +335,11 @@ static int GetMIDIChannel(int mus_channel, MEMFILE *midioutput)
     }
     else
     {
-        
-        
 
         if (channel_map[mus_channel] == -1)
         {
             channel_map[mus_channel] = AllocateMIDIChannel();
 
-            
-            
-            
             WriteChangeController_Valueless(channel_map[mus_channel], 0x7b,
                                             midioutput);
         }
@@ -435,57 +371,40 @@ static boolean ReadMusHeader(MEMFILE *file, musheader *header)
     return result;
 }
 
-
-
-
-
-
-
 boolean mus2mid(MEMFILE *musinput, MEMFILE *midioutput)
 {
-    
+
     musheader musfileheader;
 
-    
     byte eventdescriptor;
     int channel; 
     musevent event;
 
-
-    
     byte key;
     byte controllernumber;
     byte controllervalue;
 
-    
     byte tracksizebuffer[4];
 
-    
     int hitscoreend = 0;
 
-    
     byte working;
-    
-    unsigned int timedelay;
 
-    
+    unsigned int timedelay;
 
     for (channel=0; channel<NUM_CHANNELS; ++channel)
     {
         channel_map[channel] = -1;
     }
 
-    
-
     if (!ReadMusHeader(musinput, &musfileheader))
     {
         return true;
     }
 
-
 #define CHECK_MUS_HEADER
 #ifdef CHECK_MUS_HEADER
-    
+
     if (musfileheader.id[0] != 'M'
      || musfileheader.id[1] != 'U'
      || musfileheader.id[2] != 'S'
@@ -495,27 +414,20 @@ boolean mus2mid(MEMFILE *musinput, MEMFILE *midioutput)
     }
 #endif
 
-    
     if (mem_fseek(musinput, (long)musfileheader.scorestart,
                   MEM_SEEK_SET) != 0)
     {
         return true;
     }
 
-    
-    
-
     mem_fwrite(midiheader, 1, sizeof(midiheader), midioutput);
     tracksize = 0;
 
-    
     while (!hitscoreend)
     {
-        
 
         while (!hitscoreend)
         {
-            
 
             if (mem_fread(&eventdescriptor, 1, 1, musinput) != 1)
             {
@@ -646,7 +558,7 @@ boolean mus2mid(MEMFILE *musinput, MEMFILE *midioutput)
                 break;
             }
         }
-        
+
         if (!hitscoreend)
         {
             timedelay = 0;
@@ -667,13 +579,11 @@ boolean mus2mid(MEMFILE *musinput, MEMFILE *midioutput)
         }
     }
 
-    
     if (WriteEndTrack(midioutput))
     {
         return true;
     }
 
-    
     if (mem_fseek(midioutput, 18, MEM_SEEK_SET))
     {
         return true;
@@ -723,8 +633,6 @@ int main(int argc, char *argv[])
         fprintf(stderr, "mus2mid() failed\n");
         exit(-1);
     }
-
-    
 
     mem_get_buf(dst, &outfile, &outfile_len);
 

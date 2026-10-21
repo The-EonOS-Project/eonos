@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <ring-core/mem.h>
 #include "internal.h"
 

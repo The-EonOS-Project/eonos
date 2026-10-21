@@ -1,30 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![allow(dead_code)]
 
 use core::fmt::Write;
@@ -60,24 +33,20 @@ unsafe fn wrmsr(msr: u32, value: u64) {
     );
 }
 
-
-
-
 #[repr(C)]
 pub struct SyscallFrame {
-    
+
     pub rax: u64,
     pub rdi: u64,
     pub rsi: u64,
     pub rdx: u64,
-    
-    
+
     pub r10: u64,
     pub r8: u64,
     pub r9: u64,
-    
+
     pub rip: u64,
-    
+
     pub rflags: u64,
     pub user_rsp: u64,
 }
@@ -170,31 +139,17 @@ enter_user_mode_asm:
 "#
 );
 
-
-
-
 pub fn init() {
     unsafe {
         let efer = rdmsr(MSR_EFER);
         wrmsr(MSR_EFER, efer | EFER_SCE);
 
-        
-        
-        
-        
-        
-        
-        
         let syscall_base = gdt::KERNEL_CS as u64;
         let sysret_base = gdt::USER_DS as u64 - 8;
         wrmsr(MSR_STAR, (sysret_base << 48) | (syscall_base << 32));
 
         wrmsr(MSR_LSTAR, syscall_entry as *const () as usize as u64);
 
-        
-        
-        
-        
         wrmsr(MSR_SFMASK, (1 << 8) | (1 << 9) | (1 << 10));
     }
 
@@ -208,7 +163,6 @@ pub fn init() {
     );
 }
 
-
 pub const SYS_READ: u64 = 0;
 pub const SYS_WRITE: u64 = 1;
 pub const SYS_SCHED_YIELD: u64 = 24;
@@ -219,13 +173,8 @@ pub const SYS_OPEN: u64 = 2;
 pub const SYS_CLOSE: u64 = 3;
 pub const SYS_KILL: u64 = 62;
 
-
-
 pub const SYS_LIST_FILES: u64 = 9001;
 pub const SYS_READ_FILE: u64 = 9002;
-
-
-
 
 pub const SYS_UPTIME_MS: u64 = 9003;
 
@@ -237,7 +186,6 @@ pub const SYS_MKDIR: u64 = 9007;
 pub const SYS_REMOVE: u64 = 9008;
 pub const SYS_SYNC: u64 = 9009;
 pub const SYS_LIST_BLOCK_DEVICES: u64 = 9010;
-
 
 pub const SYS_PANIC: u64 = 9011;
 
@@ -386,8 +334,6 @@ const O_CREAT: u64 = 0x40;
 const O_TRUNC: u64 = 0x200;
 const O_APPEND: u64 = 0x400;
 
-
-
 pub fn init_process_files(pid: u64, parent: u64, stdin_fd: Option<u64>, stdout_fd: Option<u64>) {
     let mut files = OPEN_FILES.lock();
     files.retain(|file| file.pid != pid);
@@ -454,16 +400,11 @@ pub fn init_process_files(pid: u64, parent: u64, stdin_fd: Option<u64>, stdout_f
     }
 }
 
-
 const fn errno(e: i64) -> u64 {
     (-e) as u64
 }
 
-
-
 const MAX_WRITE: usize = 4096;
-
-
 
 fn console_write(bytes: &[u8]) {
     let text = alloc::string::String::from_utf8_lossy(bytes);
@@ -476,10 +417,6 @@ fn console_write(bytes: &[u8]) {
     }
 }
 
-
-
-
-
 const HISTORY_CAP: usize = 32;
 
 static HISTORY: sync::IrqMutex<alloc::collections::VecDeque<alloc::vec::Vec<u8>>> =
@@ -490,9 +427,6 @@ static FOREGROUND_CHILD: AtomicU64 = AtomicU64::new(0);
 static CTRL_C_PENDING: AtomicBool = AtomicBool::new(false);
 static TERMINAL_READER: AtomicBool = AtomicBool::new(false);
 static URANDOM_STATE: AtomicU64 = AtomicU64::new(0);
-
-
-
 
 fn urandom_word() -> u64 {
     if core::arch::x86_64::__cpuid(1).ecx & (1 << 30) != 0 {
@@ -543,11 +477,6 @@ fn fill_urandom(out: &mut [u8]) {
     }
 }
 
-
-
-
-
-
 fn next_byte() -> u8 {
     loop {
         if let Some(byte) = DEFERRED_INPUT.lock().pop_front() {
@@ -566,15 +495,6 @@ fn next_byte() -> u8 {
         scheduler::yield_now();
     }
 }
-
-
-
-
-
-
-
-
-
 
 enum EditAction {
     Up,
@@ -599,18 +519,13 @@ fn decode_escape() -> EditAction {
         b'H' => EditAction::Home,
         b'F' => EditAction::End,
         b'3' => {
-            
-            
+
             let _ = next_byte(); 
             EditAction::Delete
         }
         _ => EditAction::Unknown,
     }
 }
-
-
-
-
 
 fn replace_line(line: &mut alloc::vec::Vec<u8>, cursor: &mut usize, new_line: alloc::vec::Vec<u8>) {
     cursor_left(*cursor);
@@ -623,13 +538,6 @@ fn replace_line(line: &mut alloc::vec::Vec<u8>, cursor: &mut usize, new_line: al
     *cursor = line.len();
 }
 
-
-
-
-
-
-
-
 fn cursor_left(n: usize) {
     if n == 0 {
         return;
@@ -640,9 +548,6 @@ fn cursor_left(n: usize) {
     seq.push(b'D');
     console_write(&seq);
 }
-
-
-
 
 fn itoa(mut n: usize) -> alloc::string::String {
     if n == 0 {
@@ -656,11 +561,6 @@ fn itoa(mut n: usize) -> alloc::string::String {
     digits.reverse();
     alloc::string::String::from_utf8(digits).unwrap()
 }
-
-
-
-
-
 
 fn redraw_tail(line: &[u8], from: usize, cursor: usize) {
     console_write(&line[from..]);
@@ -787,22 +687,6 @@ fn complete_line(line: &mut alloc::vec::Vec<u8>, cursor: &mut usize, max: usize)
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 fn read_line(max: usize) -> alloc::vec::Vec<u8> {
     let mut line: alloc::vec::Vec<u8> = alloc::vec::Vec::new();
     if max == 0 {
@@ -901,10 +785,7 @@ fn read_line(max: usize) -> alloc::vec::Vec<u8> {
             }
             b'\t' => complete_line(&mut line, &mut cursor, max),
             0x08 | 0x7F => {
-                
-                
-                
-                
+
                 if cursor > 0 {
                     cursor -= 1;
                     line.remove(cursor);
@@ -921,10 +802,7 @@ fn read_line(max: usize) -> alloc::vec::Vec<u8> {
                     } else {
                         line.insert(cursor, b);
                         cursor += 1;
-                        
-                        
-                        
-                        
+
                         console_write(&line[cursor - 1..]);
                         for _ in 0..(line.len() - cursor) {
                             console_write(b"\x08");
@@ -935,9 +813,6 @@ fn read_line(max: usize) -> alloc::vec::Vec<u8> {
         }
     }
 
-    
-    
-    
     if line.len() > 1 {
         let mut h = HISTORY.lock();
         let stored = line[..line.len() - 1].to_vec();
@@ -968,8 +843,7 @@ fn sys_read(fd: u64, buf: u64, len: u64) -> u64 {
         }
         file.kind
     };
-    
-    
+
     if !vmm::validate_user_range(buf, n, true) {
         return errno(EFAULT);
     }
@@ -1242,7 +1116,6 @@ fn sys_close(fd: u64) -> u64 {
     drop_pipe_ref(kind);
     0
 }
-
 
 pub fn close_process_files(pid: u64) {
     let mut pipe_refs = alloc::vec::Vec::new();
@@ -1716,9 +1589,7 @@ fn sys_era_graphics(operation: u64, a1: u64, a2: u64, a3: u64, a4: u64, a5: u64)
             let mut pixels = alloc::vec::Vec::new();
             if pixels.try_reserve_exact(pixel_count).is_err() { return errno(ENOMEM); }
             pixels.resize(pixel_count, 0);
-            
-            
-            
+
             let pixel_bytes = unsafe {
                 core::slice::from_raw_parts_mut(pixels.as_mut_ptr().cast::<u8>(), byte_len)
             };
@@ -2198,8 +2069,7 @@ fn sys_waitpid(pid: u64, status_ptr: u64, options: u64) -> u64 {
     if options & !WNOHANG != 0 {
         return errno(EINVAL);
     }
-    
-    
+
     if status_ptr != 0 && !vmm::validate_user_range(status_ptr, 4, true) {
         return errno(EFAULT);
     }
@@ -2253,14 +2123,12 @@ impl Drop for ForegroundWaitGuard {
     }
 }
 
-
 fn try_terminal_byte() -> Option<u8> {
     crate::drivers::usb::xhci::poll();
     crate::drivers::ps2::try_read_byte()
         .or_else(crate::drivers::usb::xhci::try_read_byte)
         .or_else(|| crate::serial::SERIAL1.lock().try_read_byte())
 }
-
 
 const MAX_NAME: usize = 255;
 
@@ -2476,8 +2344,7 @@ fn sys_write(fd: u64, buf: u64, len: u64) -> u64 {
     if kind != FdKind::File {
         return errno(EBADF);
     }
-    
-    
+
     let mut files = OPEN_FILES.lock();
     let Some(file) = files.iter_mut().find(|f| f.pid == pid && f.fd == fd) else {
         return errno(EBADF);
@@ -2516,17 +2383,9 @@ fn fs_errno(error: crate::vfs::FsError) -> u64 {
 
 #[no_mangle]
 extern "C" fn syscall_dispatch(frame: &mut SyscallFrame) {
-    
-    
-    
-    
+
     crate::idt::enable_interrupts();
 
-    
-    
-    
-    
-    
     let pid = scheduler::current_id();
     if process::is_sandboxed(pid)
         && matches!(
@@ -2634,14 +2493,12 @@ extern "C" fn syscall_dispatch(frame: &mut SyscallFrame) {
             frame.rax = 0;
         }
         SYS_GETPID => frame.rax = scheduler::current_id(),
-        
-        
+
         SYS_EXIT => process::exit_current((frame.rdi & 0xff) as i64),
         TEST_SYSCALL_NUM => {
             TEST_ARG.store(frame.rdi, Ordering::SeqCst);
             TEST_DONE.store(true, Ordering::SeqCst);
-            
-            
+
             scheduler::exit();
         }
         other => {
@@ -2657,9 +2514,6 @@ extern "C" fn syscall_dispatch(frame: &mut SyscallFrame) {
     }
 }
 
-
-
-
 pub fn enter_user_mode(entry: u64, user_rsp: u64) -> ! {
     unsafe {
         enter_user_mode_asm(
@@ -2671,10 +2525,6 @@ pub fn enter_user_mode(entry: u64, user_rsp: u64) -> ! {
     }
 }
 
-
-
-
-
 const TEST_SYSCALL_NUM: u64 = 0x42;
 const TEST_MAGIC: u64 = 0xABCD_1234_DEAD_BEEF;
 
@@ -2684,16 +2534,6 @@ static TEST_ARG: AtomicU64 = AtomicU64::new(0);
 const USER_CODE_VIRT: u64 = 0x0000_0000_0040_0000;
 const USER_STACK_TOP_VIRT: u64 = 0x0000_0000_0060_0000;
 const USER_STACK_PAGE_VIRT: u64 = USER_STACK_TOP_VIRT - pmm::PAGE_SIZE;
-
-
-
-
-
-
-
-
-
-
 
 #[rustfmt::skip]
 const USER_TEST_PROGRAM: [u8; 24] = [
@@ -2750,8 +2590,6 @@ pub fn self_test() {
         scheduler::yield_now();
     }
 
-    
-    
     scheduler::sleep_ms(20);
 
     let code_phys = vmm::translate(USER_CODE_VIRT);

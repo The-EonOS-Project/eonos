@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 # ====================================================================
 # Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
 # project.
@@ -997,7 +996,7 @@ $code.=<<___;
 .size	bn_sqr8x_mont,.-bn_sqr8x_mont
 ___
 }}}
-
+
 if ($addx) {{{
 my $bp="%rdx";	# original value
 

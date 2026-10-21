@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![allow(missing_docs)]
 
 #[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
@@ -48,9 +34,6 @@ fn agreement_traits() {
     test::compile_time_assert_send::<agreement::PublicKey>();
     test::compile_time_assert_sync::<agreement::PublicKey>();
 
-    
-    
-    
     let _: &dyn core::fmt::Debug = &public_key;
 
     test::compile_time_assert_clone::<agreement::UnparsedPublicKey<&[u8]>>();
@@ -68,7 +51,6 @@ fn agreement_traits() {
         r#"UnparsedPublicKey { algorithm: Algorithm { curve: Curve25519 }, bytes: "010203" }"#
     );
 
-    
     assert_eq!(unparsed_public_key.as_ref(), &[0x01, 0x02, 0x03]);
 }
 
@@ -108,8 +90,7 @@ fn agreement_agree_ephemeral() {
             }
 
             Some(_) => {
-                
-                
+
                 let dummy_private_key = agreement::EphemeralPrivateKey::generate(alg, &rng)?;
                 fn kdf_not_called(_: &[u8]) -> Result<(), ()> {
                     panic!(
@@ -162,9 +143,6 @@ fn test_agreement_ecdh_x25519_rfc_iterated() {
         &mut u,
     );
 
-    
-    
-    
     expect_iterated_x25519(
         "2c125a20f639d504a7703d2e223c79a79de48c4ee8c23379aa19a62ecd211815",
         1_000..10_000,

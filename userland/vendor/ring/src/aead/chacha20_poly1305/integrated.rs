@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{
     super::{NONCE_LEN, TAG_LEN},
     chacha::Overlapping,
@@ -71,12 +57,6 @@ pub(super) fn seal(
 ) -> Result<Tag, InputTooLongError> {
     check_input_lengths(aad, in_out)?;
 
-    
-    
-    
-    
-    
-    
     #[repr(align(16), C)]
     #[derive(Clone, Copy)]
     struct seal_data_in {
@@ -96,8 +76,6 @@ pub(super) fn seal(
             extra_ciphertext_len: 0,
         },
     };
-
-    
 
     let output = in_out.as_mut_ptr();
     let input = in_out.as_ptr();
@@ -148,12 +126,6 @@ pub(super) fn open(
 ) -> Result<Tag, InputTooLongError> {
     check_input_lengths(aad, in_out.input())?;
 
-    
-    
-    
-    
-    
-    
     #[derive(Copy, Clone)]
     #[repr(align(16), C)]
     struct open_data_in {
@@ -208,8 +180,6 @@ pub(super) fn open(
     })
 }
 
-
-
 #[repr(C)]
 pub(super) union InOut<T>
 where
@@ -218,10 +188,6 @@ where
     pub(super) input: T,
     pub(super) out: Out,
 }
-
-
-
-
 
 #[derive(Clone, Copy)]
 #[repr(align(16), C)]

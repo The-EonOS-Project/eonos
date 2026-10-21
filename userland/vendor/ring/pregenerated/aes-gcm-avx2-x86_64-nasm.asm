@@ -1,6 +1,3 @@
-
-
-
 %ifidn __OUTPUT_FORMAT__, win64
 default	rel
 %define XMMWORD
@@ -12,20 +9,11 @@ default	rel
 section	.rdata rdata align=8
 ALIGN	16
 
-
 $L$bswap_mask:
 	DQ	0x08090a0b0c0d0e0f,0x0001020304050607
 
-
-
-
-
-
-
-
 $L$gfpoly:
 	DQ	1,0xc200000000000000
-
 
 $L$gfpoly_and_internal_carrybit:
 	DQ	1,0xc200000000000001
@@ -55,13 +43,7 @@ $L$SEH_prologue_gcm_init_vpclmulqdq_avx2_3:
 
 $L$SEH_endprologue_gcm_init_vpclmulqdq_avx2_4:
 
-
-
 	vpshufd	xmm3,XMMWORD[rdx],0x4e
-
-
-
-
 
 	vpshufd	xmm0,xmm3,0xd3
 	vpsrad	xmm0,xmm0,31
@@ -70,7 +52,6 @@ $L$SEH_endprologue_gcm_init_vpclmulqdq_avx2_4:
 	vpxor	xmm3,xmm3,xmm0
 
 	vbroadcasti128	ymm6,XMMWORD[$L$gfpoly]
-
 
 	vpclmulqdq	xmm0,xmm3,xmm3,0x00
 	vpclmulqdq	xmm1,xmm3,xmm3,0x01
@@ -86,11 +67,8 @@ $L$SEH_endprologue_gcm_init_vpclmulqdq_avx2_4:
 	vpxor	xmm5,xmm5,xmm1
 	vpxor	xmm5,xmm5,xmm0
 
-
-
 	vinserti128	ymm3,ymm5,xmm3,1
 	vinserti128	ymm5,ymm5,xmm5,1
-
 
 	DB	0xc4,0xe3,0x65,0x44,0xc5,0x00
 	DB	0xc4,0xe3,0x65,0x44,0xcd,0x01
@@ -106,18 +84,13 @@ $L$SEH_endprologue_gcm_init_vpclmulqdq_avx2_4:
 	vpxor	ymm4,ymm4,ymm1
 	vpxor	ymm4,ymm4,ymm0
 
-
-
 	vmovdqu	YMMWORD[96+rcx],ymm3
 	vmovdqu	YMMWORD[64+rcx],ymm4
-
-
 
 	vpunpcklqdq	ymm0,ymm4,ymm3
 	vpunpckhqdq	ymm1,ymm4,ymm3
 	vpxor	ymm0,ymm0,ymm1
 	vmovdqu	YMMWORD[(128+32)+rcx],ymm0
-
 
 	DB	0xc4,0xe3,0x5d,0x44,0xc5,0x00
 	DB	0xc4,0xe3,0x5d,0x44,0xcd,0x01
@@ -150,8 +123,6 @@ $L$SEH_endprologue_gcm_init_vpclmulqdq_avx2_4:
 	vmovdqu	YMMWORD[32+rcx],ymm3
 	vmovdqu	YMMWORD[rcx],ymm4
 
-
-
 	vpunpcklqdq	ymm0,ymm4,ymm3
 	vpunpckhqdq	ymm1,ymm4,ymm3
 	vpxor	ymm0,ymm0,ymm1
@@ -162,7 +133,6 @@ $L$SEH_endprologue_gcm_init_vpclmulqdq_avx2_4:
 	add	rsp,24
 	ret
 $L$SEH_end_gcm_init_vpclmulqdq_avx2_5:
-
 
 global	gcm_ghash_vpclmulqdq_avx2_1
 
@@ -184,17 +154,11 @@ $L$SEH_prologue_gcm_ghash_vpclmulqdq_avx2_1_6:
 
 $L$SEH_endprologue_gcm_ghash_vpclmulqdq_avx2_1_7:
 
-
-
-
 	vmovdqu	xmm6,XMMWORD[$L$bswap_mask]
 	vmovdqu	xmm7,XMMWORD[$L$gfpoly]
 
-
 	vmovdqu	xmm5,XMMWORD[rcx]
 	vpshufb	xmm5,xmm5,xmm6
-
-
 
 $L$ghash_lastblock:
 	vmovdqu	xmm0,XMMWORD[r8]
@@ -215,7 +179,6 @@ $L$ghash_lastblock:
 	vpxor	xmm5,xmm5,xmm2
 	vpxor	xmm5,xmm5,xmm1
 
-
 $L$ghash_done:
 
 	vpshufb	xmm5,xmm5,xmm6
@@ -229,7 +192,6 @@ $L$ghash_done:
 	add	rsp,72
 	ret
 $L$SEH_end_gcm_ghash_vpclmulqdq_avx2_1_8:
-
 
 global	aes_gcm_enc_update_vaes_avx2
 
@@ -278,37 +240,25 @@ EXTERN	BORINGSSL_function_hit
 %endif
 	vbroadcasti128	ymm0,XMMWORD[$L$bswap_mask]
 
-
-
 	vmovdqu	xmm1,XMMWORD[r12]
 	vpshufb	xmm1,xmm1,xmm0
 	vbroadcasti128	ymm11,XMMWORD[rsi]
 	vpshufb	ymm11,ymm11,ymm0
 
-
-
 	mov	r10d,DWORD[240+r9]
 	lea	r10d,[((-20))+r10*4]
-
-
-
 
 	lea	r11,[96+r10*4+r9]
 	vbroadcasti128	ymm9,XMMWORD[r9]
 	vbroadcasti128	ymm10,XMMWORD[r11]
 
-
 	vpaddd	ymm11,ymm11,YMMWORD[$L$ctr_pattern]
-
-
 
 	cmp	r8,127
 	jbe	NEAR $L$crypt_loop_4x_done__func1
 
 	vmovdqu	ymm7,YMMWORD[128+rdi]
 	vmovdqu	ymm8,YMMWORD[((128+32))+rdi]
-
-
 
 	vmovdqu	ymm2,YMMWORD[$L$inc_2blocks]
 	vpshufb	ymm12,ymm11,ymm0
@@ -319,7 +269,6 @@ EXTERN	BORINGSSL_function_hit
 	vpaddd	ymm11,ymm11,ymm2
 	vpshufb	ymm15,ymm11,ymm0
 	vpaddd	ymm11,ymm11,ymm2
-
 
 	vpxor	ymm12,ymm12,ymm9
 	vpxor	ymm13,ymm13,ymm9
@@ -357,9 +306,6 @@ $L$vaesenc_loop_first_4_vecs__func1:
 ALIGN	16
 $L$crypt_loop_4x__func1:
 
-
-
-
 	vmovdqu	ymm2,YMMWORD[$L$inc_2blocks]
 	vpshufb	ymm12,ymm11,ymm0
 	vpaddd	ymm11,ymm11,ymm2
@@ -369,7 +315,6 @@ $L$crypt_loop_4x__func1:
 	vpaddd	ymm11,ymm11,ymm2
 	vpshufb	ymm15,ymm11,ymm0
 	vpaddd	ymm11,ymm11,ymm2
-
 
 	vpxor	ymm12,ymm12,ymm9
 	vpxor	ymm13,ymm13,ymm9
@@ -425,13 +370,11 @@ $L$aes128__func1:
 	DB	0xc4,0x62,0x0d,0xdc,0xf2
 	DB	0xc4,0x62,0x05,0xdc,0xfa
 
-
 	vbroadcasti128	ymm2,XMMWORD[((-128))+r11]
 	DB	0xc4,0x62,0x1d,0xdc,0xe2
 	DB	0xc4,0x62,0x15,0xdc,0xea
 	DB	0xc4,0x62,0x0d,0xdc,0xf2
 	DB	0xc4,0x62,0x05,0xdc,0xfa
-
 
 	vmovdqu	ymm3,YMMWORD[32+rdx]
 	vpshufb	ymm3,ymm3,ymm0
@@ -450,7 +393,6 @@ $L$aes128__func1:
 	DB	0xc4,0x62,0x15,0xdc,0xea
 	DB	0xc4,0x62,0x0d,0xdc,0xf2
 	DB	0xc4,0x62,0x05,0xdc,0xfa
-
 
 	vmovdqu	ymm3,YMMWORD[64+rdx]
 	vpshufb	ymm3,ymm3,ymm0
@@ -478,7 +420,6 @@ $L$aes128__func1:
 	DB	0xc4,0xc3,0x6d,0x44,0xd0,0x00
 	vpxor	ymm6,ymm6,ymm2
 
-
 	vmovdqu	ymm3,YMMWORD[96+rdx]
 	vpshufb	ymm3,ymm3,ymm0
 
@@ -504,10 +445,8 @@ $L$aes128__func1:
 	DB	0xc4,0x62,0x0d,0xdc,0xf2
 	DB	0xc4,0x62,0x05,0xdc,0xfa
 
-
 	vpxor	ymm6,ymm6,ymm5
 	vpxor	ymm6,ymm6,ymm1
-
 
 	vbroadcasti128	ymm4,XMMWORD[$L$gfpoly]
 	DB	0xc4,0xe3,0x5d,0x44,0xd5,0x01
@@ -520,7 +459,6 @@ $L$aes128__func1:
 	DB	0xc4,0x62,0x15,0xdc,0xea
 	DB	0xc4,0x62,0x0d,0xdc,0xf2
 	DB	0xc4,0x62,0x05,0xdc,0xfa
-
 
 	DB	0xc4,0xe3,0x5d,0x44,0xd6,0x01
 	vpshufd	ymm6,ymm6,0x4e
@@ -535,7 +473,6 @@ $L$aes128__func1:
 
 	vextracti128	xmm2,ymm1,1
 	vpxor	xmm1,xmm1,xmm2
-
 
 	sub	rdx,-128
 	vpxor	ymm2,ymm10,YMMWORD[rcx]
@@ -592,7 +529,6 @@ $L$ghash_last_ciphertext_4x__func1:
 	DB	0xc4,0xc3,0x6d,0x44,0xd0,0x00
 	vpxor	ymm6,ymm6,ymm2
 
-
 	vmovdqu	ymm3,YMMWORD[96+rdx]
 	vpshufb	ymm3,ymm3,ymm0
 	vmovdqu	ymm4,YMMWORD[96+rdi]
@@ -607,7 +543,6 @@ $L$ghash_last_ciphertext_4x__func1:
 
 	vpxor	ymm6,ymm6,ymm5
 	vpxor	ymm6,ymm6,ymm1
-
 
 	vbroadcasti128	ymm4,XMMWORD[$L$gfpoly]
 	DB	0xc4,0xe3,0x5d,0x44,0xd5,0x01
@@ -628,13 +563,8 @@ $L$crypt_loop_4x_done__func1:
 	test	r8,r8
 	jz	NEAR $L$done__func1
 
-
-
-
-
 	lea	rsi,[128+rdi]
 	sub	rsi,r8
-
 
 	vpxor	xmm5,xmm5,xmm5
 	vpxor	xmm6,xmm6,xmm6
@@ -642,7 +572,6 @@ $L$crypt_loop_4x_done__func1:
 
 	cmp	r8,64
 	jb	NEAR $L$lessthan64bytes__func1
-
 
 	vpshufb	ymm12,ymm11,ymm0
 	vpaddd	ymm11,ymm11,YMMWORD[$L$inc_2blocks]
@@ -661,14 +590,12 @@ $L$vaesenc_loop_tail_1__func1:
 	DB	0xc4,0x42,0x1d,0xdd,0xe2
 	DB	0xc4,0x42,0x15,0xdd,0xea
 
-
 	vmovdqu	ymm2,YMMWORD[rcx]
 	vmovdqu	ymm3,YMMWORD[32+rcx]
 	vpxor	ymm12,ymm12,ymm2
 	vpxor	ymm13,ymm13,ymm3
 	vmovdqu	YMMWORD[rdx],ymm12
 	vmovdqu	YMMWORD[32+rdx],ymm13
-
 
 	vpshufb	ymm12,ymm12,ymm0
 	vpshufb	ymm13,ymm13,ymm0
@@ -697,7 +624,6 @@ $L$vaesenc_loop_tail_1__func1:
 
 	vpxor	xmm1,xmm1,xmm1
 
-
 $L$lessthan64bytes__func1:
 	vpshufb	ymm12,ymm11,ymm0
 	vpaddd	ymm11,ymm11,YMMWORD[$L$inc_2blocks]
@@ -714,9 +640,6 @@ $L$vaesenc_loop_tail_2__func1:
 	jne	NEAR $L$vaesenc_loop_tail_2__func1
 	DB	0xc4,0x42,0x1d,0xdd,0xe2
 	DB	0xc4,0x42,0x15,0xdd,0xea
-
-
-
 
 	cmp	r8,32
 	jb	NEAR $L$xor_one_block__func1
@@ -809,7 +732,6 @@ $L$done__func1:
 	ret
 $L$SEH_end_aes_gcm_enc_update_vaes_avx2_17:
 
-
 global	aes_gcm_dec_update_vaes_avx2
 
 ALIGN	32
@@ -853,29 +775,19 @@ $L$SEH_prologue_aes_gcm_dec_update_vaes_avx2_15:
 $L$SEH_endprologue_aes_gcm_dec_update_vaes_avx2_16:
 	vbroadcasti128	ymm0,XMMWORD[$L$bswap_mask]
 
-
-
 	vmovdqu	xmm1,XMMWORD[r12]
 	vpshufb	xmm1,xmm1,xmm0
 	vbroadcasti128	ymm11,XMMWORD[rsi]
 	vpshufb	ymm11,ymm11,ymm0
 
-
-
 	mov	r10d,DWORD[240+r9]
 	lea	r10d,[((-20))+r10*4]
-
-
-
 
 	lea	r11,[96+r10*4+r9]
 	vbroadcasti128	ymm9,XMMWORD[r9]
 	vbroadcasti128	ymm10,XMMWORD[r11]
 
-
 	vpaddd	ymm11,ymm11,YMMWORD[$L$ctr_pattern]
-
-
 
 	cmp	r8,127
 	jbe	NEAR $L$crypt_loop_4x_done__func2
@@ -884,9 +796,6 @@ $L$SEH_endprologue_aes_gcm_dec_update_vaes_avx2_16:
 	vmovdqu	ymm8,YMMWORD[((128+32))+rdi]
 ALIGN	16
 $L$crypt_loop_4x__func2:
-
-
-
 
 	vmovdqu	ymm2,YMMWORD[$L$inc_2blocks]
 	vpshufb	ymm12,ymm11,ymm0
@@ -897,7 +806,6 @@ $L$crypt_loop_4x__func2:
 	vpaddd	ymm11,ymm11,ymm2
 	vpshufb	ymm15,ymm11,ymm0
 	vpaddd	ymm11,ymm11,ymm2
-
 
 	vpxor	ymm12,ymm12,ymm9
 	vpxor	ymm13,ymm13,ymm9
@@ -953,13 +861,11 @@ $L$aes128__func2:
 	DB	0xc4,0x62,0x0d,0xdc,0xf2
 	DB	0xc4,0x62,0x05,0xdc,0xfa
 
-
 	vbroadcasti128	ymm2,XMMWORD[((-128))+r11]
 	DB	0xc4,0x62,0x1d,0xdc,0xe2
 	DB	0xc4,0x62,0x15,0xdc,0xea
 	DB	0xc4,0x62,0x0d,0xdc,0xf2
 	DB	0xc4,0x62,0x05,0xdc,0xfa
-
 
 	vmovdqu	ymm3,YMMWORD[32+rcx]
 	vpshufb	ymm3,ymm3,ymm0
@@ -978,7 +884,6 @@ $L$aes128__func2:
 	DB	0xc4,0x62,0x15,0xdc,0xea
 	DB	0xc4,0x62,0x0d,0xdc,0xf2
 	DB	0xc4,0x62,0x05,0xdc,0xfa
-
 
 	vmovdqu	ymm3,YMMWORD[64+rcx]
 	vpshufb	ymm3,ymm3,ymm0
@@ -1006,7 +911,6 @@ $L$aes128__func2:
 	DB	0xc4,0xc3,0x6d,0x44,0xd0,0x00
 	vpxor	ymm6,ymm6,ymm2
 
-
 	vmovdqu	ymm3,YMMWORD[96+rcx]
 	vpshufb	ymm3,ymm3,ymm0
 
@@ -1032,10 +936,8 @@ $L$aes128__func2:
 	DB	0xc4,0x62,0x0d,0xdc,0xf2
 	DB	0xc4,0x62,0x05,0xdc,0xfa
 
-
 	vpxor	ymm6,ymm6,ymm5
 	vpxor	ymm6,ymm6,ymm1
-
 
 	vbroadcasti128	ymm4,XMMWORD[$L$gfpoly]
 	DB	0xc4,0xe3,0x5d,0x44,0xd5,0x01
@@ -1048,7 +950,6 @@ $L$aes128__func2:
 	DB	0xc4,0x62,0x15,0xdc,0xea
 	DB	0xc4,0x62,0x0d,0xdc,0xf2
 	DB	0xc4,0x62,0x05,0xdc,0xfa
-
 
 	DB	0xc4,0xe3,0x5d,0x44,0xd6,0x01
 	vpshufd	ymm6,ymm6,0x4e
@@ -1063,8 +964,6 @@ $L$aes128__func2:
 
 	vextracti128	xmm2,ymm1,1
 	vpxor	xmm1,xmm1,xmm2
-
-
 
 	vpxor	ymm2,ymm10,YMMWORD[rcx]
 	vpxor	ymm3,ymm10,YMMWORD[32+rcx]
@@ -1089,13 +988,8 @@ $L$crypt_loop_4x_done__func2:
 	test	r8,r8
 	jz	NEAR $L$done__func2
 
-
-
-
-
 	lea	rsi,[128+rdi]
 	sub	rsi,r8
-
 
 	vpxor	xmm5,xmm5,xmm5
 	vpxor	xmm6,xmm6,xmm6
@@ -1103,7 +997,6 @@ $L$crypt_loop_4x_done__func2:
 
 	cmp	r8,64
 	jb	NEAR $L$lessthan64bytes__func2
-
 
 	vpshufb	ymm12,ymm11,ymm0
 	vpaddd	ymm11,ymm11,YMMWORD[$L$inc_2blocks]
@@ -1122,14 +1015,12 @@ $L$vaesenc_loop_tail_1__func2:
 	DB	0xc4,0x42,0x1d,0xdd,0xe2
 	DB	0xc4,0x42,0x15,0xdd,0xea
 
-
 	vmovdqu	ymm2,YMMWORD[rcx]
 	vmovdqu	ymm3,YMMWORD[32+rcx]
 	vpxor	ymm12,ymm12,ymm2
 	vpxor	ymm13,ymm13,ymm3
 	vmovdqu	YMMWORD[rdx],ymm12
 	vmovdqu	YMMWORD[32+rdx],ymm13
-
 
 	vpshufb	ymm12,ymm2,ymm0
 	vpshufb	ymm13,ymm3,ymm0
@@ -1158,7 +1049,6 @@ $L$vaesenc_loop_tail_1__func2:
 
 	vpxor	xmm1,xmm1,xmm1
 
-
 $L$lessthan64bytes__func2:
 	vpshufb	ymm12,ymm11,ymm0
 	vpaddd	ymm11,ymm11,YMMWORD[$L$inc_2blocks]
@@ -1175,9 +1065,6 @@ $L$vaesenc_loop_tail_2__func2:
 	jne	NEAR $L$vaesenc_loop_tail_2__func2
 	DB	0xc4,0x42,0x1d,0xdd,0xe2
 	DB	0xc4,0x42,0x15,0xdd,0xea
-
-
-
 
 	cmp	r8,32
 	jb	NEAR $L$xor_one_block__func2
@@ -1270,7 +1157,6 @@ $L$done__func2:
 	ret
 $L$SEH_end_aes_gcm_dec_update_vaes_avx2_17:
 
-
 section	.pdata rdata align=4
 ALIGN	4
 	DD	$L$SEH_begin_gcm_init_vpclmulqdq_avx2_1 wrt ..imagebase
@@ -1288,7 +1174,6 @@ ALIGN	4
 	DD	$L$SEH_begin_aes_gcm_dec_update_vaes_avx2_1 wrt ..imagebase
 	DD	$L$SEH_end_aes_gcm_dec_update_vaes_avx2_17 wrt ..imagebase
 	DD	$L$SEH_info_aes_gcm_dec_update_vaes_avx2_0 wrt ..imagebase
-
 
 section	.xdata rdata align=8
 ALIGN	4

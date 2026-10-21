@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86_64) && defined(__ELF__)
@@ -206,7 +203,6 @@ poly_hash_ad_internal:
 	adcq	%r9,%r11
 	adcq	$0,%r12
 
-
 .Lhash_ad_done:
 	ret
 .cfi_endproc	
@@ -237,7 +233,6 @@ _CET_ENDBR
 	pushq	%r15
 .cfi_adjust_cfa_offset	8
 .cfi_offset	%r15,-56
-
 
 	pushq	%r9
 .cfi_adjust_cfa_offset	8
@@ -350,8 +345,6 @@ _CET_ENDBR
 	movdqa	%xmm13,0+112(%rbp)
 	movdqa	%xmm14,0+128(%rbp)
 	movdqa	%xmm15,0+144(%rbp)
-
-
 
 	movq	$4,%rcx
 	movq	%rsi,%r8
@@ -1680,7 +1673,6 @@ _CET_ENDBR
 	leaq	192(%rsi),%rsi
 	leaq	192(%rdi),%rdi
 
-
 .Lopen_sse_tail_64_dec_loop:
 	cmpq	$16,%rbx
 	jb	.Lopen_sse_tail_16_init
@@ -1697,12 +1689,9 @@ _CET_ENDBR
 .Lopen_sse_tail_16_init:
 	movdqa	%xmm0,%xmm1
 
-
 .Lopen_sse_tail_16:
 	testq	%rbx,%rbx
 	jz	.Lopen_sse_finalize
-
-
 
 	pxor	%xmm3,%xmm3
 	leaq	-1(%rsi,%rbx,1),%rsi
@@ -1718,7 +1707,6 @@ _CET_ENDBR
 	pextrq	$1,%xmm3,%r14
 
 	pxor	%xmm1,%xmm3
-
 
 .Lopen_sse_tail_16_extract:
 	pextrb	$0,%xmm3,(%rdi)
@@ -1768,7 +1756,6 @@ _CET_ENDBR
 	adcq	%r9,%r11
 	adcq	$0,%r12
 
-
 .Lopen_sse_finalize:
 	addq	0+0+32(%rbp),%r10
 	adcq	8+0+32(%rbp),%r11
@@ -1810,7 +1797,6 @@ _CET_ENDBR
 	addq	%r15,%r10
 	adcq	%r9,%r11
 	adcq	$0,%r12
-
 
 	movq	%r10,%r13
 	movq	%r11,%r14
@@ -2031,7 +2017,6 @@ _CET_ENDBR
 	adcq	8+0(%rsi),%r11
 	adcq	$1,%r12
 
-
 	movdqu	0(%rsi),%xmm3
 	pxor	%xmm3,%xmm1
 	movdqu	%xmm1,0(%rdi)
@@ -2075,7 +2060,6 @@ _CET_ENDBR
 	adcq	%r9,%r11
 	adcq	$0,%r12
 
-
 	movdqa	%xmm5,%xmm1
 	movdqa	%xmm9,%xmm5
 	movdqa	%xmm13,%xmm9
@@ -2086,12 +2070,6 @@ _CET_ENDBR
 	jmp	.Lopen_sse_128_xor_hash
 .size	chacha20_poly1305_open_sse41, .-chacha20_poly1305_open_sse41
 .cfi_endproc	
-
-
-
-
-
-
 
 .globl	chacha20_poly1305_seal_sse41
 .hidden chacha20_poly1305_seal_sse41
@@ -2118,7 +2096,6 @@ _CET_ENDBR
 	pushq	%r15
 .cfi_adjust_cfa_offset	8
 .cfi_offset	%r15,-56
-
 
 	pushq	%r9
 .cfi_adjust_cfa_offset	8
@@ -2369,7 +2346,6 @@ _CET_ENDBR
 	paddd	0+48(%rbp),%xmm4
 	paddd	0+64(%rbp),%xmm8
 	paddd	0+96(%rbp),%xmm12
-
 
 	pand	.Lclamp(%rip),%xmm3
 	movdqa	%xmm3,0+0(%rbp)
@@ -3566,7 +3542,6 @@ _CET_ENDBR
 	adcq	%r9,%r11
 	adcq	$0,%r12
 
-
 	movdqa	%xmm4,%xmm0
 	movdqa	%xmm8,%xmm4
 	movdqa	%xmm12,%xmm8
@@ -3591,9 +3566,7 @@ _CET_ENDBR
 	decq	%rcx
 	jne	.Lseal_sse_tail_16_compose
 
-
 	pxor	%xmm0,%xmm15
-
 
 	movq	%rbx,%rcx
 	movdqu	%xmm15,%xmm0
@@ -3603,13 +3576,6 @@ _CET_ENDBR
 	addq	$1,%rdi
 	subq	$1,%rcx
 	jnz	.Lseal_sse_tail_16_extract
-
-
-
-
-
-
-
 
 	movq	288 + 0 + 32(%rsp),%r9
 	movq	56(%r9),%r14
@@ -3626,19 +3592,14 @@ _CET_ENDBR
 
 .Lload_extra_in:
 
-
 	leaq	-1(%r13,%r15,1),%rsi
-
 
 	addq	%r15,%r13
 	subq	%r15,%r14
 	movq	%r13,48(%r9)
 	movq	%r14,56(%r9)
 
-
-
 	addq	%r15,%r8
-
 
 	pxor	%xmm11,%xmm11
 .Lload_extra_load_loop:
@@ -3648,9 +3609,6 @@ _CET_ENDBR
 	subq	$1,%r15
 	jnz	.Lload_extra_load_loop
 
-
-
-
 	movq	%rbx,%r15
 
 .Lload_extra_shift_loop:
@@ -3658,17 +3616,11 @@ _CET_ENDBR
 	subq	$1,%r15
 	jnz	.Lload_extra_shift_loop
 
-
-
-
 	leaq	.Land_masks(%rip),%r15
 	shlq	$4,%rbx
 	pand	-16(%r15,%rbx,1),%xmm15
 
-
 	por	%xmm11,%xmm15
-
-
 
 .byte	102,77,15,126,253
 	pextrq	$1,%xmm15,%r14
@@ -3712,7 +3664,6 @@ _CET_ENDBR
 	addq	%r15,%r10
 	adcq	%r9,%r11
 	adcq	$0,%r12
-
 
 .Lprocess_blocks_of_extra_in:
 
@@ -3829,7 +3780,6 @@ process_extra_in_trailer:
 	adcq	%r9,%r11
 	adcq	$0,%r12
 
-
 .Ldo_length_block:
 	addq	0+0+32(%rbp),%r10
 	adcq	8+0+32(%rbp),%r11
@@ -3871,7 +3821,6 @@ process_extra_in_trailer:
 	addq	%r15,%r10
 	adcq	%r9,%r11
 	adcq	$0,%r12
-
 
 	movq	%r10,%r13
 	movq	%r11,%r14
@@ -4088,7 +4037,6 @@ process_extra_in_trailer:
 .size	chacha20_poly1305_seal_sse41, .-chacha20_poly1305_seal_sse41
 .cfi_endproc	
 
-
 .globl	chacha20_poly1305_open_avx2
 .hidden chacha20_poly1305_open_avx2
 .type	chacha20_poly1305_open_avx2,@function
@@ -4114,7 +4062,6 @@ _CET_ENDBR
 	pushq	%r15
 .cfi_adjust_cfa_offset	8
 .cfi_offset	%r15,-56
-
 
 	pushq	%r9
 .cfi_adjust_cfa_offset	8
@@ -6026,7 +5973,6 @@ _CET_ENDBR
 	adcq	%r9,%r11
 	adcq	$0,%r12
 
-
 	vpxor	(%rsi),%ymm0,%ymm0
 	vmovdqu	%ymm0,(%rdi)
 	leaq	32(%rsi),%rsi
@@ -6261,7 +6207,6 @@ _CET_ENDBR
 .size	chacha20_poly1305_open_avx2, .-chacha20_poly1305_open_avx2
 .cfi_endproc	
 
-
 .globl	chacha20_poly1305_seal_avx2
 .hidden chacha20_poly1305_seal_avx2
 .type	chacha20_poly1305_seal_avx2,@function
@@ -6287,7 +6232,6 @@ _CET_ENDBR
 	pushq	%r15
 .cfi_adjust_cfa_offset	8
 .cfi_offset	%r15,-56
-
 
 	pushq	%r9
 .cfi_adjust_cfa_offset	8
@@ -8333,42 +8277,8 @@ _CET_ENDBR
 	vpalignr	$8,%ymm8,%ymm8,%ymm8
 	vpalignr	$4,%ymm12,%ymm12,%ymm12
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	addq	%rax,%r15
 	adcq	%rdx,%r9
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	movq	%r13,%r10
 	movq	%r14,%r11

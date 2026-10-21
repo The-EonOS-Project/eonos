@@ -9,7 +9,6 @@ const fn parse_digit(d: u8) -> u8 {
     }
 }
 
-
 pub const fn limbs_from_hex<const LIMBS: usize>(hex: &str) -> [LeakyLimb; LIMBS] {
     let hex = hex.as_bytes();
     let mut limbs = [0; LIMBS];

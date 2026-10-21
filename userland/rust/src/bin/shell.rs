@@ -29,8 +29,7 @@ fn main(args: eonos_rt::Args<'_>) -> i32 {
         .filter_map(|value| value.to_str().ok())
         .map(String::from)
         .collect();
-    
-    
+
     let argv: Vec<String> = args.skip(1).map(|value| value.to_str().unwrap_or("").to_string()).collect();
     if env_value(&environment, "PATH").is_none() {
         set_env(&mut environment, "PATH", "/disk/apps/bin:/bin");

@@ -1,22 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __P_LOCAL__
 #define __P_LOCAL__
 
@@ -26,11 +7,8 @@
 
 #define FLOATSPEED		(FRACUNIT*4)
 
-
 #define MAXHEALTH		100
 #define VIEWHEIGHT		(41*FRACUNIT)
-
-
 
 #define MAPBLOCKUNITS	128
 #define MAPBLOCKSIZE	(MAPBLOCKUNITS*FRACUNIT)
@@ -38,12 +16,7 @@
 #define MAPBMASK		(MAPBLOCKSIZE-1)
 #define MAPBTOFRAC		(MAPBLOCKSHIFT-FRACBITS)
 
-
-
 #define PLAYERRADIUS	16*FRACUNIT
-
-
-
 
 #define MAXRADIUS		32*FRACUNIT
 
@@ -54,44 +27,22 @@
 #define MELEERANGE		(64*FRACUNIT)
 #define MISSILERANGE	(32*64*FRACUNIT)
 
-
 #define	BASETHRESHOLD	 	100
 
-
-
-
-
-
-
-
 extern	thinker_t	thinkercap;	
-
 
 void P_InitThinkers (void);
 void P_AddThinker (thinker_t* thinker);
 void P_RemoveThinker (thinker_t* thinker);
 
-
-
-
-
 void P_SetupPsprites (player_t* curplayer);
 void P_MovePsprites (player_t* curplayer);
 void P_DropWeapon (player_t* player);
 
-
-
-
-
 void	P_PlayerThink (player_t* player);
-
-
-
-
 
 #define ONFLOORZ		INT_MIN
 #define ONCEILINGZ		INT_MAX
-
 
 #define ITEMQUESIZE		128
 
@@ -99,7 +50,6 @@ extern mapthing_t	itemrespawnque[ITEMQUESIZE];
 extern int		itemrespawntime[ITEMQUESIZE];
 extern int		iquehead;
 extern int		iquetail;
-
 
 void P_RespawnSpecials (void);
 
@@ -120,15 +70,7 @@ void 	P_SpawnBlood (fixed_t x, fixed_t y, fixed_t z, int damage);
 mobj_t* P_SpawnMissile (mobj_t* source, mobj_t* dest, mobjtype_t type);
 void	P_SpawnPlayerMissile (mobj_t* source, mobjtype_t type);
 
-
-
-
-
 void P_NoiseAlert (mobj_t* target, mobj_t* emmiter);
-
-
-
-
 
 typedef struct
 {
@@ -136,7 +78,7 @@ typedef struct
     fixed_t	y;
     fixed_t	dx;
     fixed_t	dy;
-    
+
 } divline_t;
 
 typedef struct
@@ -148,8 +90,6 @@ typedef struct
 	line_t*	line;
     }			d;
 } intercept_t;
-
-
 
 #define MAXINTERCEPTS_ORIGINAL 128
 #define MAXINTERCEPTS          (MAXINTERCEPTS_ORIGINAL + 61)
@@ -194,27 +134,11 @@ P_PathTraverse
 void P_UnsetThingPosition (mobj_t* thing);
 void P_SetThingPosition (mobj_t* thing);
 
-
-
-
-
-
-
-
 extern boolean		floatok;
 extern fixed_t		tmfloorz;
 extern fixed_t		tmceilingz;
 
-
 extern	line_t*		ceilingline;
-
-
-
-
-
-
-
-
 
 #define MAXSPECIALCROSS 		20
 #define MAXSPECIALCROSS_ORIGINAL	8
@@ -253,11 +177,6 @@ P_RadiusAttack
   mobj_t*	source,
   int		damage );
 
-
-
-
-
-
 extern byte*		rejectmatrix;	
 extern short*		blockmaplump;	
 extern short*		blockmap;
@@ -266,11 +185,6 @@ extern int		bmapheight;
 extern fixed_t		bmaporgx;
 extern fixed_t		bmaporgy;	
 extern mobj_t**		blocklinks;	
-
-
-
-
-
 
 extern int		maxammo[NUMAMMO];
 extern int		clipammo[NUMAMMO];
@@ -287,11 +201,6 @@ P_DamageMobj
   mobj_t*	source,
   int		damage );
 
-
-
-
-
 #include "p_spec.h"
-
 
 #endif	

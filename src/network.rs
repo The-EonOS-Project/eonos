@@ -1,9 +1,3 @@
-
-
-
-
-
-
 use alloc::vec;
 use core::sync::atomic::{AtomicU32, Ordering};
 use spin::Mutex;
@@ -89,8 +83,7 @@ fn checksum(bytes: &[u8]) -> u16 {
 
 fn ethernet(payload_type: u16, destination: [u8; 6], payload: &[u8]) -> Result<(), crate::drivers::e1000::Error> {
     let info = crate::drivers::e1000::info()?;
-    
-    
+
     let mut frame = vec![0u8; (14 + payload.len()).max(60)];
     frame[..6].copy_from_slice(&destination);
     frame[6..12].copy_from_slice(&info.mac);
@@ -123,7 +116,7 @@ fn send_udp(source_ip: [u8; 4], destination_ip: [u8; 4], destination_mac: [u8; 6
     let ip_sum = checksum(&packet[..20]); packet[10..12].copy_from_slice(&ip_sum.to_be_bytes());
     packet[20..22].copy_from_slice(&source_port.to_be_bytes()); packet[22..24].copy_from_slice(&destination_port.to_be_bytes());
     packet[24..26].copy_from_slice(&((8 + payload.len()) as u16).to_be_bytes()); packet[28..].copy_from_slice(payload);
-    
+
     ethernet(0x0800, destination_mac, &packet)
 }
 
@@ -164,7 +157,6 @@ fn resolve_mac(address: [u8; 4]) -> Result<[u8; 6], crate::drivers::e1000::Error
     }
 }
 
-
 pub fn udp_send(destination: [u8; 4], destination_port: u16, source_port: u16, payload: &[u8]) -> Result<usize, crate::drivers::e1000::Error> {
     let cfg = config();
     if cfg.configured == 0 { return Err(crate::drivers::e1000::Error::NoDevice); }
@@ -175,8 +167,6 @@ pub fn udp_send(destination: [u8; 4], destination_port: u16, source_port: u16, p
     send_udp(cfg.address, destination, mac, source_port, destination_port, payload)?;
     Ok(payload.len())
 }
-
-
 
 pub fn udp_receive(output: &mut [u8]) -> Result<Option<([u8; 4], u16, usize)>, crate::drivers::e1000::Error> {
     let mut frame = [0u8; 1518];
@@ -365,7 +355,6 @@ fn tcp_poll_frame() -> Result<bool, crate::drivers::e1000::Error> {
     Ok(true)
 }
 
-
 pub fn tcp_connect(destination: [u8; 4], destination_port: u16) -> Result<(), crate::drivers::e1000::Error> {
     let cfg = config();
     if cfg.configured == 0 { return Err(crate::drivers::e1000::Error::NoDevice); }
@@ -421,8 +410,6 @@ pub fn tcp_connect(destination: [u8; 4], destination_port: u16) -> Result<(), cr
     }
 }
 
-
-
 pub fn tcp_send(mut bytes: &[u8]) -> Result<usize, crate::drivers::e1000::Error> {
     if TCP_CONNECTION.lock().state != TCP_ESTABLISHED {
         return Err(crate::drivers::e1000::Error::TcpNotConnected);
@@ -463,7 +450,6 @@ pub fn tcp_send(mut bytes: &[u8]) -> Result<usize, crate::drivers::e1000::Error>
     Ok(total)
 }
 
-
 pub fn tcp_receive(output: &mut [u8], timeout_ms: u64) -> Result<usize, crate::drivers::e1000::Error> {
     if output.is_empty() { return Ok(0); }
     let started = crate::pit::uptime_ms();
@@ -482,7 +468,7 @@ pub fn tcp_receive(output: &mut [u8], timeout_ms: u64) -> Result<usize, crate::d
                 let sequence = connection.send_next;
                 let acknowledgement = connection.receive_next;
                 drop(connection);
-                
+
                 tcp_emit_current(TCP_ACK, sequence, acknowledgement, &[])?;
                 return Ok(count);
             }
@@ -494,7 +480,6 @@ pub fn tcp_receive(output: &mut [u8], timeout_ms: u64) -> Result<usize, crate::d
         if !tcp_poll_frame()? { crate::scheduler::yield_now(); }
     }
 }
-
 
 pub fn tcp_close() -> Result<(), crate::drivers::e1000::Error> {
     let (sequence, acknowledgement) = {
@@ -591,8 +576,6 @@ fn cache_dns(name: &str, address: Option<[u8; 4]>, ttl: u32, now: u64) {
     cache[slot] = Some(entry);
 }
 
-
-
 pub fn resolve_ipv4(hostname: &str) -> Result<Option<[u8; 4]>, crate::drivers::e1000::Error> {
     let cfg = config();
     if cfg.configured == 0 { return Err(crate::drivers::e1000::Error::NoDevice); }
@@ -639,7 +622,6 @@ pub fn resolve_ipv4(hostname: &str) -> Result<Option<[u8; 4]>, crate::drivers::e
         }
     }
 }
-
 
 pub fn ping(destination: [u8; 4], timeout_ms: u64) -> Result<Option<u64>, crate::drivers::e1000::Error> {
     let cfg = config();
@@ -733,8 +715,6 @@ fn parse_dhcp(payload: &[u8], xid: u32, mac: &[u8; 6]) -> Option<(u8, [u8; 4], C
     }
     Some((message, offered, cfg))
 }
-
-
 
 pub fn dhcp() -> Result<Config, crate::drivers::e1000::Error> {
     let info = crate::drivers::e1000::info()?;

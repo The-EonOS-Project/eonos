@@ -1,19 +1,4 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![doc(hidden)]
-
 
 #[macro_export]
 macro_rules! test_file {

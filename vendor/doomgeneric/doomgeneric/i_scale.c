@@ -1,23 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,31 +12,15 @@
 #define inline __inline
 #endif
 
-
-
 static byte *src_buffer;
-
-
 
 static byte *dest_buffer;
 
-
-
 static int dest_pitch;
-
-
-
-
-
 
 static byte *stretch_tables[2] = { NULL, NULL };
 
-
-
 static byte *half_stretch_table = NULL;
-
-
-
 
 void I_InitScale(byte *_src_buffer, byte *_dest_buffer, int _dest_pitch)
 {
@@ -65,20 +29,11 @@ void I_InitScale(byte *_src_buffer, byte *_dest_buffer, int _dest_pitch)
     dest_pitch = _dest_pitch;
 }
 
-
-
-
-
-
-
-
 static boolean I_Scale1x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp;
     int y;
     int w = x2 - x1;
-    
-    
 
     bufp = src_buffer + y1 * SCREENWIDTH + x1;
     screenp = (byte *) dest_buffer + y1 * dest_pitch + x1;
@@ -99,8 +54,6 @@ screen_mode_t mode_scale_1x = {
     I_Scale1x,
     false,
 };
-
-
 
 static boolean I_Scale2x(int x1, int y1, int x2, int y2)
 {
@@ -140,8 +93,6 @@ screen_mode_t mode_scale_2x = {
     I_Scale2x,
     false,
 };
-
-
 
 static boolean I_Scale3x(int x1, int y1, int x2, int y2)
 {
@@ -185,8 +136,6 @@ screen_mode_t mode_scale_3x = {
     I_Scale3x,
     false,
 };
-
-
 
 static boolean I_Scale4x(int x1, int y1, int x2, int y2)
 {
@@ -234,8 +183,6 @@ screen_mode_t mode_scale_4x = {
     I_Scale4x,
     false,
 };
-
-
 
 static boolean I_Scale5x(int x1, int y1, int x2, int y2)
 {
@@ -288,10 +235,6 @@ screen_mode_t mode_scale_5x = {
     false,
 };
 
-
-
-
-
 static int FindNearestColor(byte *palette, int r, int g, int b)
 {
     byte *col;
@@ -324,11 +267,6 @@ static int FindNearestColor(byte *palette, int r, int g, int b)
     return best;
 }
 
-
-
-
-
-
 static byte *GenerateStretchTable(byte *palette, int pct)
 {
     byte *result;
@@ -355,24 +293,12 @@ static byte *GenerateStretchTable(byte *palette, int pct)
     return result;
 }
 
-
-
-
 static void I_InitStretchTables(byte *palette)
 {
     if (stretch_tables[0] != NULL)
     {
         return;
     }
-
-    
-    
-    
-    
-    
-    
-    
-    
 
     printf("I_InitStretchTables: Generating lookup tables..");
     fflush(stdout);
@@ -381,8 +307,6 @@ static void I_InitStretchTables(byte *palette)
     stretch_tables[1] = GenerateStretchTable(palette, 40);
     puts("");
 }
-
-
 
 static void I_InitSquashTable(byte *palette)
 {
@@ -396,10 +320,6 @@ static void I_InitSquashTable(byte *palette)
     half_stretch_table = GenerateStretchTable(palette, 50);
     puts("");
 }
-
-
-
-
 
 void I_ResetScaleTables(byte *palette)
 {
@@ -423,14 +343,6 @@ void I_ResetScaleTables(byte *palette)
     }
 }
 
-
-
-
-
-
-
-
-
 static inline void WriteBlendedLine1x(byte *dest, byte *src1, byte *src2, 
                                byte *stretch_table)
 {
@@ -445,51 +357,37 @@ static inline void WriteBlendedLine1x(byte *dest, byte *src1, byte *src2,
     }
 } 
 
-
-
 static boolean I_Stretch1x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp;
     int y;
-
-    
 
     if (x1 != 0 || y1 != 0 || x2 != SCREENWIDTH || y2 != SCREENHEIGHT)
     {
         return false;
     }    
 
-    
-
     bufp = src_buffer + y1 * SCREENWIDTH + x1;
     screenp = (byte *) dest_buffer + y1 * dest_pitch + x1;
 
-    
-    
-
     for (y=0; y<SCREENHEIGHT; y += 5)
     {
-        
+
         memcpy(screenp, bufp, SCREENWIDTH);
         screenp += dest_pitch;
 
-        
         WriteBlendedLine1x(screenp, bufp, bufp + SCREENWIDTH, stretch_tables[0]);
         screenp += dest_pitch; bufp += SCREENWIDTH;
 
-        
         WriteBlendedLine1x(screenp, bufp, bufp + SCREENWIDTH, stretch_tables[1]);
         screenp += dest_pitch; bufp += SCREENWIDTH;
 
-        
         WriteBlendedLine1x(screenp, bufp + SCREENWIDTH, bufp, stretch_tables[1]);
         screenp += dest_pitch; bufp += SCREENWIDTH;
 
-        
         WriteBlendedLine1x(screenp, bufp + SCREENWIDTH, bufp, stretch_tables[0]);
         screenp += dest_pitch; bufp += SCREENWIDTH;
 
-        
         memcpy(screenp, bufp, SCREENWIDTH);
         screenp += dest_pitch; bufp += SCREENWIDTH;
     }
@@ -534,75 +432,55 @@ static inline void WriteBlendedLine2x(byte *dest, byte *src1, byte *src2,
     }
 } 
 
-
-
 static boolean I_Stretch2x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp;
     int y;
-
-    
 
     if (x1 != 0 || y1 != 0 || x2 != SCREENWIDTH || y2 != SCREENHEIGHT)
     {
         return false;
     }    
 
-    
-
     bufp = src_buffer + y1 * SCREENWIDTH + x1;
     screenp = (byte *) dest_buffer + y1 * dest_pitch + x1;
 
-    
-    
-
     for (y=0; y<SCREENHEIGHT; y += 5)
     {
-        
+
         WriteLine2x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine2x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteBlendedLine2x(screenp, bufp, bufp + SCREENWIDTH, stretch_tables[1]);
         screenp += dest_pitch; bufp += SCREENWIDTH;
 
-        
         WriteLine2x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteBlendedLine2x(screenp, bufp + SCREENWIDTH, bufp, stretch_tables[0]);
         screenp += dest_pitch; bufp += SCREENWIDTH;
 
-        
         WriteLine2x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine2x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteBlendedLine2x(screenp, bufp, bufp + SCREENWIDTH, stretch_tables[0]);
         screenp += dest_pitch; bufp += SCREENWIDTH;
 
-        
         WriteLine2x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteBlendedLine2x(screenp, bufp + SCREENWIDTH, bufp, stretch_tables[1]);
         screenp += dest_pitch; bufp += SCREENWIDTH;
 
-        
         WriteLine2x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine2x(screenp, bufp);
         screenp += dest_pitch; bufp += SCREENWIDTH;
     }
@@ -649,99 +527,73 @@ static inline void WriteBlendedLine3x(byte *dest, byte *src1, byte *src2,
     }
 } 
 
-
-
 static boolean I_Stretch3x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp;
     int y;
-
-    
 
     if (x1 != 0 || y1 != 0 || x2 != SCREENWIDTH || y2 != SCREENHEIGHT)
     {
         return false;
     }    
 
-    
-
     bufp = src_buffer + y1 * SCREENWIDTH + x1;
     screenp = (byte *) dest_buffer + y1 * dest_pitch + x1;
 
-    
-    
-
     for (y=0; y<SCREENHEIGHT; y += 5)
     {
-        
+
         WriteLine3x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine3x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine3x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteBlendedLine3x(screenp, bufp + SCREENWIDTH, bufp, stretch_tables[1]);
         screenp += dest_pitch; bufp += SCREENWIDTH;
 
-        
         WriteLine3x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine3x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine3x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteBlendedLine3x(screenp, bufp, bufp + SCREENWIDTH, stretch_tables[0]);
         screenp += dest_pitch; bufp += SCREENWIDTH;
 
-        
         WriteLine3x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine3x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteBlendedLine3x(screenp, bufp + SCREENWIDTH, bufp, stretch_tables[0]);
         screenp += dest_pitch; bufp += SCREENWIDTH;
 
-        
         WriteLine3x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine3x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine3x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteBlendedLine3x(screenp, bufp, bufp + SCREENWIDTH, stretch_tables[1]);
         screenp += dest_pitch; bufp += SCREENWIDTH;
 
-        
         WriteLine3x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine3x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine3x(screenp, bufp);
         screenp += dest_pitch; bufp += SCREENWIDTH;
     }
@@ -790,123 +642,91 @@ static inline void WriteBlendedLine4x(byte *dest, byte *src1, byte *src2,
     }
 } 
 
-
-
 static boolean I_Stretch4x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp;
     int y;
-
-    
 
     if (x1 != 0 || y1 != 0 || x2 != SCREENWIDTH || y2 != SCREENHEIGHT)
     {
         return false;
     }    
 
-    
-
     bufp = src_buffer + y1 * SCREENWIDTH + x1;
     screenp = (byte *) dest_buffer + y1 * dest_pitch + x1;
 
-    
-    
-
     for (y=0; y<SCREENHEIGHT; y += 5)
     {
-        
+
         WriteLine4x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine4x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine4x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine4x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteBlendedLine4x(screenp, bufp + SCREENWIDTH, bufp, stretch_tables[0]);
         screenp += dest_pitch; bufp += SCREENWIDTH;
 
-        
         WriteLine4x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine4x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine4x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine4x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteBlendedLine4x(screenp, bufp + SCREENWIDTH, bufp, stretch_tables[1]);
         screenp += dest_pitch; bufp += SCREENWIDTH;
 
-        
         WriteLine4x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine4x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine4x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine4x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteBlendedLine4x(screenp, bufp, bufp + SCREENWIDTH, stretch_tables[1]);
         screenp += dest_pitch; bufp += SCREENWIDTH;
 
-        
         WriteLine4x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine4x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine4x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine4x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteBlendedLine4x(screenp, bufp, bufp + SCREENWIDTH, stretch_tables[0]);
         screenp += dest_pitch; bufp += SCREENWIDTH;
 
-        
         WriteLine4x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine4x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine4x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine4x(screenp, bufp);
         screenp += dest_pitch; bufp += SCREENWIDTH;
     }
@@ -937,57 +757,40 @@ static inline void WriteLine5x(byte *dest, byte *src)
     }
 }
 
-
-
 static boolean I_Stretch5x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp;
     int y;
-
-    
 
     if (x1 != 0 || y1 != 0 || x2 != SCREENWIDTH || y2 != SCREENHEIGHT)
     {
         return false;
     }    
 
-    
-
     bufp = src_buffer + y1 * SCREENWIDTH + x1;
     screenp = (byte *) dest_buffer + y1 * dest_pitch + x1;
 
-    
-    
-
     for (y=0; y<SCREENHEIGHT; y += 1)
     {
-        
+
         WriteLine5x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine5x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine5x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine5x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine5x(screenp, bufp);
         screenp += dest_pitch;
 
-        
         WriteLine5x(screenp, bufp);
         screenp += dest_pitch; bufp += SCREENWIDTH;
     }
-
-    
-    
 
     if (M_CheckParm("-scanline") > 0)
     {
@@ -1011,43 +814,18 @@ screen_mode_t mode_stretch_5x = {
     false,
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 static inline void WriteSquashedLine1x(byte *dest, byte *src)
 {
     int x;
 
     for (x=0; x<SCREENWIDTH; )
     {
-        
-
-        
 
         *dest++ = stretch_tables[0][src[1] * 256 + src[0]];
 
-        
-
         *dest++ = stretch_tables[1][src[2] * 256 + src[1]];
 
-        
-
         *dest++ = stretch_tables[1][src[2] * 256 + src[3]];
-
-        
 
         *dest++ = stretch_tables[0][src[3] * 256 + src[4]];
 
@@ -1056,14 +834,10 @@ static inline void WriteSquashedLine1x(byte *dest, byte *src)
     }
 }
 
-
-
 static boolean I_Squash1x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp;
     int y;
-
-    
 
     if (x1 != 0 || y1 != 0 || x2 != SCREENWIDTH || y2 != SCREENHEIGHT)
     {
@@ -1091,11 +865,6 @@ screen_mode_t mode_squash_1x = {
     true,
 };
 
-
-
-
-
-
 #define DRAW_PIXEL2 \
       *dest++ = *dest2++ = c;
 
@@ -1108,44 +877,27 @@ static inline void WriteSquashedLine2x(byte *dest, byte *src)
 
     for (x=0; x<SCREENWIDTH; )
     {
-        
-
-        
 
         c = src[0];
         DRAW_PIXEL2;
 
-        
-
         c = stretch_tables[1][src[1] * 256 + src[0]];
         DRAW_PIXEL2;
-
-        
 
         c = src[1];
         DRAW_PIXEL2;
 
-        
-
         c = stretch_tables[0][src[1] * 256 + src[2]];
         DRAW_PIXEL2;
-
-        
 
         c = stretch_tables[0][src[3] * 256 + src[2]];
         DRAW_PIXEL2;
 
-        
-
         c = src[3];
         DRAW_PIXEL2;
 
-        
-
         c = stretch_tables[1][src[3] * 256 + src[4]];
         DRAW_PIXEL2;
-
-        
 
         c = src[4];
         DRAW_PIXEL2;
@@ -1155,14 +907,10 @@ static inline void WriteSquashedLine2x(byte *dest, byte *src)
     }
 }
 
-
-
 static boolean I_Squash2x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp;
     int y;
-
-    
 
     if (x1 != 0 || y1 != 0 || x2 != SCREENWIDTH || y2 != SCREENHEIGHT)
     {
@@ -1190,7 +938,6 @@ screen_mode_t mode_squash_2x = {
     false,
 };
 
-
 #define DRAW_PIXEL3 \
         *dest++ = *dest2++ = *dest3++ = c
 
@@ -1204,22 +951,15 @@ static inline void WriteSquashedLine3x(byte *dest, byte *src)
 
     for (x=0; x<SCREENWIDTH; )
     {
-        
-
-        
 
         c = src[0];
 
         DRAW_PIXEL3;
         DRAW_PIXEL3;
 
-        
-
         c = half_stretch_table[src[0] * 256 + src[1]];
 
         DRAW_PIXEL3;
-
-        
 
         c = src[1];
 
@@ -1231,21 +971,10 @@ static inline void WriteSquashedLine3x(byte *dest, byte *src)
     }
 }
 
-
-
-
-
-
-
-
-
-
 static boolean I_Squash3x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp;
     int y;
-
-    
 
     if (x1 != 0 || y1 != 0 || x2 != SCREENWIDTH || y2 != SCREENHEIGHT)
     {
@@ -1275,7 +1004,7 @@ screen_mode_t mode_squash_3x = {
 
 #define DRAW_PIXEL4 \
         *dest++ = *dest2++ = *dest3++ = *dest4++ = c;
-      
+
 static inline void WriteSquashedLine4x(byte *dest, byte *src)
 {
     int x;
@@ -1288,54 +1017,35 @@ static inline void WriteSquashedLine4x(byte *dest, byte *src)
 
     for (x=0; x<SCREENWIDTH; )
     {
-        
-
-        
 
         c = src[0];
         DRAW_PIXEL4;
         DRAW_PIXEL4;
         DRAW_PIXEL4;
 
-        
-
         c = stretch_tables[0][src[0] * 256 + src[1]];
         DRAW_PIXEL4;
-
-        
 
         c = src[1];
         DRAW_PIXEL4;
         DRAW_PIXEL4;
 
-        
-
         c = stretch_tables[1][src[1] * 256 + src[2]];
         DRAW_PIXEL4;
-
-        
 
         c = src[2];
         DRAW_PIXEL4;
         DRAW_PIXEL4;
 
-        
-
         c = stretch_tables[1][src[3] * 256 + src[2]];
         DRAW_PIXEL4;
-
-        
 
         c = src[3];
         DRAW_PIXEL4;
         DRAW_PIXEL4;
 
-        
-
         c = stretch_tables[0][src[4] * 256 + src[3]];
         DRAW_PIXEL4;
-
-        
 
         c = src[4];
         DRAW_PIXEL4;
@@ -1347,16 +1057,10 @@ static inline void WriteSquashedLine4x(byte *dest, byte *src)
     }
 }
 
-
-
-
-
 static boolean I_Squash4x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp;
     int y;
-
-    
 
     if (x1 != 0 || y1 != 0 || x2 != SCREENWIDTH || y2 != SCREENHEIGHT)
     {
@@ -1400,9 +1104,6 @@ static inline void WriteSquashedLine5x(byte *dest, byte *src)
 
     for (x=0; x<SCREENWIDTH; ++x)
     {
-        
-
-        
 
         c = *src++;
         DRAW_PIXEL5;
@@ -1412,16 +1113,10 @@ static inline void WriteSquashedLine5x(byte *dest, byte *src)
     }
 }
 
-
-
-
-
 static boolean I_Squash5x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp;
     int y;
-
-    
 
     if (x1 != 0 || y1 != 0 || x2 != SCREENWIDTH || y2 != SCREENHEIGHT)
     {
@@ -1448,5 +1143,4 @@ screen_mode_t mode_squash_5x = {
     I_Squash5x,
     false,
 };
-
 

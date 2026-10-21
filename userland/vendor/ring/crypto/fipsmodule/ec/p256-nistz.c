@@ -1,26 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <ring-core/base.h>
 
 #include "../../limbs/limbs.inl"
@@ -33,7 +10,6 @@
 
 typedef P256_POINT_AFFINE PRECOMP256_ROW[64];
 
-
 static const BN_ULONG ONE_MONT[P256_LIMBS] = {
     TOBN(0x00000000, 0x00000001),
     TOBN(0xffffffff, 0x00000000),
@@ -41,10 +17,7 @@ static const BN_ULONG ONE_MONT[P256_LIMBS] = {
     TOBN(0x00000000, 0xfffffffe),
 };
 
-
 #include "p256-nistz-table.h"
-
-
 
 static crypto_word_t booth_recode_w5(crypto_word_t in) {
   crypto_word_t s, d;
@@ -68,16 +41,10 @@ static crypto_word_t booth_recode_w7(crypto_word_t in) {
   return (d << 1) + (s & 1);
 }
 
-
 #if defined(OPENSSL_64_BIT) && defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunreachable-code"
 #endif
-
-
-
-
-
 
 static void copy_conditional(BN_ULONG dst[P256_LIMBS],
                              const BN_ULONG src[P256_LIMBS], BN_ULONG move) {
@@ -100,23 +67,6 @@ static void copy_conditional(BN_ULONG dst[P256_LIMBS],
 #pragma GCC diagnostic pop
 #endif
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 static BN_ULONG is_not_zero(BN_ULONG in) {
   in |= (0 - in);
   in >>= BN_BITS2 - 1;
@@ -124,8 +74,6 @@ static BN_ULONG is_not_zero(BN_ULONG in) {
 }
 
 #if defined(OPENSSL_X86_64)
-
-
 
        void ecp_nistz256_mul_mont(BN_ULONG res[P256_LIMBS],
                                   const BN_ULONG a[P256_LIMBS],
@@ -212,7 +160,6 @@ static void ecp_nistz256_select_w7(P256_POINT_AFFINE *val,
 }
 #endif  
 
-
 static void ecp_nistz256_windowed_mul(P256_POINT *r,
                                       const BN_ULONG p_scalar[P256_LIMBS],
                                       const BN_ULONG p_x[P256_LIMBS],
@@ -225,16 +172,10 @@ static void ecp_nistz256_windowed_mul(P256_POINT *r,
   static const size_t kWindowSize = 5;
   static const crypto_word_t kMask = (1 << (5  + 1)) - 1;
 
-  
-  
-  
   alignas(64) P256_POINT table[16];
   P256_SCALAR_BYTES p_str;
   p256_scalar_bytes_from_limbs(p_str, p_scalar);
 
-  
-  
-  
   P256_POINT *row = table;
 
   limbs_copy(row[1 - 1].X, p_x, P256_LIMBS);
@@ -291,7 +232,6 @@ static void ecp_nistz256_windowed_mul(P256_POINT *r,
     ecp_nistz256_point_double(r, r);
   }
 
-  
   wvalue = p_str[0];
   wvalue = (wvalue << 1) & kMask;
 
@@ -342,7 +282,6 @@ void p256_point_mul_base(Limb r[3][P256_LIMBS], const Limb scalar[P256_LIMBS]) {
   P256_SCALAR_BYTES p_str;
   p256_scalar_bytes_from_limbs(p_str, scalar);
 
-  
   size_t index = 0;
   crypto_word_t wvalue = calc_first_wvalue(&index, p_str);
 
@@ -352,9 +291,6 @@ void p256_point_mul_base(Limb r[3][P256_LIMBS], const Limb scalar[P256_LIMBS]) {
   ecp_nistz256_neg(p.Z, t.Y);
   copy_conditional(t.Y, p.Z, wvalue & 1);
 
-  
-  
-  
   limbs_copy(p.X, t.X, P256_LIMBS);
   limbs_copy(p.Y, t.Y, P256_LIMBS);
   limbs_zero(p.Z, P256_LIMBS);
@@ -369,8 +305,6 @@ void p256_point_mul_base(Limb r[3][P256_LIMBS], const Limb scalar[P256_LIMBS]) {
     ecp_nistz256_neg(neg_Y, t.Y);
     copy_conditional(t.Y, neg_Y, wvalue & 1);
 
-    
-    
     ecp_nistz256_point_add_affine(&p, &p, &t);
   }
 
@@ -386,13 +320,9 @@ void p256_point_mul_base_vartime(Limb r[3][P256_LIMBS],
   OPENSSL_memcpy(p_str, g_scalar, 32);
   p_str[32] = 0;
 
-  
   size_t index = 0;
   size_t wvalue = calc_first_wvalue(&index, p_str);
 
-  
-  
-  
   if ((wvalue >> 1) != 0) {
     OPENSSL_memcpy(p.X, &ecp_nistz256_precomputed[0][(wvalue >> 1) - 1].X,
                    sizeof(p.X));
@@ -422,12 +352,8 @@ void p256_point_mul_base_vartime(Limb r[3][P256_LIMBS],
       ecp_nistz256_neg(t.Y, t.Y);
     }
 
-    
-    
-    
     ecp_nistz256_point_add_affine(&p, &p, &t);
   }
-
 
   limbs_copy(r[0], p.X, P256_LIMBS);
   limbs_copy(r[1], p.Y, P256_LIMBS);

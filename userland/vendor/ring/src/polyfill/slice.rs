@@ -1,38 +1,8 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 mod as_chunks;
 mod as_chunks_mut;
 
 pub use as_chunks::{as_chunks, AsChunks};
 pub use as_chunks_mut::{as_chunks_mut, AsChunksMut};
-
-
-
-
-
-
 
 #[inline(always)]
 pub fn split_at_checked<T>(slice: &[T], i: usize) -> Option<(&[T], &[T])> {
@@ -42,7 +12,6 @@ pub fn split_at_checked<T>(slice: &[T], i: usize) -> Option<(&[T], &[T])> {
         None
     }
 }
-
 
 #[inline(always)]
 pub fn split_first_chunk_mut<T, const N: usize>(

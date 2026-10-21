@@ -471,7 +471,6 @@ $code .= _begin_func "gcm_ghash_vpclmulqdq_avx2_1", 1;
     vmovdqu         ($GHASH_ACC_PTR), $GHASH_ACC_XMM
     vpshufb         $BSWAP_MASK_XMM, $GHASH_ACC_XMM, $GHASH_ACC_XMM
 
-
     # Update GHASH with the remaining 16-byte block if any.
 .Lghash_lastblock:
     vmovdqu         ($AAD), $TMP0_XMM

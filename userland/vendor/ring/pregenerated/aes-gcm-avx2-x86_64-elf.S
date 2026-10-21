@@ -1,26 +1,14 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86_64) && defined(__ELF__)
 .section	.rodata
 .align	16
 
-
 .Lbswap_mask:
 .quad	0x08090a0b0c0d0e0f, 0x0001020304050607
 
-
-
-
-
-
-
-
 .Lgfpoly:
 .quad	1, 0xc200000000000000
-
 
 .Lgfpoly_and_internal_carrybit:
 .quad	1, 0xc200000000000001
@@ -44,15 +32,7 @@ gcm_init_vpclmulqdq_avx2:
 
 _CET_ENDBR
 
-
-
-
-
 	vpshufd	$0x4e,(%rsi),%xmm3
-
-
-
-
 
 	vpshufd	$0xd3,%xmm3,%xmm0
 	vpsrad	$31,%xmm0,%xmm0
@@ -61,7 +41,6 @@ _CET_ENDBR
 	vpxor	%xmm0,%xmm3,%xmm3
 
 	vbroadcasti128	.Lgfpoly(%rip),%ymm6
-
 
 	vpclmulqdq	$0x00,%xmm3,%xmm3,%xmm0
 	vpclmulqdq	$0x01,%xmm3,%xmm3,%xmm1
@@ -77,11 +56,8 @@ _CET_ENDBR
 	vpxor	%xmm1,%xmm5,%xmm5
 	vpxor	%xmm0,%xmm5,%xmm5
 
-
-
 	vinserti128	$1,%xmm3,%ymm5,%ymm3
 	vinserti128	$1,%xmm5,%ymm5,%ymm5
-
 
 .byte	0xc4,0xe3,0x65,0x44,0xc5,0x00
 .byte	0xc4,0xe3,0x65,0x44,0xcd,0x01
@@ -97,18 +73,13 @@ _CET_ENDBR
 	vpxor	%ymm1,%ymm4,%ymm4
 	vpxor	%ymm0,%ymm4,%ymm4
 
-
-
 	vmovdqu	%ymm3,96(%rdi)
 	vmovdqu	%ymm4,64(%rdi)
-
-
 
 	vpunpcklqdq	%ymm3,%ymm4,%ymm0
 	vpunpckhqdq	%ymm3,%ymm4,%ymm1
 	vpxor	%ymm1,%ymm0,%ymm0
 	vmovdqu	%ymm0,128+32(%rdi)
-
 
 .byte	0xc4,0xe3,0x5d,0x44,0xc5,0x00
 .byte	0xc4,0xe3,0x5d,0x44,0xcd,0x01
@@ -141,8 +112,6 @@ _CET_ENDBR
 	vmovdqu	%ymm3,32(%rdi)
 	vmovdqu	%ymm4,0(%rdi)
 
-
-
 	vpunpcklqdq	%ymm3,%ymm4,%ymm0
 	vpunpckhqdq	%ymm3,%ymm4,%ymm1
 	vpxor	%ymm1,%ymm0,%ymm0
@@ -162,19 +131,11 @@ gcm_ghash_vpclmulqdq_avx2_1:
 
 _CET_ENDBR
 
-
-
-
-
-
 	vmovdqu	.Lbswap_mask(%rip),%xmm6
 	vmovdqu	.Lgfpoly(%rip),%xmm7
 
-
 	vmovdqu	(%rdi),%xmm5
 	vpshufb	%xmm6,%xmm5,%xmm5
-
-
 
 .Lghash_lastblock:
 	vmovdqu	(%rdx),%xmm0
@@ -194,7 +155,6 @@ _CET_ENDBR
 	vpshufd	$0x4e,%xmm2,%xmm2
 	vpxor	%xmm2,%xmm5,%xmm5
 	vpxor	%xmm1,%xmm5,%xmm5
-
 
 .Lghash_done:
 
@@ -226,37 +186,25 @@ _CET_ENDBR
 #endif
 	vbroadcasti128	.Lbswap_mask(%rip),%ymm0
 
-
-
 	vmovdqu	(%r12),%xmm1
 	vpshufb	%xmm0,%xmm1,%xmm1
 	vbroadcasti128	(%r8),%ymm11
 	vpshufb	%ymm0,%ymm11,%ymm11
 
-
-
 	movl	240(%rcx),%r10d
 	leal	-20(,%r10,4),%r10d
-
-
-
 
 	leaq	96(%rcx,%r10,4),%r11
 	vbroadcasti128	(%rcx),%ymm9
 	vbroadcasti128	(%r11),%ymm10
 
-
 	vpaddd	.Lctr_pattern(%rip),%ymm11,%ymm11
-
-
 
 	cmpq	$127,%rdx
 	jbe	.Lcrypt_loop_4x_done__func1
 
 	vmovdqu	128(%r9),%ymm7
 	vmovdqu	128+32(%r9),%ymm8
-
-
 
 	vmovdqu	.Linc_2blocks(%rip),%ymm2
 	vpshufb	%ymm0,%ymm11,%ymm12
@@ -267,7 +215,6 @@ _CET_ENDBR
 	vpaddd	%ymm2,%ymm11,%ymm11
 	vpshufb	%ymm0,%ymm11,%ymm15
 	vpaddd	%ymm2,%ymm11,%ymm11
-
 
 	vpxor	%ymm9,%ymm12,%ymm12
 	vpxor	%ymm9,%ymm13,%ymm13
@@ -305,9 +252,6 @@ _CET_ENDBR
 .align	16
 .Lcrypt_loop_4x__func1:
 
-
-
-
 	vmovdqu	.Linc_2blocks(%rip),%ymm2
 	vpshufb	%ymm0,%ymm11,%ymm12
 	vpaddd	%ymm2,%ymm11,%ymm11
@@ -317,7 +261,6 @@ _CET_ENDBR
 	vpaddd	%ymm2,%ymm11,%ymm11
 	vpshufb	%ymm0,%ymm11,%ymm15
 	vpaddd	%ymm2,%ymm11,%ymm11
-
 
 	vpxor	%ymm9,%ymm12,%ymm12
 	vpxor	%ymm9,%ymm13,%ymm13
@@ -373,13 +316,11 @@ _CET_ENDBR
 .byte	0xc4,0x62,0x0d,0xdc,0xf2
 .byte	0xc4,0x62,0x05,0xdc,0xfa
 
-
 	vbroadcasti128	-128(%r11),%ymm2
 .byte	0xc4,0x62,0x1d,0xdc,0xe2
 .byte	0xc4,0x62,0x15,0xdc,0xea
 .byte	0xc4,0x62,0x0d,0xdc,0xf2
 .byte	0xc4,0x62,0x05,0xdc,0xfa
-
 
 	vmovdqu	32(%rsi),%ymm3
 	vpshufb	%ymm0,%ymm3,%ymm3
@@ -398,7 +339,6 @@ _CET_ENDBR
 .byte	0xc4,0x62,0x15,0xdc,0xea
 .byte	0xc4,0x62,0x0d,0xdc,0xf2
 .byte	0xc4,0x62,0x05,0xdc,0xfa
-
 
 	vmovdqu	64(%rsi),%ymm3
 	vpshufb	%ymm0,%ymm3,%ymm3
@@ -426,7 +366,6 @@ _CET_ENDBR
 .byte	0xc4,0xc3,0x6d,0x44,0xd0,0x00
 	vpxor	%ymm2,%ymm6,%ymm6
 
-
 	vmovdqu	96(%rsi),%ymm3
 	vpshufb	%ymm0,%ymm3,%ymm3
 
@@ -452,10 +391,8 @@ _CET_ENDBR
 .byte	0xc4,0x62,0x0d,0xdc,0xf2
 .byte	0xc4,0x62,0x05,0xdc,0xfa
 
-
 	vpxor	%ymm5,%ymm6,%ymm6
 	vpxor	%ymm1,%ymm6,%ymm6
-
 
 	vbroadcasti128	.Lgfpoly(%rip),%ymm4
 .byte	0xc4,0xe3,0x5d,0x44,0xd5,0x01
@@ -468,7 +405,6 @@ _CET_ENDBR
 .byte	0xc4,0x62,0x15,0xdc,0xea
 .byte	0xc4,0x62,0x0d,0xdc,0xf2
 .byte	0xc4,0x62,0x05,0xdc,0xfa
-
 
 .byte	0xc4,0xe3,0x5d,0x44,0xd6,0x01
 	vpshufd	$0x4e,%ymm6,%ymm6
@@ -483,7 +419,6 @@ _CET_ENDBR
 
 	vextracti128	$1,%ymm1,%xmm2
 	vpxor	%xmm2,%xmm1,%xmm1
-
 
 	subq	$-128,%rsi
 	vpxor	0(%rdi),%ymm10,%ymm2
@@ -540,7 +475,6 @@ _CET_ENDBR
 .byte	0xc4,0xc3,0x6d,0x44,0xd0,0x00
 	vpxor	%ymm2,%ymm6,%ymm6
 
-
 	vmovdqu	96(%rsi),%ymm3
 	vpshufb	%ymm0,%ymm3,%ymm3
 	vmovdqu	96(%r9),%ymm4
@@ -555,7 +489,6 @@ _CET_ENDBR
 
 	vpxor	%ymm5,%ymm6,%ymm6
 	vpxor	%ymm1,%ymm6,%ymm6
-
 
 	vbroadcasti128	.Lgfpoly(%rip),%ymm4
 .byte	0xc4,0xe3,0x5d,0x44,0xd5,0x01
@@ -576,13 +509,8 @@ _CET_ENDBR
 	testq	%rdx,%rdx
 	jz	.Ldone__func1
 
-
-
-
-
 	leaq	128(%r9),%r8
 	subq	%rdx,%r8
-
 
 	vpxor	%xmm5,%xmm5,%xmm5
 	vpxor	%xmm6,%xmm6,%xmm6
@@ -590,7 +518,6 @@ _CET_ENDBR
 
 	cmpq	$64,%rdx
 	jb	.Llessthan64bytes__func1
-
 
 	vpshufb	%ymm0,%ymm11,%ymm12
 	vpaddd	.Linc_2blocks(%rip),%ymm11,%ymm11
@@ -609,14 +536,12 @@ _CET_ENDBR
 .byte	0xc4,0x42,0x1d,0xdd,0xe2
 .byte	0xc4,0x42,0x15,0xdd,0xea
 
-
 	vmovdqu	0(%rdi),%ymm2
 	vmovdqu	32(%rdi),%ymm3
 	vpxor	%ymm2,%ymm12,%ymm12
 	vpxor	%ymm3,%ymm13,%ymm13
 	vmovdqu	%ymm12,0(%rsi)
 	vmovdqu	%ymm13,32(%rsi)
-
 
 	vpshufb	%ymm0,%ymm12,%ymm12
 	vpshufb	%ymm0,%ymm13,%ymm13
@@ -645,7 +570,6 @@ _CET_ENDBR
 
 	vpxor	%xmm1,%xmm1,%xmm1
 
-
 .Llessthan64bytes__func1:
 	vpshufb	%ymm0,%ymm11,%ymm12
 	vpaddd	.Linc_2blocks(%rip),%ymm11,%ymm11
@@ -662,9 +586,6 @@ _CET_ENDBR
 	jne	.Lvaesenc_loop_tail_2__func1
 .byte	0xc4,0x42,0x1d,0xdd,0xe2
 .byte	0xc4,0x42,0x15,0xdd,0xea
-
-
-
 
 	cmpq	$32,%rdx
 	jb	.Lxor_one_block__func1
@@ -762,29 +683,19 @@ _CET_ENDBR
 	movq	16(%rsp),%r12
 	vbroadcasti128	.Lbswap_mask(%rip),%ymm0
 
-
-
 	vmovdqu	(%r12),%xmm1
 	vpshufb	%xmm0,%xmm1,%xmm1
 	vbroadcasti128	(%r8),%ymm11
 	vpshufb	%ymm0,%ymm11,%ymm11
 
-
-
 	movl	240(%rcx),%r10d
 	leal	-20(,%r10,4),%r10d
-
-
-
 
 	leaq	96(%rcx,%r10,4),%r11
 	vbroadcasti128	(%rcx),%ymm9
 	vbroadcasti128	(%r11),%ymm10
 
-
 	vpaddd	.Lctr_pattern(%rip),%ymm11,%ymm11
-
-
 
 	cmpq	$127,%rdx
 	jbe	.Lcrypt_loop_4x_done__func2
@@ -793,9 +704,6 @@ _CET_ENDBR
 	vmovdqu	128+32(%r9),%ymm8
 .align	16
 .Lcrypt_loop_4x__func2:
-
-
-
 
 	vmovdqu	.Linc_2blocks(%rip),%ymm2
 	vpshufb	%ymm0,%ymm11,%ymm12
@@ -806,7 +714,6 @@ _CET_ENDBR
 	vpaddd	%ymm2,%ymm11,%ymm11
 	vpshufb	%ymm0,%ymm11,%ymm15
 	vpaddd	%ymm2,%ymm11,%ymm11
-
 
 	vpxor	%ymm9,%ymm12,%ymm12
 	vpxor	%ymm9,%ymm13,%ymm13
@@ -862,13 +769,11 @@ _CET_ENDBR
 .byte	0xc4,0x62,0x0d,0xdc,0xf2
 .byte	0xc4,0x62,0x05,0xdc,0xfa
 
-
 	vbroadcasti128	-128(%r11),%ymm2
 .byte	0xc4,0x62,0x1d,0xdc,0xe2
 .byte	0xc4,0x62,0x15,0xdc,0xea
 .byte	0xc4,0x62,0x0d,0xdc,0xf2
 .byte	0xc4,0x62,0x05,0xdc,0xfa
-
 
 	vmovdqu	32(%rdi),%ymm3
 	vpshufb	%ymm0,%ymm3,%ymm3
@@ -887,7 +792,6 @@ _CET_ENDBR
 .byte	0xc4,0x62,0x15,0xdc,0xea
 .byte	0xc4,0x62,0x0d,0xdc,0xf2
 .byte	0xc4,0x62,0x05,0xdc,0xfa
-
 
 	vmovdqu	64(%rdi),%ymm3
 	vpshufb	%ymm0,%ymm3,%ymm3
@@ -915,7 +819,6 @@ _CET_ENDBR
 .byte	0xc4,0xc3,0x6d,0x44,0xd0,0x00
 	vpxor	%ymm2,%ymm6,%ymm6
 
-
 	vmovdqu	96(%rdi),%ymm3
 	vpshufb	%ymm0,%ymm3,%ymm3
 
@@ -941,10 +844,8 @@ _CET_ENDBR
 .byte	0xc4,0x62,0x0d,0xdc,0xf2
 .byte	0xc4,0x62,0x05,0xdc,0xfa
 
-
 	vpxor	%ymm5,%ymm6,%ymm6
 	vpxor	%ymm1,%ymm6,%ymm6
-
 
 	vbroadcasti128	.Lgfpoly(%rip),%ymm4
 .byte	0xc4,0xe3,0x5d,0x44,0xd5,0x01
@@ -957,7 +858,6 @@ _CET_ENDBR
 .byte	0xc4,0x62,0x15,0xdc,0xea
 .byte	0xc4,0x62,0x0d,0xdc,0xf2
 .byte	0xc4,0x62,0x05,0xdc,0xfa
-
 
 .byte	0xc4,0xe3,0x5d,0x44,0xd6,0x01
 	vpshufd	$0x4e,%ymm6,%ymm6
@@ -972,8 +872,6 @@ _CET_ENDBR
 
 	vextracti128	$1,%ymm1,%xmm2
 	vpxor	%xmm2,%xmm1,%xmm1
-
-
 
 	vpxor	0(%rdi),%ymm10,%ymm2
 	vpxor	32(%rdi),%ymm10,%ymm3
@@ -998,13 +896,8 @@ _CET_ENDBR
 	testq	%rdx,%rdx
 	jz	.Ldone__func2
 
-
-
-
-
 	leaq	128(%r9),%r8
 	subq	%rdx,%r8
-
 
 	vpxor	%xmm5,%xmm5,%xmm5
 	vpxor	%xmm6,%xmm6,%xmm6
@@ -1012,7 +905,6 @@ _CET_ENDBR
 
 	cmpq	$64,%rdx
 	jb	.Llessthan64bytes__func2
-
 
 	vpshufb	%ymm0,%ymm11,%ymm12
 	vpaddd	.Linc_2blocks(%rip),%ymm11,%ymm11
@@ -1031,14 +923,12 @@ _CET_ENDBR
 .byte	0xc4,0x42,0x1d,0xdd,0xe2
 .byte	0xc4,0x42,0x15,0xdd,0xea
 
-
 	vmovdqu	0(%rdi),%ymm2
 	vmovdqu	32(%rdi),%ymm3
 	vpxor	%ymm2,%ymm12,%ymm12
 	vpxor	%ymm3,%ymm13,%ymm13
 	vmovdqu	%ymm12,0(%rsi)
 	vmovdqu	%ymm13,32(%rsi)
-
 
 	vpshufb	%ymm0,%ymm2,%ymm12
 	vpshufb	%ymm0,%ymm3,%ymm13
@@ -1067,7 +957,6 @@ _CET_ENDBR
 
 	vpxor	%xmm1,%xmm1,%xmm1
 
-
 .Llessthan64bytes__func2:
 	vpshufb	%ymm0,%ymm11,%ymm12
 	vpaddd	.Linc_2blocks(%rip),%ymm11,%ymm11
@@ -1084,9 +973,6 @@ _CET_ENDBR
 	jne	.Lvaesenc_loop_tail_2__func2
 .byte	0xc4,0x42,0x1d,0xdd,0xe2
 .byte	0xc4,0x42,0x15,0xdd,0xea
-
-
-
 
 	cmpq	$32,%rdx
 	jb	.Lxor_one_block__func2

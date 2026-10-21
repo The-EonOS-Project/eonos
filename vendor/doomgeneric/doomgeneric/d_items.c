@@ -1,43 +1,11 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include "info.h"
 
 #include "d_items.h"
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 weaponinfo_t	weaponinfo[NUMWEAPONS] =
 {
     {
-	
+
 	am_noammo,
 	S_PUNCHUP,
 	S_PUNCHDOWN,
@@ -46,7 +14,7 @@ weaponinfo_t	weaponinfo[NUMWEAPONS] =
 	S_NULL
     },	
     {
-	
+
 	am_clip,
 	S_PISTOLUP,
 	S_PISTOLDOWN,
@@ -55,7 +23,7 @@ weaponinfo_t	weaponinfo[NUMWEAPONS] =
 	S_PISTOLFLASH
     },	
     {
-	
+
 	am_shell,
 	S_SGUNUP,
 	S_SGUNDOWN,
@@ -64,7 +32,7 @@ weaponinfo_t	weaponinfo[NUMWEAPONS] =
 	S_SGUNFLASH1
     },
     {
-	
+
 	am_clip,
 	S_CHAINUP,
 	S_CHAINDOWN,
@@ -73,7 +41,7 @@ weaponinfo_t	weaponinfo[NUMWEAPONS] =
 	S_CHAINFLASH1
     },
     {
-	
+
 	am_misl,
 	S_MISSILEUP,
 	S_MISSILEDOWN,
@@ -82,7 +50,7 @@ weaponinfo_t	weaponinfo[NUMWEAPONS] =
 	S_MISSILEFLASH1
     },
     {
-	
+
 	am_cell,
 	S_PLASMAUP,
 	S_PLASMADOWN,
@@ -91,7 +59,7 @@ weaponinfo_t	weaponinfo[NUMWEAPONS] =
 	S_PLASMAFLASH1
     },
     {
-	
+
 	am_cell,
 	S_BFGUP,
 	S_BFGDOWN,
@@ -100,7 +68,7 @@ weaponinfo_t	weaponinfo[NUMWEAPONS] =
 	S_BFGFLASH1
     },
     {
-	
+
 	am_noammo,
 	S_SAWUP,
 	S_SAWDOWN,
@@ -109,7 +77,7 @@ weaponinfo_t	weaponinfo[NUMWEAPONS] =
 	S_NULL
     },
     {
-	
+
 	am_shell,
 	S_DSGUNUP,
 	S_DSGUNDOWN,
@@ -118,11 +86,4 @@ weaponinfo_t	weaponinfo[NUMWEAPONS] =
 	S_DSGUNFLASH1
     },	
 };
-
-
-
-
-
-
-
 

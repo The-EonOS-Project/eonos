@@ -1,24 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include "doomdef.h"
 #include "doomstat.h"
 
@@ -26,17 +5,9 @@
 
 #include "p_local.h"
 
-
-
 #include "sounds.h"
 
-
 #include "r_state.h"
-
-
-
-
-
 
 int
 EV_Teleport
@@ -55,16 +26,12 @@ EV_Teleport
     fixed_t	oldy;
     fixed_t	oldz;
 
-    
     if (thing->flags & MF_MISSILE)
 	return 0;		
 
-    
-    
     if (side == 1)		
 	return 0;	
 
-    
     tag = line->tag;
     for (i = 0; i < numsectors; i++)
     {
@@ -75,32 +42,26 @@ EV_Teleport
 		 thinker != &thinkercap;
 		 thinker = thinker->next)
 	    {
-		
+
 		if (thinker->function.acp1 != (actionf_p1)P_MobjThinker)
 		    continue;	
 
 		m = (mobj_t *)thinker;
-		
-		
+
 		if (m->type != MT_TELEPORTMAN )
 		    continue;		
 
 		sector = m->subsector->sector;
-		
+
 		if (sector-sectors != i )
 		    continue;	
 
 		oldx = thing->x;
 		oldy = thing->y;
 		oldz = thing->z;
-				
+
 		if (!P_TeleportMove (thing, m->x, m->y))
 		    return 0;
-
-                
-                
-                
-                
 
                 if (gameversion != exe_final)
 		    thing->z = thing->floorz;
@@ -108,17 +69,14 @@ EV_Teleport
 		if (thing->player)
 		    thing->player->viewz = thing->z+thing->player->viewheight;
 
-		
 		fog = P_SpawnMobj (oldx, oldy, oldz, MT_TFOG);
 		S_StartSound (fog, sfx_telept);
 		an = m->angle >> ANGLETOFINESHIFT;
 		fog = P_SpawnMobj (m->x+20*finecosine[an], m->y+20*finesine[an]
 				   , thing->z, MT_TFOG);
 
-		
 		S_StartSound (fog, sfx_telept);
-		
-		
+
 		if (thing->player)
 		    thing->reactiontime = 18;	
 

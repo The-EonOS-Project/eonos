@@ -1,24 +1,10 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 pub use self::index_error::IndexError;
 use super::Array;
 use crate::error::LenMismatchError;
 use core::{mem, ops::RangeFrom};
 
 pub struct Overlapping<'o, T> {
-    
+
     in_out: &'o mut [T],
     src: RangeFrom<usize>,
 }
@@ -65,7 +51,7 @@ impl<'o, T> Overlapping<'o, T> {
     pub fn into_unwritten_output(self) -> &'o mut [T] {
         let len = self.len();
         self.in_out.get_mut(..len).unwrap_or_else(|| {
-            
+
             unreachable!()
         })
     }
@@ -78,7 +64,7 @@ impl<T> Overlapping<'_, T> {
 
     pub fn input(&self) -> &[T] {
         self.in_out.get(self.src.clone()).unwrap_or_else(|| {
-            
+
             unreachable!()
         })
     }
@@ -86,14 +72,9 @@ impl<T> Overlapping<'_, T> {
     pub fn with_input_output_len<R>(self, f: impl FnOnce(*const T, *mut T, usize) -> R) -> R {
         let len = self.len();
         let output = self.in_out.as_mut_ptr();
-        
+
         let output_const: *const T = output;
-        
-        
-        
-        
-        
-        
+
         let input = if self.src.start == 0 {
             output_const
         } else {
@@ -102,12 +83,6 @@ impl<T> Overlapping<'_, T> {
         f(input, output, len)
     }
 
-    
-    
-    
-    
-    
-    
     #[cfg_attr(not(test), allow(dead_code))]
     pub fn split_first_chunk<const N: usize>(
         mut self,
@@ -124,23 +99,22 @@ impl<T> Overlapping<'_, T> {
             .get_mut(..end)
             .ok_or_else(|| IndexError::new(N))?;
         let first = Overlapping::new(first, src).unwrap_or_else(|IndexError { .. }| {
-            
+
             unreachable!()
         });
         let first = Array::new(first).unwrap_or_else(|LenMismatchError { .. }| {
-            
+
             unreachable!()
         });
-        
-        
+
         Ok({
             f(first);
             let tail = mem::take(&mut self.in_out).get_mut(N..).unwrap_or_else(|| {
-                
+
                 unreachable!()
             });
             Self::new(tail, self.src).unwrap_or_else(|IndexError { .. }| {
-                
+
                 unreachable!()
             })
         })

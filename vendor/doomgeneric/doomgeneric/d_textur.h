@@ -1,34 +1,7 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __D_TEXTUR__
 #define __D_TEXTUR__
 
 #include "doomtype.h"
-
-
-
-
-
-
-
 
 typedef struct
 {
@@ -36,8 +9,5 @@ typedef struct
     byte		height;
     byte		data;
 } pic_t;
-
-
-
 
 #endif

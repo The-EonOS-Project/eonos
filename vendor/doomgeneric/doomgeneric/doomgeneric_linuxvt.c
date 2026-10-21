@@ -1,16 +1,7 @@
-
-
-
-
 #include "doomkeys.h"
 #include "m_argv.h"
 #include "doomgeneric.h"
 #include "i_system.h"
-
-
-
-
-
 
 #undef KEY_TAB
 #undef KEY_ENTER
@@ -44,7 +35,6 @@
 #define DOOM_KEY_F11		(0x80+0x57)
 #define DOOM_KEY_F12		(0x80+0x58)
 
-
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -70,16 +60,13 @@
 #define INPUT_TYPE_MOUSE    2
 #define INPUT_TYPE_TOUCH    3
 
-
 static struct timeval startTime;
-
 
 static uint8_t *fbPtr;
 static int fbFd;
 static int ttyFd = -1;
 static int savedTtyMode;
 static unsigned int fbWidth, fbHeight, fbStride, fbBytesPerPixel, fbOffsetX, fbOffsetY;
-
 
 static int numInputFds = 0;
 static int inputFds[MAX_INPUT_DEVS];
@@ -89,10 +76,6 @@ static struct pollfd pollfds[MAX_INPUT_DEVS];
 static unsigned short s_KeyQueue[KEYQUEUE_SIZE];
 static unsigned int s_KeyQueueWriteIndex = 0;
 static unsigned int s_KeyQueueReadIndex = 0;
-
-
-
-
 
 static char evdevKeysToASCII1[10] = {
 	'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'
@@ -107,7 +90,6 @@ static char evdevKeysToASCII4[11] = {
 	'\\', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/'
 };
 
-
 static char evdevShiftKeysToASCII1[12] = {
 	'!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '{', '}'
 };
@@ -120,7 +102,6 @@ static char evdevShiftKeysToASCII3[12] = {
 static char evdevShiftKeysToASCII4[11] = {
 	'|', 'z', 'x', 'c', 'v', 'b', 'n', 'm', '<', '>', '?'
 };
-
 
 static unsigned char convertToDoomKey(unsigned int key){
 	switch (key) {
@@ -200,10 +181,6 @@ static unsigned char convertToDoomKey(unsigned int key){
 			key = DOOM_KEY_TAB;
 			break;
 
-		
-		
-		
-		
 		case KEY_1:
 		case KEY_2:
 		case KEY_3:
@@ -281,7 +258,6 @@ static void addKeyToQueue(int pressed, unsigned char keyCode) {
 		(pressed == 1 || pressed == 0))
 		shiftPressed = pressed;
 
-		
 	unsigned char key = convertToDoomKey(keyCode);
 	if (key == 0xFF) 
 		return;
@@ -296,8 +272,6 @@ static void addKeyToQueue(int pressed, unsigned char keyCode) {
 	s_KeyQueueWriteIndex %= KEYQUEUE_SIZE;
 }
 
-
-
 static void checkKeys() {
 	int ret, i;
 	bool keepGoing;
@@ -309,7 +283,7 @@ static void checkKeys() {
 		ret = poll(pollfds, numInputFds, 0);  
 
 		if (ret < 0) {
-			
+
 			return;
 		}
 
@@ -322,10 +296,8 @@ static void checkKeys() {
 		}
 	}
 
-	
 	return;
 }
-
 
 #define TEST_KEY(k) (keybits[(k)/8] & (1 << ((k)%8)))
 static int isKeyboard(const char *devPath) {
@@ -343,12 +315,10 @@ static int isKeyboard(const char *devPath) {
 		return 0;
 	}
 
-	
 	if (!(evbits & (1 << EV_KEY))) {
 		close(fd);
 		return 0;
 	}
-
 
 	memset(keybits, 0, sizeof(keybits));
 	if (ioctl(fd, EVIOCGBIT(EV_KEY, sizeof(keybits)), keybits) < 0) {
@@ -369,7 +339,6 @@ static void checkInputDevs() {
 	struct dirent *dp;
 	DIR *dir;
 
-	
 	dir = opendir("/dev/input");
 
 	while ((dp = readdir(dir)) != NULL) {
@@ -393,7 +362,7 @@ static void checkInputDevs() {
 
 		fd = open(fullpath, O_RDONLY | O_NONBLOCK);
 		if (fd < 0) {
-			
+
 			perror("Failed to open device");
 			continue;
 		}
@@ -406,7 +375,6 @@ static void checkInputDevs() {
 	}
 	closedir(dir);
 }
-
 
 static void RestoreVtMode(void)
 {
@@ -430,19 +398,14 @@ void DG_Init() {
 	struct fb_var_screeninfo info;
 	struct fb_fix_screeninfo finfo;
 
-	
-	
-	
 	fbFd = open("/dev/fb0", O_RDWR);
 	if (fbFd < 0)
 		I_Error("Failed to open /dev/fb0: %s", strerror(errno));
 
-	
 	ret = ioctl(fbFd, FBIOGET_VSCREENINFO, &info);
 	if (ret != 0)
 		I_Error("Failed to get framebuffer info: %s", strerror(errno));
 
-	
 	ret = ioctl(fbFd, FBIOGET_FSCREENINFO, &finfo);
 	if (ret != 0) {
 		printf("Failed to get framebuffer info: %s", strerror(errno));
@@ -456,7 +419,6 @@ void DG_Init() {
 	fbHeight = info.yres;
 	fbBytesPerPixel = info.bits_per_pixel / 8;
 
-	
 	fbOffsetX = ((fbWidth - DOOMGENERIC_RESX) / 2) * fbBytesPerPixel;
 	fbOffsetY = ((fbHeight - DOOMGENERIC_RESY) / 2) * fbStride;
 
@@ -465,7 +427,6 @@ void DG_Init() {
 
 	if (!fbPtr)
 		I_Error("Failed to mmap /dev/fb0: %s", strerror(errno));
-	
 
 	ttyFd = open("/dev/tty0", O_RDWR);
 	if (ttyFd < 0)
@@ -474,7 +435,6 @@ void DG_Init() {
 	if (ioctl(ttyFd, KDGETMODE, &savedTtyMode) < 0)
 		I_Error("Failed to get TTY mode: %s", strerror(errno));
 
-	
 	if (atexit(RestoreVtMode) != 0)
 		I_Error("Failed to register TTY cleanup");
 	signal(SIGINT, signal_handler);
@@ -485,30 +445,21 @@ void DG_Init() {
 	if (ioctl(ttyFd, KDSETMODE, KD_GRAPHICS) < 0)
 		I_Error("Failed to set TTY graphics mode: %s", strerror(errno));
 
-	
 	if (ioctl(fbFd, FBIOBLANK, FB_BLANK_UNBLANK) < 0)
 		fprintf(stderr, "Warning: failed to unblank framebuffer: %s\n", strerror(errno));
 
-
-	
 	memset(fbPtr, 0, fbStride * fbHeight);
 
-	
-	
-	
 	checkInputDevs();
-	
+
 	if (numInputFds == 0)
 		I_Error("Failed to find any compatible input device, see the logs above for potential problems");
 
-	
 	gettimeofday(&startTime, NULL);
 }
 
 void DG_DrawFrame() {
-	
-	
-	
+
 	for (int line = 0; line < DOOMGENERIC_RESY; line++) {
 		memcpy(
 			(void *)((uintptr_t)(fbPtr) + (fbStride * line) + fbOffsetY + fbOffsetX),
@@ -539,7 +490,6 @@ int DG_GetKey(int* pressed, unsigned char* doomKey) {
 	checkKeys();
 
 	if (s_KeyQueueReadIndex == s_KeyQueueWriteIndex) {
-		
 
 		return 0;
 	}
@@ -567,7 +517,6 @@ int main(int argc, char **argv) {
 	{
 		doomgeneric_Tick();
 	}
-
 
 	return 0;
 }

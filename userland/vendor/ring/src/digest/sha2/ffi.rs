@@ -1,22 +1,6 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::CHAINING_WORDS;
 use crate::polyfill::slice::AsChunks;
 use core::num::{NonZeroUsize, Wrapping};
-
-
 
 macro_rules! sha2_ffi {
     ( $U:ty, $BLOCK_LEN:expr, unsafe { $Cpu:ty => $f:ident },
@@ -27,8 +11,7 @@ macro_rules! sha2_ffi {
                 data: *const [u8; $BLOCK_LEN],
                 num: crate::c::NonZero_size_t);
         }
-        
-        
+
         unsafe {
             crate::digest::sha2::ffi::sha2_ffi::<$U, $Cpu, { $BLOCK_LEN }>($state, $data, $cpu, $f)
         }
@@ -61,11 +44,7 @@ pub(super) unsafe fn sha2_ffi<U, Cpu, const BLOCK_LEN: usize>(
     if let Some(blocks) = NonZeroUsize::new(data.len()) {
         let data = data.as_ptr();
         let _: Cpu = cpu;
-        
-        
-        
-        
-        
+
         unsafe { f(state, data, blocks) }
     }
 }

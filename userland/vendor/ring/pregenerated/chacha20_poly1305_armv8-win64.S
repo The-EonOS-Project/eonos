@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_AARCH64) && defined(_WIN32)
@@ -111,11 +108,6 @@ Lpoly_hash_ad_ret:
 	ret
 .cfi_endproc
 
-
-
-
-
-
 .globl	chacha20_poly1305_seal
 
 .def chacha20_poly1305_seal
@@ -130,9 +122,7 @@ chacha20_poly1305_seal:
 .cfi_offset	w30, -72
 .cfi_offset	w29, -80
 	mov	x29, sp
-    
-    
-    
+
 	stp	d8, d9, [sp, #16]
 	stp	d10, d11, [sp, #32]
 	stp	d12, d13, [sp, #48]
@@ -165,9 +155,6 @@ chacha20_poly1305_seal:
 	cmp	x2, #128
 	b.le	Lseal_128 
 
-    
-    
-    
 	ld4r	{v0.4s,v1.4s,v2.4s,v3.4s}, [x11]
 	mov	v4.16b, v24.16b
 
@@ -855,12 +842,10 @@ Lseal_main_loop_rounds:
 	b	Lseal_main_loop
 
 Lseal_tail:
-    
-    
+
 	cmp	x2, #64
 	b.lt	Lseal_tail_64
 
-    
 	ld1	{v20.16b - v23.16b}, [x1], #64
 
 	eor	v20.16b, v20.16b, v0.16b
@@ -994,7 +979,6 @@ Lseal_tail:
 	st1	{v20.16b - v23.16b}, [x0], #64
 	sub	x2, x2, #64
 
-    
 	mov	v0.16b, v1.16b
 	mov	v5.16b, v6.16b
 	mov	v10.16b, v11.16b
@@ -1020,10 +1004,9 @@ Lseal_tail:
 Lseal_tail_64:
 	ldp	x3, x4, [x5, #48] 
 
-    
 	cmp	x2, #16
 	b.lt	Lseal_tail_16
-    
+
 	ld1	{v20.16b}, [x1], #16
 	eor	v20.16b, v20.16b, v0.16b
 	mov	x11, v20.d[0]
@@ -1061,7 +1044,6 @@ Lseal_tail_64:
 
 	sub	x2, x2, #16
 
-    
 	mov	v0.16b, v5.16b
 	mov	v5.16b, v10.16b
 	mov	v10.16b, v15.16b
@@ -1069,7 +1051,7 @@ Lseal_tail_64:
 	b	Lseal_tail_64
 
 Lseal_tail_16:
-    
+
 	cbz	x2, Lseal_hash_extra
 
 	eor	v20.16b, v20.16b, v20.16b 
@@ -1117,7 +1099,6 @@ Lseal_tail_16_store:
 	subs	x6, x6, #1
 	b.gt	Lseal_tail_16_store
 
-    
 	mov	x11, v21.d[0]
 	mov	x12, v21.d[1]
 	adds	x8, x8, x11
@@ -1203,7 +1184,6 @@ Lseal_hash_extra_load:
 	subs	x4, x4, #1
 	b.gt	Lseal_hash_extra_load
 
-    
 	mov	x11, v20.d[0]
 	mov	x12, v20.d[1]
 	adds	x8, x8, x11
@@ -1268,7 +1248,7 @@ Lseal_finalize:
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
 	adc	x10, x10, xzr      
-    
+
 	sub	x12, xzr, x15
 	orr	x13, xzr, #3
 	subs	x11, x8, #-5
@@ -1305,7 +1285,7 @@ Lseal_finalize:
 	ret
 
 Lseal_128:
-    
+
 	eor	v25.16b, v25.16b, v25.16b
 	mov	x11, #1
 	mov	v25.s[0], w11
@@ -1450,8 +1430,6 @@ Lseal_128_rounds:
 	add	v6.4s, v6.4s, v28.4s
 	add	v7.4s, v7.4s, v28.4s
 
-    
-    
 	add	v10.4s, v10.4s, v29.4s
 	add	v11.4s, v11.4s, v29.4s
 
@@ -1469,11 +1447,6 @@ Lseal_128_rounds:
 	b	Lseal_tail
 .cfi_endproc
 
-
-
-
-
-
 .globl	chacha20_poly1305_open
 
 .def chacha20_poly1305_open
@@ -1488,9 +1461,7 @@ chacha20_poly1305_open:
 .cfi_offset	w30, -72
 .cfi_offset	w29, -80
 	mov	x29, sp
-    
-    
-    
+
 	stp	d8, d9, [sp, #16]
 	stp	d10, d11, [sp, #32]
 	stp	d12, d13, [sp, #48]
@@ -1521,7 +1492,6 @@ chacha20_poly1305_open:
 	cmp	x2, #128
 	b.le	Lopen_128 
 
-    
 	mov	v0.16b, v24.16b
 	mov	v5.16b, v28.16b
 	mov	v10.16b, v29.16b
@@ -1584,7 +1554,6 @@ Lopen_init_rounds:
 
 Lopen_ad_done:
 	mov	x3, x1
-
 
 Lopen_main_loop:
 
@@ -1938,7 +1907,6 @@ Lopen_main_loop_rounds_short:
 	add	v14.4s, v14.4s, v29.4s
 	add	v19.4s, v19.4s, v30.4s
 
-    
 	ld1	{v20.16b - v23.16b}, [x1], #64
 	eor	v20.16b, v20.16b, v0.16b
 	eor	v21.16b, v21.16b, v5.16b
@@ -2009,7 +1977,7 @@ Lopen_tail:
 	b.le	Lopen_tail_128
 
 Lopen_tail_192:
-     
+
 	mov	v0.16b, v24.16b
 	mov	v1.16b, v24.16b
 	mov	v2.16b, v24.16b
@@ -2192,7 +2160,6 @@ Lopen_tail_192_rounds_no_hash:
 	subs	x6, x6, #1
 	b.ge	Lopen_tail_192_rounds_no_hash
 
-    
 Lopen_tail_192_hash:
 	cbz	x4, Lopen_tail_192_hash_done
 	ldp	x11, x12, [x3], 16
@@ -2269,7 +2236,7 @@ Lopen_tail_192_hash_done:
 	b	Lopen_tail_64_store
 
 Lopen_tail_128:
-     
+
 	mov	v0.16b, v24.16b
 	mov	v1.16b, v24.16b
 	mov	v5.16b, v28.16b
@@ -2428,7 +2395,7 @@ Lopen_tail_128_rounds_done:
 	b	Lopen_tail_64_store
 
 Lopen_tail_64:
-    
+
 	mov	v0.16b, v24.16b
 	mov	v5.16b, v28.16b
 	mov	v10.16b, v29.16b
@@ -2536,7 +2503,7 @@ Lopen_tail_64_store:
 	b	Lopen_tail_64_store
 
 Lopen_tail_16:
-    
+
 	cbz	x2, Lopen_finalize
 
 	eor	v20.16b, v20.16b, v20.16b 
@@ -2555,7 +2522,7 @@ Lopen_tail_16_compose:
 	b.gt	Lopen_tail_16_compose
 
 	and	v20.16b, v20.16b, v21.16b
-    
+
 	mov	x11, v20.d[0]
 	mov	x12, v20.d[1]
 	adds	x8, x8, x11
@@ -2628,7 +2595,7 @@ Lopen_finalize:
 	adds	x8, x8, x13
 	adcs	x9, x9, x12
 	adc	x10, x10, xzr      
-    
+
 	sub	x12, xzr, x15
 	orr	x13, xzr, #3
 	subs	x11, x8, #-5
@@ -2665,7 +2632,7 @@ Lopen_finalize:
 	ret
 
 Lopen_128:
-    
+
 	eor	v25.16b, v25.16b, v25.16b
 	mov	x11, #1
 	mov	v25.s[0], w11

@@ -1,8 +1,3 @@
-
-
-
-
-
 use super::{checked, syscall3, syscall6, Error, Result};
 
 const SYS_GRAPHICS: usize = 9021;
@@ -17,11 +12,10 @@ const BLIT_SCALED: usize = 6;
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct DisplayInfo { pub width: u32, pub height: u32 }
 
-
 pub struct Surface { info: DisplayInfo, active: bool }
 
 impl Surface {
-    
+
     pub fn open() -> Result<Self> {
         let mut info = DisplayInfo::default();
         checked(unsafe { syscall3(SYS_GRAPHICS, ENTER, (&mut info as *mut DisplayInfo) as usize, 0) })?;
@@ -30,7 +24,6 @@ impl Surface {
 
     pub fn dimensions(&self) -> (u32, u32) { (self.info.width, self.info.height) }
 
-    
     pub fn fill_rect(&mut self, x: i32, y: i32, width: u32, height: u32, color: u32) -> Result<()> {
         checked(unsafe { syscall6(SYS_GRAPHICS, FILL_RECT, x as isize as usize, y as isize as usize,
             width as usize, height as usize, color as usize) }).map(|_| ())
@@ -40,8 +33,6 @@ impl Surface {
         self.fill_rect(x, y, 1, 1, color)
     }
 
-    
-    
     pub fn line(&mut self, x0: i32, y0: i32, x1: i32, y1: i32, color: u32) -> Result<()> {
         let (width, height) = (self.info.width as i64, self.info.height as i64);
         if width == 0 || height == 0 { return Ok(()); }
@@ -86,8 +77,6 @@ impl Surface {
         Ok(())
     }
 
-    
-    
     pub fn circle(&mut self, cx: i32, cy: i32, radius: u32, color: u32) -> Result<()> {
         let limit = self.info.width.max(self.info.height).saturating_mul(2);
         if radius > limit { return Err(Error(22)); }
@@ -106,14 +95,11 @@ impl Surface {
         Ok(())
     }
 
-    
     pub fn text(&mut self, x: i32, y: i32, color: u32, text: &str) -> Result<()> {
         checked(unsafe { syscall6(SYS_GRAPHICS, TEXT, x as isize as usize, y as isize as usize,
             color as usize, text.as_ptr() as usize, text.len()) }).map(|_| ())
     }
 
-    
-    
     pub fn image(&mut self, x: i32, y: i32, width: u32, pixels: &[u32]) -> Result<()> {
         if width == 0 || pixels.is_empty() || pixels.len() % width as usize != 0
             || pixels.len() > 262_144 { return Err(Error(22)); }
@@ -122,8 +108,6 @@ impl Surface {
             width as usize, bytes.as_ptr() as usize, bytes.len()) }).map(|_| ())
     }
 
-    
-    
     pub fn blit_scaled(&mut self, width: u32, height: u32, pixels: &[u32]) -> Result<()> {
         let count = (width as usize).checked_mul(height as usize).ok_or(Error(22))?;
         if width == 0 || height == 0 || pixels.len() != count || count > 262_144 {
@@ -138,12 +122,10 @@ impl Surface {
         checked(unsafe { syscall3(SYS_GRAPHICS, PRESENT, 0, 0) }).map(|_| ())
     }
 
-    
     pub fn present_without_cursor(&mut self) -> Result<()> {
         checked(unsafe { syscall3(SYS_GRAPHICS, PRESENT, 1, 0) }).map(|_| ())
     }
 
-    
     pub fn close(mut self) -> Result<()> {
         checked(unsafe { syscall3(SYS_GRAPHICS, EXIT, 0, 0) })?;
         self.active = false;

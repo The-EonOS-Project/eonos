@@ -1,14 +1,8 @@
-
-
 use crate::acpi;
-
-
 
 pub fn shutdown() -> bool {
     acpi::shutdown()
 }
-
-
 
 pub fn halt() -> ! {
     loop {
@@ -16,23 +10,18 @@ pub fn halt() -> ! {
     }
 }
 
-
-
 pub fn reboot() -> ! {
     unsafe { core::arch::asm!("cli", options(nomem, nostack)) };
     let _ = acpi::reset();
 
     unsafe {
-        
+
         core::arch::asm!("out dx, al", in("dx") 0x0cf9u16, in("al") 0x02u8, options(nomem, nostack, preserves_flags));
         core::arch::asm!("out dx, al", in("dx") 0x0cf9u16, in("al") 0x06u8, options(nomem, nostack, preserves_flags));
 
-        
         core::arch::asm!("out dx, al", in("dx") 0x0064u16, in("al") 0xfeu8, options(nomem, nostack, preserves_flags));
     }
 
-    
-    
     #[repr(C, packed)]
     struct Idtr {
         limit: u16,

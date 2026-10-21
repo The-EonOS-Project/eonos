@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::{
     arithmetic::limbs_from_hex,
     digest, error, limb,
@@ -25,8 +11,7 @@ pub struct Scalar([u8; SCALAR_LEN]);
 pub const SCALAR_LEN: usize = 32;
 
 impl Scalar {
-    
-    
+
     pub fn from_bytes_checked(bytes: [u8; SCALAR_LEN]) -> Result<Self, error::Unspecified> {
         const ORDER: [limb::Limb; SCALAR_LEN / limb::LIMB_BYTES] =
             limbs_from_hex("1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed");
@@ -42,7 +27,6 @@ impl Scalar {
         Ok(Self(bytes))
     }
 
-    
     pub fn from_sha512_digest_reduced(digest: digest::Digest) -> Self {
         prefixed_extern! {
             fn x25519_sc_reduce(s: &mut UnreducedScalar);

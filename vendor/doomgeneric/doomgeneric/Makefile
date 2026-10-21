@@ -1,23 +1,14 @@
-
-
-
-
-
-
-
 ifeq ($(V),1)
 	VB=''
 else
 	VB=@
 endif
 
-
 CC=clang  
 CFLAGS+=-ggdb3 -Os
 LDFLAGS+=-Wl,--gc-sections
 CFLAGS+=-ggdb3 -Wall -DNORMALUNIX -DLINUX -DSNDSERV -D_DEFAULT_SOURCE 
 LIBS+=-lm -lc -lX11
-
 
 OBJDIR=build
 OUTPUT=doomgeneric

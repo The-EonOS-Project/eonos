@@ -1,5 +1,3 @@
-
-
 #![allow(dead_code)]
 
 use alloc::string::{String, ToString};
@@ -113,7 +111,7 @@ impl Fat32 {
         let cluster_count =
             ((total_sectors as u64 - data_start) / sectors_per_cluster as u64) as u32;
         let fat_entries = sectors_per_fat as u64 * SECTOR_SIZE as u64 / 4;
-        
+
         if cluster_count < 1
             || cluster_count > 0x0fff_fff5
             || fat_entries < cluster_count as u64 + 2
@@ -675,9 +673,6 @@ impl Fat32 {
         let chain = self.collect_chain(directory)?;
         let tail = *chain.last().ok_or(FatError::Corrupt)?;
 
-        
-        
-        
         let mut after_end = false;
         for &cluster in &chain {
             let data = self.read_cluster(cluster)?;
@@ -861,8 +856,6 @@ impl Fat32 {
         Ok(())
     }
 
-    
-    
     pub fn create_file(&self, path: &str) -> Result<(), FatError> {
         let (parent, name) = self.parent_and_name(path)?;
         if let Some(existing) = self.find_named_entry(parent, &name)? {
@@ -881,7 +874,6 @@ impl Fat32 {
         self.append_directory_records(parent, &records)
     }
 
-    
     pub fn create_dir(&self, path: &str) -> Result<(), FatError> {
         let (parent, name) = self.parent_and_name(path)?;
         if self.find_named_entry(parent, &name)?.is_some() {
@@ -917,7 +909,6 @@ impl Fat32 {
         result
     }
 
-    
     pub fn remove(&self, path: &str) -> Result<(), FatError> {
         let (parent, name) = self.parent_and_name(path)?;
         let location = self
@@ -973,7 +964,6 @@ impl Fat32 {
         self.release_chain(&chain)
     }
 
-    
     pub fn truncate(&self, path: &str) -> Result<(), FatError> {
         let (parent, name) = self.parent_and_name(path)?;
         let location = self
@@ -987,8 +977,6 @@ impl Fat32 {
         self.release_chain(&chain)
     }
 
-    
-    
     pub fn write_at(&self, path: &str, offset: usize, data: &[u8]) -> Result<usize, FatError> {
         if data.is_empty() {
             return Ok(0);

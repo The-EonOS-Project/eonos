@@ -1,24 +1,3 @@
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,12 +8,10 @@
 
 #include "statdump.h"
 
-
 static const int doom1_par_times[] =
 {
     30, 75, 120, 90, 165, 180, 180, 30, 165,
 };
-
 
 static const int doom2_par_times[] =
 {
@@ -43,15 +20,12 @@ static const int doom2_par_times[] =
 
 #if ORIGCODE
 
-
 static const char *player_colors[] =
 {
     "Green", "Indigo", "Brown", "Red"
 };
 
 #endif
-
-
 
 #define MAX_CAPTURES 32
 static wbstartstruct_t captured_stats[MAX_CAPTURES];
@@ -62,11 +36,6 @@ static GameMission_t discovered_gamemission = none;
 #endif
 
 #if ORIGCODE
-
-
-
-
-
 
 static void DiscoverGamemode(wbstartstruct_t *stats, int num_stats)
 {
@@ -83,25 +52,17 @@ static void DiscoverGamemode(wbstartstruct_t *stats, int num_stats)
     {
         level = stats[i].last;
 
-        
-
         if (stats[i].epsd > 0)
         {
             discovered_gamemission = doom;
             return;
         }
 
-        
-
-
         if (level >= 9)
         {
             discovered_gamemission = doom2;
             return;
         }
-
-        
-
 
         partime = stats[i].partime;
 
@@ -124,8 +85,6 @@ static void DiscoverGamemode(wbstartstruct_t *stats, int num_stats)
 #endif
 
 #if ORIGCODE
-
-
 
 static int GetNumPlayers(wbstartstruct_t *stats)
 {
@@ -162,11 +121,6 @@ static void PrintPercentage(FILE *stream, int amount, int total)
     {
         fprintf(stream, "%i / %i", amount, total);
 
-        
-        
-        
-        
-
         fprintf(stream, " (%i%%)", (short) (amount * 100) / total);
     }
 }
@@ -174,8 +128,6 @@ static void PrintPercentage(FILE *stream, int amount, int total)
 #endif
 
 #if ORIGCODE
-
-
 
 static void PrintPlayerStats(FILE *stream, wbstartstruct_t *stats,
         int player_num)
@@ -185,19 +137,13 @@ static void PrintPlayerStats(FILE *stream, wbstartstruct_t *stats,
     fprintf(stream, "Player %i (%s):\n", player_num + 1,
             player_colors[player_num]);
 
-    
-
     fprintf(stream, "\tKills: ");
     PrintPercentage(stream, player->skills, stats->maxkills);
     fprintf(stream, "\n");
 
-    
-
     fprintf(stream, "\tItems: ");
     PrintPercentage(stream, player->sitems, stats->maxitems);
     fprintf(stream, "\n");
-
-    
 
     fprintf(stream, "\tSecrets: ");
     PrintPercentage(stream, player->ssecret, stats->maxsecret);
@@ -208,15 +154,11 @@ static void PrintPlayerStats(FILE *stream, wbstartstruct_t *stats,
 
 #if ORIGCODE
 
-
-
 static void PrintFragsTable(FILE *stream, wbstartstruct_t *stats)
 {
     int x, y;
 
     fprintf(stream, "Frags:\n");
-
-    
 
     fprintf(stream, "\t\t");
 
@@ -234,8 +176,6 @@ static void PrintFragsTable(FILE *stream, wbstartstruct_t *stats)
     fprintf(stream, "\n");
 
     fprintf(stream, "\t\t-------------------------------- VICTIMS\n");
-
-    
 
     for (y=0; y<MAXPLAYERS; ++y)
     {
@@ -267,8 +207,6 @@ static void PrintFragsTable(FILE *stream, wbstartstruct_t *stats)
 
 #if ORIGCODE
 
-
-
 static void PrintLevelName(FILE *stream, int episode, int level)
 {
     PrintBanner(stream);
@@ -295,8 +233,6 @@ static void PrintLevelName(FILE *stream, int episode, int level)
 #endif
 
 #if ORIGCODE
-
-
 
 static void PrintStats(FILE *stream, wbstartstruct_t *stats)
 {
@@ -346,27 +282,13 @@ void StatDump(void)
     FILE *dumpfile;
     int i;
 
-    
-    
-    
-    
-    
-    
-    
-    
-
     i = M_CheckParmWithArgs("-statdump", 1);
 
     if (i > 0)
     {
         printf("Statistics captured for %i level(s)\n", num_captured_stats);
 
-        
-        
-
         DiscoverGamemode(captured_stats, num_captured_stats);
-
-        
 
         if (strcmp(myargv[i + 1], "-") != 0)
         {

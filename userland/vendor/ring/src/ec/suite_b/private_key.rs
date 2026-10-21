@@ -1,23 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{ops::*, verify_affine_point_is_on_the_curve};
 use crate::{arithmetic::montgomery::R, cpu, ec, error, limb, rand};
-
 
 pub(super) fn random_scalar(
     ops: &PrivateKeyOps,
@@ -36,58 +18,26 @@ pub(super) fn generate_private_scalar_bytes(
     out: &mut [u8],
     cpu: cpu::Features,
 ) -> Result<(), error::Unspecified> {
-    
-    
-    
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
 
     let candidate = out;
 
-    
-    
     for _ in 0..100 {
-        
-        
-        
-        
 
-        
-        
-        
-        
         rng.fill(candidate)?;
 
-        
         if check_scalar_big_endian_bytes(ops, candidate, cpu).is_err() {
             continue;
         }
 
-        
-
-        
         return Ok(());
     }
 
     Err(error::Unspecified)
 }
 
-
-
-
-
 #[inline]
 pub(super) fn private_key_as_scalar(n: &Modulus<N>, private_key: &ec::Seed) -> Scalar {
-    
+
     scalar_from_big_endian_bytes(n, private_key.bytes_less_safe()).unwrap()
 }
 
@@ -101,30 +51,11 @@ pub(super) fn check_scalar_big_endian_bytes(
     scalar_from_big_endian_bytes(n, bytes).map(|_| ())
 }
 
-
-
-
-
-
 pub(super) fn scalar_from_big_endian_bytes(
     n: &Modulus<N>,
     bytes: &[u8],
 ) -> Result<Scalar, error::Unspecified> {
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     scalar_parse_big_endian_fixed_consttime(n, untrusted::Input::from(bytes))
 }
 
@@ -143,8 +74,6 @@ pub(super) fn public_from_private(
     public_out[0] = 4; 
     let (x_out, y_out) = public_out[1..].split_at_mut(elem_and_scalar_bytes);
 
-    
-    
     big_endian_affine_from_jacobian(ops, q, x_out, Some(y_out), &my_public_key)
 }
 
@@ -155,10 +84,6 @@ pub(super) fn affine_from_jacobian(
 ) -> Result<(Elem<R>, Elem<R>), error::Unspecified> {
     let z = q.point_z(p);
 
-    
-    
-    
-    
     assert!(q.elem_verify_is_not_zero(&z).is_ok());
 
     let x = q.point_x(p);
@@ -168,17 +93,12 @@ pub(super) fn affine_from_jacobian(
 
     let x_aff = q.elem_product(&x, &zz_inv);
 
-    
-    
     let y_aff = {
         let zzzz_inv = q.elem_squared(&zz_inv);
         let zzz_inv = q.elem_product(&z, &zzzz_inv);
         q.elem_product(&y, &zzz_inv)
     };
 
-    
-    
-    
     verify_affine_point_is_on_the_curve(q, (&x_aff, &y_aff))?;
 
     Ok((x_aff, y_aff))

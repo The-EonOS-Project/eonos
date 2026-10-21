@@ -8,18 +8,9 @@ license = "Apache-2.0 AND ISC"
 name = "ring"
 repository = "https://github.com/briansmith/ring"
 
-
-
-
 rust-version = "1.66.0"
 
-
 version = "0.17.14"
-
-
-
-
-
 
 links = "ring_core_0_17_14_"
 
@@ -194,8 +185,6 @@ unstable-testing-arm-no-neon = []
 test_logging = []
 wasm32_unknown_unknown_js = ["getrandom/js"]
 
-
-
 [profile.bench]
 opt-level = 3
 debug = false
@@ -214,8 +203,7 @@ codegen-units = 1
 
 [workspace]
 members = [
-    
-    
+
     "bench",
 
     "cavp",

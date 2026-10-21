@@ -1,22 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __W_WAD__
 #define __W_WAD__
 
@@ -26,15 +7,6 @@
 #include "d_mode.h"
 
 #include "w_file.h"
-
-
-
-
-
-
-
-
-
 
 typedef struct lumpinfo_s lumpinfo_t;
 
@@ -46,11 +18,8 @@ struct lumpinfo_s
     int		size;
     void       *cache;
 
-    
-
     lumpinfo_t *next;
 };
-
 
 extern lumpinfo_t *lumpinfo;
 extern unsigned int numlumps;

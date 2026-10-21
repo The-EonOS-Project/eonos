@@ -1,22 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __DOOMDEF__
 #define __DOOMDEF__
 
@@ -27,25 +8,13 @@
 #include "i_timer.h"
 #include "d_mode.h"
 
-
-
-
-
 #define DOOM_VERSION 109
-
 
 #define DOOM_191_VERSION 111
 
-
-
-
 #define RANGECHECK
 
-
 #define MAXPLAYERS 4
-
-
-
 
 typedef enum
 {
@@ -69,21 +38,11 @@ typedef enum
     ga_screenshot
 } gameaction_t;
 
-
-
-
-
-
 #define	MTF_EASY		1
 #define	MTF_NORMAL		2
 #define	MTF_HARD		4
 
-
 #define	MTF_AMBUSH		8
-
-
-
-
 
 typedef enum
 {
@@ -93,15 +52,10 @@ typedef enum
     it_blueskull,
     it_yellowskull,
     it_redskull,
-    
+
     NUMCARDS
-    
+
 } card_t;
-
-
-
-
-
 
 typedef enum
 {
@@ -116,13 +70,10 @@ typedef enum
     wp_supershotgun,
 
     NUMWEAPONS,
-    
-    
+
     wp_nochange
 
 } weapontype_t;
-
-
 
 typedef enum
 {
@@ -135,8 +86,6 @@ typedef enum
 
 } ammotype_t;
 
-
-
 typedef enum
 {
     pw_invulnerability,
@@ -146,15 +95,8 @@ typedef enum
     pw_allmap,
     pw_infrared,
     NUMPOWERS
-    
+
 } powertype_t;
-
-
-
-
-
-
-
 
 typedef enum
 {
@@ -162,7 +104,7 @@ typedef enum
     INVISTICS	= (60*TICRATE),
     INFRATICS	= (120*TICRATE),
     IRONTICS	= (60*TICRATE)
-    
+
 } powerduration_t;
 
 #endif          

@@ -1,11 +1,3 @@
-
-
-
-
-
-
-
-
 #![allow(dead_code)]
 
 use crate::log_ok;
@@ -21,8 +13,6 @@ const ICW4_8086: u8 = 0x01;
 
 const PIC_EOI: u8 = 0x20;
 
-
-
 pub const IRQ_BASE: u8 = 32;
 
 unsafe fn outb(port: u16, val: u8) {
@@ -35,40 +25,33 @@ unsafe fn inb(port: u16) -> u8 {
     val
 }
 
-
-
-
 unsafe fn io_wait() {
     outb(0x80, 0);
 }
 
 pub fn init() {
     unsafe {
-        
+
         outb(PIC1_COMMAND, ICW1_INIT | ICW1_ICW4);
         io_wait();
         outb(PIC2_COMMAND, ICW1_INIT | ICW1_ICW4);
         io_wait();
 
-        
         outb(PIC1_DATA, IRQ_BASE);
         io_wait();
         outb(PIC2_DATA, IRQ_BASE + 8);
         io_wait();
 
-        
         outb(PIC1_DATA, 0b0000_0100);
         io_wait();
         outb(PIC2_DATA, 0b0000_0010);
         io_wait();
 
-        
         outb(PIC1_DATA, ICW4_8086);
         io_wait();
         outb(PIC2_DATA, ICW4_8086);
         io_wait();
 
-        
         outb(PIC1_DATA, 0xFF);
         outb(PIC2_DATA, 0xFF);
     }
@@ -84,7 +67,6 @@ pub fn init() {
     );
 }
 
-
 pub fn unmask(irq: u8) {
     unsafe {
         if irq < 8 {
@@ -93,14 +75,12 @@ pub fn unmask(irq: u8) {
         } else {
             let mask = inb(PIC2_DATA) & !(1 << (irq - 8));
             outb(PIC2_DATA, mask);
-            
-            
+
             let master_mask = inb(PIC1_DATA) & !(1 << 2);
             outb(PIC1_DATA, master_mask);
         }
     }
 }
-
 
 pub fn mask(irq: u8) {
     unsafe {
@@ -113,8 +93,6 @@ pub fn mask(irq: u8) {
         }
     }
 }
-
-
 
 pub fn end_of_interrupt(irq: u8) {
     unsafe {

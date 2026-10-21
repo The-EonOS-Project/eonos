@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 pub(crate) use self::{constant::limbs_from_hex, limb_slice_error::LimbSliceError};
 use crate::{error::LenMismatchError, limb::LIMB_BITS};
 
@@ -30,11 +16,7 @@ pub mod montgomery;
 
 mod n0;
 
-
-
-
 pub const MIN_LIMBS: usize = 4;
-
 
 pub const MAX_LIMBS: usize = 8192 / LIMB_BITS;
 

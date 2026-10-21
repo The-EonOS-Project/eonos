@@ -12,7 +12,6 @@
 #define DOOMGENERIC_RESY 400
 #endif  
 
-
 #ifdef CMAP256
 
 typedef uint8_t pixel_t;
@@ -23,7 +22,6 @@ typedef uint32_t pixel_t;
 
 #endif  
 
-
 extern pixel_t* DG_ScreenBuffer;
 
 #ifdef __cplusplus
@@ -32,8 +30,6 @@ extern "C" {
 
 void doomgeneric_Create(int argc, char **argv);
 void doomgeneric_Tick();
-
-
 
 void DG_Init();
 void DG_DrawFrame();

@@ -1,21 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 
 #ifdef ORIGCODE
@@ -40,10 +22,6 @@ int I_CDMusInit(void)
 #ifdef ORIGCODE
     int drive_num = 0;
 
-    
-    
-    
-
     if (cd_handle == NULL)
     {
         if (SDL_Init(SDL_INIT_CDROM) < 0)
@@ -52,8 +30,6 @@ int I_CDMusInit(void)
             cd_Error = 1;
             return -1;
         }
-
-        
 
         cd_handle = SDL_CDOpen(drive_num);
 
@@ -86,9 +62,6 @@ int I_CDMusInit(void)
     return 0;
 }
 
-
-
-
 void I_CDMusPrintStartup(void)
 {
 #ifdef ORIGCODE
@@ -114,9 +87,6 @@ int I_CDMusPlay(int track)
         cd_Error = 1;
         return -1;
     }
-
-    
-    
 
     result = SDL_CDPlayTracks(cd_handle, track - 1, 0, 1, 0);
 
@@ -159,7 +129,6 @@ int I_CDMusResume(void)
 
 int I_CDMusSetVolume(int volume)
 {
-    
 
     cd_Error = 0;
 
@@ -177,20 +146,16 @@ int I_CDMusFirstTrack(void)
         return -1;
     }
 
-    
-
     for (i=0; i<cd_handle->numtracks; ++i) 
     {
         if (cd_handle->track[i].type == SDL_AUDIO_TRACK)
         {
             cd_Error = 0;
 
-            
             return i + 1;
         }
     }
 
-    
     cd_Error = 1;
 
     return -1;
@@ -227,11 +192,7 @@ int I_CDMusTrackLength(int track_num)
         return -1;
     }
 
-    
-
     track = &cd_handle->track[track_num - 1];
-
-    
 
     cd_Error = 0;
 

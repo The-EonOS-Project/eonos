@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef OPENSSL_HEADER_EC_ECP_NISTZ384_H
 #define OPENSSL_HEADER_EC_ECP_NISTZ384_H
 
@@ -29,6 +15,5 @@ typedef struct {
   Limb X[P384_LIMBS];
   Limb Y[P384_LIMBS];
 } P384_POINT_AFFINE;
-
 
 #endif 

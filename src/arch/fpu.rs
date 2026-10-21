@@ -1,10 +1,3 @@
-
-
-
-
-
-
-
 #[repr(C, align(16))]
 #[derive(Clone, Copy)]
 pub struct FpuState([u8; 512]);
@@ -46,6 +39,6 @@ pub fn init() {
 }
 
 pub fn default_state() -> FpuState {
-    
+
     unsafe { DEFAULT_STATE }
 }

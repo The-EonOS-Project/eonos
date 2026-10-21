@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![cfg(any(
     all(target_arch = "aarch64", target_endian = "little"),
     target_arch = "x86",
@@ -28,9 +14,7 @@ cfg_if! {
         pub(in super::super) type OptionalCpuFeatures = ();
     } else if #[cfg(any(target_arch = "x86", target_arch = "x86_64"))] {
         use cpu::intel::{Aes, Avx, Ssse3};
-        
-        
-        
+
         pub(in super::super) type RequiredCpuFeatures = (Aes, Ssse3);
         pub(in super::super) type OptionalCpuFeatures = Avx;
     }
@@ -58,8 +42,7 @@ impl Key {
         (Aes { .. }, Ssse3 { .. }): RequiredCpuFeatures,
         optional_cpu_features: Option<OptionalCpuFeatures>,
     ) -> Result<Self, error::Unspecified> {
-        
-        
+
         let inner = if let Some(Avx { .. }) = optional_cpu_features {
             unsafe { set_encrypt_key!(aes_hw_set_encrypt_key_alt, bytes) }?
         } else {

@@ -1,25 +1,8 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 pub mod mouse;
 pub mod pci;
 pub mod xhci;
 
 use crate::log_ok;
-
 
 pub fn init() {
     xhci::self_test();

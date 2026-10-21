@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_AARCH64) && defined(__APPLE__)
@@ -292,7 +289,6 @@ Loop_tail:
 	ldp	x29,x30,[sp],#96
 	AARCH64_VALIDATE_LINK_REGISTER
 	ret
-
 
 .globl	_ChaCha20_ctr32_neon
 .private_extern	_ChaCha20_ctr32_neon
@@ -792,7 +788,6 @@ Ldone_neon:
 	ldp	x29,x30,[sp],#96
 	AARCH64_VALIDATE_LINK_REGISTER
 	ret
-
 
 .align	5
 ChaCha20_512_neon:

@@ -6,8 +6,6 @@ use crate::log_ok;
 pub const KERNEL_CS: u16 = 0x08;
 pub const KERNEL_DS: u16 = 0x10;
 
-
-
 pub const USER_DS: u16 = 0x18;
 
 pub const USER_CS: u16 = 0x20;
@@ -46,15 +44,6 @@ struct Gdtr {
 struct Stack([u8; DOUBLE_FAULT_STACK_SIZE]);
 
 static mut GDT: [u64; 7] = [0; 7];
-
-
-
-
-
-
-
-
-
 
 #[no_mangle]
 #[allow(dead_code)] 
@@ -149,11 +138,6 @@ pub fn init() {
         DOUBLE_FAULT_IST
     );
 }
-
-
-
-
-
 
 pub fn set_kernel_stack(rsp0: u64) {
     unsafe {

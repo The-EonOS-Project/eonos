@@ -1,19 +1,3 @@
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef DOOM_STATDUMP_H
 #define DOOM_STATDUMP_H
 

@@ -1,22 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{ops::*, private_key::*, public_key::*};
 use crate::{agreement, cpu, ec, error};
-
 
 macro_rules! ecdh {
     ( $NAME:ident, $curve:expr, $name_str:expr, $private_key_ops:expr,
@@ -24,20 +7,7 @@ macro_rules! ecdh {
         #[doc = "ECDH using the NSA Suite B"]
         #[doc=$name_str]
         #[doc = "curve."]
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
         pub static $NAME: agreement::Algorithm = agreement::Algorithm {
             curve: $curve,
             ecdh: $ecdh,
@@ -87,61 +57,17 @@ fn ecdh(
     peer_public_key: untrusted::Input,
     cpu: cpu::Features,
 ) -> Result<(), error::Unspecified> {
-    
-    
-    
-    
-    
 
     let q = &public_key_ops.common.elem_modulus(cpu);
 
-    
-
-    
-    
-    
-    
-    
-    
     let peer_public_key = parse_uncompressed_point(public_key_ops, q, peer_public_key)?;
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     let n = &private_key_ops.common.scalar_modulus(cpu);
     let my_private_key = private_key_as_scalar(n, my_private_key);
     let product = private_key_ops.point_mul(&my_private_key, &peer_public_key, cpu);
 
-    
-    
-    
-    
-    
-    
-    
-    
     big_endian_affine_from_jacobian(private_key_ops, q, out, None, &product)
 
-    
-    
-    
 }
 
 #[cfg(test)]
@@ -167,27 +93,17 @@ mod tests {
 
     #[test]
     fn test_agreement_suite_b_ecdh_generate() {
-        
-        
+
         let random_00 = test::rand::FixedByteRandom { byte: 0x00 };
 
-        
-        
         let random_ff = test::rand::FixedByteRandom { byte: 0xff };
 
         for &(_, alg, curve, ops) in SUPPORTED_SUITE_B_ALGS.iter() {
-            
-            
+
             assert!(agreement::EphemeralPrivateKey::generate(alg, &random_00).is_err());
 
-            
-            
-            
             assert!(agreement::EphemeralPrivateKey::generate(alg, &random_ff).is_err());
 
-            
-            
-            
             let mut n_bytes = [0u8; ec::SCALAR_MAX_BYTES];
             let num_bytes = curve.elem_scalar_seed_len;
             limb::big_endian_from_limbs(ops.n_limbs(), &mut n_bytes[..num_bytes]);
@@ -197,8 +113,6 @@ mod tests {
                 assert!(agreement::EphemeralPrivateKey::generate(alg, &rng).is_err());
             }
 
-            
-            
             let mut n_minus_1_bytes = n_bytes;
             {
                 let n_minus_1_bytes = &mut n_minus_1_bytes[..num_bytes];
@@ -210,7 +124,6 @@ mod tests {
                 assert_eq!(n_minus_1_bytes, key.bytes_for_test());
             }
 
-            
             let mut n_plus_1_bytes = n_bytes;
             {
                 let n_plus_1_bytes = &mut n_plus_1_bytes[..num_bytes];
@@ -221,9 +134,6 @@ mod tests {
                 assert!(agreement::EphemeralPrivateKey::generate(alg, &rng).is_err());
             }
 
-            
-            
-            
             {
                 let bytes = [
                     &n_bytes[..num_bytes],

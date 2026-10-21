@@ -2,12 +2,11 @@ pub fn assert_iterator<T>(it: impl ExactSizeIterator<Item = T> + Clone, expected
 where
     T: Copy + core::fmt::Debug + PartialEq,
 {
-    
+
     assert_exact_size_iterator(it.clone(), expected);
-    
+
     assert_exact_size_iterator(it, expected);
 }
-
 
 fn assert_exact_size_iterator<T>(mut it: impl ExactSizeIterator<Item = T>, expected: &[T])
 where

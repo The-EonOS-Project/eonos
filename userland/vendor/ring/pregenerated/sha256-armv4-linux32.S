@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_ARM) && defined(__ELF__)
@@ -88,14 +85,8 @@ sha256_block_data_order_nohw:
 	add	r11,r11,r12				eor	r2,r2,r10				eor	r0,r4,r4,ror#11
 	add	r11,r11,r2			#if 0 
 
-
 #endif
 #if 0 
-
-
-
-
-
 
 #else
 	ldr	r2,[sp,#2*4]		rr	eor	r12,r4,r5			nnrn	ldr	r1,[sp,#15*4]	rr#endif

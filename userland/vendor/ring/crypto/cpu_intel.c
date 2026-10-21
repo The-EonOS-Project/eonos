@@ -1,19 +1,4 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <ring-core/base.h>
-
 
 #if !defined(OPENSSL_NO_ASM) && (defined(OPENSSL_X86) || defined(OPENSSL_X86_64))
 
@@ -26,10 +11,6 @@
 
 #include "internal.h"
 
-
-
-
-
 static void OPENSSL_cpuid(uint32_t *out_eax, uint32_t *out_ebx,
                           uint32_t *out_ecx, uint32_t *out_edx, uint32_t leaf) {
 #if defined(_MSC_VER) && !defined(__clang__)
@@ -40,8 +21,7 @@ static void OPENSSL_cpuid(uint32_t *out_eax, uint32_t *out_ebx,
   *out_ecx = (uint32_t)tmp[2];
   *out_edx = (uint32_t)tmp[3];
 #elif defined(__pic__) && defined(OPENSSL_32_BIT)
-  
-  
+
   __asm__ volatile (
     "xor %%ecx, %%ecx\n"
     "mov %%ebx, %%edi\n"
@@ -60,10 +40,6 @@ static void OPENSSL_cpuid(uint32_t *out_eax, uint32_t *out_ebx,
 #endif
 }
 
-
-
-
-
 static uint64_t OPENSSL_xgetbv(uint32_t xcr) {
 #if defined(_MSC_VER) && !defined(__clang__)
   return (uint64_t)_xgetbv(xcr);
@@ -75,7 +51,7 @@ static uint64_t OPENSSL_xgetbv(uint32_t xcr) {
 }
 
 void OPENSSL_cpuid_setup(uint32_t OPENSSL_ia32cap_P[4]) {
-  
+
   uint32_t eax, ebx, ecx, edx;
   OPENSSL_cpuid(&eax, &ebx, &ecx, &edx, 0);
 
@@ -108,7 +84,6 @@ void OPENSSL_cpuid_setup(uint32_t OPENSSL_ia32cap_P[4]) {
     model |= ext_model << 4;
   }
 
-  
   if (is_intel) {
     edx |= (1u << 30);
   } else {
@@ -117,12 +92,12 @@ void OPENSSL_cpuid_setup(uint32_t OPENSSL_ia32cap_P[4]) {
 
   uint64_t xcr0 = 0;
   if (ecx & (1u << 27)) {
-    
+
     xcr0 = OPENSSL_xgetbv(0);
   }
-  
+
   if ((xcr0 & 6) != 6) {
-    
+
     ecx &= ~(1u << 28);  
     ecx &= ~(1u << 12);  
     ecx &= ~(1u << 11);  
@@ -130,24 +105,9 @@ void OPENSSL_cpuid_setup(uint32_t OPENSSL_ia32cap_P[4]) {
     extended_features[1] &= ~(1u << 9);   
     extended_features[1] &= ~(1u << 10);  
   }
-  
-  
-  
+
   if ((xcr0 & 0xe6) != 0xe6) {
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     extended_features[0] &= ~(1u << 16);  
     extended_features[0] &= ~(1u << 17);  
     extended_features[0] &= ~(1u << 21);  
@@ -163,19 +123,6 @@ void OPENSSL_cpuid_setup(uint32_t OPENSSL_ia32cap_P[4]) {
     extended_features[1] &= ~(1u << 14);  
   }
 
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   if (is_intel && family == 6 &&
       (model == 85 ||    
        model == 106 ||   

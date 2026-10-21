@@ -1,20 +1,16 @@
-
 ifeq ($(V),1)
 	VB=''
 else
 	VB=@
 endif
 
-
 SDL_CFLAGS = `sdl2-config --cflags`
 SDL_LIBS = `sdl2-config --cflags --libs` -lSDL2_mixer
-
 
 CC=emcc
 CFLAGS+=-DFEATURE_SOUND -s SDL2_MIXER_FORMATS='["mid"]' $(SDL_CFLAGS)
 LDFLAGS+=--preload-file doom1.wad 
 LIBS+=-lm -lc $(SDL_LIBS)
-
 
 OBJDIR=build
 OUTPUT=doomgeneric

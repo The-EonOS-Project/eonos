@@ -1,8 +1,5 @@
 use core::iter::Peekable;
 
-
-
-
 pub struct LeadingZerosStripped<I>
 where
     I: Iterator,
@@ -29,8 +26,7 @@ where
     pub fn new(inner: I) -> Self {
         let mut len = inner.len();
         let mut inner = inner.peekable();
-        
-        
+
         while len > 1 && inner.next_if_eq(&0).is_some() {
             len -= 1;
         }

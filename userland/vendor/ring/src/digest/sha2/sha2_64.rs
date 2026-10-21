@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{BlockLen, CHAINING_WORDS};
 use crate::{cpu, polyfill::slice::AsChunks};
 use cfg_if::cfg_if;
@@ -44,9 +30,7 @@ pub(crate) fn block_data_order_64(
         } else if #[cfg(target_arch = "x86_64")] {
             use cpu::{GetFeature as _, intel::{Avx, IntelCpu}};
             if let Some(cpu) = cpu.get_feature() {
-                
-                
-                
+
                 sha2_64_ffi!(unsafe { (Avx, IntelCpu) => sha512_block_data_order_avx },
                     state, data, cpu);
             } else {

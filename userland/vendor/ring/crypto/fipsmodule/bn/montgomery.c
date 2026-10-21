@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include "internal.h"
 #include "../../internal.h"
 
@@ -32,9 +18,6 @@ int bn_from_montgomery_in_place(BN_ULONG r[], size_t num_r, BN_ULONG a[],
     return 0;
   }
 
-  
-  
-  
   BN_ULONG n0 = n0_[0];
   BN_ULONG carry = 0;
   for (size_t i = 0; i < num_n; i++) {
@@ -45,16 +28,10 @@ int bn_from_montgomery_in_place(BN_ULONG r[], size_t num_r, BN_ULONG a[],
     a[i + num_n] = v;
   }
 
-  
-  
   a += num_n;
 
-  
-  
   BN_ULONG v = limbs_sub(r, a, n, num_n) - carry;
-  
-  
-  
+
   v = 0u - v;
   for (size_t i = 0; i < num_n; i++) {
     r[i] = constant_time_select_w(v, a[i], r[i]);

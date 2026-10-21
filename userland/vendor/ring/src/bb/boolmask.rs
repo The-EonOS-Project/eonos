@@ -1,20 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::Word;
 use core::ops;
-
 
 #[repr(transparent)]
 pub struct BoolMask(Word);
@@ -25,8 +10,6 @@ impl BoolMask {
     #[cfg(test)]
     pub(super) const FALSE: Self = Self(0);
 
-    
-    
     pub(crate) fn leak(self) -> bool {
         self.0 != 0
     }

@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::error::{KeyRejected, Unspecified};
 
 impl From<untrusted::EndOfInput> for Unspecified {

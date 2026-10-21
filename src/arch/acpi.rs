@@ -1,36 +1,8 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![allow(dead_code)]
 
 use crate::vmm;
 use crate::{log_debug, log_fail, log_ok};
 use limine::request::RsdpRequest;
-
-
-
-
-
-
-
-
-
-
-
-
 
 fn map_table(phys: u64, len: u64) -> *const u8 {
     vmm::map_mmio(phys, len) as *const u8
@@ -39,11 +11,6 @@ fn map_table(phys: u64, len: u64) -> *const u8 {
 #[used]
 #[link_section = ".requests"]
 static RSDP_REQUEST: RsdpRequest = RsdpRequest::new();
-
-
-
-
-
 
 #[repr(C, packed)]
 struct RsdpV1 {
@@ -63,8 +30,6 @@ struct RsdpV2 {
     _reserved: [u8; 3],
 }
 
-
-
 #[repr(C, packed)]
 struct SdtHeader {
     signature: [u8; 4],
@@ -81,11 +46,6 @@ struct SdtHeader {
 fn checksum_ok(bytes: &[u8]) -> bool {
     bytes.iter().fold(0u8, |acc, &b| acc.wrapping_add(b)) == 0
 }
-
-
-
-
-
 
 pub struct MadtInfo {
     pub local_apic_addr: u64,
@@ -109,19 +69,12 @@ pub struct IoApicInfo {
 pub struct IsaOverride {
     pub isa_irq: u8,
     pub gsi: u32,
-    
-    
-    
-    
-    
-    
-    
+
     pub flags: u16,
 }
 
 impl MadtInfo {
-    
-    
+
     pub fn override_for(&self, irq: u8) -> Option<(u32, u16)> {
         self.overrides[..self.override_count]
             .iter()
@@ -129,11 +82,6 @@ impl MadtInfo {
             .map(|o| (o.gsi, o.flags))
     }
 }
-
-
-
-
-
 
 pub fn find_madt() -> Option<MadtInfo> {
     let Some(madt_addr) = find_table_address(b"APIC") else {
@@ -154,8 +102,6 @@ fn find_table_address(signature: &[u8; 4]) -> Option<u64> {
         return None;
     }
 
-    
-    
     let rsdp_base = map_table(rsdp_addr, 4096);
     let v1 = unsafe { &*(rsdp_base as *const RsdpV1) };
     if &v1.signature != b"RSD PTR " {
@@ -163,11 +109,6 @@ fn find_table_address(signature: &[u8; 4]) -> Option<u64> {
         return None;
     }
 
-    
-    
-    
-    
-    
     let mut sdt_addr = v1.rsdt_address as u64;
     let mut sdt_is_xsdt = false;
     if v1.revision >= 2 {
@@ -201,9 +142,6 @@ fn find_table_address(signature: &[u8; 4]) -> Option<u64> {
         return None;
     }
 
-    
-    
-    
     let sdt_base = map_table(sdt_addr, 0x10000);
     let sdt_header = unsafe { &*(sdt_base as *const SdtHeader) };
     let sdt_len = sdt_header.length as usize;
@@ -231,8 +169,7 @@ fn find_table_address(signature: &[u8; 4]) -> Option<u64> {
     let entry_size = if sdt_is_xsdt { 8 } else { 4 };
     let mut offset = entries_start;
     while offset < sdt_len {
-        
-        
+
         let addr = unsafe {
             if sdt_is_xsdt {
                 core::ptr::read_unaligned(sdt_base.add(offset) as *const u64)
@@ -247,9 +184,6 @@ fn find_table_address(signature: &[u8; 4]) -> Option<u64> {
         offset += entry_size;
     }
 
-    
-    
-    
     if sdt_is_xsdt {
         let rsdt_addr = unsafe {
             core::ptr::read_unaligned(rsdp_base.add(16) as *const u32) as u64
@@ -282,8 +216,6 @@ fn find_table_address(signature: &[u8; 4]) -> Option<u64> {
     log_debug!("ACPI", "Init", "ACPI table {:?} not found", signature);
     None
 }
-
-
 
 pub fn shutdown() -> bool {
     let Some(fadt_addr) = find_table_address(b"FACP") else {
@@ -345,7 +277,6 @@ pub fn shutdown() -> bool {
         return false;
     };
 
-    
     let sci_enabled = unsafe { inw(pm1a) & 1 != 0 };
     if !sci_enabled && fadt_len > 53 {
         let smi_command = unsafe { core::ptr::read_unaligned(fadt.add(48) as *const u32) };
@@ -375,8 +306,6 @@ pub fn shutdown() -> bool {
     }
     true
 }
-
-
 
 pub fn reset() -> bool {
     let Some(fadt_addr) = find_table_address(b"FACP") else {
@@ -515,24 +444,18 @@ fn table_signature_is(phys_addr: u64, sig: &[u8; 4]) -> bool {
     if phys_addr == 0 {
         return false;
     }
-    
-    
-    
+
     let base = map_table(phys_addr, 4096);
     let header = unsafe { &*(base as *const SdtHeader) };
     &header.signature == sig
 }
-
-
-
 
 #[repr(C, packed)]
 struct MadtHeader {
     sdt: SdtHeader,
     local_apic_addr: u32,
     flags: u32,
-    
-    
+
 }
 
 const MADT_ENTRY_IOAPIC: u8 = 1;
@@ -540,9 +463,7 @@ const MADT_ENTRY_ISA_OVERRIDE: u8 = 2;
 const MADT_ENTRY_LOCAL_APIC_OVERRIDE: u8 = 5;
 
 fn parse_madt(madt_addr: u64) -> Option<MadtInfo> {
-    
-    
-    
+
     let base = map_table(madt_addr, 0x10000);
     let header = unsafe { &*(base as *const MadtHeader) };
     let total_len = header.sdt.length as usize;
@@ -621,10 +542,7 @@ fn parse_madt(madt_addr: u64) -> Option<MadtInfo> {
                 }
             }
             MADT_ENTRY_LOCAL_APIC_OVERRIDE if entry_len >= 12 => {
-                
-                
-                
-                
+
                 let addr64 =
                     unsafe { core::ptr::read_unaligned(base.add(offset + 4) as *const u64) };
                 if addr64 != 0 {

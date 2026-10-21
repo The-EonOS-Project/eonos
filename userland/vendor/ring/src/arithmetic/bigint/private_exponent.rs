@@ -1,43 +1,20 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{limb, BoxedLimbs, Limb, Modulus};
 use crate::error;
 use alloc::boxed::Box;
 
 pub struct PrivateExponent {
-    
-    
+
     limbs: Box<[Limb]>,
 }
 
 impl PrivateExponent {
-    
+
     pub fn from_be_bytes_padded<M>(
         input: untrusted::Input,
         p: &Modulus<M>,
     ) -> Result<Self, error::Unspecified> {
         let mut dP = BoxedLimbs::from_be_bytes_padded_less_than(input, p)?;
 
-        
-        
-        
-        
-        
-        
-        
-        
         limb::limbs_reject_even_leak_bit(&dP)?;
         dP.reverse();
 
@@ -46,8 +23,6 @@ impl PrivateExponent {
         })
     }
 
-    
-    
     #[cfg(test)]
     pub fn from_be_bytes_for_test_only<M>(
         input: untrusted::Input,
@@ -55,7 +30,6 @@ impl PrivateExponent {
     ) -> Result<Self, error::Unspecified> {
         use crate::limb::LIMB_BYTES;
 
-        
         if let r @ Ok(_) = Self::from_be_bytes_padded(input, p) {
             return r;
         }

@@ -1,22 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include "config.h"
 
 #include <stdio.h>
@@ -71,25 +52,13 @@ static boolean (*ExpandSoundData)(sfxinfo_t *sfxinfo,
                                   int samplerate,
                                   int length) = NULL;
 
-
-
-
-
 static allocated_sound_t *allocated_sounds_head = NULL;
 static allocated_sound_t *allocated_sounds_tail = NULL;
 static int allocated_sounds_size = 0;
 
 int use_libsamplerate = 0;
 
-
-
-
-
-
-
 float libsamplerate_scale = 0.65f;
-
-
 
 static void AllocatedSoundLink(allocated_sound_t *snd)
 {
@@ -107,8 +76,6 @@ static void AllocatedSoundLink(allocated_sound_t *snd)
         snd->next->prev = snd;
     }
 }
-
-
 
 static void AllocatedSoundUnlink(allocated_sound_t *snd)
 {
@@ -133,24 +100,15 @@ static void AllocatedSoundUnlink(allocated_sound_t *snd)
 
 static void FreeAllocatedSound(allocated_sound_t *snd)
 {
-    
 
     AllocatedSoundUnlink(snd);
 
-    
-
     snd->sfxinfo->driver_data = NULL;
-
-    
 
     allocated_sounds_size -= snd->chunk.alen;
 
     free(snd);
 }
-
-
-
-
 
 static boolean FindAndFreeSound(void)
 {
@@ -169,14 +127,8 @@ static boolean FindAndFreeSound(void)
         snd = snd->prev;
     }
 
-    
-
     return false;
 }
-
-
-
-
 
 static void ReserveCacheSpace(size_t len)
 {
@@ -185,12 +137,8 @@ static void ReserveCacheSpace(size_t len)
         return;
     }
 
-    
-    
-
     while (allocated_sounds_size + len > snd_cachesize)
     {
-        
 
         if (!FindAndFreeSound())
         {
@@ -199,25 +147,15 @@ static void ReserveCacheSpace(size_t len)
     }
 }
 
-
-
 static Mix_Chunk *AllocateSound(sfxinfo_t *sfxinfo, size_t len)
 {
     allocated_sound_t *snd;
 
-    
-
     ReserveCacheSpace(len);
-
-    
-    
 
     do
     {
         snd = malloc(sizeof(allocated_sound_t) + len);
-
-        
-        
 
         if (snd == NULL && !FindAndFreeSound())
         {
@@ -225,8 +163,6 @@ static Mix_Chunk *AllocateSound(sfxinfo_t *sfxinfo, size_t len)
         }
 
     } while (snd == NULL);
-
-    
 
     snd->chunk.abuf = (byte *) (snd + 1);
     snd->chunk.alen = len;
@@ -236,11 +172,7 @@ static Mix_Chunk *AllocateSound(sfxinfo_t *sfxinfo, size_t len)
     snd->sfxinfo = sfxinfo;
     snd->use_count = 0;
 
-    
-
     sfxinfo->driver_data = snd;
-
-    
 
     allocated_sounds_size += len;
 
@@ -249,24 +181,14 @@ static Mix_Chunk *AllocateSound(sfxinfo_t *sfxinfo, size_t len)
     return &snd->chunk;
 }
 
-
-
 static void LockAllocatedSound(allocated_sound_t *snd)
 {
-    
 
     ++snd->use_count;
-
-    
-
-    
-    
 
     AllocatedSoundUnlink(snd);
     AllocatedSoundLink(snd);
 }
-
-
 
 static void UnlockAllocatedSound(allocated_sound_t *snd)
 {
@@ -277,12 +199,7 @@ static void UnlockAllocatedSound(allocated_sound_t *snd)
 
     --snd->use_count;
 
-    
 }
-
-
-
-
 
 static void ReleaseSoundOnChannel(int channel)
 {
@@ -300,19 +217,14 @@ static void ReleaseSoundOnChannel(int channel)
 
 #ifdef HAVE_LIBSAMPLERATE
 
-
-
 static int SRC_ConversionMode(void)
 {
     switch (use_libsamplerate)
     {
-        
 
         default:
         case 0:
             return -1;
-
-        
 
         case 1:
             return SRC_LINEAR;
@@ -326,13 +238,6 @@ static int SRC_ConversionMode(void)
             return SRC_SINC_BEST_QUALITY;
     }
 }
-
-
-
-
-
-
-
 
 static boolean ExpandSoundData_SRC(sfxinfo_t *sfxinfo,
                                    byte *data,
@@ -350,28 +255,19 @@ static boolean ExpandSoundData_SRC(sfxinfo_t *sfxinfo,
     src_data.data_in = malloc(length * sizeof(float));
     src_data.src_ratio = (double)mixer_freq / samplerate;
 
-    
     src_data.output_frames = src_data.src_ratio * length + (mixer_freq / 4);
     src_data.data_out = malloc(src_data.output_frames * sizeof(float));
 
     assert(src_data.data_in != NULL && src_data.data_out != NULL);
 
-    
-
     for (i=0; i<length; ++i)
     {
-        
-        
-        
+
         src_data.data_in[i] = data[i] / 127.5 - 1;
     }
 
-    
-
     retn = src_simple(&src_data, SRC_ConversionMode(), 1);
     assert(retn == 0);
-
-    
 
     alen = src_data.output_frames_gen * 4;
 
@@ -384,36 +280,13 @@ static boolean ExpandSoundData_SRC(sfxinfo_t *sfxinfo,
 
     expanded = (int16_t *) chunk->abuf;
 
-    
-
     for (i=0; i<src_data.output_frames_gen; ++i)
     {
-        
-        
-        
-        
-        
-
-        
-        
-        
-        
-        
-        
-        
-
-        
-        
-        
-        
-        
-        
 
         float cvtval_f =
             src_data.data_out[i] * libsamplerate_scale * INT16_MAX;
         int32_t cvtval_i = cvtval_f + (cvtval_f < 0 ? -0.5 : 0.5);
 
-        
         if (cvtval_i < -INT16_MAX)
         {
             cvtval_i = -INT16_MAX;
@@ -424,8 +297,6 @@ static boolean ExpandSoundData_SRC(sfxinfo_t *sfxinfo,
             cvtval_i = INT16_MAX;
             ++clipped;
         }
-
-        
 
         expanded[abuf_index++] = cvtval_i;
         expanded[abuf_index++] = cvtval_i;
@@ -456,13 +327,11 @@ static boolean ConvertibleRatio(int freq1, int freq2)
     }
     else if ((freq2 % freq1) != 0)
     {
-        
 
         return false;
     }
     else
     {
-        
 
         ratio = freq2 / freq1;
 
@@ -477,8 +346,6 @@ static boolean ConvertibleRatio(int freq1, int freq2)
 
 #ifdef DEBUG_DUMP_WAVS
 
-
-
 static void WriteWAV(char *filename, byte *data,
                      uint32_t length, int samplerate)
 {
@@ -488,14 +355,10 @@ static void WriteWAV(char *filename, byte *data,
 
     wav = fopen(filename, "wb");
 
-    
-
     fwrite("RIFF", 1, 4, wav);
     i = LONG(36 + samplerate);
     fwrite(&i, 4, 1, wav);
     fwrite("WAVE", 1, 4, wav);
-
-    
 
     fwrite("fmt ", 1, 4, wav);
     i = LONG(16);
@@ -513,8 +376,6 @@ static void WriteWAV(char *filename, byte *data,
     s = SHORT(16);
     fwrite(&s, 2, 1, wav);           
 
-    
-
     fwrite("data", 1, 4, wav);
     i = LONG(length);
     fwrite(&i, 4, 1, wav);           
@@ -525,9 +386,6 @@ static void WriteWAV(char *filename, byte *data,
 
 #endif
 
-
-
-
 static boolean ExpandSoundData_SDL(sfxinfo_t *sfxinfo,
                                    byte *data,
                                    int samplerate,
@@ -536,16 +394,10 @@ static boolean ExpandSoundData_SDL(sfxinfo_t *sfxinfo,
     SDL_AudioCVT convertor;
     Mix_Chunk *chunk;
     uint32_t expanded_length;
- 
-    
 
     expanded_length = (uint32_t) ((((uint64_t) length) * mixer_freq) / samplerate);
 
-    
-
     expanded_length *= 4;
-
-    
 
     chunk = AllocateSound(sfxinfo, expanded_length);
 
@@ -554,18 +406,9 @@ static boolean ExpandSoundData_SDL(sfxinfo_t *sfxinfo,
         return false;
     }
 
-    
         Sint16 *expanded = (Sint16 *) chunk->abuf;
         int expand_ratio;
         int i;
-
-        
-        
-        
-        
-        
-
-        
 
         expanded_length = ((uint64_t) length * mixer_freq) / samplerate;
         expand_ratio = (length << 8) / expanded_length;
@@ -580,32 +423,17 @@ static boolean ExpandSoundData_SDL(sfxinfo_t *sfxinfo,
             sample = data[src] | (data[src] << 8);
             sample -= 32768;
 
-            
-
             expanded[i * 2] = expanded[i * 2 + 1] = sample;
         }
 
 #ifdef LOW_PASS_FILTER
-        
-        
 
         {
             float rc, dt, alpha;
 
-            
-            
-            
-            
-            
-
-            
-            
-
             dt = 1.0f / mixer_freq;
             rc = 1.0f / (3.14f * samplerate);
             alpha = dt / (rc + dt);
-
-            
 
             for (i=2; i<expanded_length * 2; ++i)
             {
@@ -618,9 +446,6 @@ static boolean ExpandSoundData_SDL(sfxinfo_t *sfxinfo,
     return true;
 }
 
-
-
-
 static boolean CacheSFX(sfxinfo_t *sfxinfo)
 {
     int lumpnum;
@@ -629,48 +454,27 @@ static boolean CacheSFX(sfxinfo_t *sfxinfo)
     unsigned int length;
     byte *data;
 
-    
-
     lumpnum = sfxinfo->lumpnum;
     data = W_CacheLumpNum(lumpnum, PU_STATIC);
     lumplen = W_LumpLength(lumpnum);
 
-    
-
     if (lumplen < 8
      || data[0] != 0x03 || data[1] != 0x00)
     {
-        
 
         return false;
     }
 
-    
-
     samplerate = (data[3] << 8) | data[2];
     length = (data[7] << 24) | (data[6] << 16) | (data[5] << 8) | data[4];
-
-    
-    
-
-    
-    
-    
-    
-    
 
     if (length > lumplen - 8 || length <= 48)
     {
         return false;
     }
 
-    
-    
-
     data += 16;
     length -= 32;
-
-    
 
     if (!ExpandSoundData(sfxinfo, data + 8, samplerate, length))
     {
@@ -688,8 +492,6 @@ static boolean CacheSFX(sfxinfo_t *sfxinfo)
     }
 #endif
 
-    
-  
     W_ReleaseLumpNum(lumpnum);
 
     return true;
@@ -697,15 +499,11 @@ static boolean CacheSFX(sfxinfo_t *sfxinfo)
 
 static void GetSfxLumpName(sfxinfo_t *sfx, char *buf, size_t buf_len)
 {
-    
 
     if (sfx->link != NULL)
     {
         sfx = sfx->link;
     }
-
-    
-    
 
     if (use_sfx_prefix)
     {
@@ -719,14 +517,10 @@ static void GetSfxLumpName(sfxinfo_t *sfx, char *buf, size_t buf_len)
 
 #ifdef HAVE_LIBSAMPLERATE
 
-
-
 static void I_SDL_PrecacheSounds(sfxinfo_t *sounds, int num_sounds)
 {
     char namebuf[9];
     int i;
-
-    
 
     if (use_libsamplerate == 0)
     {
@@ -760,16 +554,13 @@ static void I_SDL_PrecacheSounds(sfxinfo_t *sounds, int num_sounds)
 
 static void I_SDL_PrecacheSounds(sfxinfo_t *sounds, int num_sounds)
 {
-    
+
 }
 
 #endif
 
-
-
 static boolean LockSound(sfxinfo_t *sfxinfo)
 {
-    
 
     if (sfxinfo->driver_data == NULL)
     {
@@ -783,11 +574,6 @@ static boolean LockSound(sfxinfo_t *sfxinfo)
 
     return true;
 }
-
-
-
-
-
 
 static int I_SDL_GetSfxLumpNum(sfxinfo_t *sfx)
 {
@@ -815,11 +601,6 @@ static void I_SDL_UpdateSoundParams(int handle, int vol, int sep)
     if (right < 0) right = 0;
     else if (right > 255) right = 255;
 
-    
-    
-    
-    
-
     if (setpanning_workaround)
     {
         Mix_UnregisterAllEffects(handle);
@@ -827,19 +608,6 @@ static void I_SDL_UpdateSoundParams(int handle, int vol, int sep)
 
     Mix_SetPanning(handle, left, right);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 static int I_SDL_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int sep)
 {
@@ -850,12 +618,7 @@ static int I_SDL_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int sep)
         return -1;
     }
 
-    
-    
-
     ReleaseSoundOnChannel(channel);
-
-    
 
     if (!LockSound(sfxinfo))
     {
@@ -864,14 +627,10 @@ static int I_SDL_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int sep)
 
     snd = sfxinfo->driver_data;
 
-    
-
     Mix_PlayChannelTimed(channel, &snd->chunk, 0, -1);
 
     channels_playing[channel] = sfxinfo;
 
-    
- 
     I_SDL_UpdateSoundParams(channel, vol, sep);
 
     return channel;
@@ -886,12 +645,8 @@ static void I_SDL_StopSound(int handle)
 
     Mix_HaltChannel(handle);
 
-    
-    
-
     ReleaseSoundOnChannel(handle);
 }
-
 
 static boolean I_SDL_SoundIsPlaying(int handle)
 {
@@ -903,23 +658,15 @@ static boolean I_SDL_SoundIsPlaying(int handle)
     return Mix_Playing(handle);
 }
 
-
-
-
-
 static void I_SDL_UpdateSound(void)
 {
     int i;
-
-    
 
     for (i=0; i<NUM_CHANNELS; ++i)
     {
         if (channels_playing[i] && !I_SDL_SoundIsPlaying(i))
         {
-            
-            
-            
+
             ReleaseSoundOnChannel(i);
         }
     }
@@ -938,9 +685,6 @@ static void I_SDL_ShutdownSound(void)
     sound_initialized = false;
 }
 
-
-
-
 static int GetSliceSize(void)
 {
     int limit;
@@ -948,19 +692,14 @@ static int GetSliceSize(void)
 
     limit = (snd_samplerate * snd_maxslicetime_ms) / 1000;
 
-    
-
     for (n=0;; ++n)
     {
-        
 
         if ((1 << (n + 1)) > limit)
         {
             return (1 << n);
         }
     }
-
-    
 
     return 1024;
 }
@@ -970,8 +709,6 @@ static boolean I_SDL_InitSound(boolean _use_sfx_prefix)
     int i;
 
     use_sfx_prefix = _use_sfx_prefix;
-
-    
 
     for (i=0; i<NUM_CHANNELS; ++i)
     {
@@ -1013,11 +750,6 @@ static boolean I_SDL_InitSound(boolean _use_sfx_prefix)
                         use_libsamplerate);
     }
 #endif
-
-    
-    
-    
-    
 
     {
         const SDL_version *mixer_version;

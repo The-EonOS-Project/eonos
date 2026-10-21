@@ -1,34 +1,7 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __Z_ZONE__
 #define __Z_ZONE__
 
 #include <stdio.h>
-
-
-
-
 
 enum
 {
@@ -38,17 +11,12 @@ enum
     PU_FREE,                        
     PU_LEVEL,                       
     PU_LEVSPEC,                     
-    
-    
 
     PU_PURGELEVEL,
     PU_CACHE,
 
-    
-
     PU_NUM_TAGS
 };
-        
 
 void	Z_Init (void);
 void*	Z_Malloc (int size, int tag, void *ptr);
@@ -62,12 +30,7 @@ void    Z_ChangeUser(void *ptr, void **user);
 int     Z_FreeMemory (void);
 unsigned int Z_ZoneSize(void);
 
-
-
-
-
 #define Z_ChangeTag(p,t)                                       \
     Z_ChangeTag2((p), (t), __FILE__, __LINE__)
-
 
 #endif

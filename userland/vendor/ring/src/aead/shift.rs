@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #[cfg(target_arch = "x86")]
 pub fn shift_full_blocks<const BLOCK_LEN: usize>(
     in_out: super::overlapping::Overlapping<'_, u8>,

@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_ARM) && defined(__ELF__)
@@ -139,7 +136,7 @@ _vpaes_schedule_core:
 	rnrnr
 .Lschedule_go:
 	cmp	r1, #192			bhi	.Lschedule_256
-	
+
 rrrrrn.Lschedule_128:
 	mov	r0, #10		
 .Loop_schedule_128:

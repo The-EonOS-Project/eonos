@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include "limbs.h"
 #include "ring-core/check.h"
 
@@ -19,16 +5,6 @@
 #pragma warning(push, 3)
 #include <intrin.h>
 #pragma warning(pop)
-
-
-
-
-
-
-
-
-
-
 
 #if _MSC_FULL_VER < 190023918
 #error "MSVC 2015 Update 2 or later is required."
@@ -53,8 +29,6 @@ typedef uint64_t DoubleLimb;
 #endif
 #endif
 
-
-
 static inline Carry limb_adc(Limb *r, Limb a, Limb b, Carry carry_in) {
   dev_assert_secret(carry_in == 0 || carry_in == 1);
   Carry ret;
@@ -69,7 +43,6 @@ static inline Carry limb_adc(Limb *r, Limb a, Limb b, Carry carry_in) {
   return ret;
 }
 
-
 static inline Carry limb_add(Limb *r, Limb a, Limb b) {
   Carry ret;
 #if defined(RING_CORE_ADDCARRY_INTRINSIC)
@@ -82,8 +55,6 @@ static inline Carry limb_add(Limb *r, Limb a, Limb b) {
   dev_assert_secret(ret == 0 || ret == 1);
   return ret;
 }
-
-
 
 static inline Carry limb_sbb(Limb *r, Limb a, Limb b, Carry borrow_in) {
   dev_assert_secret(borrow_in == 0 || borrow_in == 1);
@@ -98,7 +69,6 @@ static inline Carry limb_sbb(Limb *r, Limb a, Limb b, Carry borrow_in) {
   dev_assert_secret(ret == 0 || ret == 1);
   return ret;
 }
-
 
 static inline Carry limb_sub(Limb *r, Limb a, Limb b) {
   Carry ret;
@@ -122,7 +92,6 @@ static inline Carry limbs_add(Limb r[], const Limb a[], const Limb b[],
   }
   return carry;
 }
-
 
 static inline Carry limbs_sub(Limb r[], const Limb a[], const Limb b[],
                               size_t num_limbs) {

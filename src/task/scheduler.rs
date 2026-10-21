@@ -1,36 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![allow(dead_code)]
 
 use alloc::boxed::Box;
@@ -43,27 +10,21 @@ use crate::sync::{self, IrqMutex};
 use crate::{idt, pit, vmm};
 use crate::{log_fail, log_ok};
 
-
-
-
 const STACK_REGION: u64 = 0xffff_ffff_a000_0000;
-
 
 const SLOT_SIZE: u64 = 0x2_0000; 
 const MAX_SLOTS: usize = 512;
 const STACK_PAGES: u64 = 16; 
 
 extern "C" {
-    
-    
-    
+
     fn switch_context(
         old_rsp: *mut u64,
         new_rsp: u64,
         old_fpu: *mut crate::fpu::FpuState,
         new_fpu: *const crate::fpu::FpuState,
     );
-    
+
     fn thread_trampoline();
 }
 
@@ -102,27 +63,21 @@ thread_trampoline:
 struct Thread {
     id: u64,
     name: &'static str,
-    
+
     rsp: u64,
-    
-    
+
     stack_slot: Option<usize>,
-    
+
     wake_at: u64,
     is_idle: bool,
-    
-    
-    
-    
+
     aspace: Option<vmm::AddressSpace>,
-    
+
     user_entry: u64,
     user_rsp: u64,
-    
+
     fpu: crate::fpu::FpuState,
 }
-
-
 
 pub struct CrashContext {
     pub id: u64,
@@ -161,9 +116,7 @@ impl Scheduler {
 static SCHED: IrqMutex<Scheduler> = IrqMutex::new(Scheduler::new());
 static READY: AtomicBool = AtomicBool::new(false);
 
-
 const TIME_SLICE_MS: u64 = 10;
-
 
 static SLICE_TICKS: AtomicU64 = AtomicU64::new(0);
 
@@ -175,16 +128,13 @@ enum Next<'a> {
     Yield,
     Sleep(u64),
     Exit,
-    
-    
+
     Block(&'a IrqMutex<VecDeque<Box<Thread>>>),
 }
 
 fn slot_base(slot: usize) -> u64 {
     STACK_REGION + slot as u64 * SLOT_SIZE
 }
-
-
 
 fn unmap_stack(base: u64, pages: u64) {
     for i in 0..pages {
@@ -194,7 +144,6 @@ fn unmap_stack(base: u64, pages: u64) {
         }
     }
 }
-
 
 fn create_thread(name: &'static str, entry: fn(), is_idle: bool) -> Option<Box<Thread>> {
     let (slot, id) = {
@@ -224,11 +173,6 @@ fn create_thread(name: &'static str, entry: fn(), is_idle: bool) -> Option<Box<T
         vmm::map_page(base + (1 + i) * PAGE_SIZE, phys, vmm::KERNEL_RW);
     }
 
-    
-    
-    
-    
-    
     let stack_top = base + (1 + STACK_PAGES) * PAGE_SIZE;
     let rsp = stack_top - 7 * 8;
     unsafe {
@@ -256,11 +200,6 @@ fn create_thread(name: &'static str, entry: fn(), is_idle: bool) -> Option<Box<T
     }))
 }
 
-
-
-
-
-
 fn free_thread(t: Box<Thread>) {
     if let Some(slot) = t.stack_slot {
         unmap_stack(slot_base(slot), STACK_PAGES);
@@ -268,8 +207,6 @@ fn free_thread(t: Box<Thread>) {
     }
     drop(t);
 }
-
-
 
 fn finish_switch() {
     let dead = {
@@ -297,13 +234,9 @@ fn wake_sleepers(s: &mut Scheduler) {
     }
 }
 
-
-
-
 fn reschedule(how: Next<'_>) {
     let saved = sync::irq_save();
 
-    
     SLICE_TICKS.store(0, Ordering::Relaxed);
     NEED_RESCHED.store(false, Ordering::Relaxed);
 
@@ -330,10 +263,7 @@ fn reschedule(how: Next<'_>) {
             }
             Next::Exit => s.zombies.push(cur),
             Next::Block(queue) => {
-                
-                
-                
-                
+
                 queue.lock().push_back(cur);
             }
         }
@@ -344,21 +274,11 @@ fn reschedule(how: Next<'_>) {
         };
         let next_ptr: *mut Thread = &mut *next;
         let next_rsp = next.rsp;
-        
-        
-        
-        
-        
-        
-        
+
         if let Some(slot) = next.stack_slot {
             crate::gdt::set_kernel_stack(slot_base(slot) + (1 + STACK_PAGES) * PAGE_SIZE);
         }
-        
-        
-        
-        
-        
+
         let want_cr3 = match next.aspace.as_ref() {
             Some(a) => a.phys(),
             None => vmm::kernel_cr3(),
@@ -369,7 +289,7 @@ fn reschedule(how: Next<'_>) {
         s.current = Some(next);
 
         if cur_ptr == next_ptr {
-            
+
             None
         } else {
             Some((
@@ -383,18 +303,17 @@ fn reschedule(how: Next<'_>) {
 
     if let Some((old_rsp, new_rsp, old_fpu, new_fpu)) = switch {
         unsafe { switch_context(old_rsp, new_rsp, old_fpu, new_fpu) };
-        
+
         finish_switch();
     }
 
     sync::irq_restore(saved);
 }
 
-
 #[no_mangle]
 extern "C" fn thread_start(entry: usize) -> ! {
     finish_switch();
-    
+
     idt::enable_interrupts();
     let f: fn() = unsafe { core::mem::transmute(entry) };
     f();
@@ -403,15 +322,11 @@ extern "C" fn thread_start(entry: usize) -> ! {
 
 fn idle_main() {
     loop {
-        
-        
+
         unsafe { core::arch::asm!("sti", "hlt", options(nomem, nostack)) };
         yield_now();
     }
 }
-
-
-
 
 pub fn init() {
     let Some(idle) = create_thread("idle", idle_main, true) else {
@@ -446,7 +361,6 @@ pub fn init() {
     );
 }
 
-
 pub fn spawn(name: &'static str, entry: fn()) -> Option<u64> {
     let t = create_thread(name, entry, false)?;
     let id = t.id;
@@ -454,24 +368,15 @@ pub fn spawn(name: &'static str, entry: fn()) -> Option<u64> {
     Some(id)
 }
 
-
-
-
 fn user_thread_main() {
     let (entry, rsp) = {
         let s = SCHED.lock();
         let t = s.current.as_ref().expect("scheduler: no current thread");
         (t.user_entry, t.user_rsp)
     };
-    
-    
+
     crate::syscall::enter_user_mode(entry, rsp)
 }
-
-
-
-
-
 
 pub fn spawn_user(
     name: &'static str,
@@ -487,8 +392,6 @@ pub fn spawn_user(
     SCHED.lock().ready.push_back(t);
     Some(id)
 }
-
-
 
 pub fn kill_user(id: u64) -> bool {
     let saved = sync::irq_save();
@@ -520,13 +423,11 @@ pub fn kill_user(id: u64) -> bool {
     killed
 }
 
-
 pub fn yield_now() {
     if READY.load(Ordering::SeqCst) {
         reschedule(Next::Yield);
     }
 }
-
 
 pub fn sleep_ms(ms: u64) {
     if !READY.load(Ordering::SeqCst) {
@@ -535,19 +436,15 @@ pub fn sleep_ms(ms: u64) {
     reschedule(Next::Sleep(pit::uptime_ms() + ms));
 }
 
-
 pub fn exit() -> ! {
     if READY.load(Ordering::SeqCst) {
         reschedule(Next::Exit);
     }
-    
+
     loop {
         unsafe { core::arch::asm!("cli; hlt", options(nomem, nostack)) };
     }
 }
-
-
-
 
 pub fn tick() {
     if !READY.load(Ordering::Relaxed) {
@@ -556,9 +453,6 @@ pub fn tick() {
     let used = SLICE_TICKS.fetch_add(1, Ordering::Relaxed) + 1;
     let slice_ticks = (pit::frequency_hz() * TIME_SLICE_MS / 1000).max(1);
 
-    
-    
-    
     let Some(s) = SCHED.try_lock() else { return };
     let now = pit::uptime_ms();
     let sleeper_due = s.sleeping.iter().any(|t| t.wake_at <= now);
@@ -569,8 +463,6 @@ pub fn tick() {
         NEED_RESCHED.store(true, Ordering::Relaxed);
     }
 }
-
-
 
 pub fn preempt_if_needed() {
     if NEED_RESCHED.swap(false, Ordering::Relaxed) {
@@ -607,28 +499,10 @@ pub fn try_crash_context() -> Option<CrashContext> {
     })
 }
 
-
 pub fn stack_slots_in_use() -> usize {
     let s = SCHED.lock();
     s.next_slot - s.free_slots.len()
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 pub struct WaitQueue {
     waiters: IrqMutex<VecDeque<Box<Thread>>>,
@@ -641,15 +515,6 @@ impl WaitQueue {
         }
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
     pub fn wait_until<F: FnMut() -> bool>(&self, mut cond: F) {
         loop {
             let saved = sync::irq_save();
@@ -658,20 +523,16 @@ impl WaitQueue {
                 return;
             }
             if !READY.load(Ordering::SeqCst) {
-                
+
                 sync::irq_restore(saved);
                 return;
             }
-            
-            
+
             reschedule(Next::Block(&self.waiters));
             sync::irq_restore(saved);
         }
     }
 
-    
-    
-    
     pub fn wait(&self) {
         if !READY.load(Ordering::SeqCst) {
             return;
@@ -679,8 +540,6 @@ impl WaitQueue {
         reschedule(Next::Block(&self.waiters));
     }
 
-    
-    
     pub fn wake_one(&self) -> bool {
         let woken = self.waiters.lock().pop_front();
         match woken {
@@ -692,7 +551,6 @@ impl WaitQueue {
         }
     }
 
-    
     pub fn wake_all(&self) {
         let all: Vec<Box<Thread>> = self.waiters.lock().drain(..).collect();
         if all.is_empty() {
@@ -704,15 +562,10 @@ impl WaitQueue {
         }
     }
 
-    
     pub fn len(&self) -> usize {
         self.waiters.lock().len()
     }
 }
-
-
-
-
 
 static DONE: AtomicUsize = AtomicUsize::new(0);
 static ORDER_LEN: AtomicUsize = AtomicUsize::new(0);
@@ -746,7 +599,6 @@ fn sleeper() {
     DONE.fetch_add(1, Ordering::SeqCst);
 }
 
-
 fn spinner_a() {
     while !STOP.load(Ordering::Relaxed) {
         SPIN_A.fetch_add(1, Ordering::Relaxed);
@@ -762,7 +614,6 @@ fn spinner_b() {
     }
     SPIN_DONE.fetch_add(1, Ordering::SeqCst);
 }
-
 
 fn wait_for(counter: &AtomicUsize, target: usize) -> bool {
     let deadline = pit::uptime_ms() + 2000;
@@ -785,7 +636,6 @@ pub fn self_test() {
     ORDER_LEN.store(0, Ordering::SeqCst);
     let slots_before = stack_slots_in_use();
 
-    
     for _ in 0..WORKERS {
         if spawn("worker", worker).is_none() {
             log_fail!("Scheduler", "SelfTest", "Could not spawn a worker thread");
@@ -812,8 +662,6 @@ pub fn self_test() {
         return;
     }
 
-    
-    
     sleep_ms(20);
 
     let total = ORDER_LEN.load(Ordering::SeqCst);
@@ -828,10 +676,6 @@ pub fn self_test() {
         return;
     }
 
-    
-    
-    
-    
     let order: [u64; 16] = core::array::from_fn(|i| ORDER[i].load(Ordering::SeqCst));
     for i in 0..total {
         let n = order[..total].iter().filter(|&&x| x == order[i]).count();
@@ -858,9 +702,6 @@ pub fn self_test() {
         return;
     }
 
-    
-    
-    
     STOP.store(false, Ordering::SeqCst);
     SPIN_A.store(0, Ordering::SeqCst);
     SPIN_B.store(0, Ordering::SeqCst);

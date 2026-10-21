@@ -1,11 +1,7 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_AARCH64) && defined(__APPLE__)
 #if __ARM_MAX_ARCH__ >= 8
-
 
 .text
 .globl	_aes_gcm_enc_kernel

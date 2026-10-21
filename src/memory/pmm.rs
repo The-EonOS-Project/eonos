@@ -309,12 +309,6 @@ pub fn free_frames(phys: u64, count: usize) {
     }
 }
 
-
-
-
-
-
-
 pub fn hhdm_ranges() -> ([(u64, u64); MAX_REGIONS], usize) {
     let mut out = [(0u64, 0u64); MAX_REGIONS];
     let mut n = 0usize;

@@ -1,26 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include "doomdef.h"
 #include "d_event.h"
 
@@ -28,25 +5,11 @@
 
 #include "doomstat.h"
 
-
-
-
 #define INVERSECOLORMAP		32
-
-
-
-
-
-
 
 #define MAXBOB	0x100000	
 
 boolean		onground;
-
-
-
-
-
 
 void
 P_Thrust
@@ -55,33 +18,20 @@ P_Thrust
   fixed_t	move ) 
 {
     angle >>= ANGLETOFINESHIFT;
-    
+
     player->mo->momx += FixedMul(move,finecosine[angle]); 
     player->mo->momy += FixedMul(move,finesine[angle]);
 }
-
-
-
-
-
-
-
 
 void P_CalcHeight (player_t* player) 
 {
     int		angle;
     fixed_t	bob;
-    
-    
-    
-    
-    
-    
-    
+
     player->bob =
 	FixedMul (player->mo->momx, player->mo->momx)
 	+ FixedMul (player->mo->momy,player->mo->momy);
-    
+
     player->bob >>= 2;
 
     if (player->bob>MAXBOB)
@@ -97,12 +47,10 @@ void P_CalcHeight (player_t* player)
 	player->viewz = player->mo->z + player->viewheight;
 	return;
     }
-		
+
     angle = (FINEANGLES/20*leveltime)&FINEMASK;
     bob = FixedMul ( player->bob/2, finesine[angle]);
 
-    
-    
     if (player->playerstate == PST_LIVE)
     {
 	player->viewheight += player->deltaviewheight;
@@ -119,7 +67,7 @@ void P_CalcHeight (player_t* player)
 	    if (player->deltaviewheight <= 0)
 		player->deltaviewheight = 1;
 	}
-	
+
 	if (player->deltaviewheight)	
 	{
 	    player->deltaviewheight += FRACUNIT/4;
@@ -133,26 +81,19 @@ void P_CalcHeight (player_t* player)
 	player->viewz = player->mo->ceilingz-4*FRACUNIT;
 }
 
-
-
-
-
-
 void P_MovePlayer (player_t* player)
 {
     ticcmd_t*		cmd;
-	
+
     cmd = &player->cmd;
-	
+
     player->mo->angle += (cmd->angleturn<<16);
 
-    
-    
     onground = (player->mo->z <= player->mo->floorz);
-	
+
     if (cmd->forwardmove && onground)
 	P_Thrust (player, player->mo->angle, cmd->forwardmove*2048);
-    
+
     if (cmd->sidemove && onground)
 	P_Thrust (player, player->mo->angle-ANG90, cmd->sidemove*2048);
 
@@ -163,13 +104,6 @@ void P_MovePlayer (player_t* player)
     }
 }	
 
-
-
-
-
-
-
-
 #define ANG5   	(ANG90/18)
 
 void P_DeathThink (player_t* player)
@@ -178,8 +112,7 @@ void P_DeathThink (player_t* player)
     angle_t		delta;
 
     P_MovePsprites (player);
-	
-    
+
     if (player->viewheight > 6*FRACUNIT)
 	player->viewheight -= FRACUNIT;
 
@@ -189,20 +122,19 @@ void P_DeathThink (player_t* player)
     player->deltaviewheight = 0;
     onground = (player->mo->z <= player->mo->floorz);
     P_CalcHeight (player);
-	
+
     if (player->attacker && player->attacker != player->mo)
     {
 	angle = R_PointToAngle2 (player->mo->x,
 				 player->mo->y,
 				 player->attacker->x,
 				 player->attacker->y);
-	
+
 	delta = angle - player->mo->angle;
-	
+
 	if (delta < ANG5 || delta > (unsigned)-ANG5)
 	{
-	    
-	    
+
 	    player->mo->angle = angle;
 
 	    if (player->damagecount)
@@ -215,29 +147,21 @@ void P_DeathThink (player_t* player)
     }
     else if (player->damagecount)
 	player->damagecount--;
-	
 
     if (player->cmd.buttons & BT_USE)
 	player->playerstate = PST_REBORN;
 }
 
-
-
-
-
-
 void P_PlayerThink (player_t* player)
 {
     ticcmd_t*		cmd;
     weapontype_t	newweapon;
-	
-    
+
     if (player->cheats & CF_NOCLIP)
 	player->mo->flags |= MF_NOCLIP;
     else
 	player->mo->flags &= ~MF_NOCLIP;
-    
-    
+
     cmd = &player->cmd;
     if (player->mo->flags & MF_JUSTATTACKED)
     {
@@ -246,40 +170,31 @@ void P_PlayerThink (player_t* player)
 	cmd->sidemove = 0;
 	player->mo->flags &= ~MF_JUSTATTACKED;
     }
-			
-	
+
     if (player->playerstate == PST_DEAD)
     {
 	P_DeathThink (player);
 	return;
     }
-    
-    
-    
-    
+
     if (player->mo->reactiontime)
 	player->mo->reactiontime--;
     else
 	P_MovePlayer (player);
-    
+
     P_CalcHeight (player);
 
     if (player->mo->subsector->sector->special)
 	P_PlayerInSpecialSector (player);
-    
-    
 
-    
     if (cmd->buttons & BT_SPECIAL)
 	cmd->buttons = 0;			
-		
+
     if (cmd->buttons & BT_CHANGE)
     {
-	
-	
-	
+
 	newweapon = (cmd->buttons&BT_WEAPONMASK)>>BT_WEAPONSHIFT;
-	
+
 	if (newweapon == wp_fist
 	    && player->weaponowned[wp_chainsaw]
 	    && !(player->readyweapon == wp_chainsaw
@@ -287,7 +202,7 @@ void P_PlayerThink (player_t* player)
 	{
 	    newweapon = wp_chainsaw;
 	}
-	
+
 	if ( (gamemode == commercial)
 	    && newweapon == wp_shotgun 
 	    && player->weaponowned[wp_supershotgun]
@@ -295,13 +210,11 @@ void P_PlayerThink (player_t* player)
 	{
 	    newweapon = wp_supershotgun;
 	}
-	
 
 	if (player->weaponowned[newweapon]
 	    && newweapon != player->readyweapon)
 	{
-	    
-	    
+
 	    if ((newweapon != wp_plasma
 		 && newweapon != wp_bfg)
 		|| (gamemode != shareware) )
@@ -310,8 +223,7 @@ void P_PlayerThink (player_t* player)
 	    }
 	}
     }
-    
-    
+
     if (cmd->buttons & BT_USE)
     {
 	if (!player->usedown)
@@ -322,37 +234,31 @@ void P_PlayerThink (player_t* player)
     }
     else
 	player->usedown = false;
-    
-    
-    P_MovePsprites (player);
-    
-    
 
-    
+    P_MovePsprites (player);
+
     if (player->powers[pw_strength])
 	player->powers[pw_strength]++;	
-		
+
     if (player->powers[pw_invulnerability])
 	player->powers[pw_invulnerability]--;
 
     if (player->powers[pw_invisibility])
 	if (! --player->powers[pw_invisibility] )
 	    player->mo->flags &= ~MF_SHADOW;
-			
+
     if (player->powers[pw_infrared])
 	player->powers[pw_infrared]--;
-		
+
     if (player->powers[pw_ironfeet])
 	player->powers[pw_ironfeet]--;
-		
+
     if (player->damagecount)
 	player->damagecount--;
-		
+
     if (player->bonuscount)
 	player->bonuscount--;
 
-    
-    
     if (player->powers[pw_invulnerability])
     {
 	if (player->powers[pw_invulnerability] > 4*32
@@ -366,7 +272,7 @@ void P_PlayerThink (player_t* player)
 	if (player->powers[pw_infrared] > 4*32
 	    || (player->powers[pw_infrared]&8) )
 	{
-	    
+
 	    player->fixedcolormap = 1;
 	}
 	else
@@ -375,5 +281,4 @@ void P_PlayerThink (player_t* player)
     else
 	player->fixedcolormap = 0;
 }
-
 

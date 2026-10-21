@@ -1,23 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,16 +15,7 @@
 
 #include "z_zone.h"
 
-
-
-
-
-
-
-
 char *configdir;
-
-
 
 static char *default_main_config;
 static char *default_extra_config;
@@ -60,28 +31,17 @@ typedef enum
 
 typedef struct
 {
-    
+
     char *name;
 
-    
     void *location;
 
-    
     default_type_t type;
 
-    
-    
-    
     int untranslated;
 
-    
-    
-    
-    
     int original_translated;
 
-    
-    
     boolean bound;
 } default_t;
 
@@ -106,568 +66,158 @@ typedef struct
 #define CONFIG_VARIABLE_STRING(name) \
     CONFIG_VARIABLE_GENERIC(name, DEFAULT_STRING)
 
-
-
 static default_t	doom_defaults_list[] =
 {
-    
-    
-    
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(mouse_sensitivity),
 
-    
-    
-    
-
     CONFIG_VARIABLE_INT(sfx_volume),
-
-    
-    
-    
 
     CONFIG_VARIABLE_INT(music_volume),
 
-    
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(show_talk),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(voice_volume),
 
-    
-    
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(show_messages),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_right),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_left),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_up),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_down),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_strafeleft),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_straferight),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_useHealth),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_jump),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_flyup),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_flydown),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_flycenter),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_lookup),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_lookdown),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_lookcenter),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_invquery),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_mission),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_invPop),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_invKey),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_invHome),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_invEnd),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_invleft),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_invright),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_invLeft),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_invRight),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_useartifact),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_invUse),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_invDrop),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_lookUp),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_lookDown),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_fire),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_use),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_strafe),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_speed),
 
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(use_mouse),
-
-    
-    
-    
 
     CONFIG_VARIABLE_INT(mouseb_fire),
 
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(mouseb_strafe),
-
-    
-    
-    
 
     CONFIG_VARIABLE_INT(mouseb_forward),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(mouseb_jump),
-
-    
-    
-    
 
     CONFIG_VARIABLE_INT(use_joystick),
 
-    
-    
-    
-
     CONFIG_VARIABLE_INT(joyb_fire),
-
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(joyb_strafe),
 
-    
-    
-    
-
     CONFIG_VARIABLE_INT(joyb_use),
-
-    
-    
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(joyb_speed),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(joyb_jump),
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(screenblocks),
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(screensize),
-
-    
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(detaillevel),
 
-    
-    
-    
-
     CONFIG_VARIABLE_INT(snd_channels),
-
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(snd_musicdevice),
 
-    
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(snd_sfxdevice),
-
-    
-    
-    
 
     CONFIG_VARIABLE_INT(snd_sbport),
 
-    
-    
-    
-
     CONFIG_VARIABLE_INT(snd_sbirq),
-
-    
-    
-    
 
     CONFIG_VARIABLE_INT(snd_sbdma),
 
-    
-    
-    
-
     CONFIG_VARIABLE_INT(snd_mport),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(usegamma),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_STRING(savedir),
-
-    
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(messageson),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_STRING(back_flat),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_STRING(nickname),
 
-    
-    
-    
-
     CONFIG_VARIABLE_STRING(chatmacro0),
-
-    
-    
-    
 
     CONFIG_VARIABLE_STRING(chatmacro1),
 
-    
-    
-    
-
     CONFIG_VARIABLE_STRING(chatmacro2),
-
-    
-    
-    
 
     CONFIG_VARIABLE_STRING(chatmacro3),
 
-    
-    
-    
-
     CONFIG_VARIABLE_STRING(chatmacro4),
-
-    
-    
-    
 
     CONFIG_VARIABLE_STRING(chatmacro5),
 
-    
-    
-    
-
     CONFIG_VARIABLE_STRING(chatmacro6),
-
-    
-    
-    
 
     CONFIG_VARIABLE_STRING(chatmacro7),
 
-    
-    
-    
-
     CONFIG_VARIABLE_STRING(chatmacro8),
 
-    
-    
-    
-
     CONFIG_VARIABLE_STRING(chatmacro9),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(comport),
 };
@@ -679,874 +229,264 @@ static default_collection_t doom_defaults =
     NULL,
 };
 
-
-
 static default_t extra_defaults_list[] =
 {
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(graphical_startup),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(autoadjust_video_settings),
-
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(fullscreen),
 
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(aspect_ratio_correct),
-
-    
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(startup_delay),
 
-    
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(screen_width),
-
-    
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(screen_height),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(screen_bpp),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(grabmouse),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(novert),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_FLOAT(mouse_acceleration),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(mouse_threshold),
-
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(snd_samplerate),
 
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(snd_cachesize),
-
-    
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(snd_maxslicetime_ms),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_STRING(snd_musiccmd),
-
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT_HEX(opl_io_port),
 
-    
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(show_endoom),
-
-    
-    
-    
 
     CONFIG_VARIABLE_INT(png_screenshots),
 
-    
-    
-    
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(vanilla_savegame_limit),
-
-    
-    
-    
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(vanilla_demo_limit),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(vanilla_keyboard_mapping),
 
-    
-    
-    
-    
-
     CONFIG_VARIABLE_STRING(video_driver),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_STRING(window_position),
 
 #ifdef FEATURE_MULTIPLAYER
 
-    
-    
-    
-    
-
     CONFIG_VARIABLE_STRING(player_name),
 
 #endif
 
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(joystick_index),
-
-    
-    
-    
 
     CONFIG_VARIABLE_INT(joystick_x_axis),
 
-    
-    
-    
-
     CONFIG_VARIABLE_INT(joystick_x_invert),
-
-    
-    
-    
 
     CONFIG_VARIABLE_INT(joystick_y_axis),
 
-    
-    
-    
-
     CONFIG_VARIABLE_INT(joystick_y_invert),
-
-    
-    
-    
 
     CONFIG_VARIABLE_INT(joystick_strafe_axis),
 
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(joystick_strafe_invert),
-
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(joystick_physical_button0),
 
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(joystick_physical_button1),
-
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(joystick_physical_button2),
 
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(joystick_physical_button3),
-
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(joystick_physical_button4),
 
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(joystick_physical_button5),
-
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(joystick_physical_button6),
 
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(joystick_physical_button7),
-
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(joystick_physical_button8),
 
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(joystick_physical_button9),
-
-    
-    
-    
 
     CONFIG_VARIABLE_INT(joyb_strafeleft),
 
-    
-    
-    
-
     CONFIG_VARIABLE_INT(joyb_straferight),
-
-    
-    
-    
 
     CONFIG_VARIABLE_INT(joyb_menu_activate),
 
-    
-    
-    
-
     CONFIG_VARIABLE_INT(joyb_prevweapon),
-
-    
-    
-    
 
     CONFIG_VARIABLE_INT(joyb_nextweapon),
 
-    
-    
-    
-
     CONFIG_VARIABLE_INT(mouseb_strafeleft),
-
-    
-    
-    
 
     CONFIG_VARIABLE_INT(mouseb_straferight),
 
-    
-    
-    
-
     CONFIG_VARIABLE_INT(mouseb_use),
-
-    
-    
-    
 
     CONFIG_VARIABLE_INT(mouseb_backward),
 
-    
-    
-    
-
     CONFIG_VARIABLE_INT(mouseb_prevweapon),
 
-    
-    
-    
-
     CONFIG_VARIABLE_INT(mouseb_nextweapon),
-
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(dclick_use),
 
 #ifdef FEATURE_SOUND
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_INT(use_libsamplerate),
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_FLOAT(libsamplerate_scale),
 
-    
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_STRING(timidity_cfg_path),
 
-    
-    
-    
-    
-
     CONFIG_VARIABLE_STRING(gus_patch_path),
-
-    
-    
-    
-    
 
     CONFIG_VARIABLE_INT(gus_ram_kb),
 
 #endif
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_pause),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_menu_activate),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_menu_up),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_menu_down),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_menu_left),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_menu_right),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_menu_back),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_menu_forward),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_menu_confirm),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_menu_abort),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_menu_help),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_menu_save),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_menu_load),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_menu_volume),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_menu_detail),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_menu_qsave),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_menu_endgame),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_menu_messages),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_menu_qload),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_menu_quit),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_menu_gamma),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_spy),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_menu_incscreen),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_menu_decscreen),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_menu_screenshot),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_map_toggle),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_map_north),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_map_south),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_map_east),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_map_west),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_map_zoomin),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_map_zoomout),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_map_maxzoom),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_map_follow),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_map_grid),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_map_mark),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_map_clearmark),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_weapon1),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_weapon2),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_weapon3),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_weapon4),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_weapon5),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_weapon6),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_weapon7),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_weapon8),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_prevweapon),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_nextweapon),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_arti_all),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_arti_health),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_arti_poisonbag),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_arti_blastradius),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_arti_teleport),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_arti_teleportother),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_arti_egg),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_arti_invulnerability),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_message_refresh),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_demo_quit),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_multi_msg),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_multi_msgplayer1),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_multi_msgplayer2),
 
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_multi_msgplayer3),
-
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_multi_msgplayer4),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_multi_msgplayer5),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_multi_msgplayer6),
 
-    
-    
-    
-    
-    
-
     CONFIG_VARIABLE_KEY(key_multi_msgplayer7),
-
-    
-    
-    
-    
-    
 
     CONFIG_VARIABLE_KEY(key_multi_msgplayer8),
 };
@@ -1557,8 +497,6 @@ static default_collection_t extra_defaults =
     arrlen(extra_defaults_list),
     NULL,
 };
-
-
 
 static default_t *SearchCollection(default_collection_t *collection, char *name)
 {
@@ -1574,16 +512,6 @@ static default_t *SearchCollection(default_collection_t *collection, char *name)
 
     return NULL;
 }
-
-
-
-
-
-
-
-
-
-
 
 static const int scantokey[128] =
 {
@@ -1605,72 +533,52 @@ static const int scantokey[128] =
     0,      0,      0,      0,      0,      0,      KEY_PRTSCR, 0
 };
 
-
 static void SaveDefaultCollection(default_collection_t *collection)
 {
 #if ORIGCODE
     default_t *defaults;
     int i, v;
     FILE *f;
-	
+
     f = fopen (collection->filename, "w");
     if (!f)
 	return; 
 
     defaults = collection->defaults;
-		
+
     for (i=0 ; i<collection->numdefaults ; i++)
     {
         int chars_written;
-
-        
 
         if (!defaults[i].bound)
         {
             continue;
         }
 
-        
-
         chars_written = fprintf(f, "%s ", defaults[i].name);
 
         for (; chars_written < 30; ++chars_written)
             fprintf(f, " ");
 
-        
-
         switch (defaults[i].type) 
         {
             case DEFAULT_KEY:
 
-                
-                
-                
-                
                 v = * (int *) defaults[i].location;
 
                 if (v == KEY_RSHIFT)
                 {
-                    
-                    
-                    
-                    
-                    
 
                     v = 54;
                 }
                 else if (defaults[i].untranslated
                       && v == defaults[i].original_translated)
                 {
-                    
-                    
 
                     v = defaults[i].untranslated;
                 }
                 else
                 {
-                    
-                    
 
                     int s;
 
@@ -1711,8 +619,6 @@ static void SaveDefaultCollection(default_collection_t *collection)
 #endif
 }
 
-
-
 static int ParseIntParameter(char *strparm)
 {
     int parm;
@@ -1729,8 +635,6 @@ static void SetVariable(default_t *def, char *value)
 {
     int intparm;
 
-    
-
     switch (def->type)
     {
         case DEFAULT_STRING:
@@ -1743,9 +647,6 @@ static void SetVariable(default_t *def, char *value)
             break;
 
         case DEFAULT_KEY:
-
-            
-            
 
             intparm = ParseIntParameter(value);
             def->untranslated = intparm;
@@ -1776,13 +677,10 @@ static void LoadDefaultCollection(default_collection_t *collection)
     char defname[80];
     char strparm[100];
 
-    
     f = fopen(collection->filename, "r");
 
     if (f == NULL)
     {
-        
-        
 
         return;
     }
@@ -1791,32 +689,23 @@ static void LoadDefaultCollection(default_collection_t *collection)
     {
         if (fscanf(f, "%79s %99[^\n]\n", defname, strparm) != 2)
         {
-            
 
             continue;
         }
-
-        
 
         def = SearchCollection(collection, defname);
 
         if (def == NULL || !def->bound)
         {
-            
-            
 
             continue;
         }
-
-        
-        
 
         while (strlen(strparm) > 0 && !isprint(strparm[strlen(strparm)-1]))
         {
             strparm[strlen(strparm)-1] = '\0';
         }
 
-        
         if (strlen(strparm) >= 2
          && strparm[0] == '"' && strparm[strlen(strparm) - 1] == '"')
         {
@@ -1831,17 +720,11 @@ static void LoadDefaultCollection(default_collection_t *collection)
 #endif
 }
 
-
-
 void M_SetConfigFilenames(char *main_config, char *extra_config)
 {
     default_main_config = main_config;
     default_extra_config = extra_config;
 }
-
-
-
-
 
 void M_SaveDefaults (void)
 {
@@ -1849,16 +732,10 @@ void M_SaveDefaults (void)
     SaveDefaultCollection(&extra_defaults);
 }
 
-
-
-
-
 void M_SaveDefaultsAlternate(char *main, char *extra)
 {
     char *orig_main;
     char *orig_extra;
-
-    
 
     orig_main = doom_defaults.filename;
     orig_extra = extra_defaults.filename;
@@ -1868,29 +745,13 @@ void M_SaveDefaultsAlternate(char *main, char *extra)
 
     M_SaveDefaults();
 
-    
-
     doom_defaults.filename = orig_main;
     extra_defaults.filename = orig_extra;
 }
 
-
-
-
-
 void M_LoadDefaults (void)
 {
     int i;
- 
-    
-
-    
-    
-    
-    
-    
-    
-    
 
     i = M_CheckParmWithArgs("-config", 1);
 
@@ -1906,13 +767,6 @@ void M_LoadDefaults (void)
     }
 
     printf("saving config in %s\n", doom_defaults.filename);
-
-    
-    
-    
-    
-    
-    
 
     i = M_CheckParmWithArgs("-extraconfig", 1);
 
@@ -1932,13 +786,9 @@ void M_LoadDefaults (void)
     LoadDefaultCollection(&extra_defaults);
 }
 
-
-
 static default_t *GetDefaultForName(char *name)
 {
     default_t *result;
-
-    
 
     result = SearchCollection(&doom_defaults, name);
 
@@ -1947,8 +797,6 @@ static default_t *GetDefaultForName(char *name)
         result = SearchCollection(&extra_defaults, name);
     }
 
-    
-
     if (result == NULL)
     {
         I_Error("Unknown configuration variable: '%s'", name);
@@ -1956,10 +804,6 @@ static default_t *GetDefaultForName(char *name)
 
     return result;
 }
-
-
-
-
 
 void M_BindVariable(char *name, void *location)
 {
@@ -1970,9 +814,6 @@ void M_BindVariable(char *name, void *location)
     variable->location = location;
     variable->bound = true;
 }
-
-
-
 
 boolean M_SetVariable(char *name, char *value)
 {
@@ -1989,8 +830,6 @@ boolean M_SetVariable(char *name, char *value)
 
     return true;
 }
-
-
 
 int M_GetIntVariable(char *name)
 {
@@ -2037,9 +876,6 @@ float M_GetFloatVariable(char *name)
     return *((float *) variable->location);
 }
 
-
-
-
 static char *GetDefaultConfigDir(void)
 {
     char *result = (char *)malloc(2);
@@ -2049,16 +885,8 @@ static char *GetDefaultConfigDir(void)
     return result;
 }
 
-
-
-
-
-
-
-
 void M_SetConfigDir(char *dir)
 {
-    
 
     if (dir != NULL)
     {
@@ -2074,15 +902,8 @@ void M_SetConfigDir(char *dir)
         printf("Using %s for configuration and saves\n", configdir);
     }
 
-    
-
     M_MakeDirectory(configdir);
 }
-
-
-
-
-
 
 char *M_GetSaveGameDir(char *iwadname)
 {
@@ -2091,9 +912,6 @@ char *M_GetSaveGameDir(char *iwadname)
     char *topdir;
 #endif
 
-    
-    
-
     if (!strcmp(configdir, ""))
     {
     	savegamedir = strdup("");
@@ -2101,12 +919,9 @@ char *M_GetSaveGameDir(char *iwadname)
     else
     {
 #if ORIGCODE
-        
 
         topdir = M_StringJoin(configdir, "savegame", NULL);
         M_MakeDirectory(topdir);
-
-        
 
         savegamedir = M_StringJoin(topdir, DIR_SEPARATOR_S, iwadname,
                                    DIR_SEPARATOR_S, NULL);

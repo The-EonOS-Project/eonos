@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::{
     bb,
     polyfill::{slice::AsChunks, ArraySplitMap},
@@ -36,9 +22,6 @@ macro_rules! htable_new {
         HTable::new($name, $value)
     }};
 }
-
-
-
 
 #[cfg(any(
     all(target_arch = "aarch64", target_endian = "little"),
@@ -72,10 +55,6 @@ impl KeyValue {
         self.0
     }
 }
-
-
-
-
 
 #[cfg(any(
     all(target_arch = "aarch64", target_endian = "little"),
@@ -129,15 +108,11 @@ impl HTable {
             }
         };
 
-        
-        
-        
         unsafe {
             f(xi, self, input.as_ptr(), input_len);
         }
     }
 }
-
 
 #[derive(Clone)]
 #[repr(C, align(16))]

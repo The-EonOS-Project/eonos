@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![cfg(any(
     all(target_arch = "aarch64", target_endian = "little"),
     all(target_arch = "arm", target_endian = "little"),
@@ -80,17 +66,14 @@ impl EncryptCtr32 for Key {
             let (in_out, src) = in_out.into_slice_src_mut();
             let blocks = in_out[src.clone()].len() / BLOCK_LEN;
 
-            
             let bsaes_blocks = if blocks >= 8 && (blocks % 8) < 6 {
-                
-                
+
                 blocks - (blocks % 8)
             } else if blocks >= 8 {
-                
-                
+
                 blocks
             } else {
-                
+
                 0
             };
             let bsaes_in_out_len = bsaes_blocks * BLOCK_LEN;
@@ -98,9 +81,6 @@ impl EncryptCtr32 for Key {
                 Overlapping::new(&mut in_out[..(src.start + bsaes_in_out_len)], src.clone())
                     .unwrap_or_else(|IndexError { .. }| unreachable!());
 
-            
-            
-            
             unsafe {
                 bs::ctr32_encrypt_blocks_with_vpaes_key(bs_in_out, &self.inner, ctr);
             }
@@ -109,11 +89,6 @@ impl EncryptCtr32 for Key {
                 .unwrap_or_else(|IndexError { .. }| unreachable!())
         };
 
-        
-        
-        
-        
-        
         unsafe { ctr32_encrypt_blocks!(vpaes_ctr32_encrypt_blocks, in_out, &self.inner, ctr) }
     }
 }

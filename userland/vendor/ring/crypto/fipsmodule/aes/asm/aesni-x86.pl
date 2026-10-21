@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 # ====================================================================
 # Written by Andy Polyakov <appro@openssl.org> for the OpenSSL
 # project.
@@ -127,7 +126,7 @@ sub aescommon
 sub aesimc	{ aescommon(0xdb,@_); }
 sub aesenc	{ aescommon(0xdc,@_); }
 sub aesenclast	{ aescommon(0xdd,@_); }
-
+
 # Inline version of internal aesni_[en|de]crypt1
 { my $sn;
 sub aesni_inline_generate1
@@ -193,7 +192,6 @@ sub aesni_generate1	# fully unrolled loop
     &ret();
     &function_end_B("_aesni_${p}rypt1");
 }
-
 
 # _aesni_[en|de]cryptN are private interfaces, N denotes interleave
 # factor. Why 3x subroutine were originally used in loops? Even though
@@ -651,7 +649,7 @@ if ($PREFIX eq $AESNI_PREFIX) {
 	&mov	("esp",&DWP(80,"esp"));
 &function_end("${PREFIX}_ctr32_encrypt_blocks");
 }
-
+
 ######################################################################
 # Mechanical port from aesni-x86_64.pl.
 
@@ -959,7 +957,6 @@ if ($PREFIX eq $AESNI_PREFIX) {
 	&pop	("ebx");
 	&ret	();
 &function_end_B("${PREFIX}_set_encrypt_key_alt");
-
 
 &set_label("key_const",64);
 &data_word(0x0c0f0e0d,0x0c0f0e0d,0x0c0f0e0d,0x0c0f0e0d);

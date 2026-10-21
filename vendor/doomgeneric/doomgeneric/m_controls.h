@@ -1,22 +1,6 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __M_CONTROLS_H__
 #define __M_CONTROLS_H__
- 
+
 extern int key_right;
 extern int key_left;
 
@@ -30,7 +14,7 @@ extern int key_strafe;
 extern int key_speed;
 
 extern int key_jump;
- 
+
 extern int key_flyup;
 extern int key_flydown;
 extern int key_flycenter;
@@ -40,7 +24,6 @@ extern int key_lookcenter;
 extern int key_invleft;
 extern int key_invright;
 extern int key_useartifact;
-
 
 extern int key_usehealth;
 extern int key_invquery;
@@ -93,8 +76,6 @@ extern int key_map_follow;
 extern int key_map_grid;
 extern int key_map_mark;
 extern int key_map_clearmark;
-
-
 
 extern int key_menu_activate;
 extern int key_menu_up;

@@ -1,26 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef OPENSSL_HEADER_TARGET_H
 #define OPENSSL_HEADER_TARGET_H
-
-
-
-
-
-
-
 
 #if defined(__x86_64) || defined(_M_AMD64) || defined(_M_X64)
 #define OPENSSL_64_BIT
@@ -34,7 +13,6 @@
 #elif defined(__ARMEL__) || defined(_M_ARM)
 #define OPENSSL_32_BIT
 #define OPENSSL_ARM
-
 
 #elif !defined(__BYTE_ORDER__)
 #error "Cannot determine endianness because __BYTE_ORDER__ is not defined"
@@ -76,8 +54,6 @@
 #define OPENSSL_HWASAN
 #endif
 #endif
-
-
 
 #if defined(OPENSSL_APPLE) && defined(OPENSSL_ARM)
 #define OPENSSL_ASM_INCOMPATIBLE

@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include "./p256_shared.h"
 
 #include "../../limbs/limbs.h"
@@ -38,10 +24,9 @@ static const BN_ULONG N_N0[] = {
 
 void p256_scalar_mul_mont(ScalarMont r, const ScalarMont a,
                               const ScalarMont b) {
-  
+
   bn_mul_mont_small(r, a, b, N, N_N0, P256_LIMBS);
 }
-
 
 void p256_scalar_sqr_rep_mont(ScalarMont r, const ScalarMont a, Limb rep) {
   dev_assert_secret(rep >= 1);

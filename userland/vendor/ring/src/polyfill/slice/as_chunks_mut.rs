@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::AsChunks;
 
 #[inline(always)]
@@ -61,8 +47,6 @@ impl<T, const N: usize> AsChunksMut<'_, T, N> {
         AsChunks::<T, N>::from(self)
     }
 
-    
-    
     #[inline(always)]
     pub fn chunks_mut<const CHUNK_LEN: usize>(&mut self) -> AsChunksMutChunksMutIter<T, N> {
         AsChunksMutChunksMutIter(self.0.chunks_mut(CHUNK_LEN * N))

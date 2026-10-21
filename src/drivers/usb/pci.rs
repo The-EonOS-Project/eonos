@@ -1,20 +1,9 @@
-
-
-
-
-
-
-
-
-
 #![allow(dead_code)]
 
 use alloc::vec::Vec;
 
 const CONFIG_ADDRESS: u16 = 0xCF8;
 const CONFIG_DATA: u16 = 0xCFC;
-
-
 
 const CLASS_SERIAL_BUS: u8 = 0x0C;
 const SUBCLASS_USB: u8 = 0x03;
@@ -63,9 +52,7 @@ pub struct PciLocation {
 pub struct UsbController {
     pub location: PciLocation,
     pub kind: ControllerKind,
-    
-    
-    
+
     pub mmio_base: u64,
 }
 
@@ -105,25 +92,19 @@ fn write_config16(loc: PciLocation, offset: u8, value: u16) {
     }
 }
 
-
 pub fn enable_mmio_bus_master(loc: PciLocation) -> bool {
     let command = (read_config32(loc, 0x04) as u16) | (1 << 1) | (1 << 2);
-    
+
     write_config16(loc, 0x04, command);
     (read_config32(loc, 0x04) as u16 & 0x6) == 0x6
 }
-
-
-
-
 
 pub fn find_usb_controllers() -> Vec<UsbController> {
     let mut found = Vec::new();
 
     for bus in 0u16..256 {
         for device in 0u8..32 {
-            
-            
+
             let loc0 = PciLocation {
                 bus: bus as u8,
                 device,
@@ -164,8 +145,7 @@ pub fn find_usb_controllers() -> Vec<UsbController> {
 
                 let bar0 = read_config32(loc, 0x10);
                 let mmio_base = if bar0 & 0x1 == 0 {
-                    
-                    
+
                     let is_64bit = (bar0 >> 1) & 0x3 == 2;
                     let base_low = (bar0 & !0xF) as u64;
                     if is_64bit {

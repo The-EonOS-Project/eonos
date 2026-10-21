@@ -1,16 +1,9 @@
 #![no_std]
 
-
-
-
-
-
-
 extern crate alloc;
 
 pub mod era;
 pub mod system;
-
 
 pub use eonos_rt::Args;
 pub use eonos_rt::entry;
@@ -22,8 +15,6 @@ pub enum AppType {
     Shell = 1,
     Era = 2,
 }
-
-
 
 #[macro_export]
 macro_rules! app {

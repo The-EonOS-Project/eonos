@@ -1,5 +1,3 @@
-
-
 #include "doomkeys.h"
 #include "m_argv.h"
 #include "doomgeneric.h"
@@ -15,7 +13,6 @@
 
 #include "nano-X.h"
 
-
 #define KEYQUEUE_SIZE 16
 
 static unsigned short g_key_queue[KEYQUEUE_SIZE];
@@ -24,13 +21,11 @@ static unsigned int g_key_queue_read_index = 0;
 
 static unsigned char g_key_states[256];
 
-
 static GR_WINDOW_ID  wid;
 static GR_GC_ID      gc;
 static unsigned char* windowBuffer = 0;
 static const int winSizeX = DOOMGENERIC_RESX;
 static const int winSizeY = DOOMGENERIC_RESY;
-
 
 static void add_key_to_queue(int pressed, unsigned char key)
 {
@@ -120,7 +115,7 @@ static unsigned char convert_to_doom_keyx(int wkey)
 	case MWKEY_F10: doomkey = KEY_F10; break;
 	case MWKEY_F11: doomkey = KEY_F11; break;
 	case MWKEY_F12: doomkey = KEY_F12; break;
-	
+
 	default:
 		break;
 	}
@@ -168,7 +163,7 @@ void DG_DrawFrame()
             }
             break;
         case GR_EVENT_TYPE_KEY_DOWN:
-            
+
             kp = (GR_EVENT_KEYSTROKE*)&event;
             key = convert_to_doom_keyx(kp->ch);
             if (key > 0 && key < sizeof(g_key_states))
@@ -182,7 +177,7 @@ void DG_DrawFrame()
             }
             break;
         case GR_EVENT_TYPE_TIMER:
-            
+
             break;
         }
     }
@@ -211,7 +206,6 @@ int DG_GetKey(int* pressed, unsigned char* doomKey)
 {
     if (g_key_queue_read_index == g_key_queue_write_index)
     {
-        
 
         return 0;
     }
@@ -243,6 +237,6 @@ int main(int argc, char **argv)
     {
         doomgeneric_Tick();
     }
-    
+
     return 0;
 }

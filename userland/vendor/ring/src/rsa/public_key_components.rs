@@ -1,29 +1,11 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::PublicKey;
 use core::iter::FromIterator;
 
-
-
-
 #[derive(Clone, Copy)]
 pub struct PublicKeyComponents<B> {
-    
+
     pub n: B,
 
-    
     pub e: B,
 }
 

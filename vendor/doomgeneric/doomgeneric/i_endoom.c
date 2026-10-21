@@ -1,20 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 #include <string.h>
 
@@ -26,18 +9,12 @@
 #include "txt_main.h"
 #endif
 
-
 #ifdef __DJGPP__
 #include <go32.h>
 #endif  
 
-
 #define ENDOOM_W 80
 #define ENDOOM_H 25
-
-
-
-
 
 void I_Endoom(byte *endoom_data)
 {
@@ -46,13 +23,9 @@ void I_Endoom(byte *endoom_data)
     int y;
     int indent;
 
-    
-
     TXT_Init();
     I_InitWindowTitle();
     I_InitWindowIcon();
-
-    
 
     screendata = TXT_GetScreenData();
 
@@ -64,8 +37,6 @@ void I_Endoom(byte *endoom_data)
                endoom_data + (y * ENDOOM_W + indent) * 2,
                TXT_SCREEN_W * 2);
     }
-
-    
 
     while (true)
     {
@@ -79,21 +50,16 @@ void I_Endoom(byte *endoom_data)
         TXT_Sleep(0);
     }
 
-    
-
     TXT_Shutdown();
 
 #elif defined(__DJGPP__)
 
     int y;
 
-    
-    
     for (y = 0; y < ENDOOM_H; y++) {
         puts("\n");
     }
 
-    
     movedata(_my_ds(), (unsigned) endoom_data, _dos_ds, 0xB8000UL, ENDOOM_W * ENDOOM_H * 2);
 
 #endif

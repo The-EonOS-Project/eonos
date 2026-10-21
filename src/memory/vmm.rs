@@ -22,30 +22,11 @@ pub const KERNEL_RX: u64 = PRESENT;
 pub const KERNEL_RO: u64 = PRESENT | NO_EXECUTE;
 pub const KERNEL_RW: u64 = PRESENT | WRITABLE | NO_EXECUTE;
 
-
-
-
-
-
-
-
 pub const USER_RX: u64 = PRESENT | USER;
 pub const USER_RO: u64 = PRESENT | USER | NO_EXECUTE;
 pub const USER_RW: u64 = PRESENT | WRITABLE | USER | NO_EXECUTE;
 
-
-
-
-
-
 pub const KERNEL_WC: u64 = PRESENT | WRITABLE | NO_EXECUTE | PWT;
-
-
-
-
-
-
-
 
 pub const KERNEL_UC: u64 = PRESENT | WRITABLE | NO_EXECUTE | PCD;
 
@@ -54,8 +35,6 @@ const ENTRIES: usize = 512;
 const HUGE_2M: u64 = 0x20_0000;
 const HUGE_1G: u64 = 0x4000_0000;
 
-
-
 const HUGE_2M_MASK: u64 = 0x000f_ffff_ffe0_0000;
 const HUGE_1G_MASK: u64 = 0x000f_ffff_c000_0000;
 const PAT_HUGE: u64 = 1 << 12;
@@ -63,13 +42,7 @@ const PAT_4K: u64 = 1 << 7;
 
 const SELF_TEST_VIRT: u64 = 0xffff_ffff_c000_0000;
 
-
-
-
 const SELF_TEST_USER_VIRT: u64 = 0x0000_0000_0010_0000;
-
-
-
 
 const KERNEL_PML4_START: usize = 256;
 
@@ -101,13 +74,7 @@ unsafe impl Send for Vmm {}
 
 static VMM: IrqMutex<Option<Vmm>> = IrqMutex::new(None);
 
-
-
-
 static KERNEL_CR3: AtomicU64 = AtomicU64::new(0);
-
-
-
 
 pub const USER_SPACE_END: u64 = 0x0000_8000_0000_0000;
 
@@ -139,10 +106,6 @@ fn index(virt: u64, level: usize) -> usize {
     ((virt >> (39 - level * 9)) & 0x1FF) as usize
 }
 
-
-
-
-
 unsafe fn child_table(parent: *mut Table, idx: usize) -> *mut Table {
     let entry = (*parent).0[idx];
     if entry & PRESENT != 0 {
@@ -157,15 +120,10 @@ unsafe fn child_table(parent: *mut Table, idx: usize) -> *mut Table {
     table_ptr(phys)
 }
 
-
-
-
 unsafe fn split_huge(pd: *mut Table, idx: usize) {
     let entry = (*pd).0[idx];
     let base = entry & HUGE_2M_MASK;
 
-    
-    
     let mut flags = entry & !ADDR_MASK & !HUGE;
     if entry & PAT_HUGE != 0 {
         flags |= PAT_4K;
@@ -178,8 +136,6 @@ unsafe fn split_huge(pd: *mut Table, idx: usize) {
     }
     (*pd).0[idx] = phys | PRESENT | WRITABLE | USER;
 }
-
-
 
 unsafe fn split_1g_huge(pdpt: *mut Table, idx: usize) {
     let entry = (*pdpt).0[idx];
@@ -207,9 +163,6 @@ unsafe fn pd_for(pdpt: *mut Table, virt: u64) -> *mut Table {
     child_table(pdpt, idx)
 }
 
-
-
-
 unsafe fn pt_for(pd: *mut Table, virt: u64) -> *mut Table {
     let idx = index(virt, 2);
     let entry = (*pd).0[idx];
@@ -219,9 +172,6 @@ unsafe fn pt_for(pd: *mut Table, virt: u64) -> *mut Table {
     }
     child_table(pd, idx)
 }
-
-
-
 
 unsafe fn leaf_for(pml4: *mut Table, virt: u64) -> Option<*mut u64> {
     let pml4_entry = (*pml4).0[index(virt, 0)];
@@ -287,30 +237,6 @@ pub fn map_page(virt: u64, phys: u64, flags: u64) {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 pub fn map_mmio(phys: u64, len: u64) -> *mut u8 {
     let hhdm = pmm::hhdm_offset();
     let start = phys & !(PAGE_SIZE - 1);
@@ -326,8 +252,6 @@ pub fn map_mmio(phys: u64, len: u64) -> *mut u8 {
     (hhdm + phys) as *mut u8
 }
 
-
-
 pub fn unmap_page(virt: u64) -> Option<u64> {
     let guard = VMM.lock();
     let Some(vmm) = guard.as_ref() else {
@@ -342,8 +266,6 @@ pub fn unmap_page(virt: u64) -> Option<u64> {
         Some(phys)
     }
 }
-
-
 
 pub fn protect_page(virt: u64, flags: u64) -> bool {
     if !matches!(
@@ -365,7 +287,6 @@ pub fn protect_page(virt: u64, flags: u64) -> bool {
     }
     true
 }
-
 
 unsafe fn walk(pml4_phys: u64, virt: u64) -> Option<u64> {
     let pml4 = table_ptr(pml4_phys);
@@ -403,10 +324,6 @@ pub fn translate(virt: u64) -> Option<u64> {
     unsafe { walk(vmm.pml4_phys, virt) }
 }
 
-
-
-
-
 pub fn try_translate(virt: u64) -> Option<u64> {
     let guard = VMM.try_lock()?;
     let vmm = guard.as_ref()?;
@@ -417,17 +334,13 @@ pub fn is_active() -> bool {
     VMM.lock().is_some()
 }
 
-
 pub fn kernel_cr3() -> u64 {
     KERNEL_CR3.load(Ordering::Acquire)
 }
 
-
-
 pub fn current_cr3() -> u64 {
     unsafe { read_cr3() & ADDR_MASK }
 }
-
 
 pub fn current_user_page_mapped(virt: u64) -> bool {
     if virt >= USER_SPACE_END {
@@ -435,9 +348,6 @@ pub fn current_user_page_mapped(virt: u64) -> bool {
     }
     unsafe { walk_user(current_cr3(), virt).is_some() }
 }
-
-
-
 
 pub fn map_current_user_page(virt: u64, phys: u64) -> bool {
     if virt >= USER_SPACE_END || virt & (PAGE_SIZE - 1) != 0 || phys & (PAGE_SIZE - 1) != 0 {
@@ -456,8 +366,6 @@ pub fn map_current_user_page(virt: u64, phys: u64) -> bool {
     }
     true
 }
-
-
 
 pub fn unmap_current_user_page(virt: u64) -> Option<u64> {
     if virt >= USER_SPACE_END || virt & (PAGE_SIZE - 1) != 0 {
@@ -505,32 +413,10 @@ unsafe fn enable_nxe() {
     asm!("wrmsr", in("ecx") EFER, in("eax") lo, in("edx") hi, options(nomem, nostack, preserves_flags));
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 unsafe fn configure_pat() {
     const PAT_MSR: u32 = 0x277;
     const WRITE_COMBINING: u64 = 0x01;
 
-    
-    
-    
     asm!("wbinvd", options(nomem, nostack));
 
     let lo: u32;
@@ -547,8 +433,6 @@ unsafe fn configure_pat() {
 
     asm!("wbinvd", options(nomem, nostack));
 }
-
-
 
 fn merge_ranges(r: &mut [(u64, u64)]) -> usize {
     for i in 1..r.len() {
@@ -571,8 +455,6 @@ fn merge_ranges(r: &mut [(u64, u64)]) -> usize {
     }
     out
 }
-
-
 
 unsafe fn map_hhdm_range(pml4: *mut Table, hhdm: u64, start: u64, end: u64) {
     let mut p = start;
@@ -647,11 +529,7 @@ pub fn init() {
 
     let mut mapped_bytes = 0u64;
     unsafe {
-        
-        
-        
-        
-        
+
         let (mut ranges, n) = pmm::hhdm_ranges();
         let n = merge_ranges(&mut ranges[..n]);
         for &(start, end) in &ranges[..n] {
@@ -697,28 +575,6 @@ pub fn init() {
     );
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 pub struct AddressSpace {
     pml4_phys: u64,
 }
@@ -726,23 +582,15 @@ pub struct AddressSpace {
 unsafe impl Send for AddressSpace {}
 
 impl AddressSpace {
-    
-    
+
     pub fn phys(&self) -> u64 {
         self.pml4_phys
     }
 
-    
-    
-    
-    
     pub unsafe fn activate(&self) {
         write_cr3(self.pml4_phys);
     }
 
-    
-    
-    
     pub fn map(&self, virt: u64, phys: u64, flags: u64) {
         assert!(
             virt < USER_SPACE_END,
@@ -768,15 +616,11 @@ impl AddressSpace {
         );
         unsafe {
             map4k(table_ptr(self.pml4_phys), virt, phys, flags);
-            
-            
-            
+
             invlpg(virt);
         }
     }
 
-    
-    
     pub fn unmap(&self, virt: u64) -> Option<u64> {
         assert!(
             virt < USER_SPACE_END,
@@ -792,9 +636,6 @@ impl AddressSpace {
         Some(phys)
     }
 
-    
-    
-    
     pub fn protect(&self, virt: u64, flags: u64) -> bool {
         if virt >= USER_SPACE_END || !matches!(flags, USER_RX | USER_RO | USER_RW) {
             return false;
@@ -804,25 +645,19 @@ impl AddressSpace {
         };
         unsafe {
             *leaf = (*leaf & ADDR_MASK) | flags | PRESENT;
-            
-            
+
             invlpg(virt);
         }
         true
     }
 
-    
-    
     pub fn translate(&self, virt: u64) -> Option<u64> {
         unsafe { walk(self.pml4_phys, virt) }
     }
 }
 
 impl Drop for AddressSpace {
-    
-    
-    
-    
+
     fn drop(&mut self) {
         unsafe { free_user_half(self.pml4_phys) };
     }
@@ -882,13 +717,6 @@ unsafe fn free_pt(phys: u64) {
     pmm::free_frame(phys);
 }
 
-
-
-
-
-
-
-
 unsafe fn walk_user(pml4_phys: u64, virt: u64) -> Option<u64> {
     let pml4 = table_ptr(pml4_phys);
     let e = (*pml4).0[index(virt, 0)];
@@ -912,15 +740,6 @@ unsafe fn walk_user(pml4_phys: u64, virt: u64) -> Option<u64> {
     }
     Some((leaf & ADDR_MASK) + (virt & (PAGE_SIZE - 1)))
 }
-
-
-
-
-
-
-
-
-
 
 pub fn copy_from_user(dst: &mut [u8], src: u64) -> bool {
     if !validate_user_range(src, dst.len(), false) {
@@ -948,13 +767,6 @@ pub fn copy_from_user(dst: &mut [u8], src: u64) -> bool {
     true
 }
 
-
-
-
-
-
-
-
 pub fn copy_to_user(dst: u64, src: &[u8]) -> bool {
     if !validate_user_range(dst, src.len(), true) {
         return false;
@@ -980,10 +792,6 @@ pub fn copy_to_user(dst: u64, src: &[u8]) -> bool {
     }
     true
 }
-
-
-
-
 
 pub fn validate_user_range(addr: u64, len: usize, write: bool) -> bool {
     if len == 0 {
@@ -1018,10 +826,6 @@ pub fn validate_user_range(addr: u64, len: usize, write: bool) -> bool {
     true
 }
 
-
-
-
-
 unsafe fn walk_user_write(pml4_phys: u64, virt: u64) -> Option<u64> {
     let pml4 = table_ptr(pml4_phys);
     let e = (*pml4).0[index(virt, 0)];
@@ -1045,10 +849,6 @@ unsafe fn walk_user_write(pml4_phys: u64, virt: u64) -> Option<u64> {
     }
     Some((leaf & ADDR_MASK) + (virt & (PAGE_SIZE - 1)))
 }
-
-
-
-
 
 pub fn create_address_space() -> Option<AddressSpace> {
     let guard = VMM.lock();
@@ -1135,7 +935,6 @@ pub fn address_space_self_test() {
         return;
     };
 
-    
     unsafe {
         let pml4 = table_ptr(aspace.pml4_phys);
         for i in 0..KERNEL_PML4_START {
@@ -1151,8 +950,6 @@ pub fn address_space_self_test() {
         }
     }
 
-    
-    
     let kernel_matches = {
         let guard = VMM.lock();
         let kernel_pml4 = table_ptr(guard.as_ref().unwrap().pml4_phys);
@@ -1168,10 +965,6 @@ pub fn address_space_self_test() {
         return;
     }
 
-    
-    
-    
-    
     let probe = addr_of!(__kernel_text_start) as u64;
     if aspace.translate(probe) != translate(probe) {
         log_fail!(
@@ -1183,18 +976,12 @@ pub fn address_space_self_test() {
         return;
     }
 
-    
-    
-    
     let Some(user_phys) = pmm::alloc_frame() else {
         log_fail!("VMM", "AddressSpaceSelfTest", "No free frame to test with");
         return;
     };
     aspace.map(SELF_TEST_USER_VIRT, user_phys, USER_RW);
 
-    
-    
-    
     let old_cr3 = unsafe { read_cr3() };
     unsafe { aspace.activate() };
 
@@ -1210,9 +997,6 @@ pub fn address_space_self_test() {
     let protect_rw_ok = aspace.protect(SELF_TEST_USER_VIRT, USER_RW)
         && unsafe { walk_user_write(aspace.pml4_phys, SELF_TEST_USER_VIRT).is_some() };
 
-    
-    
-    
     unsafe { write_cr3(old_cr3) };
     log_debug!(
         "VMM",
@@ -1254,9 +1038,6 @@ pub fn address_space_self_test() {
         return;
     }
 
-    
-    
-    
     drop(aspace);
 
     let frames_after = pmm::free_frame_count();

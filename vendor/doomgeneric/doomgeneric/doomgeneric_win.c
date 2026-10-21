@@ -10,7 +10,6 @@ static BITMAPINFO s_Bmi = { sizeof(BITMAPINFOHEADER), DOOMGENERIC_RESX, -DOOMGEN
 static HWND s_Hwnd = 0;
 static HDC s_Hdc = 0;
 
-
 #define KEYQUEUE_SIZE 16
 
 static unsigned short s_KeyQueue[KEYQUEUE_SIZE];
@@ -92,7 +91,7 @@ static LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 
 void DG_Init()
 {
-	
+
 	const char windowClassName[] = "DoomWindowClass";
 	const char windowTitle[] = "Doom";
 	WNDCLASSEXA wc;
@@ -171,7 +170,6 @@ int DG_GetKey(int* pressed, unsigned char* doomKey)
 {
 	if (s_KeyQueueReadIndex == s_KeyQueueWriteIndex)
 	{
-		
 
 		return 0;
 	}
@@ -204,7 +202,6 @@ int main(int argc, char **argv)
     {
         doomgeneric_Tick();
     }
-    
 
     return 0;
 }

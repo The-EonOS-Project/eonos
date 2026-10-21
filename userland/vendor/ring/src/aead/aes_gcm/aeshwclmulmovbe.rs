@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![cfg(target_arch = "x86_64")]
 
 use super::{
@@ -36,8 +22,7 @@ pub(super) fn seal(
     in_out: &mut [u8],
 ) -> Result<Tag, error::Unspecified> {
     prefixed_extern! {
-        
-        
+
         fn aesni_gcm_encrypt(
             input: *const u8,
             output: *mut u8,
@@ -66,8 +51,7 @@ pub(super) fn seal(
     let ramaining = match in_out.get_mut(processed..) {
         Some(remaining) => remaining,
         None => {
-            
-            
+
             unreachable!()
         }
     };
@@ -91,8 +75,7 @@ pub(super) fn open(
     src: RangeFrom<usize>,
 ) -> Result<Tag, error::Unspecified> {
     prefixed_extern! {
-        
-        
+
         fn aesni_gcm_decrypt(
             input: *const u8,
             output: *mut u8,
@@ -120,15 +103,13 @@ pub(super) fn open(
         }
     });
     let in_out_slice = in_out_slice.get_mut(processed..).unwrap_or_else(|| {
-        
-        
+
         unreachable!()
     });
-    
+
     let in_out =
         Overlapping::new(in_out_slice, src.clone()).unwrap_or_else(|IndexError { .. }| {
-            
-            
+
             unreachable!()
         });
     let (whole, _) = slice::as_chunks(in_out.input());
@@ -136,7 +117,6 @@ pub(super) fn open(
 
     let whole_len = whole.as_flattened().len();
 
-    
     let whole = Overlapping::new(&mut in_out_slice[..(src.start + whole_len)], src.clone())
         .map_err(error::erase::<IndexError>)?;
     aes_key.ctr32_encrypt_within(whole, &mut ctr);

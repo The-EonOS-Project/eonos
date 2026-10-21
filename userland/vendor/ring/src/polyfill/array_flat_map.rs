@@ -1,13 +1,5 @@
 use core::iter::FlatMap;
 
-
-
-
-
-
-
-
-
 #[derive(Clone)]
 pub struct ArrayFlatMap<I, Item, F, const LEN: usize> {
     inner: FlatMap<I, [Item; LEN], F>,
@@ -19,8 +11,7 @@ where
     I: ExactSizeIterator,
     F: FnMut(I::Item) -> [Item; LEN],
 {
-    
-    
+
     pub fn new(inner: I, f: F) -> Option<Self> {
         let remaining = inner.len().checked_mul(LEN)?;
         let inner = inner.flat_map(f);
@@ -43,7 +34,6 @@ where
         result
     }
 
-    
     fn size_hint(&self) -> (usize, Option<usize>) {
         (self.remaining, Some(self.remaining))
     }
@@ -64,15 +54,15 @@ mod tests {
     #[test]
     fn test_array_flat_map() {
         static TEST_CASES: &[(&[u16], fn(u16) -> [u8; 2], &[u8])] = &[
-            
+
             (&[], u16::to_be_bytes, &[]),
-            
+
             (
                 &[0x0102, 0x0304, 0x0506],
                 u16::to_be_bytes,
                 &[1, 2, 3, 4, 5, 6],
             ),
-            
+
             (
                 &[0x0102, 0x0304, 0x0506],
                 u16::to_le_bytes,
@@ -85,7 +75,6 @@ mod tests {
         });
     }
 
-    
     #[test]
     fn test_array_flat_map_len_overflow() {
         struct DownwardCounter {

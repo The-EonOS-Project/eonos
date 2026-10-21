@@ -1,12 +1,3 @@
-
-
-
-
-
-
-
-
-
 #![allow(dead_code)]
 
 use core::alloc::{GlobalAlloc, Layout};
@@ -19,19 +10,9 @@ use crate::sync::IrqMutex;
 use crate::vmm;
 use crate::{log_debug, log_fail, log_ok};
 
-
-
-
-
 const HEAP_START: usize = 0xffff_ffff_9000_0000;
 
-
-
-
 const HEAP_MAX_SIZE: usize = 64 * 1024 * 1024; 
-
-
-
 
 const HEAP_GROW_STEP: usize = 64 * 1024; 
 
@@ -55,9 +36,6 @@ impl fmt::Display for Size {
     }
 }
 
-
-
-
 struct FreeBlock {
     size: usize,
     next: *mut FreeBlock,
@@ -74,19 +52,15 @@ impl FreeBlock {
 }
 
 struct FreeList {
-    
-    
+
     head: *mut FreeBlock,
-    
-    
+
     mapped_end: usize,
-    
+
     allocated: usize,
-    
+
     total: usize,
 }
-
-
 
 unsafe impl Send for FreeList {}
 
@@ -100,10 +74,6 @@ impl FreeList {
         }
     }
 
-    
-    
-    
-    
     unsafe fn insert(&mut self, addr: usize, size: usize) {
         debug_assert_eq!(addr % align_of::<FreeBlock>(), 0);
         debug_assert!(size >= size_of::<FreeBlock>());
@@ -115,15 +85,12 @@ impl FreeList {
             cur = (*cur).next;
         }
 
-        
         let (size, next) = if !cur.is_null() && addr + size == (*cur).addr() {
             (size + (*cur).size, (*cur).next)
         } else {
             (size, cur)
         };
 
-        
-        
         if !prev.is_null() && (*prev).end() == addr {
             (*prev).size += size;
             (*prev).next = next;
@@ -140,9 +107,6 @@ impl FreeList {
         }
     }
 
-    
-    
-    
     unsafe fn find_and_remove(&mut self, size: usize, align: usize) -> Option<usize> {
         let mut prev: *mut FreeBlock = ptr::null_mut();
         let mut cur = self.head;
@@ -168,10 +132,6 @@ impl FreeList {
                 if after_size >= size_of::<FreeBlock>() {
                     self.insert(alloc_start + size, after_size);
                 }
-                
-                
-                
-                
 
                 return Some(alloc_start);
             }
@@ -183,9 +143,6 @@ impl FreeList {
         None
     }
 
-    
-    
-    
     unsafe fn grow(&mut self, min_extra: usize) -> bool {
         if self.mapped_end == 0 {
             self.mapped_end = HEAP_START;
@@ -245,9 +202,6 @@ const fn align_down(v: usize, a: usize) -> usize {
     v & !(a - 1)
 }
 
-
-
-
 fn adjust(layout: Layout) -> (usize, usize) {
     let align = layout.align().max(align_of::<FreeBlock>());
     let size = layout.size().max(size_of::<FreeBlock>());
@@ -277,9 +231,6 @@ unsafe impl GlobalAlloc for KernelHeap {
             return addr as *mut u8;
         }
 
-        
-        
-        
         if !list.grow(size + align) {
             return ptr::null_mut();
         }
@@ -304,11 +255,9 @@ unsafe impl GlobalAlloc for KernelHeap {
 #[global_allocator]
 static ALLOCATOR: KernelHeap = KernelHeap::new();
 
-
 pub fn allocated_bytes() -> usize {
     ALLOCATOR.inner.lock().allocated
 }
-
 
 pub fn heap_size() -> usize {
     ALLOCATOR.inner.lock().total
@@ -340,7 +289,6 @@ pub fn self_test() {
 
     let before = allocated_bytes();
 
-    
     let boxed = Box::new(0x1234_5678_9abc_def0u64);
     if *boxed != 0x1234_5678_9abc_def0 {
         log_fail!("Heap", "SelfTest", "Box value mismatch");
@@ -348,8 +296,6 @@ pub fn self_test() {
     }
     drop(boxed);
 
-    
-    
     let mut v: Vec<u32> = Vec::new();
     for i in 0..2048u32 {
         v.push(i);
@@ -365,9 +311,6 @@ pub fn self_test() {
     }
     drop(v);
 
-    
-    
-    
     let heap_before_stress = heap_size();
     {
         let mut chunks: Vec<Box<[u8; 512]>> = Vec::new();

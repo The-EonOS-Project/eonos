@@ -1,26 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -72,7 +49,6 @@ static int SplitLine(char *line, char **fields, unsigned int max_fields)
         {
             *p = '\0';
 
-            
             do
             {
                 ++p;
@@ -94,7 +70,6 @@ static int SplitLine(char *line, char **fields, unsigned int max_fields)
         }
     }
 
-    
     p = fields[num_fields - 1] + strlen(fields[num_fields - 1]);
     while (p > fields[num_fields - 1] && isspace(*(p - 1)))
     {
@@ -177,8 +152,6 @@ static char *ReadDMXConfig(void)
     int lumpnum;
     unsigned int len;
     char *data;
-
-    
 
     lumpnum = W_CheckNumForName("DMXGUS");
 

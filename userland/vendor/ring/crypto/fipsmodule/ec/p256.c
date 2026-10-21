@@ -1,21 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <ring-core/base.h>
 
 #include "../../limbs/limbs.h"
@@ -57,9 +39,6 @@
 #include "../../../third_party/fiat/p256_32.h"
 #endif
 
-
-
-
 #if defined(OPENSSL_64_BIT)
 #define FIAT_P256_NLIMBS 4
 typedef uint64_t fiat_p256_limb_t;
@@ -73,7 +52,6 @@ typedef uint32_t fiat_p256_felem[FIAT_P256_NLIMBS];
 static const fiat_p256_felem fiat_p256_one = {
     0x1, 0x0, 0x0, 0xffffffff, 0xffffffff, 0xffffffff, 0xfffffffe, 0x0};
 #endif  
-
 
 static fiat_p256_limb_t fiat_p256_nz(
     const fiat_p256_limb_t in1[FIAT_P256_NLIMBS]) {
@@ -98,44 +76,14 @@ static void fiat_p256_cmovznz(fiat_p256_limb_t out[FIAT_P256_NLIMBS],
 
 static void fiat_p256_from_words(fiat_p256_felem out,
                                  const Limb in[32 / sizeof(BN_ULONG)]) {
-  
-  
-  
-  
+
   OPENSSL_memcpy(out, in, 32);
 }
 
 static void fiat_p256_to_words(Limb out[32 / sizeof(BN_ULONG)], const fiat_p256_felem in) {
-  
+
   OPENSSL_memcpy(out, in, 32);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 static void fiat_p256_point_double(fiat_p256_felem x_out, fiat_p256_felem y_out,
                                    fiat_p256_felem z_out,
@@ -143,14 +91,13 @@ static void fiat_p256_point_double(fiat_p256_felem x_out, fiat_p256_felem y_out,
                                    const fiat_p256_felem y_in,
                                    const fiat_p256_felem z_in) {
   fiat_p256_felem delta, gamma, beta, ftmp, ftmp2, tmptmp, alpha, fourbeta;
-  
+
   fiat_p256_square(delta, z_in);
-  
+
   fiat_p256_square(gamma, y_in);
-  
+
   fiat_p256_mul(beta, x_in, gamma);
 
-  
   fiat_p256_sub(ftmp, x_in, delta);
   fiat_p256_add(ftmp2, x_in, delta);
 
@@ -158,20 +105,17 @@ static void fiat_p256_point_double(fiat_p256_felem x_out, fiat_p256_felem y_out,
   fiat_p256_add(ftmp2, ftmp2, tmptmp);
   fiat_p256_mul(alpha, ftmp, ftmp2);
 
-  
   fiat_p256_square(x_out, alpha);
   fiat_p256_add(fourbeta, beta, beta);
   fiat_p256_add(fourbeta, fourbeta, fourbeta);
   fiat_p256_add(tmptmp, fourbeta, fourbeta);
   fiat_p256_sub(x_out, x_out, tmptmp);
 
-  
   fiat_p256_add(delta, gamma, delta);
   fiat_p256_add(ftmp, y_in, z_in);
   fiat_p256_square(z_out, ftmp);
   fiat_p256_sub(z_out, z_out, delta);
 
-  
   fiat_p256_sub(y_out, fourbeta, x_out);
   fiat_p256_add(gamma, gamma, gamma);
   fiat_p256_square(gamma, gamma);
@@ -179,20 +123,6 @@ static void fiat_p256_point_double(fiat_p256_felem x_out, fiat_p256_felem y_out,
   fiat_p256_add(gamma, gamma, gamma);
   fiat_p256_sub(y_out, y_out, gamma);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 static void fiat_p256_point_add(fiat_p256_felem x3, fiat_p256_felem y3,
                                 fiat_p256_felem z3, const fiat_p256_felem x1,
@@ -205,61 +135,49 @@ static void fiat_p256_point_add(fiat_p256_felem x3, fiat_p256_felem y3,
   fiat_p256_limb_t z1nz = fiat_p256_nz(z1);
   fiat_p256_limb_t z2nz = fiat_p256_nz(z2);
 
-  
   fiat_p256_felem z1z1;
   fiat_p256_square(z1z1, z1);
 
   fiat_p256_felem u1, s1, two_z1z2;
   if (!mixed) {
-    
+
     fiat_p256_felem z2z2;
     fiat_p256_square(z2z2, z2);
 
-    
     fiat_p256_mul(u1, x1, z2z2);
 
-    
     fiat_p256_add(two_z1z2, z1, z2);
     fiat_p256_square(two_z1z2, two_z1z2);
     fiat_p256_sub(two_z1z2, two_z1z2, z1z1);
     fiat_p256_sub(two_z1z2, two_z1z2, z2z2);
 
-    
     fiat_p256_mul(s1, z2, z2z2);
     fiat_p256_mul(s1, s1, y1);
   } else {
-    
 
-    
     fiat_p256_copy(u1, x1);
-    
+
     fiat_p256_add(two_z1z2, z1, z1);
-    
+
     fiat_p256_copy(s1, y1);
   }
 
-  
   fiat_p256_felem u2;
   fiat_p256_mul(u2, x2, z1z1);
 
-  
   fiat_p256_felem h;
   fiat_p256_sub(h, u2, u1);
 
   fiat_p256_limb_t xneq = fiat_p256_nz(h);
 
-  
   fiat_p256_mul(z_out, h, two_z1z2);
 
-  
   fiat_p256_felem z1z1z1;
   fiat_p256_mul(z1z1z1, z1, z1z1);
 
-  
   fiat_p256_felem s2;
   fiat_p256_mul(s2, y2, z1z1z1);
 
-  
   fiat_p256_felem r;
   fiat_p256_sub(r, s2, s1);
   fiat_p256_add(r, r, r);
@@ -274,26 +192,21 @@ static void fiat_p256_point_add(fiat_p256_felem x3, fiat_p256_felem y3,
     return;
   }
 
-  
   fiat_p256_felem i;
   fiat_p256_add(i, h, h);
   fiat_p256_square(i, i);
 
-  
   fiat_p256_felem j;
   fiat_p256_mul(j, h, i);
 
-  
   fiat_p256_felem v;
   fiat_p256_mul(v, u1, i);
 
-  
   fiat_p256_square(x_out, r);
   fiat_p256_sub(x_out, x_out, j);
   fiat_p256_sub(x_out, x_out, v);
   fiat_p256_sub(x_out, x_out, v);
 
-  
   fiat_p256_sub(y_out, v, x_out);
   fiat_p256_mul(y_out, y_out, r);
   fiat_p256_felem s1j;
@@ -311,9 +224,6 @@ static void fiat_p256_point_add(fiat_p256_felem x3, fiat_p256_felem y3,
 
 #include "./p256_table.h"
 
-
-
-
 static void fiat_p256_select_point_affine(
     const fiat_p256_limb_t idx, size_t size,
     const fiat_p256_felem pre_comp[ ][2], fiat_p256_felem out[3]) {
@@ -326,8 +236,6 @@ static void fiat_p256_select_point_affine(
   fiat_p256_cmovznz(out[2], idx, out[2], fiat_p256_one);
 }
 
-
-
 static void fiat_p256_select_point(const fiat_p256_limb_t idx, size_t size,
                                    const fiat_p256_felem pre_comp[ ][3],
                                    fiat_p256_felem out[3]) {
@@ -339,7 +247,6 @@ static void fiat_p256_select_point(const fiat_p256_limb_t idx, size_t size,
     fiat_p256_cmovznz(out[2], mismatch, pre_comp[i][2], out[2]);
   }
 }
-
 
 static crypto_word_t fiat_p256_get_bit(const Limb in[P256_LIMBS], int i) {
   if (i < 0 || i >= 256) {
@@ -363,7 +270,7 @@ void p256_point_mul(Limb r[3][P256_LIMBS], const Limb scalar[P256_LIMBS],
 
   fiat_p256_felem p_pre_comp[17][3];
   OPENSSL_memset(&p_pre_comp, 0, sizeof(p_pre_comp));
-  
+
   fiat_p256_from_words(p_pre_comp[1][0], p_x);
   fiat_p256_from_words(p_pre_comp[1][1], p_y);
   fiat_p256_copy(p_pre_comp[1][2], fiat_p256_one);
@@ -381,18 +288,15 @@ void p256_point_mul(Limb r[3][P256_LIMBS], const Limb scalar[P256_LIMBS],
     }
   }
 
-  
   fiat_p256_felem nq[3] = {{0}, {0}, {0}}, ftmp, tmp[3];
 
-  
   int skip = 1;  
   for (size_t i = 255; i < 256; i--) {
-    
+
     if (!skip) {
       fiat_p256_point_double(nq[0], nq[1], nq[2], nq[0], nq[1], nq[2]);
     }
 
-    
     if (i % 5 == 0) {
       crypto_word_t bits = fiat_p256_get_bit(scalar, i + 4) << 5;
       bits |= fiat_p256_get_bit(scalar, i + 3) << 4;
@@ -403,7 +307,6 @@ void p256_point_mul(Limb r[3][P256_LIMBS], const Limb scalar[P256_LIMBS],
       crypto_word_t sign, digit;
       recode_scalar_bits(&sign, &digit, bits);
 
-      
       fiat_p256_select_point((fiat_p256_limb_t)digit, 17,
         RING_CORE_POINTLESS_ARRAY_CONST_CAST((const fiat_p256_felem(*)[3]))p_pre_comp,
         tmp);
@@ -428,7 +331,7 @@ void p256_point_mul(Limb r[3][P256_LIMBS], const Limb scalar[P256_LIMBS],
 }
 
 void p256_point_mul_base(Limb r[3][P256_LIMBS], const Limb scalar[P256_LIMBS]) {
-  
+
   fiat_p256_felem nq[3] = {{0}, {0}, {0}}, tmp[3];
 
   int skip = 1;  
@@ -437,12 +340,11 @@ void p256_point_mul_base(Limb r[3][P256_LIMBS], const Limb scalar[P256_LIMBS]) {
       fiat_p256_point_double(nq[0], nq[1], nq[2], nq[0], nq[1], nq[2]);
     }
 
-    
     crypto_word_t bits = fiat_p256_get_bit(scalar, i + 224) << 3;
     bits |= fiat_p256_get_bit(scalar, i + 160) << 2;
     bits |= fiat_p256_get_bit(scalar, i + 96) << 1;
     bits |= fiat_p256_get_bit(scalar, i + 32);
-    
+
     fiat_p256_select_point_affine((fiat_p256_limb_t)bits, 15,
                                   fiat_p256_g_pre_comp[1], tmp);
 
@@ -456,12 +358,11 @@ void p256_point_mul_base(Limb r[3][P256_LIMBS], const Limb scalar[P256_LIMBS]) {
       skip = 0;
     }
 
-    
     bits = fiat_p256_get_bit(scalar, i + 192) << 3;
     bits |= fiat_p256_get_bit(scalar, i + 128) << 2;
     bits |= fiat_p256_get_bit(scalar, i + 64) << 1;
     bits |= fiat_p256_get_bit(scalar, i);
-    
+
     fiat_p256_select_point_affine((fiat_p256_limb_t)bits, 15,
                                   fiat_p256_g_pre_comp[0], tmp);
     fiat_p256_point_add(nq[0], nq[1], nq[2], nq[0], nq[1], nq[2], 1 ,
@@ -515,7 +416,6 @@ void p256_point_double(Limb r[3][P256_LIMBS], const Limb a[3][P256_LIMBS]) {
   fiat_p256_to_words(r[1], y);
   fiat_p256_to_words(r[2], z);
 }
-
 
 void p256_point_add_affine(Limb r[3][P256_LIMBS], const Limb a[3][P256_LIMBS],
                            const Limb b[2][P256_LIMBS]) {

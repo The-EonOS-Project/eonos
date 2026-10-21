@@ -1,22 +1,4 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{super::overlapping::Overlapping, Counter, Key};
-
-
-
-
 
 macro_rules! chacha20_ctr32_ffi {
     ( unsafe { ($MIN_LEN:expr, $Cpu:ty, $InOut:ty) => $f:ident },
@@ -30,9 +12,7 @@ macro_rules! chacha20_ctr32_ffi {
                 counter: &crate::aead::chacha::Counter,
             );
         }
-        
-        
-        
+
         unsafe {
             crate::aead::chacha::ffi::chacha20_ctr32_ffi::<$InOut, $Cpu, $MIN_LEN>(
                 $key, $counter, $in_out, $cpu, $f,
@@ -40,8 +20,6 @@ macro_rules! chacha20_ctr32_ffi {
         }
     }};
 }
-
-
 
 pub(super) unsafe fn chacha20_ctr32_ffi<
     'o,

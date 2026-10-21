@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 pub trait ArraySplitMap<I, O, const CN: usize, const ON: usize> {
     fn array_split_map(self, f: impl Fn([I; CN]) -> O) -> [O; ON];
 }

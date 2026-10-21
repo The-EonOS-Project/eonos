@@ -10,8 +10,6 @@ pub fn force_unlock_all() {
     }
 }
 
-
-
 pub fn write_memory_dump<W: Write>(console: &mut W, address: usize, bytes: &[u8]) {
     let length = bytes.len().min(64);
     let _ = writeln!(console, "Memory dump ({} bytes):", length);
@@ -23,9 +21,6 @@ pub fn write_memory_dump<W: Write>(console: &mut W, address: usize, bytes: &[u8]
         let _ = writeln!(console);
     }
 }
-
-
-
 
 pub fn write_crash_context<W: Write>(console: &mut W, fault_cs: Option<u64>) -> Option<(u64, u64)> {
     let Some(context) = crate::scheduler::try_crash_context() else {
@@ -76,8 +71,6 @@ pub fn write_crash_context<W: Write>(console: &mut W, fault_cs: Option<u64>) -> 
     }
 }
 
-
-
 pub fn write_stack_trace<W: Write>(
     console: &mut W,
     frame_pointer: u64,
@@ -104,8 +97,7 @@ pub fn write_stack_trace<W: Write>(
         if current < low || end > high || current & 7 != 0 {
             break;
         }
-        
-        
+
         let (next, return_address) = unsafe {
             let frame = current as *const u64;
             (
@@ -131,8 +123,6 @@ pub fn write_stack_trace<W: Write>(
 }
 
 const CRASHLOG_CAPACITY: usize = 4096;
-
-
 
 pub struct PanicOutput<'a> {
     console: &'a mut Console,
@@ -165,7 +155,7 @@ where
     force_unlock_all();
 
     if let Some(console) = CONSOLE.lock().as_mut() {
-        
+
         console.clear();
 
         let _ = write!(console, "\x1b[48;2;0;0;170m\x1b[97m");

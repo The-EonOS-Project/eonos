@@ -1,18 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef OPENSSL_HEADER_BN_INTERNAL_H
 #define OPENSSL_HEADER_BN_INTERNAL_H
 
@@ -46,10 +31,6 @@ typedef crypto_word_t BN_ULONG;
 #define BN_ULLONG uint64_t
 #define BN_BITS2 32
 
-
-
-
-
 #define BN_MONT_CTX_N0_LIMBS 2
 #define BN_MONT_CTX_N0(hi, lo) TOBN(hi, lo)
 #define TOBN(hi, lo) (lo), (hi)
@@ -57,38 +38,6 @@ typedef crypto_word_t BN_ULONG;
 #else
 #error "Must define either OPENSSL_32_BIT or OPENSSL_64_BIT"
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 OPENSSL_STATIC_ASSERT(sizeof(int) == sizeof(size_t) ||
                       (sizeof(int) == 4 && sizeof(size_t) == 8),
@@ -107,8 +56,7 @@ void bn_mul_mont_nohw(BN_ULONG *rp, const BN_ULONG *ap, const BN_ULONG *bp,
 static inline void bn_mul_mont_small(
     BN_ULONG *rp, const BN_ULONG *ap, const BN_ULONG *bp,
     const BN_ULONG *np, const BN_ULONG *n0, size_t num) {
-    
-    
+
     bn_mul_mont_nohw(rp, ap, bp, np, n0, num);
 }
 #elif defined(OPENSSL_ARM)
@@ -119,10 +67,9 @@ void bn_mul_mont_nohw(BN_ULONG *rp, const BN_ULONG *ap, const BN_ULONG *bp,
 static inline void bn_mul_mont_small(
     BN_ULONG *rp, const BN_ULONG *ap, const BN_ULONG *bp,
     const BN_ULONG *np, const BN_ULONG *n0, size_t num) {
-    
-    
+
     if (num == 8) {
-        
+
         if (neon_available) {
             bn_mul8x_mont_neon(rp, ap, bp, np, n0, num);
             return;

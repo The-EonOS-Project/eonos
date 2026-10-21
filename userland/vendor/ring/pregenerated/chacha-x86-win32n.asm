@@ -1,6 +1,3 @@
-
-
-
 %include "ring_core_generated/prefix_symbols_nasm.inc"
 %ifidn __OUTPUT_FORMAT__, win32
 %ifidn __OUTPUT_FORMAT__,obj

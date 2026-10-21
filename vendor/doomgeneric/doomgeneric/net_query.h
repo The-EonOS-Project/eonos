@@ -1,20 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef NET_QUERY_H
 #define NET_QUERY_H
 

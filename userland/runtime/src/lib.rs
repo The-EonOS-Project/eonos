@@ -1,12 +1,5 @@
 #![no_std]
 
-
-
-
-
-
-
-
 extern crate alloc;
 
 pub mod era;
@@ -32,11 +25,8 @@ core::arch::global_asm!(
     "ud2",
 );
 
-
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Error(pub i32);
-
-
 
 #[derive(Clone, Copy, Debug, Default)]
 #[repr(C)]
@@ -48,7 +38,6 @@ pub struct MouseState {
     pub wheel: i32,
 }
 
-
 #[derive(Clone, Copy, Debug, Default)]
 #[repr(C)]
 pub struct MemoryInfo {
@@ -57,7 +46,6 @@ pub struct MemoryInfo {
     pub heap_used: u64,
     pub total_physical: u64,
 }
-
 
 #[derive(Clone, Copy, Debug, Default)]
 #[repr(C)]
@@ -68,7 +56,6 @@ pub struct NetworkInfo {
     pub received: u64,
     pub transmitted: u64,
 }
-
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 #[repr(C)]
@@ -82,7 +69,6 @@ pub struct Ipv4Config {
     pub configured: u32,
 }
 
-
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 #[repr(C)]
 pub struct UdpDatagramInfo {
@@ -90,7 +76,6 @@ pub struct UdpDatagramInfo {
     pub source_port: u16,
     pub length: u16,
 }
-
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 #[repr(C)]
@@ -100,7 +85,6 @@ pub struct KeyEvent {
     pub modifiers: u8,
     pub _reserved: u8,
 }
-
 
 pub type Result<T> = core::result::Result<T, Error>;
 
@@ -163,7 +147,6 @@ const ALLOCATION_MAGIC: usize = 0xE0A5_A110_CAFE_BEEF;
 const SIZE_CLASSES: [usize; 6] = [64, 128, 256, 512, 1024, 2048];
 const SMALL_ALLOCATION_LIMIT: usize = 2048;
 
-
 pub const O_RDONLY: usize = 0;
 
 pub const O_WRONLY: usize = 1;
@@ -176,7 +159,6 @@ pub const O_TRUNC: usize = 0x200;
 
 pub const O_APPEND: usize = 0x400;
 
-
 pub fn list_files(buffer: &mut [u8]) -> Result<usize> {
     checked(unsafe {
         syscall3(
@@ -187,7 +169,6 @@ pub fn list_files(buffer: &mut [u8]) -> Result<usize> {
         )
     })
 }
-
 
 pub fn list_processes(buffer: &mut [u8]) -> Result<usize> {
     checked(unsafe {
@@ -200,7 +181,6 @@ pub fn list_processes(buffer: &mut [u8]) -> Result<usize> {
     })
 }
 
-
 pub fn list_block_devices(buffer: &mut [u8]) -> Result<usize> {
     checked(unsafe {
         syscall3(
@@ -211,7 +191,6 @@ pub fn list_block_devices(buffer: &mut [u8]) -> Result<usize> {
         )
     })
 }
-
 
 pub fn list_mounts(buffer: &mut [u8]) -> Result<usize> {
     checked(unsafe {
@@ -224,16 +203,13 @@ pub fn list_mounts(buffer: &mut [u8]) -> Result<usize> {
     })
 }
 
-
 pub fn mkdir(path: &str) -> Result<()> {
     checked(unsafe { syscall3(SYS_MKDIR, path.as_ptr() as usize, path.len(), 0) }).map(|_| ())
 }
 
-
 pub fn remove(path: &str) -> Result<()> {
     checked(unsafe { syscall3(SYS_REMOVE, path.as_ptr() as usize, path.len(), 0) }).map(|_| ())
 }
-
 
 pub fn mount(device: &CStr, mountpoint: &CStr) -> Result<()> {
     checked(unsafe {
@@ -246,7 +222,6 @@ pub fn mount(device: &CStr, mountpoint: &CStr) -> Result<()> {
     })
     .map(|_| ())
 }
-
 
 pub fn panic_kernel() -> ! {
     unsafe { syscall3(SYS_PANIC, 0, 0, 0) };
@@ -323,16 +298,13 @@ fn checked(raw: isize) -> Result<usize> {
     }
 }
 
-
 pub fn read(fd: usize, buffer: &mut [u8]) -> Result<usize> {
     checked(unsafe { syscall3(SYS_READ, fd, buffer.as_mut_ptr() as usize, buffer.len()) })
 }
 
-
 pub fn write(fd: usize, buffer: &[u8]) -> Result<usize> {
     checked(unsafe { syscall3(SYS_WRITE, fd, buffer.as_ptr() as usize, buffer.len()) })
 }
-
 
 pub fn write_all(fd: usize, mut buffer: &[u8]) -> Result<()> {
     while !buffer.is_empty() {
@@ -345,11 +317,9 @@ pub fn write_all(fd: usize, mut buffer: &[u8]) -> Result<()> {
     Ok(())
 }
 
-
 pub fn open(path: &str, flags: usize) -> Result<usize> {
     checked(unsafe { syscall3(SYS_OPEN, path.as_ptr() as usize, path.len(), flags) })
 }
-
 
 pub fn pipe() -> Result<(usize, usize)> {
     let mut descriptors = [0usize; 2];
@@ -364,8 +334,6 @@ pub fn pipe() -> Result<(usize, usize)> {
     Ok((descriptors[0], descriptors[1]))
 }
 
-
-
 pub fn pipe_read_available(fd: usize, buffer: &mut [u8]) -> Result<usize> {
     checked(unsafe {
         syscall3(
@@ -377,7 +345,6 @@ pub fn pipe_read_available(fd: usize, buffer: &mut [u8]) -> Result<usize> {
     })
 }
 
-
 pub fn pipe_write_available(fd: usize, buffer: &[u8]) -> Result<usize> {
     checked(unsafe {
         syscall3(
@@ -388,7 +355,6 @@ pub fn pipe_write_available(fd: usize, buffer: &[u8]) -> Result<usize> {
         )
     })
 }
-
 
 pub fn mouse_state() -> Result<MouseState> {
     let mut state = MouseState::default();
@@ -403,7 +369,6 @@ pub fn mouse_state() -> Result<MouseState> {
     Ok(state)
 }
 
-
 pub fn memory_info() -> Result<MemoryInfo> {
     let mut info = MemoryInfo::default();
     checked(unsafe {
@@ -412,16 +377,13 @@ pub fn memory_info() -> Result<MemoryInfo> {
     Ok(info)
 }
 
-
 pub fn chdir(path: &str) -> Result<()> {
     checked(unsafe { syscall3(SYS_CHDIR, path.as_ptr() as usize, path.len(), 0) }).map(|_| ())
 }
 
-
 pub fn getcwd(buffer: &mut [u8]) -> Result<usize> {
     checked(unsafe { syscall3(SYS_GETCWD, buffer.as_mut_ptr() as usize, buffer.len(), 0) })
 }
-
 
 pub fn list_directory(path: &str, buffer: &mut [u8]) -> Result<usize> {
     checked(unsafe {
@@ -429,26 +391,21 @@ pub fn list_directory(path: &str, buffer: &mut [u8]) -> Result<usize> {
     })
 }
 
-
 pub fn close(fd: usize) -> Result<()> {
     checked(unsafe { syscall3(SYS_CLOSE, fd, 0, 0) }).map(|_| ())
 }
-
 
 pub fn seek(fd: usize, offset: i64, whence: usize) -> Result<usize> {
     checked(unsafe { syscall3(SYS_SEEK, fd, offset as usize, whence) })
 }
 
-
 pub fn keyboard_claim() -> Result<()> {
     checked(unsafe { syscall3(SYS_KEYBOARD_FOCUS, 1, 0, 0) }).map(|_| ())
 }
 
-
 pub fn keyboard_release() -> Result<()> {
     checked(unsafe { syscall3(SYS_KEYBOARD_FOCUS, 0, 0, 0) }).map(|_| ())
 }
-
 
 pub fn keyboard_event() -> Result<Option<KeyEvent>> {
     let mut event = KeyEvent::default();
@@ -458,54 +415,43 @@ pub fn keyboard_event() -> Result<Option<KeyEvent>> {
     Ok((count != 0).then_some(event))
 }
 
-
 pub fn getpid() -> usize {
     unsafe { syscall3(SYS_GETPID, 0, 0, 0) as usize }
 }
 
-
 pub fn uptime_ms() -> usize {
     unsafe { syscall3(SYS_UPTIME_MS, 0, 0, 0) as usize }
 }
-
-
 
 pub fn wall_time_secs() -> Option<u64> {
     let seconds = unsafe { syscall3(SYS_WALL_TIME, 0, 0, 0) };
     (seconds > 0).then_some(seconds as u64)
 }
 
-
 pub fn sleep_ms(milliseconds: usize) -> Result<()> {
     checked(unsafe { syscall3(SYS_SLEEP_MS, milliseconds, 0, 0) }).map(|_| ())
 }
-
 
 pub fn yield_now() {
     let _ = unsafe { syscall3(SYS_SCHED_YIELD, 0, 0, 0) };
 }
 
-
 pub fn sync() -> Result<()> {
     checked(unsafe { syscall3(SYS_SYNC, 0, 0, 0) }).map(|_| ())
 }
-
 
 pub fn reboot() -> Result<()> {
     checked(unsafe { syscall3(SYS_POWER_CONTROL, 0, 0, 0) }).map(|_| ())
 }
 
-
 pub fn shutdown() -> Result<()> {
     checked(unsafe { syscall3(SYS_POWER_CONTROL, 1, 0, 0) }).map(|_| ())
 }
-
 
 pub fn is_mountpoint(path: &CStr) -> Result<bool> {
     checked(unsafe { syscall3(SYS_IS_MOUNTPOINT, path.as_ptr() as usize, 0, 0) })
         .map(|mounted| mounted != 0)
 }
-
 
 pub fn network_info() -> Result<NetworkInfo> {
     let mut info = NetworkInfo::default();
@@ -513,18 +459,15 @@ pub fn network_info() -> Result<NetworkInfo> {
     Ok(info)
 }
 
-
 pub fn ipv4_config() -> Result<Ipv4Config> {
     let mut config = Ipv4Config::default();
     checked(unsafe { syscall3(SYS_NET_CONFIG, (&mut config as *mut Ipv4Config) as usize, 0, 0) })?;
     Ok(config)
 }
 
-
 pub fn dhcp() -> Result<()> {
     checked(unsafe { syscall3(SYS_NET_DHCP, 0, 0, 0) }).map(|_| ())
 }
-
 
 pub fn udp_send(destination: [u8; 4], destination_port: u16, source_port: u16, payload: &[u8]) -> Result<usize> {
     checked(unsafe {
@@ -540,8 +483,6 @@ pub fn udp_send(destination: [u8; 4], destination_port: u16, source_port: u16, p
     })
 }
 
-
-
 pub fn udp_receive(info: &mut UdpDatagramInfo, buffer: &mut [u8]) -> Result<usize> {
     checked(unsafe {
         syscall4(
@@ -554,8 +495,6 @@ pub fn udp_receive(info: &mut UdpDatagramInfo, buffer: &mut [u8]) -> Result<usiz
     })
 }
 
-
-
 pub fn ping(destination: [u8; 4], timeout_ms: u64) -> Result<Option<u64>> {
     let result = checked(unsafe {
         syscall3(SYS_NET_PING, destination.as_ptr() as usize, timeout_ms as usize, 0)
@@ -563,18 +502,15 @@ pub fn ping(destination: [u8; 4], timeout_ms: u64) -> Result<Option<u64>> {
     Ok(if result == 0 { None } else { Some((result - 1) as u64) })
 }
 
-
 pub fn tcp_connect(destination: [u8; 4], port: u16) -> Result<()> {
     checked(unsafe {
         syscall3(SYS_TCP_CONNECT, destination.as_ptr() as usize, port as usize, 0)
     }).map(|_| ())
 }
 
-
 pub fn tcp_send(bytes: &[u8]) -> Result<usize> {
     checked(unsafe { syscall3(SYS_TCP_SEND, bytes.as_ptr() as usize, bytes.len(), 0) })
 }
-
 
 pub fn tcp_receive(buffer: &mut [u8], timeout_ms: u64) -> Result<usize> {
     checked(unsafe {
@@ -582,19 +518,14 @@ pub fn tcp_receive(buffer: &mut [u8], timeout_ms: u64) -> Result<usize> {
     })
 }
 
-
 pub fn tcp_close() -> Result<()> {
     checked(unsafe { syscall3(SYS_TCP_CLOSE, 0, 0, 0) }).map(|_| ())
 }
-
-
-
 
 pub fn secure_random(buffer: &mut [u8]) -> Result<()> {
     checked(unsafe { syscall3(SYS_SECURE_RANDOM, buffer.as_mut_ptr() as usize, buffer.len(), 0) })
         .map(|_| ())
 }
-
 
 pub fn resolve_ipv4(hostname: &str) -> Result<[u8; 4]> {
     let mut address = [0u8; 4];
@@ -610,16 +541,13 @@ pub fn resolve_ipv4(hostname: &str) -> Result<[u8; 4]> {
     Ok(address)
 }
 
-
 pub fn send_ethernet_frame(frame: &[u8]) -> Result<usize> {
     checked(unsafe { syscall3(SYS_NET_SEND, frame.as_ptr() as usize, frame.len(), 0) })
 }
 
-
 pub fn receive_ethernet_frame(buffer: &mut [u8]) -> Result<usize> {
     checked(unsafe { syscall3(SYS_NET_RECEIVE, buffer.as_mut_ptr() as usize, buffer.len(), 0) })
 }
-
 
 pub fn wait4(pid: isize, status: &mut i32, options: usize) -> Result<usize> {
     checked(unsafe {
@@ -632,17 +560,13 @@ pub fn wait4(pid: isize, status: &mut i32, options: usize) -> Result<usize> {
     })
 }
 
-
 pub fn kill(pid: usize, signal: usize) -> Result<()> {
     checked(unsafe { syscall3(SYS_KILL, pid, signal, 0) }).map(|_| ())
 }
 
-
-
 pub fn exec(path: &str, argv: &[&CStr], env: &[&CStr]) -> Result<usize> {
     exec_with_stdio(path, argv, env, None, None)
 }
-
 
 pub fn exec_with_stdio(
     path: &str,
@@ -687,7 +611,6 @@ pub fn exec_with_stdio(
         )
     })
 }
-
 
 pub fn exec_sandboxed_with_stdio(
     path: &str,
@@ -751,10 +674,6 @@ impl AllocatorState {
     }
 }
 
-
-
-
-
 pub struct UserAllocator {
     locked: AtomicBool,
     state: UnsafeCell<AllocatorState>,
@@ -763,7 +682,7 @@ pub struct UserAllocator {
 unsafe impl Sync for UserAllocator {}
 
 impl UserAllocator {
-    
+
     pub const fn new() -> Self {
         Self {
             locked: AtomicBool::new(false),
@@ -888,7 +807,6 @@ unsafe impl GlobalAlloc for UserAllocator {
     }
 }
 
-
 pub fn exit(status: i32) -> ! {
     unsafe {
         syscall3(SYS_EXIT, status as usize, 0, 0);
@@ -897,7 +815,6 @@ pub fn exit(status: i32) -> ! {
         core::hint::spin_loop();
     }
 }
-
 
 pub struct Args<'a> {
     argv: *const *const c_char,
@@ -908,8 +825,7 @@ pub struct Args<'a> {
 }
 
 impl<'a> Args<'a> {
-    
-    
+
     #[doc(hidden)]
     pub unsafe fn from_raw(
         len: usize,
@@ -925,7 +841,6 @@ impl<'a> Args<'a> {
         }
     }
 
-    
     pub fn envs(&self) -> EnvVars<'_> {
         EnvVars {
             envp: self.envp,
@@ -954,7 +869,6 @@ impl<'a> Iterator for Args<'a> {
 }
 
 impl ExactSizeIterator for Args<'_> {}
-
 
 pub struct EnvVars<'a> {
     envp: *const *const c_char,
@@ -1012,7 +926,6 @@ impl fmt::Write for BufferedConsoleWriter {
     }
 }
 
-
 pub fn write_fmt(arguments: fmt::Arguments<'_>) -> fmt::Result {
     let mut writer = BufferedConsoleWriter {
         fd: 1,
@@ -1022,7 +935,6 @@ pub fn write_fmt(arguments: fmt::Arguments<'_>) -> fmt::Result {
     writer.write_fmt(arguments)?;
     writer.flush()
 }
-
 
 pub fn write_err_fmt(arguments: fmt::Arguments<'_>) -> fmt::Result {
     let mut writer = BufferedConsoleWriter {
@@ -1034,14 +946,12 @@ pub fn write_err_fmt(arguments: fmt::Arguments<'_>) -> fmt::Result {
     writer.flush()
 }
 
-
 #[macro_export]
 macro_rules! print {
     ($($arg:tt)*) => {{
         let _ = $crate::write_fmt(core::format_args!($($arg)*));
     }};
 }
-
 
 #[macro_export]
 macro_rules! println {
@@ -1051,14 +961,12 @@ macro_rules! println {
     }};
 }
 
-
 #[macro_export]
 macro_rules! eprint {
     ($($arg:tt)*) => {{
         let _ = $crate::write_err_fmt(core::format_args!($($arg)*));
     }};
 }
-
 
 #[macro_export]
 macro_rules! eprintln {
@@ -1067,7 +975,6 @@ macro_rules! eprintln {
         let _ = $crate::write_err_fmt(core::format_args!("{}\n", core::format_args!($($arg)*)));
     }};
 }
-
 
 #[macro_export]
 macro_rules! entry {
@@ -1100,7 +1007,6 @@ extern "C" {
         envp: *const *const c_char,
     ) -> i32;
 }
-
 
 #[no_mangle]
 pub extern "C" fn eonos_runtime_start(initial_stack: *const usize) -> ! {

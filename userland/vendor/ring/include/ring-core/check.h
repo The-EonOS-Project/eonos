@@ -1,27 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef RING_CHECK_H
 #define RING_CHECK_H
-
-
-
-
-
-
-
-
 
 #if !defined(RING_CORE_NOSTDLIBINC)
 # include <assert.h>
@@ -33,15 +11,6 @@
 #  define debug_assert_nonsecret(x) ((void)0)
 # endif
 #endif
-
-
-
-
-
-
-
-
-
 
 #if 0 
 

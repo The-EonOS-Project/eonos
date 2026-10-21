@@ -1,10 +1,3 @@
-
-
-
-
-
-
-
 #![allow(dead_code)]
 
 use core::sync::atomic::{AtomicU64, Ordering};
@@ -14,8 +7,6 @@ use crate::{idt, log_fail, log_ok};
 
 const CHANNEL0_DATA: u16 = 0x40;
 const COMMAND: u16 = 0x43;
-
-
 
 const BASE_FREQUENCY: u32 = 1_193_182;
 
@@ -28,14 +19,8 @@ unsafe fn outb(port: u16, val: u8) {
     core::arch::asm!("out dx, al", in("dx") port, in("al") val, options(nomem, nostack, preserves_flags));
 }
 
-
-
-
-
 pub fn init(hz: u32) {
-    
-    
-    
+
     let hz = hz.clamp(19, 1000);
     let divisor = (BASE_FREQUENCY / hz).clamp(1, 65535) as u16;
 
@@ -62,21 +47,17 @@ pub fn init(hz: u32) {
 
 fn on_tick() {
     TICKS.fetch_add(1, Ordering::Relaxed);
-    
-    
+
     crate::scheduler::tick();
 }
-
 
 pub fn ticks() -> u64 {
     TICKS.load(Ordering::Relaxed)
 }
 
-
 pub fn frequency_hz() -> u64 {
     HZ.load(Ordering::Relaxed)
 }
-
 
 pub fn uptime_ms() -> u64 {
     let hz = frequency_hz();
@@ -85,19 +66,6 @@ pub fn uptime_ms() -> u64 {
     }
     ticks() * 1000 / hz
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 pub fn self_test() {
     let hz = frequency_hz();
@@ -111,13 +79,7 @@ pub fn self_test() {
     let deadline = start + target_ticks;
 
     let tsc_start = rdtsc();
-    
-    
-    
-    
-    
-    
-    
+
     let tsc_timeout = 1u64 << 33;
 
     while ticks() < deadline {

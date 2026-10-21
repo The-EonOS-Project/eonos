@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![cfg(all(target_arch = "aarch64", target_endian = "little"))]
 
 use super::super::super::{inout::AliasingSlices3 as _, n0::N0, LimbSliceError, MAX_LIMBS};
@@ -29,9 +15,7 @@ pub(in super::super::super) fn sqr_mont5(
     n0: &N0,
 ) -> Result<(), LimbSliceError> {
     prefixed_extern! {
-        
-        
-        
+
         fn bn_sqr8x_mont(
             rp: *mut Limb,
             ap: *const Limb,
@@ -45,7 +29,6 @@ pub(in super::super::super) fn sqr_mont5(
     let n = n.as_flattened();
     let num_limbs = NonZeroUsize::new(n.len()).ok_or_else(|| LimbSliceError::too_short(n.len()))?;
 
-    
     if num_limbs.get() > MAX_LIMBS {
         return Err(LimbSliceError::too_long(num_limbs.get()));
     }

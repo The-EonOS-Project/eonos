@@ -1,25 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 #include <ctype.h>
-
 
 #include "deh_main.h"
 #include "i_system.h"
@@ -28,7 +8,6 @@
 #include "v_video.h"
 #include "w_wad.h"
 #include "s_sound.h"
-
 
 #include "d_main.h"
 #include "dstrings.h"
@@ -43,12 +22,6 @@ typedef enum
     F_STAGE_ARTSCREEN,
     F_STAGE_CAST,
 } finalestage_t;
-
-
-
-
-
-
 
 finalestage_t finalestage;
 
@@ -102,9 +75,6 @@ void	F_CastTicker (void);
 boolean F_CastResponder (event_t *ev);
 void	F_CastDrawer (void);
 
-
-
-
 void F_StartFinale (void)
 {
     size_t i;
@@ -123,13 +93,9 @@ void F_StartFinale (void)
         S_ChangeMusic(mus_read_m, true);
     }
 
-    
-
     for (i=0; i<arrlen(textscreens); ++i)
     {
         textscreen_t *screen = &textscreens[i];
-
-        
 
         if (gameversion == exe_chex && screen->mission == doom)
         {
@@ -145,43 +111,34 @@ void F_StartFinale (void)
         }
     }
 
-    
-  
     finaletext = DEH_String(finaletext);
     finaleflat = DEH_String(finaleflat);
-    
+
     finalestage = F_STAGE_TEXT;
     finalecount = 0;
-	
+
 }
-
-
 
 boolean F_Responder (event_t *event)
 {
     if (finalestage == F_STAGE_CAST)
 	return F_CastResponder (event);
-	
+
     return false;
 }
-
-
-
-
 
 void F_Ticker (void)
 {
     size_t		i;
-    
-    
+
     if ( (gamemode == commercial)
       && ( finalecount > 50) )
     {
-      
+
       for (i=0 ; i<MAXPLAYERS ; i++)
 	if (players[i].cmd.buttons)
 	  break;
-				
+
       if (i < MAXPLAYERS)
       {	
 	if (gamemap == 30)
@@ -190,19 +147,18 @@ void F_Ticker (void)
 	  gameaction = ga_worlddone;
       }
     }
-    
-    
+
     finalecount++;
-	
+
     if (finalestage == F_STAGE_CAST)
     {
 	F_CastTicker ();
 	return;
     }
-	
+
     if ( gamemode == commercial)
 	return;
-		
+
     if (finalestage == F_STAGE_TEXT
      && finalecount>strlen (finaletext)*TEXTSPEED + TEXTWAIT)
     {
@@ -214,32 +170,24 @@ void F_Ticker (void)
     }
 }
 
-
-
-
-
-
-
 #include "hu_stuff.h"
 extern	patch_t *hu_font[HU_FONTSIZE];
-
 
 void F_TextWrite (void)
 {
     byte*	src;
     byte*	dest;
-    
+
     int		x,y,w;
     signed int	count;
     char*	ch;
     int		c;
     int		cx;
     int		cy;
-    
-    
+
     src = W_CacheLumpName ( finaleflat , PU_CACHE);
     dest = I_VideoBuffer;
-	
+
     for (y=0 ; y<SCREENHEIGHT ; y++)
     {
 	for (x=0 ; x<SCREENWIDTH/64 ; x++)
@@ -255,12 +203,11 @@ void F_TextWrite (void)
     }
 
     V_MarkRect (0, 0, SCREENWIDTH, SCREENHEIGHT);
-    
-    
+
     cx = 10;
     cy = 10;
     ch = finaletext;
-	
+
     count = ((signed int) finalecount - 10) / TEXTSPEED;
     if (count < 0)
 	count = 0;
@@ -275,27 +222,22 @@ void F_TextWrite (void)
 	    cy += 11;
 	    continue;
 	}
-		
+
 	c = toupper(c) - HU_FONTSTART;
 	if (c < 0 || c> HU_FONTSIZE)
 	{
 	    cx += 4;
 	    continue;
 	}
-		
+
 	w = SHORT (hu_font[c]->width);
 	if (cx+w > SCREENWIDTH)
 	    break;
 	V_DrawPatch(cx, cy, hu_font[c]);
 	cx+=w;
     }
-	
+
 }
-
-
-
-
-
 
 typedef struct
 {
@@ -333,10 +275,6 @@ int		castframes;
 int		castonmelee;
 boolean		castattacking;
 
-
-
-
-
 void F_StartCast (void)
 {
     wipegamestate = -1;		
@@ -351,21 +289,17 @@ void F_StartCast (void)
     S_ChangeMusic(mus_evil, true);
 }
 
-
-
-
-
 void F_CastTicker (void)
 {
     int		st;
     int		sfx;
-	
+
     if (--casttics > 0)
 	return;			
-		
+
     if (caststate->tics == -1 || caststate->nextstate == S_NULL)
     {
-	
+
 	castnum++;
 	castdeath = false;
 	if (castorder[castnum].name == NULL)
@@ -377,14 +311,13 @@ void F_CastTicker (void)
     }
     else
     {
-	
+
 	if (caststate == &states[S_PLAY_ATK1])
 	    goto stopattack;	
 	st = caststate->nextstate;
 	caststate = &states[st];
 	castframes++;
-	
-	
+
 	switch (st)
 	{
 	  case S_PLAY_ATK1:	sfx = sfx_dshtgn; break;
@@ -415,14 +348,14 @@ void F_CastTicker (void)
 	  case S_PAIN_ATK3:	sfx = sfx_sklatk; break;
 	  default: sfx = 0; break;
 	}
-		
+
 	if (sfx)
 	    S_StartSound (NULL, sfx);
     }
-	
+
     if (castframes == 12)
     {
-	
+
 	castattacking = true;
 	if (castonmelee)
 	    caststate=&states[mobjinfo[castorder[castnum].type].meleestate];
@@ -439,7 +372,7 @@ void F_CastTicker (void)
 		    &states[mobjinfo[castorder[castnum].type].missilestate];
 	}
     }
-	
+
     if (castattacking)
     {
 	if (castframes == 24
@@ -451,26 +384,20 @@ void F_CastTicker (void)
 	    caststate = &states[mobjinfo[castorder[castnum].type].seestate];
 	}
     }
-	
+
     casttics = caststate->tics;
     if (casttics == -1)
 	casttics = 15;
 }
 
-
-
-
-
-
 boolean F_CastResponder (event_t* ev)
 {
     if (ev->type != ev_keydown)
 	return false;
-		
+
     if (castdeath)
 	return true;			
-		
-    
+
     castdeath = true;
     caststate = &states[mobjinfo[castorder[castnum].type].deathstate];
     casttics = caststate->tics;
@@ -478,10 +405,9 @@ boolean F_CastResponder (event_t* ev)
     castattacking = false;
     if (mobjinfo[castorder[castnum].type].deathsound)
 	S_StartSound (NULL, mobjinfo[castorder[castnum].type].deathsound);
-	
+
     return true;
 }
-
 
 void F_CastPrint (char* text)
 {
@@ -490,11 +416,10 @@ void F_CastPrint (char* text)
     int		cx;
     int		w;
     int		width;
-    
-    
+
     ch = text;
     width = 0;
-	
+
     while (ch)
     {
 	c = *ch++;
@@ -506,12 +431,11 @@ void F_CastPrint (char* text)
 	    width += 4;
 	    continue;
 	}
-		
+
 	w = SHORT (hu_font[c]->width);
 	width += w;
     }
-    
-    
+
     cx = 160-width/2;
     ch = text;
     while (ch)
@@ -525,18 +449,13 @@ void F_CastPrint (char* text)
 	    cx += 4;
 	    continue;
 	}
-		
+
 	w = SHORT (hu_font[c]->width);
 	V_DrawPatch(cx, 180, hu_font[c]);
 	cx+=w;
     }
-	
+
 }
-
-
-
-
-
 
 void F_CastDrawer (void)
 {
@@ -545,28 +464,22 @@ void F_CastDrawer (void)
     int			lump;
     boolean		flip;
     patch_t*		patch;
-    
-    
+
     V_DrawPatch (0, 0, W_CacheLumpName (DEH_String("BOSSBACK"), PU_CACHE));
 
     F_CastPrint (DEH_String(castorder[castnum].name));
-    
-    
+
     sprdef = &sprites[caststate->sprite];
     sprframe = &sprdef->spriteframes[ caststate->frame & FF_FRAMEMASK];
     lump = sprframe->lump[0];
     flip = (boolean)sprframe->flip[0];
-			
+
     patch = W_CacheLumpNum (lump+firstspritelump, PU_CACHE);
     if (flip)
 	V_DrawPatchFlipped(160, 170, patch);
     else
 	V_DrawPatch(160, 170, patch);
 }
-
-
-
-
 
 void
 F_DrawPatchCol
@@ -579,17 +492,16 @@ F_DrawPatchCol
     byte*	dest;
     byte*	desttop;
     int		count;
-	
+
     column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
     desttop = I_VideoBuffer + x;
 
-    
     while (column->topdelta != 0xff )
     {
 	source = (byte *)column + 3;
 	dest = desttop + column->topdelta*SCREENWIDTH;
 	count = column->length;
-		
+
 	while (count--)
 	{
 	    *dest = *source++;
@@ -598,10 +510,6 @@ F_DrawPatchCol
 	column = (column_t *)(  (byte *)column + column->length + 4 );
     }
 }
-
-
-
-
 
 void F_BunnyScroll (void)
 {
@@ -612,18 +520,18 @@ void F_BunnyScroll (void)
     char	name[10];
     int		stage;
     static int	laststage;
-		
+
     p1 = W_CacheLumpName (DEH_String("PFUB2"), PU_LEVEL);
     p2 = W_CacheLumpName (DEH_String("PFUB1"), PU_LEVEL);
 
     V_MarkRect (0, 0, SCREENWIDTH, SCREENHEIGHT);
-	
+
     scrolled = (320 - ((signed int) finalecount-230)/2);
     if (scrolled > 320)
 	scrolled = 320;
     if (scrolled < 0)
 	scrolled = 0;
-		
+
     for ( x=0 ; x<SCREENWIDTH ; x++)
     {
 	if (x+scrolled < 320)
@@ -631,7 +539,7 @@ void F_BunnyScroll (void)
 	else
 	    F_DrawPatchCol (x, p2, x+scrolled - 320);		
     }
-	
+
     if (finalecount < 1130)
 	return;
     if (finalecount < 1180)
@@ -642,7 +550,7 @@ void F_BunnyScroll (void)
 	laststage = 0;
 	return;
     }
-	
+
     stage = (finalecount-1180) / 5;
     if (stage > 6)
 	stage = 6;
@@ -651,7 +559,7 @@ void F_BunnyScroll (void)
 	S_StartSound (NULL, sfx_pistol);
 	laststage = stage;
     }
-	
+
     DEH_snprintf(name, 10, "END%i", stage);
     V_DrawPatch((SCREENWIDTH - 13 * 8) / 2, 
                 (SCREENHEIGHT - 8 * 8) / 2, 
@@ -661,7 +569,7 @@ void F_BunnyScroll (void)
 static void F_ArtScreenDrawer(void)
 {
     char *lumpname;
-    
+
     if (gameepisode == 3)
     {
         F_BunnyScroll();
@@ -696,9 +604,6 @@ static void F_ArtScreenDrawer(void)
     }
 }
 
-
-
-
 void F_Drawer (void)
 {
     switch (finalestage)
@@ -714,5 +619,4 @@ void F_Drawer (void)
             break;
     }
 }
-
 

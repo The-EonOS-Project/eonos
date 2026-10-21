@@ -1,11 +1,7 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86_64) && defined(__ELF__)
 .text	
-
 
 .section	.rodata
 .align	64
@@ -21,14 +17,11 @@
 .LONE_mont:
 .quad	0x0000000000000001, 0xffffffff00000000, 0xffffffffffffffff, 0x00000000fffffffe
 
-
 .Lord:
 .quad	0xf3b9cac2fc632551, 0xbce6faada7179e84, 0xffffffffffffffff, 0xffffffff00000000
 .LordK:
 .quad	0xccd1c8aaee00bc4f
 .text	
-
-
 
 .globl	ecp_nistz256_neg
 .hidden ecp_nistz256_neg
@@ -88,11 +81,6 @@ _CET_ENDBR
 .cfi_endproc	
 .size	ecp_nistz256_neg,.-ecp_nistz256_neg
 
-
-
-
-
-
 .globl	ecp_nistz256_ord_mul_mont_nohw
 .hidden ecp_nistz256_ord_mul_mont_nohw
 .type	ecp_nistz256_ord_mul_mont_nohw,@function
@@ -125,7 +113,6 @@ _CET_ENDBR
 	leaq	.Lord(%rip),%r14
 	movq	.LordK(%rip),%r15
 
-
 	movq	%rax,%rcx
 	mulq	0(%rsi)
 	movq	%rax,%r8
@@ -152,7 +139,6 @@ _CET_ENDBR
 	movq	%r8,%rax
 	adcq	$0,%rdx
 	movq	%rdx,%r12
-
 
 	mulq	0(%r14)
 	movq	%r8,%rbp
@@ -182,7 +168,6 @@ _CET_ENDBR
 	addq	%r8,%r11
 	adcq	%rbp,%r12
 	adcq	$0,%r13
-
 
 	movq	%rax,%rcx
 	mulq	0(%rsi)
@@ -219,7 +204,6 @@ _CET_ENDBR
 	adcq	%rdx,%r13
 	adcq	$0,%r8
 
-
 	mulq	0(%r14)
 	movq	%r9,%rbp
 	addq	%rax,%rcx
@@ -247,7 +231,6 @@ _CET_ENDBR
 	addq	%r9,%r12
 	adcq	%rbp,%r13
 	adcq	$0,%r8
-
 
 	movq	%rax,%rcx
 	mulq	0(%rsi)
@@ -284,7 +267,6 @@ _CET_ENDBR
 	adcq	%rdx,%r8
 	adcq	$0,%r9
 
-
 	mulq	0(%r14)
 	movq	%r10,%rbp
 	addq	%rax,%rcx
@@ -312,7 +294,6 @@ _CET_ENDBR
 	addq	%r10,%r13
 	adcq	%rbp,%r8
 	adcq	$0,%r9
-
 
 	movq	%rax,%rcx
 	mulq	0(%rsi)
@@ -349,7 +330,6 @@ _CET_ENDBR
 	adcq	%rdx,%r9
 	adcq	$0,%r10
 
-
 	mulq	0(%r14)
 	movq	%r11,%rbp
 	addq	%rax,%rcx
@@ -376,7 +356,6 @@ _CET_ENDBR
 	addq	%r11,%r8
 	adcq	%rbp,%r9
 	adcq	$0,%r10
-
 
 	movq	%r12,%rsi
 	subq	0(%r14),%r12
@@ -416,12 +395,6 @@ _CET_ENDBR
 	ret
 .cfi_endproc	
 .size	ecp_nistz256_ord_mul_mont_nohw,.-ecp_nistz256_ord_mul_mont_nohw
-
-
-
-
-
-
 
 .globl	ecp_nistz256_ord_sqr_mont_nohw
 .hidden ecp_nistz256_ord_sqr_mont_nohw
@@ -482,12 +455,10 @@ _CET_ENDBR
 	adcq	$0,%rdx
 	movq	%rdx,%r12
 
-
 	mulq	%r14
 	movq	%rax,%r13
 	movq	%r14,%rax
 	movq	%rdx,%r14
-
 
 	mulq	%rbp
 	addq	%rax,%r11
@@ -503,7 +474,6 @@ _CET_ENDBR
 	adcq	%rdx,%r13
 	adcq	$0,%r14
 
-
 	xorq	%r15,%r15
 	movq	%r8,%rax
 	addq	%r9,%r9
@@ -513,7 +483,6 @@ _CET_ENDBR
 	adcq	%r13,%r13
 	adcq	%r14,%r14
 	adcq	$0,%r15
-
 
 	mulq	%rax
 	movq	%rax,%r8
@@ -542,7 +511,6 @@ _CET_ENDBR
 	adcq	%rax,%r14
 	movq	0(%rsi),%rax
 	adcq	%rdx,%r15
-
 
 	mulq	%r8
 	movq	%r8,%rbp
@@ -574,7 +542,6 @@ _CET_ENDBR
 	addq	%rbp,%r11
 	adcq	$0,%r8
 
-
 	mulq	%r9
 	movq	%r9,%rbp
 	addq	%rax,%rcx
@@ -604,7 +571,6 @@ _CET_ENDBR
 
 	addq	%rbp,%r8
 	adcq	$0,%r9
-
 
 	mulq	%r10
 	movq	%r10,%rbp
@@ -636,7 +602,6 @@ _CET_ENDBR
 	addq	%rbp,%r9
 	adcq	$0,%r10
 
-
 	mulq	%r11
 	movq	%r11,%rbp
 	addq	%rax,%rcx
@@ -663,7 +628,6 @@ _CET_ENDBR
 	addq	%rbp,%r10
 	adcq	$0,%r11
 
-
 	xorq	%rdx,%rdx
 	addq	%r12,%r8
 	adcq	%r13,%r9
@@ -672,7 +636,6 @@ _CET_ENDBR
 	adcq	%r15,%r11
 	movq	%r9,%rax
 	adcq	$0,%rdx
-
 
 	subq	0(%rsi),%r8
 	movq	%r10,%r14
@@ -755,7 +718,6 @@ _CET_ENDBR
 	leaq	.Lord-128(%rip),%r14
 	movq	.LordK(%rip),%r15
 
-
 	mulxq	%r9,%r8,%r9
 	mulxq	%r10,%rcx,%r10
 	mulxq	%r11,%rbp,%r11
@@ -766,7 +728,6 @@ _CET_ENDBR
 	adcq	%rbp,%r10
 	adcq	%rcx,%r11
 	adcq	$0,%r12
-
 
 	xorq	%r13,%r13
 	mulxq	0+128(%r14),%rcx,%rbp
@@ -788,7 +749,6 @@ _CET_ENDBR
 	adcxq	%r8,%r12
 	adoxq	%r8,%r13
 	adcq	$0,%r13
-
 
 	mulxq	0+128(%rsi),%rcx,%rbp
 	adcxq	%rcx,%r9
@@ -812,7 +772,6 @@ _CET_ENDBR
 	adoxq	%r8,%r8
 	adcq	$0,%r8
 
-
 	mulxq	0+128(%r14),%rcx,%rbp
 	adcxq	%rcx,%r9
 	adoxq	%rbp,%r10
@@ -832,7 +791,6 @@ _CET_ENDBR
 	adcxq	%r9,%r13
 	adoxq	%r9,%r8
 	adcq	$0,%r8
-
 
 	mulxq	0+128(%rsi),%rcx,%rbp
 	adcxq	%rcx,%r10
@@ -856,7 +814,6 @@ _CET_ENDBR
 	adoxq	%r9,%r9
 	adcq	$0,%r9
 
-
 	mulxq	0+128(%r14),%rcx,%rbp
 	adcxq	%rcx,%r10
 	adoxq	%rbp,%r11
@@ -876,7 +833,6 @@ _CET_ENDBR
 	adcxq	%r10,%r8
 	adoxq	%r10,%r9
 	adcq	$0,%r9
-
 
 	mulxq	0+128(%rsi),%rcx,%rbp
 	adcxq	%rcx,%r11
@@ -900,7 +856,6 @@ _CET_ENDBR
 	adoxq	%r10,%r10
 	adcq	$0,%r10
 
-
 	mulxq	0+128(%r14),%rcx,%rbp
 	adcxq	%rcx,%r11
 	adoxq	%rbp,%r12
@@ -922,8 +877,6 @@ _CET_ENDBR
 	adcxq	%r11,%r9
 	adoxq	%r11,%r10
 	adcq	$0,%r10
-
-
 
 	movq	%r8,%rcx
 	subq	0(%r14),%r12
@@ -1031,7 +984,6 @@ _CET_ENDBR
 	adcxq	%r10,%r10
 	adoxq	%r15,%r14
 
-
 	mulxq	%rdx,%r8,%rbp
 .byte	102,72,15,126,202
 	adcxq	%r11,%r11
@@ -1053,7 +1005,6 @@ _CET_ENDBR
 	adoxq	%rcx,%r14
 	adoxq	%rax,%r15
 
-
 	movq	%r8,%rdx
 	mulxq	32(%rsi),%rdx,%rcx
 
@@ -1072,7 +1023,6 @@ _CET_ENDBR
 	adoxq	%rbp,%r8
 	adcxq	%rax,%r8
 
-
 	movq	%r9,%rdx
 	mulxq	32(%rsi),%rdx,%rcx
 
@@ -1089,7 +1039,6 @@ _CET_ENDBR
 	adoxq	%rcx,%r8
 	adcxq	%rbp,%r9
 	adoxq	%rax,%r9
-
 
 	movq	%r10,%rdx
 	mulxq	32(%rsi),%rdx,%rcx
@@ -1108,7 +1057,6 @@ _CET_ENDBR
 	adoxq	%rbp,%r10
 	adcxq	%rax,%r10
 
-
 	movq	%r11,%rdx
 	mulxq	32(%rsi),%rdx,%rcx
 
@@ -1126,7 +1074,6 @@ _CET_ENDBR
 	adcxq	%rbp,%r11
 	adoxq	%rax,%r11
 
-
 	addq	%r8,%r12
 	adcq	%r13,%r9
 	movq	%r12,%rdx
@@ -1134,7 +1081,6 @@ _CET_ENDBR
 	adcq	%r15,%r11
 	movq	%r9,%r14
 	adcq	$0,%rax
-
 
 	subq	0(%rsi),%r12
 	movq	%r10,%r15
@@ -1178,11 +1124,6 @@ _CET_ENDBR
 	ret
 .cfi_endproc	
 .size	ecp_nistz256_ord_sqr_mont_adx,.-ecp_nistz256_ord_sqr_mont_adx
-
-
-
-
-
 
 .globl	ecp_nistz256_mul_mont_nohw
 .hidden ecp_nistz256_mul_mont_nohw
@@ -1243,7 +1184,6 @@ _CET_ENDBR
 __ecp_nistz256_mul_montq:
 .cfi_startproc	
 
-
 	movq	%rax,%rbp
 	mulq	%r9
 	movq	.Lpoly+8(%rip),%r14
@@ -1271,15 +1211,6 @@ __ecp_nistz256_mul_montq:
 	xorq	%r13,%r13
 	movq	%rdx,%r12
 
-
-
-
-
-
-
-
-
-
 	movq	%r8,%rbp
 	shlq	$32,%r8
 	mulq	%r15
@@ -1291,8 +1222,6 @@ __ecp_nistz256_mul_montq:
 	adcq	%rdx,%r12
 	adcq	$0,%r13
 	xorq	%r8,%r8
-
-
 
 	movq	%rax,%rbp
 	mulq	0(%rsi)
@@ -1325,8 +1254,6 @@ __ecp_nistz256_mul_montq:
 	adcq	%rdx,%r13
 	adcq	$0,%r8
 
-
-
 	movq	%r9,%rbp
 	shlq	$32,%r9
 	mulq	%r15
@@ -1338,8 +1265,6 @@ __ecp_nistz256_mul_montq:
 	adcq	%rdx,%r13
 	adcq	$0,%r8
 	xorq	%r9,%r9
-
-
 
 	movq	%rax,%rbp
 	mulq	0(%rsi)
@@ -1372,8 +1297,6 @@ __ecp_nistz256_mul_montq:
 	adcq	%rdx,%r8
 	adcq	$0,%r9
 
-
-
 	movq	%r10,%rbp
 	shlq	$32,%r10
 	mulq	%r15
@@ -1385,8 +1308,6 @@ __ecp_nistz256_mul_montq:
 	adcq	%rdx,%r8
 	adcq	$0,%r9
 	xorq	%r10,%r10
-
-
 
 	movq	%rax,%rbp
 	mulq	0(%rsi)
@@ -1419,8 +1340,6 @@ __ecp_nistz256_mul_montq:
 	adcq	%rdx,%r9
 	adcq	$0,%r10
 
-
-
 	movq	%r11,%rbp
 	shlq	$32,%r11
 	mulq	%r15
@@ -1432,8 +1351,6 @@ __ecp_nistz256_mul_montq:
 	adcq	%rdx,%r9
 	movq	%r13,%rbp
 	adcq	$0,%r10
-
-
 
 	subq	$-1,%r12
 	movq	%r8,%rbx
@@ -1455,13 +1372,6 @@ __ecp_nistz256_mul_montq:
 	ret
 .cfi_endproc	
 .size	__ecp_nistz256_mul_montq,.-__ecp_nistz256_mul_montq
-
-
-
-
-
-
-
 
 .globl	ecp_nistz256_sqr_mont_nohw
 .hidden ecp_nistz256_sqr_mont_nohw
@@ -1537,7 +1447,6 @@ __ecp_nistz256_sqr_montq:
 	adcq	$0,%rdx
 	movq	%rdx,%r12
 
-
 	mulq	%r14
 	addq	%rax,%r11
 	movq	%r8,%rax
@@ -1551,7 +1460,6 @@ __ecp_nistz256_sqr_montq:
 	addq	%rbp,%r12
 	movq	%rdx,%r13
 	adcq	$0,%r13
-
 
 	mulq	%r15
 	xorq	%r15,%r15
@@ -1596,9 +1504,6 @@ __ecp_nistz256_sqr_montq:
 	movq	.Lpoly+8(%rip),%rsi
 	movq	.Lpoly+24(%rip),%rbp
 
-
-
-
 	movq	%r8,%rcx
 	shlq	$32,%r8
 	mulq	%rbp
@@ -1608,8 +1513,6 @@ __ecp_nistz256_sqr_montq:
 	adcq	%rax,%r11
 	movq	%r9,%rax
 	adcq	$0,%rdx
-
-
 
 	movq	%r9,%rcx
 	shlq	$32,%r9
@@ -1622,8 +1525,6 @@ __ecp_nistz256_sqr_montq:
 	movq	%r10,%rax
 	adcq	$0,%rdx
 
-
-
 	movq	%r10,%rcx
 	shlq	$32,%r10
 	movq	%rdx,%r9
@@ -1635,8 +1536,6 @@ __ecp_nistz256_sqr_montq:
 	movq	%r11,%rax
 	adcq	$0,%rdx
 
-
-
 	movq	%r11,%rcx
 	shlq	$32,%r11
 	movq	%rdx,%r10
@@ -1647,8 +1546,6 @@ __ecp_nistz256_sqr_montq:
 	adcq	%rax,%r10
 	adcq	$0,%rdx
 	xorq	%r11,%r11
-
-
 
 	addq	%r8,%r12
 	adcq	%r9,%r13
@@ -1738,7 +1635,6 @@ _CET_ENDBR
 __ecp_nistz256_mul_montx:
 .cfi_startproc	
 
-
 	mulxq	%r9,%r8,%r9
 	mulxq	%r10,%rcx,%r10
 	movq	$32,%r14
@@ -1754,8 +1650,6 @@ __ecp_nistz256_mul_montx:
 	shrxq	%r14,%r8,%rcx
 	adcq	$0,%r12
 
-
-
 	addq	%rbp,%r9
 	adcq	%rcx,%r10
 
@@ -1765,8 +1659,6 @@ __ecp_nistz256_mul_montx:
 	adcq	%rbp,%r12
 	adcq	$0,%r13
 	xorq	%r8,%r8
-
-
 
 	mulxq	0+128(%rsi),%rcx,%rbp
 	adcxq	%rcx,%r9
@@ -1791,8 +1683,6 @@ __ecp_nistz256_mul_montx:
 	adoxq	%r8,%r8
 	adcq	$0,%r8
 
-
-
 	addq	%rcx,%r10
 	adcq	%rbp,%r11
 
@@ -1802,8 +1692,6 @@ __ecp_nistz256_mul_montx:
 	adcq	%rbp,%r13
 	adcq	$0,%r8
 	xorq	%r9,%r9
-
-
 
 	mulxq	0+128(%rsi),%rcx,%rbp
 	adcxq	%rcx,%r10
@@ -1828,8 +1716,6 @@ __ecp_nistz256_mul_montx:
 	adoxq	%r9,%r9
 	adcq	$0,%r9
 
-
-
 	addq	%rcx,%r11
 	adcq	%rbp,%r12
 
@@ -1839,8 +1725,6 @@ __ecp_nistz256_mul_montx:
 	adcq	%rbp,%r8
 	adcq	$0,%r9
 	xorq	%r10,%r10
-
-
 
 	mulxq	0+128(%rsi),%rcx,%rbp
 	adcxq	%rcx,%r11
@@ -1865,8 +1749,6 @@ __ecp_nistz256_mul_montx:
 	adoxq	%r10,%r10
 	adcq	$0,%r10
 
-
-
 	addq	%rcx,%r12
 	adcq	%rbp,%r13
 
@@ -1877,8 +1759,6 @@ __ecp_nistz256_mul_montx:
 	movq	%r13,%rdx
 	adcq	%rbp,%r9
 	adcq	$0,%r10
-
-
 
 	xorl	%eax,%eax
 	movq	%r8,%rcx
@@ -1969,7 +1849,6 @@ __ecp_nistz256_sqr_montx:
 	adcq	$0,%r12
 	xorq	%r13,%r13
 
-
 	mulxq	%r15,%rcx,%rbp
 	adcxq	%rcx,%r11
 	adoxq	%rbp,%r12
@@ -1979,7 +1858,6 @@ __ecp_nistz256_sqr_montx:
 	adcxq	%rcx,%r12
 	adoxq	%rbp,%r13
 	adcq	$0,%r13
-
 
 	mulxq	%r8,%rcx,%r14
 	movq	0+128(%rsi),%rdx
@@ -2016,7 +1894,6 @@ __ecp_nistz256_sqr_montx:
 	shrxq	%rsi,%r8,%rax
 	movq	%rdx,%rbp
 
-
 	addq	%rcx,%r9
 	adcq	%rax,%r10
 
@@ -2025,7 +1902,6 @@ __ecp_nistz256_sqr_montx:
 	shlxq	%rsi,%r9,%rcx
 	adcq	$0,%r8
 	shrxq	%rsi,%r9,%rax
-
 
 	addq	%rcx,%r10
 	adcq	%rax,%r11
@@ -2036,7 +1912,6 @@ __ecp_nistz256_sqr_montx:
 	adcq	$0,%r9
 	shrxq	%rsi,%r10,%rax
 
-
 	addq	%rcx,%r11
 	adcq	%rax,%r8
 
@@ -2045,7 +1920,6 @@ __ecp_nistz256_sqr_montx:
 	shlxq	%rsi,%r11,%rcx
 	adcq	$0,%r10
 	shrxq	%rsi,%r11,%rax
-
 
 	addq	%rcx,%r8
 	adcq	%rax,%r9
@@ -2084,7 +1958,6 @@ __ecp_nistz256_sqr_montx:
 	ret
 .cfi_endproc	
 .size	__ecp_nistz256_sqr_montx,.-__ecp_nistz256_sqr_montx
-
 
 .globl	ecp_nistz256_select_w5_nohw
 .hidden ecp_nistz256_select_w5_nohw
@@ -2148,8 +2021,6 @@ _CET_ENDBR
 .LSEH_end_ecp_nistz256_select_w5_nohw:
 .size	ecp_nistz256_select_w5_nohw,.-ecp_nistz256_select_w5_nohw
 
-
-
 .globl	ecp_nistz256_select_w7_nohw
 .hidden ecp_nistz256_select_w7_nohw
 .type	ecp_nistz256_select_w7_nohw,@function
@@ -2200,7 +2071,6 @@ _CET_ENDBR
 .cfi_endproc	
 .LSEH_end_ecp_nistz256_select_w7_nohw:
 .size	ecp_nistz256_select_w7_nohw,.-ecp_nistz256_select_w7_nohw
-
 
 .globl	ecp_nistz256_select_w5_avx2
 .hidden ecp_nistz256_select_w5_avx2
@@ -2266,8 +2136,6 @@ _CET_ENDBR
 .LSEH_end_ecp_nistz256_select_w5_avx2:
 .size	ecp_nistz256_select_w5_avx2,.-ecp_nistz256_select_w5_avx2
 
-
-
 .globl	ecp_nistz256_select_w7_avx2
 .hidden ecp_nistz256_select_w7_avx2
 .type	ecp_nistz256_select_w7_avx2,@function
@@ -2287,7 +2155,6 @@ _CET_ENDBR
 
 	vmovd	%edx,%xmm1
 	vpermd	%ymm1,%ymm2,%ymm1
-
 
 	movq	$21,%rax
 .Lselect_loop_avx2_w7:
@@ -2326,7 +2193,6 @@ _CET_ENDBR
 
 	decq	%rax
 	jnz	.Lselect_loop_avx2_w7
-
 
 	vmovdqa	0(%rsi),%ymm5
 	vmovdqa	32(%rsi),%ymm6
@@ -2884,15 +2750,8 @@ _CET_ENDBR
 .byte	0x3e
 	jnz	.Ladd_proceedq
 
-
-
 	testq	%r9,%r9
 	jz	.Ladd_doubleq
-
-
-
-
-
 
 .byte	102,72,15,126,199
 	pxor	%xmm0,%xmm0
@@ -2970,9 +2829,6 @@ _CET_ENDBR
 	movq	24+32(%rsp),%r12
 	leaq	192(%rsp),%rdi
 	call	__ecp_nistz256_mul_montq
-
-
-
 
 	xorq	%r11,%r11
 	addq	%r12,%r12
@@ -3301,9 +3157,6 @@ _CET_ENDBR
 	movq	24+128(%rsp),%r12
 	leaq	0(%rsp),%rdi
 	call	__ecp_nistz256_mul_montq
-
-
-
 
 	xorq	%r11,%r11
 	addq	%r12,%r12
@@ -4012,15 +3865,8 @@ _CET_ENDBR
 .byte	0x3e
 	jnz	.Ladd_proceedx
 
-
-
 	testq	%r9,%r9
 	jz	.Ladd_doublex
-
-
-
-
-
 
 .byte	102,72,15,126,199
 	pxor	%xmm0,%xmm0
@@ -4098,9 +3944,6 @@ _CET_ENDBR
 	movq	24+32(%rsp),%r12
 	leaq	192(%rsp),%rdi
 	call	__ecp_nistz256_mul_montx
-
-
-
 
 	xorq	%r11,%r11
 	addq	%r12,%r12
@@ -4429,9 +4272,6 @@ _CET_ENDBR
 	movq	24+128(%rsp),%r12
 	leaq	0(%rsp),%rdi
 	call	__ecp_nistz256_mul_montx
-
-
-
 
 	xorq	%r11,%r11
 	addq	%r12,%r12

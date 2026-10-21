@@ -1,19 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::{c, error};
 use core::{ffi::c_int, num::NonZeroUsize};
 
@@ -22,7 +6,6 @@ mod leaky;
 mod word;
 
 pub(crate) use self::{boolmask::BoolMask, leaky::LeakyWord, word::Word};
-
 
 pub fn verify_slices_are_equal(a: &[u8], b: &[u8]) -> Result<(), error::Unspecified> {
     let len = a.len(); 
@@ -33,8 +16,7 @@ pub fn verify_slices_are_equal(a: &[u8], b: &[u8]) -> Result<(), error::Unspecif
         Some(len) => {
             let a = a.as_ptr();
             let b = b.as_ptr();
-            
-            
+
             let result = unsafe { CRYPTO_memcmp(a, b, len) };
             match result {
                 0 => Ok(()),
@@ -60,8 +42,6 @@ pub(crate) fn xor_16(a: [u8; 16], b: [u8; 16]) -> [u8; 16] {
 pub(crate) fn xor_assign<'a>(a: impl IntoIterator<Item = &'a mut u8>, b: u8) {
     a.into_iter().for_each(|a| *a ^= b);
 }
-
-
 
 #[inline(always)]
 pub(crate) fn xor_assign_at_start<'a>(
@@ -95,7 +75,6 @@ mod tests {
             let mut out = rand::generate::<[u8; 256]>(&rng)?.expose();
             let input = rand::generate::<[u8; 256]>(&rng)?.expose();
 
-            
             let b = (rand::generate::<[u8; 1]>(&rng)?.expose()[0] & 0x0f) == 0;
 
             let ref_in = input;
@@ -125,7 +104,6 @@ mod tests {
             let mut out = rand::generate::<[u8; 256]>(&rng)?.expose();
             let input = rand::generate::<[u8; 256]>(&rng)?.expose();
 
-            
             let b = (rand::generate::<[u8; 1]>(&rng)?.expose()[0] & 0x0f) != 0;
 
             let ref_in = input;

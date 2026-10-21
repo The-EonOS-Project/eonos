@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::{
     super::{MAX_LIMBS, MIN_LIMBS},
     BoxedLimbs, Modulus, PublicModulus,
@@ -21,7 +7,6 @@ use crate::{
     error,
     limb::{self, Limb, LIMB_BYTES},
 };
-
 
 pub(crate) struct OwnedModulusValue<M> {
     limbs: BoxedLimbs<M>, 
@@ -48,10 +33,7 @@ impl<M> OwnedModulusValue<M> {
         if num_limbs > MAX_LIMBS {
             return Err(error::KeyRejected::too_large());
         }
-        
 
-        
-        
         if untrusted::Reader::new(input).peek(0) {
             return Err(error::KeyRejected::invalid_encoding());
         }

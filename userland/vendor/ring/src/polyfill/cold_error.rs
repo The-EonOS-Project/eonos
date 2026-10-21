@@ -1,41 +1,5 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 macro_rules! cold_exhaustive_error {
-    
+
     {
         struct $mod_name:ident::$Error:ident with $vis:vis constructor {
             $field:ident: $ValueType:ty
@@ -56,7 +20,7 @@ macro_rules! cold_exhaustive_error {
             }
         }
     };
-    
+
     {
         struct $mod_name:ident::$Error:ident {
             $field:ident: $ValueType:ty
@@ -69,7 +33,6 @@ macro_rules! cold_exhaustive_error {
         }
     };
 
-    
     {
         enum $mod_name:ident::$Error:ident {
             $(

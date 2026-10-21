@@ -1,16 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![allow(dead_code)]
 
 use core::cell::UnsafeCell;
@@ -19,7 +6,6 @@ use core::sync::atomic::{AtomicBool, AtomicI64, Ordering};
 
 use crate::scheduler::WaitQueue;
 use crate::sync::IrqMutex;
-
 
 pub struct Mutex<T> {
     locked: AtomicBool,
@@ -43,19 +29,13 @@ impl<T> Mutex<T> {
         }
     }
 
-    
     pub fn lock(&self) -> MutexGuard<'_, T> {
-        
-        
-        
-        
-        
+
         self.queue
             .wait_until(|| !self.locked.swap(true, Ordering::Acquire));
         MutexGuard { mutex: self }
     }
 
-    
     pub fn try_lock(&self) -> Option<MutexGuard<'_, T>> {
         if !self.locked.swap(true, Ordering::Acquire) {
             Some(MutexGuard { mutex: self })
@@ -81,14 +61,10 @@ impl<T> DerefMut for MutexGuard<'_, T> {
 impl<T> Drop for MutexGuard<'_, T> {
     fn drop(&mut self) {
         self.mutex.locked.store(false, Ordering::Release);
-        
-        
-        
+
         self.mutex.queue.wake_one();
     }
 }
-
-
 
 pub struct Semaphore {
     count: AtomicI64,
@@ -105,9 +81,7 @@ impl Semaphore {
 
     pub fn acquire(&self) {
         self.queue.wait_until(|| {
-            
-            
-            
+
             let mut cur = self.count.load(Ordering::Relaxed);
             loop {
                 if cur <= 0 {
@@ -126,7 +100,6 @@ impl Semaphore {
         });
     }
 
-    
     pub fn try_acquire(&self) -> bool {
         let mut cur = self.count.load(Ordering::Relaxed);
         while cur > 0 {
@@ -153,10 +126,6 @@ impl Semaphore {
     }
 }
 
-
-
-
-
 use core::sync::atomic::AtomicU64;
 
 use crate::scheduler;
@@ -172,8 +141,7 @@ const MUTEX_ITERS: u64 = 200;
 fn mutex_worker() {
     for _ in 0..MUTEX_ITERS {
         let mut guard = TEST_MUTEX.lock();
-        
-        
+
         let before = *guard;
         scheduler::yield_now(); 
         *guard = before + 1;
@@ -213,7 +181,7 @@ fn sem_worker() {
 }
 
 pub fn self_test() {
-    
+
     *MUTEX_DONE.lock() = 0;
     for _ in 0..MUTEX_WORKERS {
         if scheduler::spawn("mutex-worker", mutex_worker).is_none() {
@@ -246,7 +214,6 @@ pub fn self_test() {
         return;
     }
 
-    
     *SEM_DONE.lock() = 0;
     SEM_INSIDE.store(0, Ordering::SeqCst);
     SEM_MAX_INSIDE.store(0, Ordering::SeqCst);

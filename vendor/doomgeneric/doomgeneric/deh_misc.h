@@ -1,20 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef DEH_MISC_H
 #define DEH_MISC_H
 
@@ -57,8 +40,6 @@ extern int deh_bfg_cells_per_shot;
 extern int deh_species_infighting;           
 
 #else
-
-
 
 #define deh_initial_health      DEH_DEFAULT_INITIAL_HEALTH
 #define deh_initial_bullets     DEH_DEFAULT_INITIAL_BULLETS

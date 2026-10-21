@@ -1,29 +1,7 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __D_ITEMS__
 #define __D_ITEMS__
 
 #include "doomdef.h"
-
-
-
 
 typedef struct
 {

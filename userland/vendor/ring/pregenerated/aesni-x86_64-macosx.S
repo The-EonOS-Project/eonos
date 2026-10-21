@@ -1,6 +1,3 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86_64) && defined(__APPLE__)
@@ -35,8 +32,6 @@ L$enc_loop2:
 .byte	102,15,56,221,216
 	ret
 
-
-
 .p2align	4
 _aesni_encrypt3:
 
@@ -70,8 +65,6 @@ L$enc_loop3:
 .byte	102,15,56,221,216
 .byte	102,15,56,221,224
 	ret
-
-
 
 .p2align	4
 _aesni_encrypt4:
@@ -112,8 +105,6 @@ L$enc_loop4:
 .byte	102,15,56,221,224
 .byte	102,15,56,221,232
 	ret
-
-
 
 .p2align	4
 _aesni_encrypt6:
@@ -168,8 +159,6 @@ L$enc_loop6_enter:
 .byte	102,15,56,221,240
 .byte	102,15,56,221,248
 	ret
-
-
 
 .p2align	4
 _aesni_encrypt8:
@@ -235,7 +224,6 @@ L$enc_loop8_enter:
 .byte	102,68,15,56,221,200
 	ret
 
-
 .globl	_aes_hw_ctr32_encrypt_blocks
 .private_extern _aes_hw_ctr32_encrypt_blocks
 
@@ -248,8 +236,6 @@ _CET_ENDBR
 #endif
 	cmpq	$1,%rdx
 	jne	L$ctr32_bulk
-
-
 
 	movups	(%r8),%xmm2
 	movups	(%rdi),%xmm3
@@ -281,9 +267,6 @@ L$ctr32_bulk:
 
 	subq	$128,%rsp
 	andq	$-16,%rsp
-
-
-
 
 	movdqu	(%r8),%xmm2
 	movdqu	(%rcx),%xmm0
@@ -489,7 +472,6 @@ L$ctr32_loop8:
 .byte	102,68,15,56,220,200
 	movups	192-128(%rcx),%xmm0
 
-
 .byte	102,15,56,220,209
 .byte	102,15,56,220,217
 .byte	102,15,56,220,225
@@ -581,12 +563,10 @@ L$ctr32_enc_done:
 
 L$ctr32_tail:
 
-
 	leaq	16(%rcx),%rcx
 	cmpq	$4,%rdx
 	jb	L$ctr32_loop3
 	je	L$ctr32_loop4
-
 
 	shll	$4,%eax
 	movdqa	96(%rsp),%xmm8
@@ -724,13 +704,11 @@ L$ctr32_done:
 L$ctr32_epilogue:
 	ret
 
-
 .globl	_aes_hw_set_encrypt_key_base
 .private_extern _aes_hw_set_encrypt_key_base
 
 .p2align	4
 _aes_hw_set_encrypt_key_base:
-
 
 _CET_ENDBR
 #ifdef BORINGSSL_DISPATCH_TEST
@@ -738,14 +716,11 @@ _CET_ENDBR
 #endif
 	subq	$8,%rsp
 
-
-
 	movups	(%rdi),%xmm0
 	xorps	%xmm4,%xmm4
 	leaq	16(%rdx),%rax
 	cmpl	$256,%esi
 	je	L$14rounds
-
 
 	cmpl	$128,%esi
 	jne	L$bad_keybits
@@ -778,8 +753,6 @@ L$10rounds:
 	movl	%esi,80(%rax)
 	xorl	%eax,%eax
 	jmp	L$enc_key_ret
-
-
 
 .p2align	4
 L$14rounds:
@@ -834,8 +807,6 @@ L$enc_key_ret:
 
 	ret
 
-
-
 .p2align	4
 L$key_expansion_128:
 
@@ -849,7 +820,6 @@ L$key_expansion_128_cold:
 	shufps	$255,%xmm1,%xmm1
 	xorps	%xmm1,%xmm0
 	ret
-
 
 .p2align	4
 L$key_expansion_256a:
@@ -865,7 +835,6 @@ L$key_expansion_256a_cold:
 	xorps	%xmm1,%xmm0
 	ret
 
-
 .p2align	4
 L$key_expansion_256b:
 
@@ -880,22 +849,17 @@ L$key_expansion_256b:
 	xorps	%xmm1,%xmm2
 	ret
 
-
-
 .globl	_aes_hw_set_encrypt_key_alt
 .private_extern _aes_hw_set_encrypt_key_alt
 
 .p2align	4
 _aes_hw_set_encrypt_key_alt:
 
-
 _CET_ENDBR
 #ifdef BORINGSSL_DISPATCH_TEST
 	movb	$1,BORINGSSL_function_hit+3(%rip)
 #endif
 	subq	$8,%rsp
-
-
 
 	movups	(%rdi),%xmm0
 	xorps	%xmm4,%xmm4
@@ -972,8 +936,6 @@ L$oop_key128:
 	xorl	%eax,%eax
 	jmp	L$enc_key_ret_alt
 
-
-
 .p2align	4
 L$14rounds_alt:
 	movups	16(%rdi),%xmm2
@@ -1044,8 +1006,6 @@ L$enc_key_ret_alt:
 	addq	$8,%rsp
 
 	ret
-
-
 
 .section	__DATA,__const
 .p2align	6

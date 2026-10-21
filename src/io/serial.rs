@@ -37,11 +37,6 @@ impl SerialPort {
         unsafe { outb(self.port, byte) };
     }
 
-    
-    
-    
-    
-    
     pub fn try_read_byte(&mut self) -> Option<u8> {
         unsafe {
             if inb(self.port + 5) & 0x01 != 0 {

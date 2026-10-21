@@ -1,26 +1,7 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::{
     aead::{aes, chacha},
     cpu, error, hkdf,
 };
-
 
 pub struct HeaderProtectionKey {
     inner: KeyInner,
@@ -44,9 +25,7 @@ impl From<hkdf::Okm<'_, &'static Algorithm>> for HeaderProtectionKey {
 }
 
 impl HeaderProtectionKey {
-    
-    
-    
+
     pub fn new(
         algorithm: &'static Algorithm,
         key_bytes: &[u8],
@@ -57,9 +36,6 @@ impl HeaderProtectionKey {
         })
     }
 
-    
-    
-    
     pub fn new_mask(&self, sample: &[u8]) -> Result<[u8; 5], error::Unspecified> {
         let sample = <&[u8; SAMPLE_LEN]>::try_from(sample)?;
 
@@ -67,7 +43,6 @@ impl HeaderProtectionKey {
         Ok(out)
     }
 
-    
     #[inline(always)]
     pub fn algorithm(&self) -> &'static Algorithm {
         self.algorithm
@@ -76,9 +51,7 @@ impl HeaderProtectionKey {
 
 const SAMPLE_LEN: usize = super::TAG_LEN;
 
-
 pub type Sample = [u8; SAMPLE_LEN];
-
 
 pub struct Algorithm {
     init: fn(key: &[u8], cpu_features: cpu::Features) -> Result<KeyInner, error::Unspecified>,
@@ -97,13 +70,12 @@ impl hkdf::KeyType for &'static Algorithm {
 }
 
 impl Algorithm {
-    
+
     #[inline(always)]
     pub fn key_len(&self) -> usize {
         self.key_len
     }
 
-    
     #[inline(always)]
     pub fn sample_len(&self) -> usize {
         SAMPLE_LEN
@@ -127,14 +99,12 @@ impl PartialEq for Algorithm {
 
 impl Eq for Algorithm {}
 
-
 pub static AES_128: Algorithm = Algorithm {
     key_len: 16,
     init: aes_init_128,
     new_mask: aes_new_mask,
     id: AlgorithmID::AES_128,
 };
-
 
 pub static AES_256: Algorithm = Algorithm {
     key_len: 32,
@@ -163,7 +133,6 @@ fn aes_new_mask(key: &KeyInner, sample: Sample) -> [u8; 5] {
 
     aes_key.new_mask(sample)
 }
-
 
 pub static CHACHA20: Algorithm = Algorithm {
     key_len: chacha::KEY_LEN,

@@ -1,11 +1,7 @@
-
-
-
 #include <ring-core/asm_base.h>
 
 #if !defined(OPENSSL_NO_ASM) && defined(OPENSSL_X86_64) && defined(__APPLE__)
 .text	
-
 
 .p2align	5
 _aesni_ctr32_ghash_6x:
@@ -38,22 +34,6 @@ L$resume_ctr32:
 	vpxor	%xmm15,%xmm12,%xmm12
 	vmovups	16-128(%rcx),%xmm2
 	vpclmulqdq	$0x01,%xmm3,%xmm7,%xmm6
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	xorq	%r12,%r12
 	cmpq	%r14,%r15
@@ -233,7 +213,6 @@ L$resume_ctr32:
 	vaesenc	%xmm1,%xmm14,%xmm14
 	vmovups	192-128(%rcx),%xmm1
 
-
 	vaesenc	%xmm15,%xmm9,%xmm9
 	vaesenc	%xmm15,%xmm10,%xmm10
 	vaesenc	%xmm15,%xmm11,%xmm11
@@ -338,41 +317,31 @@ L$6x_done:
 
 	ret
 
-
 .globl	_aesni_gcm_decrypt
 .private_extern _aesni_gcm_decrypt
 
 .p2align	5
 _aesni_gcm_decrypt:
 
-
 _CET_ENDBR
 	xorq	%rax,%rax
-
-
 
 	cmpq	$0x60,%rdx
 	jb	L$gcm_dec_abort
 
 	pushq	%rbp
 
-
 	movq	%rsp,%rbp
 
 	pushq	%rbx
 
-
 	pushq	%r12
-
 
 	pushq	%r13
 
-
 	pushq	%r14
 
-
 	pushq	%r15
-
 
 	vzeroupper
 
@@ -403,12 +372,6 @@ L$dec_no_key_aliasing:
 	vmovdqu	80(%rdi),%xmm7
 	movq	%rdi,%r14
 	vmovdqu	64(%rdi),%xmm4
-
-
-
-
-
-
 
 	leaq	-192(%rdi,%rdx,1),%r15
 
@@ -460,9 +423,6 @@ L$dec_no_key_aliasing:
 
 L$gcm_dec_abort:
 	ret
-
-
-
 
 .p2align	5
 _aesni_ctr32_6x:
@@ -554,14 +514,11 @@ L$handle_ctr32_2:
 	vpxor	%xmm4,%xmm14,%xmm14
 	jmp	L$oop_ctr32
 
-
-
 .globl	_aesni_gcm_encrypt
 .private_extern _aesni_gcm_encrypt
 
 .p2align	5
 _aesni_gcm_encrypt:
-
 
 _CET_ENDBR
 #ifdef BORINGSSL_DISPATCH_TEST
@@ -570,31 +527,22 @@ _CET_ENDBR
 #endif
 	xorq	%rax,%rax
 
-
-
-
 	cmpq	$288,%rdx
 	jb	L$gcm_enc_abort
 
 	pushq	%rbp
 
-
 	movq	%rsp,%rbp
 
 	pushq	%rbx
 
-
 	pushq	%r12
-
 
 	pushq	%r13
 
-
 	pushq	%r14
 
-
 	pushq	%r15
-
 
 	vzeroupper
 
@@ -619,13 +567,6 @@ _CET_ENDBR
 L$enc_no_key_aliasing:
 
 	movq	%rsi,%r14
-
-
-
-
-
-
-
 
 	leaq	-192(%rsi,%rdx,1),%r15
 
@@ -847,8 +788,6 @@ L$enc_no_key_aliasing:
 
 L$gcm_enc_abort:
 	ret
-
-
 
 .section	__DATA,__const
 .p2align	6

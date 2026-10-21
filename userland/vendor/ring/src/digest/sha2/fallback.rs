@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::CHAINING_WORDS;
 use crate::polyfill::slice::{self, AsChunks};
 use core::{
@@ -39,10 +25,6 @@ where
         let (M, remainder): (AsChunks<u8, BYTES_LEN>, &[u8]) = slice::as_chunks(M);
         debug_assert!(remainder.is_empty());
 
-        
-        
-        
-        
         let mut W = S::zero_w();
         let W = W.as_mut();
         W.iter_mut().zip(M).for_each(|(Wt, Mt)| {
@@ -53,10 +35,8 @@ where
             W[t] = sigma_1(W[t - 2]) + W[t - 7] + sigma_0(W[t - 15]) + W[t - 16]
         }
 
-        
         let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h] = H;
 
-        
         for (Kt, Wt) in S::K.as_ref().iter().zip(W.iter()) {
             let T1 = h + SIGMA_1(e) + ch(e, f, g) + *Kt + *Wt;
             let T2 = SIGMA_0(a) + maj(a, b, c);
@@ -70,7 +50,6 @@ where
             a = T1 + T2;
         }
 
-        
         H[0] += a;
         H[1] += b;
         H[2] += c;
@@ -84,42 +63,35 @@ where
     H
 }
 
-
 #[inline(always)]
 pub(in super::super) fn ch<W: Word>(x: W, y: W, z: W) -> W {
     (x & y) | (!x & z)
 }
-
 
 #[inline(always)]
 pub(in super::super) fn maj<W: Word>(x: W, y: W, z: W) -> W {
     (x & y) | (x & z) | (y & z)
 }
 
-
 #[inline(always)]
 fn SIGMA_0<S: Sha2>(x: S) -> S {
     x.rotr(S::BIG_SIGMA_0.0) ^ x.rotr(S::BIG_SIGMA_0.1) ^ x.rotr(S::BIG_SIGMA_0.2)
 }
-
 
 #[inline(always)]
 fn SIGMA_1<S: Sha2>(x: S) -> S {
     x.rotr(S::BIG_SIGMA_1.0) ^ x.rotr(S::BIG_SIGMA_1.1) ^ x.rotr(S::BIG_SIGMA_1.2)
 }
 
-
 #[inline(always)]
 fn sigma_0<S: Sha2>(x: S) -> S {
     x.rotr(S::SMALL_SIGMA_0.0) ^ x.rotr(S::SMALL_SIGMA_0.1) ^ (x >> S::SMALL_SIGMA_0.2)
 }
 
-
 #[inline(always)]
 fn sigma_1<S: Sha2>(x: S) -> S {
     x.rotr(S::SMALL_SIGMA_1.0) ^ x.rotr(S::SMALL_SIGMA_1.1) ^ (x >> S::SMALL_SIGMA_1.2)
 }
-
 
 pub(in super::super) trait Word:
     'static
@@ -139,7 +111,6 @@ pub(in super::super) trait Word:
 
     fn rotr(self, count: u32) -> Self;
 }
-
 
 pub(super) trait Sha2: Word + BitXor<Output = Self> + Shr<usize, Output = Self> {
     const BIG_SIGMA_0: (u32, u32, u32);
@@ -170,15 +141,13 @@ impl Word for Wrapping<u32> {
     }
 }
 
-
 impl Sha2 for Wrapping<u32> {
-    
+
     const BIG_SIGMA_0: (u32, u32, u32) = (2, 13, 22);
     const BIG_SIGMA_1: (u32, u32, u32) = (6, 11, 25);
     const SMALL_SIGMA_0: (u32, u32, usize) = (7, 18, 3);
     const SMALL_SIGMA_1: (u32, u32, usize) = (17, 19, 10);
 
-    
     const ROUNDS: usize = 64;
 
     type W = [Self; Self::ROUNDS];
@@ -186,7 +155,6 @@ impl Sha2 for Wrapping<u32> {
         [Self::ZERO; Self::ROUNDS]
     }
 
-    
     const K: &'static Self::W = &[
         Self(0x428a2f98),
         Self(0x71374491),
@@ -270,15 +238,13 @@ impl Word for Wrapping<u64> {
     }
 }
 
-
 impl Sha2 for Wrapping<u64> {
-    
+
     const BIG_SIGMA_0: (u32, u32, u32) = (28, 34, 39);
     const BIG_SIGMA_1: (u32, u32, u32) = (14, 18, 41);
     const SMALL_SIGMA_0: (u32, u32, usize) = (1, 8, 7);
     const SMALL_SIGMA_1: (u32, u32, usize) = (19, 61, 6);
 
-    
     const ROUNDS: usize = 80;
 
     type W = [Self; Self::ROUNDS];
@@ -286,7 +252,6 @@ impl Sha2 for Wrapping<u64> {
         [Self::ZERO; Self::ROUNDS]
     }
 
-    
     const K: &'static Self::W = &[
         Self(0x428a2f98d728ae22),
         Self(0x7137449123ef65cd),

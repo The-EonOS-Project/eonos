@@ -1,5 +1,3 @@
-
-
 use crate::acpi::{IsaOverride, MadtInfo};
 use crate::sync::IrqMutex;
 use crate::{idt, lapic, vmm};
@@ -55,14 +53,11 @@ fn redirection_read(io: IoApic, index: u32) -> (u32, u32) {
 
 fn redirection_write(io: IoApic, index: u32, low: u32, high: u32) {
     let reg = REG_REDIRECTION_BASE + index * 2;
-    
-    
+
     write_reg(io.base, reg, low | REDIR_MASKED);
     write_reg(io.base, reg + 1, high);
     write_reg(io.base, reg, low);
 }
-
-
 
 pub fn init(madt: &MadtInfo) -> bool {
     if madt.ioapic_count == 0 || madt.ioapic_count > 4 {
@@ -159,8 +154,6 @@ fn polarity_trigger(flags: u16) -> Option<u32> {
     Some(bits)
 }
 
-
-
 pub fn supports_isa_irq(irq: u8) -> bool {
     let guard = CONFIG.lock();
     guard
@@ -171,8 +164,7 @@ pub fn supports_isa_irq(irq: u8) -> bool {
 }
 
 fn set_isa_irq(irq: u8, masked: bool) {
-    
-    
+
     let guard = CONFIG.lock();
     let Some(config) = guard.as_ref() else {
         log_fail!("IOAPIC", "Route", "I/O APIC is not initialized");
@@ -192,9 +184,7 @@ fn set_isa_irq(irq: u8, masked: bool) {
         return;
     };
     let (mut low, _) = redirection_read(io, index);
-    
-    
-    
+
     low &= !(0x0fff | REDIR_ACTIVE_LOW | REDIR_LEVEL_TRIGGERED | REDIR_MASKED);
     low |= idt::IRQ_BASE as u32 + irq as u32;
     low |= mode_bits;

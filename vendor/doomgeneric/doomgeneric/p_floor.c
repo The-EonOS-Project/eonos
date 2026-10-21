@@ -1,42 +1,13 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include "z_zone.h"
 #include "doomdef.h"
 #include "p_local.h"
 
 #include "s_sound.h"
 
-
 #include "doomstat.h"
 #include "r_state.h"
 
 #include "sounds.h"
-
-
-
-
-
-
-
-
 
 result_e
 T_MovePlane
@@ -49,15 +20,15 @@ T_MovePlane
 {
     boolean	flag;
     fixed_t	lastpos;
-	
+
     switch(floorOrCeiling)
     {
       case 0:
-	
+
 	switch(direction)
 	{
 	  case -1:
-	    
+
 	    if (sector->floorheight - speed < dest)
 	    {
 		lastpos = sector->floorheight;
@@ -67,7 +38,7 @@ T_MovePlane
 		{
 		    sector->floorheight =lastpos;
 		    P_ChangeSector(sector,crush);
-		    
+
 		}
 		return pastdest;
 	    }
@@ -84,9 +55,9 @@ T_MovePlane
 		}
 	    }
 	    break;
-						
+
 	  case 1:
-	    
+
 	    if (sector->floorheight + speed > dest)
 	    {
 		lastpos = sector->floorheight;
@@ -96,13 +67,13 @@ T_MovePlane
 		{
 		    sector->floorheight = lastpos;
 		    P_ChangeSector(sector,crush);
-		    
+
 		}
 		return pastdest;
 	    }
 	    else
 	    {
-		
+
 		lastpos = sector->floorheight;
 		sector->floorheight += speed;
 		flag = P_ChangeSector(sector,crush);
@@ -118,13 +89,13 @@ T_MovePlane
 	    break;
 	}
 	break;
-									
+
       case 1:
-	
+
 	switch(direction)
 	{
 	  case -1:
-	    
+
 	    if (sector->ceilingheight - speed < dest)
 	    {
 		lastpos = sector->ceilingheight;
@@ -135,13 +106,13 @@ T_MovePlane
 		{
 		    sector->ceilingheight = lastpos;
 		    P_ChangeSector(sector,crush);
-		    
+
 		}
 		return pastdest;
 	    }
 	    else
 	    {
-		
+
 		lastpos = sector->ceilingheight;
 		sector->ceilingheight -= speed;
 		flag = P_ChangeSector(sector,crush);
@@ -156,9 +127,9 @@ T_MovePlane
 		}
 	    }
 	    break;
-						
+
 	  case 1:
-	    
+
 	    if (sector->ceilingheight + speed > dest)
 	    {
 		lastpos = sector->ceilingheight;
@@ -168,7 +139,7 @@ T_MovePlane
 		{
 		    sector->ceilingheight = lastpos;
 		    P_ChangeSector(sector,crush);
-		    
+
 		}
 		return pastdest;
 	    }
@@ -180,37 +151,28 @@ T_MovePlane
 
 #if 0 
 
-
-
-
-
-
 #endif
 	    }
 	    break;
 	}
 	break;
-		
+
     }
     return ok;
 }
 
-
-
-
-
 void T_MoveFloor(floormove_t* floor)
 {
     result_e	res;
-	
+
     res = T_MovePlane(floor->sector,
 		      floor->speed,
 		      floor->floordestheight,
 		      floor->crush,0,floor->direction);
-    
+
     if (!(leveltime&7))
 	S_StartSound(&floor->sector->soundorg, sfx_stnmov);
-    
+
     if (res == pastdest)
     {
 	floor->sector->specialdata = NULL;
@@ -244,9 +206,6 @@ void T_MoveFloor(floormove_t* floor)
 
 }
 
-
-
-
 int
 EV_DoFloor
 ( line_t*	line,
@@ -263,12 +222,10 @@ EV_DoFloor
     while ((secnum = P_FindSectorFromLineTag(line,secnum)) >= 0)
     {
 	sec = &sectors[secnum];
-		
-	
+
 	if (sec->specialdata)
 	    continue;
-	
-	
+
 	rtn = 1;
 	floor = Z_Malloc (sizeof(*floor), PU_LEVSPEC, 0);
 	P_AddThinker (&floor->thinker);
@@ -364,7 +321,7 @@ EV_DoFloor
 	  {
 	      int	minsize = INT_MAX;
 	      side_t*	side;
-				
+
 	      floor->direction = 1;
 	      floor->sector = sec;
 	      floor->speed = FLOORSPEED;
@@ -390,7 +347,7 @@ EV_DoFloor
 		  floor->sector->floorheight + minsize;
 	  }
 	  break;
-	  
+
 	  case lowerAndChange:
 	    floor->direction = -1;
 	    floor->sector = sec;
@@ -434,12 +391,6 @@ EV_DoFloor
     return rtn;
 }
 
-
-
-
-
-
-
 int
 EV_BuildStairs
 ( line_t*	line,
@@ -452,12 +403,12 @@ EV_BuildStairs
     int			texture;
     int			ok;
     int			rtn;
-    
+
     sector_t*		sec;
     sector_t*		tsec;
 
     floormove_t*	floor;
-    
+
     fixed_t		stairsize = 0;
     fixed_t		speed = 0;
 
@@ -466,12 +417,10 @@ EV_BuildStairs
     while ((secnum = P_FindSectorFromLineTag(line,secnum)) >= 0)
     {
 	sec = &sectors[secnum];
-		
-	
+
 	if (sec->specialdata)
 	    continue;
-	
-	
+
 	rtn = 1;
 	floor = Z_Malloc (sizeof(*floor), PU_LEVSPEC, 0);
 	P_AddThinker (&floor->thinker);
@@ -493,12 +442,9 @@ EV_BuildStairs
 	floor->speed = speed;
 	height = sec->floorheight + stairsize;
 	floor->floordestheight = height;
-		
+
 	texture = sec->floorpic;
-	
-	
-	
-	
+
 	do
 	{
 	    ok = 0;
@@ -506,10 +452,10 @@ EV_BuildStairs
 	    {
 		if ( !((sec->lines[i])->flags & ML_TWOSIDED) )
 		    continue;
-					
+
 		tsec = (sec->lines[i])->frontsector;
 		newsecnum = tsec-sectors;
-		
+
 		if (secnum != newsecnum)
 		    continue;
 
@@ -518,12 +464,12 @@ EV_BuildStairs
 
 		if (tsec->floorpic != texture)
 		    continue;
-					
+
 		height += stairsize;
 
 		if (tsec->specialdata)
 		    continue;
-					
+
 		sec = tsec;
 		secnum = newsecnum;
 		floor = Z_Malloc (sizeof(*floor), PU_LEVSPEC, 0);

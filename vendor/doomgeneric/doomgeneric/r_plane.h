@@ -1,33 +1,9 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifndef __R_PLANE__
 #define __R_PLANE__
 
-
 #include "r_data.h"
 
-
-
-
 extern  short*		lastopening;
-
 
 typedef void (*planefunction_t) (int top, int bottom);
 
@@ -70,7 +46,5 @@ R_CheckPlane
 ( visplane_t*	pl,
   int		start,
   int		stop );
-
-
 
 #endif

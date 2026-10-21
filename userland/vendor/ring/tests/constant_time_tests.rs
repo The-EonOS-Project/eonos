@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #![allow(missing_docs)]
 
 #[allow(deprecated)]
@@ -26,7 +12,6 @@ use wasm_bindgen_test::{wasm_bindgen_test as test, wasm_bindgen_test_configure};
 #[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
 wasm_bindgen_test_configure!(run_in_browser);
 
-
 #[allow(deprecated)]
 #[test]
 fn test_verify_slices_are_equal() {
@@ -35,18 +20,18 @@ fn test_verify_slices_are_equal() {
     {
         let copy = initial;
         for len in 0..copy.len() {
-            
+
             assert_eq!(
                 verify_slices_are_equal(&initial, &copy[..len]),
                 Err(error::Unspecified)
             );
-            
+
             assert_eq!(
                 verify_slices_are_equal(&initial[..len], &copy[..len]),
                 Ok(())
             );
         }
-        
+
         assert_eq!(verify_slices_are_equal(&initial, &copy), Ok(()));
     }
 
@@ -56,17 +41,17 @@ fn test_verify_slices_are_equal() {
             copy[i] ^= 1u8 << bit;
 
             for len in 0..=initial.len() {
-                
+
                 assert_ne!(&initial[..], &copy[..]);
 
                 let a = &initial[..len];
                 let b = &copy[..len];
 
                 let expected_result = if i < len {
-                    
+
                     Err(error::Unspecified)
                 } else {
-                    
+
                     Ok(())
                 };
                 assert_eq!(a == b, expected_result.is_ok()); 

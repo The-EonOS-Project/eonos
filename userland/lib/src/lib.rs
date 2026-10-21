@@ -1,7 +1,5 @@
 #![no_std]
 
-
-
 extern crate alloc;
 
 use alloc::ffi::{CString, NulError};
@@ -9,25 +7,23 @@ use alloc::string::String;
 use alloc::vec::Vec;
 use core::fmt;
 
-
 pub const MAX_LINE_LENGTH: usize = 4096;
-
 
 #[derive(Debug)]
 pub enum Error {
-    
+
     System(eonos_rt::Error),
-    
+
     InteriorNul,
-    
+
     InvalidUtf8,
-    
+
     LineTooLong,
-    
+
     InvalidInput,
-    
+
     InvalidArgument,
-    
+
     Usage(&'static str),
 }
 
@@ -88,11 +84,6 @@ fn errno_message(errno: i32) -> &'static str {
     }
 }
 
-
-
-
-
-
 pub fn read_line(fd: usize) -> Result<Option<String>, Error> {
     let mut bytes = [0u8; MAX_LINE_LENGTH];
     let count = eonos_rt::read(fd, &mut bytes)?;
@@ -115,7 +106,6 @@ pub fn read_line(fd: usize) -> Result<Option<String>, Error> {
         .map_err(|_| Error::InvalidUtf8)
 }
 
-
 pub mod flags {
     pub const READ_ONLY: usize = eonos_rt::O_RDONLY;
     pub const WRITE_ONLY: usize = eonos_rt::O_WRONLY;
@@ -125,14 +115,13 @@ pub mod flags {
     pub const APPEND: usize = eonos_rt::O_APPEND;
 }
 
-
 pub struct File {
     fd: usize,
     closed: bool,
 }
 
 impl File {
-    
+
     pub fn open(path: &str, open_flags: usize) -> Result<Self, Error> {
         Ok(Self {
             fd: eonos_rt::open(path, open_flags)?,
@@ -140,22 +129,18 @@ impl File {
         })
     }
 
-    
     pub const fn fd(&self) -> usize {
         self.fd
     }
 
-    
     pub fn read(&mut self, buffer: &mut [u8]) -> Result<usize, Error> {
         Ok(eonos_rt::read(self.fd, buffer)?)
     }
 
-    
     pub fn write(&mut self, buffer: &[u8]) -> Result<usize, Error> {
         Ok(eonos_rt::write(self.fd, buffer)?)
     }
 
-    
     pub fn write_all(&mut self, mut buffer: &[u8]) -> Result<(), Error> {
         while !buffer.is_empty() {
             let count = self.write(buffer)?;
@@ -167,7 +152,6 @@ impl File {
         Ok(())
     }
 
-    
     pub fn read_to_end(&mut self) -> Result<Vec<u8>, Error> {
         let mut contents = Vec::new();
         let mut chunk = [0u8; 512];
@@ -180,12 +164,10 @@ impl File {
         }
     }
 
-    
     pub fn read_to_string(&mut self) -> Result<String, Error> {
         String::from_utf8(self.read_to_end()?).map_err(|_| Error::InvalidUtf8)
     }
 
-    
     pub fn close(mut self) -> Result<(), Error> {
         eonos_rt::close(self.fd)?;
         self.closed = true;
@@ -201,31 +183,25 @@ impl Drop for File {
     }
 }
 
-
 #[derive(Clone, Copy, Debug)]
 pub struct Process {
     pid: usize,
 }
 
-
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ExitStatus {
-    
+
     pub pid: usize,
-    
+
     pub code: i32,
 }
 
 impl Process {
-    
-    
-    
+
     pub fn spawn(path: &str, arguments: &[&str], environment: &[&str]) -> Result<Self, Error> {
         Self::spawn_with_stdio(path, arguments, environment, None, None)
     }
 
-    
-    
     pub fn spawn_with_stdio(
         path: &str,
         arguments: &[&str],
@@ -249,7 +225,6 @@ impl Process {
         Ok(Self { pid })
     }
 
-    
     pub fn spawn_sandboxed_with_stdio(
         path: &str,
         arguments: &[&str],
@@ -273,42 +248,35 @@ impl Process {
         Ok(Self { pid })
     }
 
-    
     pub const fn pid(&self) -> usize {
         self.pid
     }
 
-    
     pub fn wait(self) -> Result<ExitStatus, Error> {
         let mut code = 0;
         let pid = eonos_rt::wait4(self.pid as isize, &mut code, 0)?;
         Ok(ExitStatus { pid, code })
     }
 
-    
     pub fn try_wait(&self) -> Result<Option<ExitStatus>, Error> {
         let mut code = 0;
         let pid = eonos_rt::wait4(self.pid as isize, &mut code, 1)?;
         Ok((pid != 0).then_some(ExitStatus { pid, code }))
     }
 
-    
     pub fn signal(&self, signal: usize) -> Result<(), Error> {
         Ok(eonos_rt::kill(self.pid, signal)?)
     }
 }
-
 
 pub fn print(text: &str) -> Result<(), Error> {
     eonos_rt::write_all(1, text.as_bytes())?;
     Ok(())
 }
 
-
 pub fn chdir(path: &str) -> Result<(), Error> {
     Ok(eonos_rt::chdir(path)?)
 }
-
 
 pub fn current_dir() -> Result<String, Error> {
     let mut bytes = [0u8; 256];
@@ -316,17 +284,14 @@ pub fn current_dir() -> Result<String, Error> {
     String::from_utf8(bytes[..count].to_vec()).map_err(|_| Error::InvalidUtf8)
 }
 
-
 pub fn eprint(text: &str) -> Result<(), Error> {
     eonos_rt::write_all(2, text.as_bytes())?;
     Ok(())
 }
 
-
 pub fn list_files() -> Result<String, Error> {
     read_listing(eonos_rt::list_files)
 }
-
 
 pub fn list_directory(path: &str) -> Result<String, Error> {
     let mut bytes = [0u8; 4096];
@@ -334,16 +299,13 @@ pub fn list_directory(path: &str) -> Result<String, Error> {
     String::from_utf8(bytes[..count].to_vec()).map_err(|_| Error::InvalidUtf8)
 }
 
-
 pub fn list_processes() -> Result<String, Error> {
     read_listing(eonos_rt::list_processes)
 }
 
-
 pub fn list_block_devices() -> Result<String, Error> {
     read_listing(eonos_rt::list_block_devices)
 }
-
 
 pub fn list_mounts() -> Result<String, Error> {
     read_listing(eonos_rt::list_mounts)
@@ -355,23 +317,19 @@ fn read_listing(list: fn(&mut [u8]) -> eonos_rt::Result<usize>) -> Result<String
     String::from_utf8(bytes[..count].to_vec()).map_err(|_| Error::InvalidUtf8)
 }
 
-
 pub fn mkdir(path: &str) -> Result<(), Error> {
     Ok(eonos_rt::mkdir(path)?)
 }
 
-
 pub fn remove(path: &str) -> Result<(), Error> {
     Ok(eonos_rt::remove(path)?)
 }
-
 
 pub fn mount(device: &str, mountpoint: &str) -> Result<(), Error> {
     let device = CString::new(device)?;
     let mountpoint = CString::new(mountpoint)?;
     Ok(eonos_rt::mount(device.as_c_str(), mountpoint.as_c_str())?)
 }
-
 
 pub fn is_mountpoint(path: &str) -> Result<bool, Error> {
     let path = CString::new(path)?;

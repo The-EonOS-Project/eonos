@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use super::AsChunksMut;
 use core::ops;
 
@@ -89,8 +75,6 @@ impl<'a, T, const N: usize> Iterator for AsChunksIter<'a, T, N> {
     }
 }
 
-
-
 impl<'a, T, const N: usize> From<&'a AsChunksMut<'_, T, N>> for AsChunks<'a, T, N> {
     #[inline(always)]
     fn from(as_mut: &'a AsChunksMut<'_, T, N>) -> Self {
@@ -104,7 +88,6 @@ impl<'a, T, const N: usize> From<&'a [T; N]> for AsChunks<'a, T, N> {
         Self(array)
     }
 }
-
 
 impl<'a, T> From<AsChunks<'a, T, 8>> for AsChunks<'a, T, 4> {
     #[inline(always)]

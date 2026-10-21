@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 ######################################################################
 ## Constant-time SSSE3 AES core implementation.
 ## version 0.1
@@ -177,7 +176,7 @@ _vpaes_consts:
 .size	_vpaes_consts,.-_vpaes_consts
 .align	6
 ___
-
+
 {
 my ($inp,$out,$key) = map("r$_", (0..2));
 

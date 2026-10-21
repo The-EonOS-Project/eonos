@@ -1,22 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -58,7 +39,6 @@
 #define DEFAULT_RAM 6 
 #define MIN_RAM     6  
 
-
 typedef struct atexit_listentry_s atexit_listentry_t;
 
 struct atexit_listentry_s
@@ -82,44 +62,27 @@ void I_AtExit(atexit_func_t func, boolean run_on_error)
     exit_funcs = entry;
 }
 
-
-
 void I_Tactile(int on, int off, int total)
 {
 }
-
-
-
-
 
 static byte *AutoAllocMemory(int *size, int default_ram, int min_ram)
 {
     byte *zonemem;
 
-    
-    
-    
-    
-
     zonemem = NULL;
 
     while (zonemem == NULL)
     {
-        
 
         if (default_ram < min_ram)
         {
             I_Error("Unable to allocate %i MiB of RAM for zone", default_ram);
         }
 
-        
-
         *size = default_ram * 1024 * 1024;
 
         zonemem = malloc(*size);
-
-        
-        
 
         if (zonemem == NULL)
         {
@@ -135,12 +98,6 @@ byte *I_ZoneBase (int *size)
     byte *zonemem;
     int min_ram, default_ram;
     int p;
-
-    
-    
-    
-    
-    
 
     p = M_CheckParmWithArgs("-mb", 1);
 
@@ -191,7 +148,7 @@ void I_PrintStartupBanner(char *gamedescription)
     I_PrintDivider();
     I_PrintBanner(gamedescription);
     I_PrintDivider();
-    
+
     printf(
     " " PACKAGE_NAME " is free software, covered by the GNU General Public\n"
     " License.  There is NO warranty; not even for MERCHANTABILITY or FITNESS\n"
@@ -201,16 +158,10 @@ void I_PrintStartupBanner(char *gamedescription)
     I_PrintDivider();
 }
 
-
-
-
-
-
-
 boolean I_ConsoleStdout(void)
 {
 #ifdef _WIN32
-    
+
     return 0;
 #else
 #if ORIGCODE
@@ -221,34 +172,10 @@ boolean I_ConsoleStdout(void)
 #endif
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void I_Quit (void)
 {
     atexit_listentry_t *entry;
 
-    
- 
     entry = exit_funcs; 
 
     while (entry != NULL)
@@ -267,38 +194,24 @@ void I_Quit (void)
 #if !defined(_WIN32) && !defined(__MACOSX__) && !defined(__DJGPP__) && !defined(EONOS)
 #define ZENITY_BINARY "/usr/bin/zenity"
 
-
-
 static int ZenityAvailable(void)
 {
     return system(ZENITY_BINARY " --help >/dev/null 2>&1") == 0;
 }
-
-
-
 
 static char *EscapeShellString(char *string)
 {
     char *result;
     char *r, *s;
 
-    
     result = malloc(strlen(string) * 2 + 3);
     r = result;
 
-    
     *r = '"';
     ++r;
 
     for (s = string; *s != '\0'; ++s)
     {
-        
-        
-        
-        
-        
-        
-        
 
         if (strchr("$`\\!", *s) != NULL)
         {
@@ -310,15 +223,12 @@ static char *EscapeShellString(char *string)
         ++r;
     }
 
-    
     *r = '"';
     ++r;
     *r = '\0';
 
     return result;
 }
-
-
 
 static int ZenityErrorBox(char *message)
 {
@@ -349,11 +259,6 @@ static int ZenityErrorBox(char *message)
 
 #endif 
 
-
-
-
-
-
 static boolean already_quitting = false;
 
 void I_Error (char *error, ...)
@@ -375,21 +280,17 @@ void I_Error (char *error, ...)
         already_quitting = true;
     }
 
-    
     va_start(argptr, error);
-    
+
     vfprintf(stderr, error, argptr);
     fprintf(stderr, "\n\n");
     va_end(argptr);
     fflush(stderr);
 
-    
     va_start(argptr, error);
     memset(msgbuf, 0, sizeof(msgbuf));
     M_vsnprintf(msgbuf, sizeof(msgbuf), error, argptr);
     va_end(argptr);
-
-    
 
     entry = exit_funcs;
 
@@ -405,9 +306,6 @@ void I_Error (char *error, ...)
 
     exit_gui_popup = !M_ParmExists("-nogui");
 
-    
-    
-    
     if (exit_gui_popup && !I_ConsoleStdout())
 #ifdef _WIN32
     {
@@ -423,10 +321,6 @@ void I_Error (char *error, ...)
     {
         CFStringRef message;
 	int i;
-
-	
-	
-	
 
 	for (i = 0; msgbuf[i] != '\0'; ++i)
         {
@@ -450,9 +344,7 @@ void I_Error (char *error, ...)
     }
 #elif defined(EONOS)
     {
-        
-        
-        
+
         fprintf(stderr, "%s\n", msgbuf);
     }
 #elif defined(__DJGPP__)
@@ -467,7 +359,6 @@ void I_Error (char *error, ...)
     }
 #endif
 
-    
 #if ORIGCODE
     SDL_Quit();
 
@@ -476,24 +367,6 @@ void I_Error (char *error, ...)
     exit(-1);
 #endif
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #define DOS_MEM_DUMP_SIZE 10
 
@@ -517,15 +390,6 @@ boolean I_GetMemoryValue(unsigned int offset, void *value, int size)
 
         firsttime = false;
         i = 0;
-
-        
-        
-        
-        
-        
-        
-        
-        
 
         p = M_CheckParmWithArgs("-setmem", 1);
 

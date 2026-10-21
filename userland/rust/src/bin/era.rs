@@ -682,8 +682,7 @@ fn poll_konsul_command(state: &mut KonsulState) {
     let mut drained_to_empty = false;
     let mut read_failure = None;
     let mut wait_failure = None;
-    
-    
+
     {
         let command = state.running.as_mut().unwrap();
         for _ in 0..8 {
@@ -714,8 +713,7 @@ fn poll_konsul_command(state: &mut KonsulState) {
     }
     if let Some(error) = wait_failure { state.push_output(&error); }
     let command = state.running.as_ref().unwrap();
-    
-    
+
     if !command.finished || !drained_to_empty { return; }
     let command = state.running.take().unwrap();
     let _ = eonos_rt::close(command.read_fd);
@@ -812,9 +810,6 @@ fn main(args: eonos_rt::Args<'_>) -> i32 {
     let mut last_app_pointer: Option<(usize, i32, i32, u8)> = None;
     let mut app_pointer_armed = false;
 
-    
-    
-    
     let initial_buttons = eonos_rt::mouse_state().map(|state| state.buttons).unwrap_or(0);
     let mut stable_left = initial_buttons & 1 != 0;
     let mut candidate_left = stable_left;
@@ -1774,13 +1769,10 @@ fn draw_window(layout: &Layout, view: View, files: &FileState, processes: &str, 
     let y = layout.window_y;
     let w = layout.window_w;
     let h = layout.window_h;
-    
-    
+
     rect(x + w, y + 10, 8, h, 0x101522);
     rect(x + 8, y + h, w, 10, 0x101522);
 
-    
-    
     rect(x, y, w, h, 0xC0C0C0);
     rect(x, y, w, 2, 0xFFFFFF);
     rect(x, y, 2, h, 0xFFFFFF);
@@ -1805,9 +1797,6 @@ fn draw_window(layout: &Layout, view: View, files: &FileState, processes: &str, 
     } else { window_title(view) };
     text(x + 28, y + 8, 0xFFFFFF, title);
 
-    
-    
-    
     let controls_x = x + w - 65;
     draw_window_control(controls_x, y + 6, 18, 18, WindowControl::Minimize);
     draw_window_control(controls_x + 20, y + 6, 18, 18, WindowControl::Maximize);
@@ -2076,7 +2065,6 @@ fn draw_taskbar(layout: &Layout, view: Option<View>, minimized: bool) {
     rect(0, y, layout.width, 2, 0xFFFFFF);
     rect(0, y + 2, layout.width, 1, 0x808080);
 
-    
     rect(4, y + 4, 94, 22, 0xC0C0C0);
     rect(4, y + 4, 94, 2, 0xFFFFFF);
     rect(4, y + 4, 2, 22, 0xFFFFFF);
@@ -2088,8 +2076,6 @@ fn draw_taskbar(layout: &Layout, view: Option<View>, minimized: bool) {
     rect(12, y + 18, 12, 2, 0xFFFFFF);
     text(32, y + 7, 0x101010, "EonOS");
 
-    
-    
     let available = (layout.width - 254).max(1);
     if layout.windows.is_empty() {
         text(112, y + 7, 0x404040, "Desktop");
@@ -2112,7 +2098,6 @@ fn draw_taskbar(layout: &Layout, view: Option<View>, minimized: bool) {
         }
     }
 
-    
     classic_button(layout.width - 142, y + 4, 66, 22, "Power");
     rect(layout.width - 72, y + 4, 68, 22, 0xC0C0C0);
     rect(layout.width - 72, y + 4, 1, 22, 0x808080);

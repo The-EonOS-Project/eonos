@@ -1,21 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,17 +11,6 @@
 int		myargc;
 char**		myargv;
 
-
-
-
-
-
-
-
-
-
-
-
 int M_CheckParmWithArgs(char *check, int num_args)
 {
     int i;
@@ -52,13 +23,6 @@ int M_CheckParmWithArgs(char *check, int num_args)
 
     return 0;
 }
-
-
-
-
-
-
-
 
 boolean M_ParmExists(char *check)
 {
@@ -86,7 +50,6 @@ static void LoadResponseFile(int argv_index)
 
     response_filename = myargv[argv_index] + 1;
 
-    
     handle = fopen(response_filename, "rb");
 
     if (handle == NULL)
@@ -100,11 +63,6 @@ static void LoadResponseFile(int argv_index)
     printf("Found response file %s!\n", response_filename);
 
     size = M_FileLength(handle);
-
-    
-    
-    
-    
 
     file = malloc(size + 1);
 
@@ -124,13 +82,9 @@ static void LoadResponseFile(int argv_index)
 
     fclose(handle);
 
-    
-
     newargv = malloc(sizeof(char *) * MAXARGVS);
     newargc = 0;
     memset(newargv, 0, sizeof(char *) * MAXARGVS);
-
-    
 
     for (i=0; i<argv_index; ++i)
     {
@@ -143,7 +97,6 @@ static void LoadResponseFile(int argv_index)
 
     while(k < size)
     {
-        
 
         while(k < size && isspace((int)infile[k]))
         {
@@ -155,18 +108,12 @@ static void LoadResponseFile(int argv_index)
             break;
         }
 
-        
-        
-        
-
         if (infile[k] == '\"')
         {
-            
+
             ++k;
 
             newargv[newargc++] = &infile[k];
-
-            
 
             while (k < size && infile[k] != '\"' && infile[k] != '\n')
             {
@@ -179,14 +126,11 @@ static void LoadResponseFile(int argv_index)
                         response_filename);
             }
 
-            
-
             infile[k] = '\0';
             ++k;
         }
         else
         {
-            
 
             newargv[newargc++] = &infile[k];
 
@@ -195,15 +139,11 @@ static void LoadResponseFile(int argv_index)
                 ++k;
             }
 
-            
-
             infile[k] = '\0';
 
             ++k;
         }
     }
-
-    
 
     for (i=argv_index + 1; i<myargc; ++i)
     {
@@ -216,21 +156,9 @@ static void LoadResponseFile(int argv_index)
 
 #if 0 
 
-
-
-
-
-
-
-
-
 #endif
 #endif
 }
-
-
-
-
 
 void M_FindResponseFile(void)
 {
@@ -244,8 +172,6 @@ void M_FindResponseFile(void)
         }
     }
 }
-
-
 
 char *M_GetExecutableName(void)
 {

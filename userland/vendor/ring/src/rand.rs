@@ -1,27 +1,7 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::error;
 
-
 pub trait SecureRandom: sealed::SecureRandom {
-    
+
     fn fill(&self, dest: &mut [u8]) -> Result<(), error::Unspecified>;
 }
 
@@ -35,20 +15,15 @@ where
     }
 }
 
-
-
-
-
 pub struct Random<T: RandomlyConstructable>(T);
 
 impl<T: RandomlyConstructable> Random<T> {
-    
+
     #[inline]
     pub fn expose(self) -> T {
         self.0
     }
 }
-
 
 #[inline]
 pub fn generate<T: RandomlyConstructable>(
@@ -63,7 +38,7 @@ pub(crate) mod sealed {
     use crate::error;
 
     pub trait SecureRandom: core::fmt::Debug {
-        
+
         fn fill_impl(&self, dest: &mut [u8]) -> Result<(), error::Unspecified>;
     }
 
@@ -85,31 +60,14 @@ pub(crate) mod sealed {
     }
 }
 
-
 pub trait RandomlyConstructable: sealed::RandomlyConstructable {}
 impl<T> RandomlyConstructable for T where T: sealed::RandomlyConstructable {}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #[derive(Clone, Debug)]
 pub struct SystemRandom(());
 
 impl SystemRandom {
-    
+
     #[inline(always)]
     pub fn new() -> Self {
         Self(())
@@ -117,9 +75,6 @@ impl SystemRandom {
 }
 
 impl crate::sealed::Sealed for SystemRandom {}
-
-
-
 
 #[cfg(any(
     all(feature = "less-safe-getrandom-custom-or-rdrand", target_os = "none"),

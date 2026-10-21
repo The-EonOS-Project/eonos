@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use self::ffi::{Block, BLOCK_LEN, ZERO_BLOCK};
 use super::{aes_gcm, Aad};
 use crate::{
@@ -63,10 +49,6 @@ impl<'key, K: UpdateBlock> Context<'key, K> {
         let aad_len = BitLength::from_byte_len(aad.as_ref().len())
             .map_err(error::erase::<InputTooLongError>)?;
 
-        
-        
-        
-
         let mut ctx = Self {
             Xi: Xi(ZERO_BLOCK),
             key,
@@ -112,7 +94,7 @@ impl Context<'_, clmul::Key> {
 
 #[cfg(target_arch = "x86_64")]
 impl Context<'_, clmulavxmovbe::Key> {
-    
+
     #[inline]
     pub(super) fn inner(&mut self) -> (&HTable, &mut Xi) {
         (self.key.inner(), &mut self.Xi)
@@ -121,7 +103,7 @@ impl Context<'_, clmulavxmovbe::Key> {
 
 #[cfg(target_arch = "x86_64")]
 impl Context<'_, vclmulavx2::Key> {
-    
+
     #[inline]
     pub(super) fn inner(&mut self) -> (&HTable, &mut Xi) {
         (self.key.inner(), &mut self.Xi)

@@ -1,17 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 use crate::{
     bb, cpu,
     error::{self, InputTooLongError},
@@ -32,7 +18,6 @@ impl hkdf::KeyType for &'static Algorithm {
         self.key_len()
     }
 }
-
 
 pub struct Algorithm {
     init: fn(key: &[u8], cpu_features: cpu::Features) -> Result<KeyInner, error::Unspecified>,
@@ -58,21 +43,17 @@ pub struct Algorithm {
 }
 
 impl Algorithm {
-    
+
     #[inline(always)]
     pub fn key_len(&self) -> usize {
         self.key_len
     }
 
-    
-    
-    
     #[inline(always)]
     pub fn tag_len(&self) -> usize {
         TAG_LEN
     }
 
-    
     #[inline(always)]
     pub fn nonce_len(&self) -> usize {
         NONCE_LEN
@@ -101,17 +82,13 @@ impl Algorithm {
         let Tag(calculated_tag) = (self.open)(key, nonce, aad, in_out, src, cpu_features)?;
 
         if bb::verify_slices_are_equal(calculated_tag.as_ref(), received_tag.as_ref()).is_err() {
-            
-            
-            
-            
+
             for b in &mut in_out[..ciphertext_len] {
                 *b = 0;
             }
             return Err(error::Unspecified);
         }
 
-        
         Ok(&mut in_out[..ciphertext_len])
     }
 
@@ -145,7 +122,6 @@ impl PartialEq for Algorithm {
 
 impl Eq for Algorithm {}
 
-
 pub static AES_128_GCM: Algorithm = Algorithm {
     key_len: aes::AES_128_KEY_LEN,
     init: aes_gcm_init_128,
@@ -153,7 +129,6 @@ pub static AES_128_GCM: Algorithm = Algorithm {
     open: aes_gcm_open,
     id: AlgorithmID::AES_128_GCM,
 };
-
 
 pub static AES_256_GCM: Algorithm = Algorithm {
     key_len: aes::AES_256_KEY_LEN,
@@ -214,11 +189,6 @@ pub(super) fn aes_gcm_open(
     aes_gcm::open(key, nonce, aad, in_out, src)
 }
 
-
-
-
-
-
 pub static CHACHA20_POLY1305: Algorithm = Algorithm {
     key_len: chacha20_poly1305::KEY_LEN,
     init: chacha20_poly1305_init,
@@ -226,7 +196,6 @@ pub static CHACHA20_POLY1305: Algorithm = Algorithm {
     open: chacha20_poly1305_open,
     id: AlgorithmID::CHACHA20_POLY1305,
 };
-
 
 fn chacha20_poly1305_init(
     key: &[u8],
