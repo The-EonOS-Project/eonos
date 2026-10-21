@@ -1037,7 +1037,7 @@ fn sys_open(path_ptr: u64, path_len: u64, flags: u64) -> u64 {
     {
         return errno(EINVAL);
     }
-    if sandboxed && (access != 0 || flags & (O_CREAT | O_TRUNC | O_APPEND) != 0) {
+    if sandboxed && access == 0 && flags & (O_CREAT | O_TRUNC | O_APPEND) != 0 {
         return errno(EPERM);
     }
     let n = path_len as usize;
@@ -1055,6 +1055,12 @@ fn sys_open(path_ptr: u64, path_len: u64, flags: u64) -> u64 {
         Ok(path) => path,
         Err(error) => return fs_errno(error),
     };
+    if sandboxed
+        && (access != 0 || flags & (O_CREAT | O_TRUNC | O_APPEND) != 0)
+        && !(path.starts_with("/disk/") && crate::vfs::is_writable_mountpoint("/disk"))
+    {
+        return errno(EPERM);
+    }
     if sandboxed && path == "/device/console" {
         return errno(EPERM);
     }
@@ -2517,9 +2523,10 @@ extern "C" fn syscall_dispatch(frame: &mut SyscallFrame) {
     crate::idt::enable_interrupts();
 
     // Third-party applications use pipes and the bounded Era drawing protocol.
-    // Hardware, global input focus, power, mounts, and kernel control stay out
-    // of their capability set. The policy is checked at the syscall boundary,
-    // so a hand-crafted ELF cannot bypass the SDK restrictions.
+    // File writes are limited to a mounted writable /disk in sys_open; hardware,
+    // global input focus, power, mounts, and kernel control stay out of their
+    // capability set. Policy is enforced at the syscall boundary, so a crafted
+    // ELF cannot bypass the SDK restrictions.
     let pid = scheduler::current_id();
     if process::is_sandboxed(pid)
         && matches!(

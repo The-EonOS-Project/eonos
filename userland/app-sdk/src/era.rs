@@ -20,6 +20,26 @@
 //!     window.present()?;
 //! }
 //! ```
+//!
+//! Modal dialogs can return a user's decision or acknowledge an error:
+//!
+//! ```ignore
+//! if window.confirm_dialog("Overwrite file?", "This replaces the existing file.")? {
+//!     if save_file(path, contents).is_err() {
+//!         window.error_dialog("Could not save the file in this directory.")?;
+//!     }
+//! }
+//! let name = window.text_input_dialog("Rename", "New name:", "notes.txt")?;
+//! if let Some(path) = window.save_file_dialog("/disk", "notes.txt")? {
+//!     eonos_app::system::write_file(&path, b"Hello")?;
+//!     window.toast("Saved")?;
+//! }
+//! let mut progress = window.begin_progress("Copy", "Preparing")?;
+//! for percent in 0..=100 {
+//!     if progress.update(percent, "Copying files")? { break; }
+//! }
+//! progress.finish()?;
+//! ```
 
 use alloc::string::String;
 use alloc::vec::Vec;
@@ -38,6 +58,8 @@ const BUTTON_FACE: u32 = 0xC0C0C0;
 const BUTTON_LIGHT: u32 = 0xFFFFFF;
 const BUTTON_DARK: u32 = 0x404040;
 const BUTTON_TEXT: u32 = 0x101010;
+const DIALOG_FACE: u32 = 0xD4D0C8;
+const DIALOG_TITLE: u32 = 0x000080;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Event {
@@ -54,6 +76,9 @@ pub struct Window {
     height: u32,
     frame: Vec<u8>,
     command_count: u16,
+    last_frame: Vec<u8>,
+    last_command_count: u16,
+    toast: Option<(String, u64)>,
     input: Vec<u8>,
     pointer_clicks: Vec<(i32, i32)>,
     pointer_buttons: u8,
@@ -96,6 +121,9 @@ impl Window {
             height: u32::from_le_bytes(response[5..9].try_into().unwrap()),
             frame: Vec::new(),
             command_count: 0,
+            last_frame: Vec::new(),
+            last_command_count: 0,
+            toast: None,
             input: Vec::new(),
             pointer_clicks: Vec::new(),
             pointer_buttons: 0,
@@ -261,6 +289,457 @@ impl Window {
         Ok(activated)
     }
 
+    /// Show a modal Yes/No dialog and return the user's choice. Returns `true`
+    /// for Yes and `false` for No, Escape, or a close event. Era continues
+    /// servicing other windows while the app waits. The No button is focused
+    /// by default so Enter without an explicit choice is safe.
+    pub fn confirm_dialog(&mut self, title: &str, message: &str) -> Result<bool> {
+        self.run_dialog(title, message, true)
+    }
+
+    /// Show a modal message with an OK button and wait until it is dismissed.
+    pub fn message_dialog(&mut self, title: &str, message: &str) -> Result<()> {
+        self.run_dialog(title, message, false).map(|_| ())
+    }
+
+    /// Show a standard error dialog with an OK button.
+    pub fn error_dialog(&mut self, message: &str) -> Result<()> {
+        self.message_dialog("Error", message)
+    }
+
+    /// Ask for a line of text. Returns `None` if cancelled.
+    pub fn text_input_dialog(&mut self, title: &str, prompt: &str, initial: &str) -> Result<Option<String>> {
+        self.run_input_dialog(title, prompt, initial)
+    }
+
+    /// Ask for a signed whole number. Invalid input displays an error and
+    /// lets the user try again; cancellation returns `None`.
+    pub fn number_input_dialog(&mut self, title: &str, prompt: &str, initial: i64) -> Result<Option<i64>> {
+        let mut value = alloc::format!("{}", initial);
+        loop {
+            let Some(input) = self.run_input_dialog(title, prompt, &value)? else { return Ok(None); };
+            match input.trim().parse::<i64>() {
+                Ok(number) => return Ok(Some(number)),
+                Err(_) => {
+                    value = input;
+                    self.error_dialog("Enter a valid whole number.")?;
+                }
+            }
+        }
+    }
+
+    /// Show a Save dialog rooted at `directory`. The user can navigate folders,
+    /// enter a filename, and confirm replacement of an existing file. Returns
+    /// the selected absolute path or `None` when cancelled.
+    pub fn save_file_dialog(&mut self, directory: &str, suggested_name: &str) -> Result<Option<String>> {
+        if self.width < 320 || self.height < 250 || suggested_name.len() > MAX_INPUT_BYTES {
+            return Err(Error(22));
+        }
+        let Some(mut directory) = normalize_disk_directory(directory) else { return Err(Error(22)); };
+        let mut filename = String::from(suggested_name);
+        let background = self.last_frame.clone();
+        let background_commands = self.last_command_count;
+        let mut status = String::new();
+        let panel_height = self.height.saturating_sub(16).min(420) as usize;
+        let widget_rows = (panel_height.saturating_sub(218) / 24).clamp(1, 6);
+        let mut selected_path = None;
+        let mut cancelled = false;
+
+        self.widget_count = 2 + 1 + widget_rows + 2;
+        self.focused_widget = 2;
+        self.next_widget = 0;
+        self.activate_widget = None;
+        self.text_widgets.clear();
+        self.next_text_widgets.clear();
+        self.dropdown_widgets.clear();
+        self.next_dropdown_widgets.clear();
+        self.pending_text_keys.clear();
+        self.cursor_widget = None;
+        self.text_cursors.clear();
+        self.text_cursor = 0;
+        let outcome = (|| -> Result<()> {
+        loop {
+            let mut enter = false;
+            while let Some(event) = self.poll_event()? {
+                match event {
+                    Event::Close | Event::Key { usage: 0x29, pressed: true, .. } => { cancelled = true; break; }
+                    Event::Key { usage: 0x28, pressed: true, .. } => {
+                        enter = true;
+                        self.activate_widget = None;
+                    }
+                    _ => {}
+                }
+            }
+            if cancelled { break; }
+            let normalized_directory = normalize_disk_directory(&directory);
+            let listing = normalized_directory.as_ref()
+                .and_then(|path| crate::system::list_directory(path).ok());
+            let folders: Vec<String> = listing.as_deref().unwrap_or("").lines()
+                .filter(|entry| entry.ends_with('/') && entry.len() > 1)
+                .take(widget_rows)
+                .map(String::from)
+                .collect();
+
+            self.frame.clear();
+            self.frame.extend_from_slice(&background);
+            self.command_count = background_commands;
+            let (panel_x, panel_y, panel_w, panel_h) = self.draw_dialog_panel("Save file", "", (self.height as i32 - 16).min(420))?;
+            self.text(panel_x + 14, panel_y + 42, 0x202020, "Folder:")?;
+            let path_changed = self.text_input(panel_x + 14, panel_y + 58, panel_w - 88, 26, &mut directory, "Path under /disk")?;
+            let up = self.button(panel_x + panel_w as i32 - 64, panel_y + 58, 50, 26, "Up")?;
+            if path_changed {
+                if normalize_disk_directory(&directory).is_some() { status.clear(); }
+                else { status = String::from("Folder must stay inside /disk."); }
+            }
+            if up {
+                if let Some(normalized) = normalize_disk_directory(&directory) {
+                    directory = parent_disk_directory(&normalized);
+                    status.clear();
+                } else { status = String::from("Folder must stay inside /disk."); }
+            }
+            self.text(panel_x + 14, panel_y + 91, 0x202020, "Filename:")?;
+            self.text_input(panel_x + 14, panel_y + 107, panel_w - 28, 26, &mut filename, "filename")?;
+            self.text(panel_x + 14, panel_y + 137, 0x202020, "Folders:")?;
+
+            let rows_y = panel_y + 156;
+            let mut entered_directory = None;
+            for row in 0..widget_rows {
+                let label = folders.get(row)
+                    .map(|entry| truncate_chars(entry.trim_end_matches('/'), (panel_w as usize).saturating_sub(42) / 8))
+                    .unwrap_or_default();
+                let clicked = self.button(panel_x + 14, rows_y + row as i32 * 24, panel_w - 28, 22, &label)?;
+                if clicked {
+                    if let Some(folder) = folders.get(row) {
+                        if let Some(normalized) = normalize_disk_directory(&directory) {
+                            entered_directory = Some(join_directory(&normalized, folder.trim_end_matches('/')));
+                        }
+                    }
+                }
+            }
+            if let Some(next) = entered_directory {
+                if next.len() <= 240 { directory = next; status.clear(); }
+                else { status = String::from("Folder path is too long."); }
+            }
+
+            if !status.is_empty() {
+                let status_y = if panel_h < 300 { panel_y + 137 } else { panel_y + panel_h - 62 };
+                self.text(panel_x + 14, status_y, 0xA00000, &truncate_chars(&status, 52))?;
+            } else if listing.is_none() {
+                self.text(panel_x + 14, panel_y + panel_h - 62, 0xA00000, "Cannot read this folder.")?;
+            }
+            let button_y = panel_y + panel_h - 40;
+            let save = self.button(panel_x + panel_w as i32 - 178, button_y, 76, 28, "Save")?;
+            let cancel = self.button(panel_x + panel_w as i32 - 92, button_y, 76, 28, "Cancel")?;
+            self.present()?;
+            if cancel { cancelled = true; break; }
+            if save || enter {
+                if filename.is_empty() || filename.contains('/') || filename == "." || filename == ".." || filename.contains('\0') {
+                    status = String::from("Enter a valid filename.");
+                    crate::system::sleep_ms(16)?;
+                    continue;
+                }
+                let Some(normalized) = normalize_disk_directory(&directory) else {
+                    status = String::from("Folder must stay inside /disk.");
+                    crate::system::sleep_ms(16)?;
+                    continue;
+                };
+                let path = join_directory(&normalized, &filename);
+                if path.len() > 255 {
+                    status = String::from("File path is too long.");
+                    crate::system::sleep_ms(16)?;
+                    continue;
+                }
+                let entries = match crate::system::list_directory(&normalized) {
+                    Ok(entries) => entries,
+                    Err(_) => {
+                        status = String::from("Cannot read this folder.");
+                        crate::system::sleep_ms(16)?;
+                        continue;
+                    }
+                };
+                if entries.lines().any(|entry| entry.strip_suffix('/').is_some_and(|name| name == filename)) {
+                    status = String::from("A folder already uses that name.");
+                    crate::system::sleep_ms(16)?;
+                    continue;
+                }
+                let exists = entries.lines().any(|entry| entry == filename);
+                selected_path = Some((path, exists));
+                break;
+            }
+            crate::system::sleep_ms(16)?;
+        }
+        Ok(())
+        })();
+
+        self.frame.clear();
+        self.frame.extend_from_slice(&background);
+        self.command_count = background_commands;
+        self.next_widget = 0;
+        self.text_widgets.clear();
+        self.next_text_widgets.clear();
+        self.dropdown_widgets.clear();
+        self.next_dropdown_widgets.clear();
+        self.pending_text_keys.clear();
+        self.cursor_widget = None;
+        self.text_cursors.clear();
+        self.text_cursor = 0;
+        let restore = self.present();
+        outcome?;
+        restore?;
+        if cancelled { return Ok(None); }
+        if let Some((path, true)) = selected_path.as_ref() {
+            if !self.confirm_dialog("Replace file?", &alloc::format!("Replace {}?", path))? {
+                return Ok(None);
+            }
+        }
+        Ok(selected_path.map(|(path, _)| path))
+    }
+
+    /// Show a brief toast notification on subsequent frames for 2.5 seconds.
+    pub fn toast(&mut self, message: &str) -> Result<()> {
+        self.toast_for(message, 2500)
+    }
+
+    /// Show a toast for the requested duration, clamped to 250 ms–15 seconds.
+    /// The app must continue calling `present()` for the toast to be drawn.
+    pub fn toast_for(&mut self, message: &str, duration_ms: u64) -> Result<()> {
+        if message.is_empty() || message.len() > 256 { return Err(Error(22)); }
+        let deadline = crate::system::uptime_ms().saturating_add(duration_ms.clamp(250, 15_000));
+        self.toast = Some((String::from(message), deadline));
+        Ok(())
+    }
+
+    /// Begin a cancellable progress dialog. Call `update` as work advances;
+    /// it returns true when the user presses Cancel or Escape. Drop the
+    /// returned value to restore the app's previous frame, or call `finish`.
+    pub fn begin_progress<'a>(&'a mut self, title: &str, message: &str) -> Result<ProgressDialog<'a>> {
+        if title.is_empty() || title.len() > 80 || message.len() > 256 {
+            return Err(Error(22));
+        }
+        let background = self.last_frame.clone();
+        let background_commands = self.last_command_count;
+        let mut progress = ProgressDialog {
+            window: self,
+            title: String::from(title),
+            background,
+            background_commands,
+            cancelled: false,
+            finished: false,
+        };
+        progress.update(0, message)?;
+        Ok(progress)
+    }
+
+    fn run_dialog(&mut self, title: &str, message: &str, confirm: bool) -> Result<bool> {
+        if title.is_empty() || title.len() > 80 || message.len() > 2048 {
+            return Err(Error(22));
+        }
+
+        let background = self.last_frame.clone();
+        let background_commands = self.last_command_count;
+        self.widget_count = if confirm { 2 } else { 1 };
+        self.next_widget = 0;
+        self.focused_widget = if confirm { 1 } else { 0 };
+        self.activate_widget = None;
+        self.dropdown_step = 0;
+        self.open_dropdown = None;
+        self.pending_text_keys.clear();
+        self.text_widgets.clear();
+        self.next_text_widgets.clear();
+        self.dropdown_widgets.clear();
+        self.next_dropdown_widgets.clear();
+
+        let outcome = (|| -> Result<bool> {
+            loop {
+                let mut dismissed = false;
+                while let Some(event) = self.poll_event()? {
+                    match event {
+                        Event::Close => { dismissed = true; break; }
+                        Event::Key { usage: 0x29, pressed: true, .. } => {
+                            dismissed = true;
+                            break;
+                        }
+                        _ => {}
+                    }
+                }
+                if dismissed { return Ok(false); }
+
+                self.frame.clear();
+                self.frame.extend_from_slice(&background);
+                self.command_count = background_commands;
+                self.draw_dialog(title, message, confirm)?;
+                let width = self.width.min(420) as i32;
+                let left = (self.width as i32 - width) / 2;
+                let button_y = self.dialog_button_y(confirm);
+                let accepted = if confirm {
+                    let yes = self.button(left + width - 184, button_y, 76, 28, "Yes")?;
+                    let no = self.button(left + width - 96, button_y, 76, 28, "No")?;
+                    if yes { Some(true) } else if no { Some(false) } else { None }
+                } else {
+                    let ok = self.button(left + (width - 76) / 2, button_y, 76, 28, "OK")?;
+                    ok.then_some(true)
+                };
+                self.present()?;
+                if let Some(accepted) = accepted { return Ok(accepted); }
+                crate::system::sleep_ms(16)?;
+            }
+        })();
+
+        // Restore the caller's frame so the modal controls do not remain on
+        // screen after the dialog returns.
+        self.frame.clear();
+        self.frame.extend_from_slice(&background);
+        self.command_count = background_commands;
+        self.next_widget = 0;
+        self.text_widgets.clear();
+        self.next_text_widgets.clear();
+        self.dropdown_widgets.clear();
+        self.next_dropdown_widgets.clear();
+        let restore = self.present();
+        match outcome {
+            Err(error) => Err(error),
+            Ok(value) => restore.map(|()| value),
+        }
+    }
+
+    fn dialog_button_y(&self, confirm: bool) -> i32 {
+        let height = if confirm { 176 } else { 156 };
+        ((self.height as i32 - height) / 2 + height - 42).max(8)
+    }
+
+    fn draw_dialog(&mut self, title: &str, message: &str, confirm: bool) -> Result<()> {
+        let height = if confirm { 176 } else { 156 };
+        self.draw_dialog_panel(title, message, height)?;
+        Ok(())
+    }
+
+    fn draw_dialog_panel(&mut self, title: &str, message: &str, requested_height: i32) -> Result<(i32, i32, u32, i32)> {
+        let width = self.width.saturating_sub(16).min(540).max(208);
+        let height = requested_height.min(self.height.saturating_sub(16) as i32).max(132);
+        let x = (self.width as i32 - width as i32) / 2;
+        let y = (self.height as i32 - height).max(0) / 2;
+        self.fill_rect(x + 4, y + 4, width, height as u32, 0x606060)?;
+        self.fill_rect(x, y, width, height as u32, DIALOG_FACE)?;
+        self.fill_rect(x, y, width, 2, 0xFFFFFF)?;
+        self.fill_rect(x, y, 2, height as u32, 0xFFFFFF)?;
+        self.fill_rect(x + width as i32 - 2, y + 2, 2, (height - 2) as u32, 0x404040)?;
+        self.fill_rect(x + 2, y + height - 2, width - 4, 2, 0x404040)?;
+        self.fill_rect(x + 8, y + 8, width - 16, 22, DIALOG_TITLE)?;
+        self.text(x + 14, y + 11, 0xFFFFFF, title)?;
+        if !message.is_empty() {
+            let max_chars = ((width as usize).saturating_sub(36) / 8).max(1);
+            let mut line_y = y + 48;
+            let mut displayed = 0usize;
+            for source_line in message.lines().take(4) {
+                let chars: Vec<char> = source_line.chars().collect();
+                for chunk in chars.chunks(max_chars).take(4) {
+                    if displayed >= 4 { break; }
+                    let line: String = chunk.iter().collect();
+                    self.text(x + 18, line_y, 0x101010, &line)?;
+                    line_y += 18;
+                    displayed += 1;
+                    if line_y >= y + height - 52 { break; }
+                }
+                if displayed >= 4 || line_y >= y + height - 52 { break; }
+            }
+        }
+        Ok((x, y, width, height))
+    }
+
+    fn run_input_dialog(&mut self, title: &str, prompt: &str, initial: &str) -> Result<Option<String>> {
+        if self.width < 300 || self.height < 250 || title.is_empty() || title.len() > 80 || prompt.len() > 512 || initial.len() > MAX_INPUT_BYTES {
+            return Err(Error(22));
+        }
+        let background = self.last_frame.clone();
+        let background_commands = self.last_command_count;
+        let mut value = String::from(initial);
+        self.widget_count = 3;
+        self.next_widget = 0;
+        self.focused_widget = 0;
+        self.activate_widget = None;
+        self.text_widgets.clear();
+        self.next_text_widgets.clear();
+        self.dropdown_widgets.clear();
+        self.next_dropdown_widgets.clear();
+        self.pending_text_keys.clear();
+        self.cursor_widget = None;
+        self.text_cursors.clear();
+        self.text_cursor = 0;
+
+        let outcome = (|| -> Result<Option<String>> {
+            loop {
+                let mut enter = false;
+                let mut cancel = false;
+                while let Some(event) = self.poll_event()? {
+                    match event {
+                        Event::Close | Event::Key { usage: 0x29, pressed: true, .. } => { cancel = true; break; }
+                        Event::Key { usage: 0x28, pressed: true, .. } => enter = true,
+                        _ => {}
+                    }
+                }
+                if cancel { return Ok(None); }
+
+                self.frame.clear();
+                self.frame.extend_from_slice(&background);
+                self.command_count = background_commands;
+                let (x, y, width, height) = self.draw_dialog_panel(title, "", 220)?;
+                let prompt_width = ((width as usize).saturating_sub(36) / 8).max(1);
+                for (line, chunk) in prompt.chars().collect::<Vec<_>>().chunks(prompt_width).take(2).enumerate() {
+                    let text: String = chunk.iter().collect();
+                    self.text(x + 18, y + 48 + line as i32 * 18, 0x202020, &text)?;
+                }
+                self.text_input(x + 18, y + 88, width - 36, 30, &mut value, "Enter a value")?;
+                let button_y = y + height - 42;
+                let accept_x = x + width as i32 - 184;
+                let accepted = self.button(accept_x, button_y, 76, 28, "OK")?;
+                let cancelled = self.button(accept_x + 88, button_y, 76, 28, "Cancel")?;
+                self.present()?;
+                if accepted || enter { return Ok(Some(value)); }
+                if cancelled { return Ok(None); }
+                crate::system::sleep_ms(16)?;
+            }
+        })();
+
+        self.frame.clear();
+        self.frame.extend_from_slice(&background);
+        self.command_count = background_commands;
+        self.next_widget = 0;
+        self.text_widgets.clear();
+        self.next_text_widgets.clear();
+        self.dropdown_widgets.clear();
+        self.next_dropdown_widgets.clear();
+        self.cursor_widget = None;
+        self.text_cursors.clear();
+        self.text_cursor = 0;
+        let restore = self.present();
+        match outcome {
+            Err(error) => Err(error),
+            Ok(value) => restore.map(|()| value),
+        }
+    }
+
+    fn draw_active_toast(&mut self) -> Result<()> {
+        let now = crate::system::uptime_ms();
+        let Some((message, deadline)) = self.toast.as_ref() else { return Ok(()); };
+        if now >= *deadline {
+            self.toast = None;
+            return Ok(());
+        }
+        let message = message.clone();
+        let width = self.width.saturating_sub(24).min(420).max(1);
+        let x = (self.width.saturating_sub(width + 24) / 2) as i32;
+        let y = 14;
+        self.fill_rect(x + 3, y + 3, width, 34, 0x606060)?;
+        self.fill_rect(x, y, width, 34, 0xFFFFE1)?;
+        self.fill_rect(x, y, width, 1, 0xFFFFFF)?;
+        self.fill_rect(x, y, 1, 34, 0xFFFFFF)?;
+        self.fill_rect(x + width as i32 - 1, y + 1, 1, 33, 0x404040)?;
+        self.fill_rect(x + 1, y + 33, width - 1, 1, 0x404040)?;
+        let max_chars = ((width as usize).saturating_sub(16) / 8).max(1);
+        let text: String = message.chars().take(max_chars).collect();
+        self.text(x + 8, y + 9, 0x101010, &text)
+    }
+
     /// Draw a single-line text field. The value is edited with printable
     /// keyboard input, Backspace/Delete, Left/Right, and Home/End. Returns
     /// true if the value changes. Text is limited to 256 UTF-8 bytes.
@@ -362,10 +841,13 @@ impl Window {
 
     /// Replace the current window contents with the queued commands.
     pub fn present(&mut self) -> Result<()> {
+        self.draw_active_toast()?;
         let mut payload = Vec::with_capacity(self.frame.len() + 2);
         payload.extend_from_slice(&self.command_count.to_le_bytes());
         payload.extend_from_slice(&self.frame);
         send_packet(PACKET_FRAME, &payload)?;
+        self.last_frame.clone_from(&self.frame);
+        self.last_command_count = self.command_count;
         self.frame.clear();
         self.command_count = 0;
         self.pointer_clicks.clear();
@@ -467,6 +949,116 @@ impl Window {
         self.fill_rect(x + 2, y + 2, 1, height - 4, 0x12377B)?;
         self.fill_rect(x + width as i32 - 3, y + 2, 1, height - 4, 0x12377B)
     }
+}
+
+/// Stateful cancellable progress UI. Update it between units of work; each
+/// update polls input and returns `true` if the user cancelled.
+pub struct ProgressDialog<'a> {
+    window: &'a mut Window,
+    title: String,
+    background: Vec<u8>,
+    background_commands: u16,
+    cancelled: bool,
+    finished: bool,
+}
+
+impl ProgressDialog<'_> {
+    /// Update the progress bar and status text. Percentages are clamped to
+    /// 100. Returns whether cancellation was requested.
+    pub fn update(&mut self, percent: u8, message: &str) -> Result<bool> {
+        if self.cancelled { return Ok(true); }
+        if message.len() > 256 { return Err(Error(22)); }
+        self.window.widget_count = 1;
+        self.window.focused_widget = 0;
+        while let Some(event) = self.window.poll_event()? {
+            if matches!(event, Event::Close | Event::Key { usage: 0x29, pressed: true, .. }) {
+                self.cancelled = true;
+            }
+        }
+        if self.cancelled { return Ok(true); }
+
+        self.window.frame.clear();
+        self.window.frame.extend_from_slice(&self.background);
+        self.window.command_count = self.background_commands;
+        self.window.next_widget = 0;
+        let (x, y, width, height) = self.window.draw_dialog_panel(&self.title, "", 176)?;
+        self.window.text(x + 18, y + 48, 0x202020, &truncate_chars(message, 54))?;
+        let bar_x = x + 18;
+        let bar_y = y + 78;
+        let bar_width = width - 36;
+        self.window.fill_rect(bar_x, bar_y, bar_width, 22, 0xFFFFFF)?;
+        self.window.fill_rect(bar_x, bar_y, bar_width, 1, 0x404040)?;
+        self.window.fill_rect(bar_x, bar_y, 1, 22, 0x404040)?;
+        let filled = ((bar_width.saturating_sub(4) as u64) * percent.min(100) as u64 / 100) as u32;
+        if filled > 0 { self.window.fill_rect(bar_x + 2, bar_y + 2, filled, 18, 0x12377B)?; }
+        let button_y = y + height - 42;
+        let cancelled = self.window.button(x + width as i32 - 94, button_y, 76, 28, "Cancel")?;
+        self.window.present()?;
+        if cancelled { self.cancelled = true; }
+        Ok(self.cancelled)
+    }
+
+    /// Restore the app's previous frame and finish the progress operation.
+    pub fn finish(mut self) -> Result<()> {
+        let result = self.restore();
+        self.finished = true;
+        result
+    }
+
+    fn restore(&mut self) -> Result<()> {
+        self.window.frame.clear();
+        self.window.frame.extend_from_slice(&self.background);
+        self.window.command_count = self.background_commands;
+        self.window.next_widget = 0;
+        self.window.text_widgets.clear();
+        self.window.next_text_widgets.clear();
+        self.window.dropdown_widgets.clear();
+        self.window.next_dropdown_widgets.clear();
+        self.window.present()
+    }
+}
+
+impl Drop for ProgressDialog<'_> {
+    fn drop(&mut self) {
+        if !self.finished { let _ = self.restore(); }
+    }
+}
+
+fn normalize_disk_directory(path: &str) -> Option<String> {
+    if path.is_empty() || path.len() > 240 || !path.starts_with('/') || path.contains('\0') { return None; }
+    let mut parts: Vec<&str> = Vec::new();
+    for part in path.split('/') {
+        match part {
+            "" | "." => {}
+            ".." if parts.len() > 1 => { parts.pop(); }
+            ".." => return None,
+            value => parts.push(value),
+        }
+    }
+    if parts.first().copied() != Some("disk") { return None; }
+    let mut normalized = String::from("/");
+    for (index, part) in parts.iter().enumerate() {
+        if index != 0 { normalized.push('/'); }
+        normalized.push_str(part);
+    }
+    Some(normalized)
+}
+
+fn parent_disk_directory(path: &str) -> String {
+    if path == "/disk" { return String::from("/disk"); }
+    match path.rfind('/') {
+        Some(index) if index >= 5 => String::from(&path[..index]),
+        _ => String::from("/disk"),
+    }
+}
+
+fn join_directory(directory: &str, name: &str) -> String {
+    if directory == "/" { alloc::format!("/{}", name) }
+    else { alloc::format!("{}/{}", directory.trim_end_matches('/'), name) }
+}
+
+fn truncate_chars(value: &str, max_chars: usize) -> String {
+    value.chars().take(max_chars).collect()
 }
 
 fn send_packet(kind: u8, payload: &[u8]) -> Result<()> {
