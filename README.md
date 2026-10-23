@@ -85,6 +85,11 @@ snapshot of uptime, current process, memory, process listings, storage devices,
 mounts, and E1000 counters. Existing focused commands such as `ps`, `free`,
 `lsblk`, `net`, and `mouse` remain available.
 
+Era accepts non-interlaced 8-bit RGB and RGBA PNG wallpapers. With `/disk`
+mounted, download or copy a PNG there, then run
+`era-wallpaper /disk/snow-pine-forest.png` before starting Era. The selected
+wallpaper is saved on the data disk and loaded the next time Era starts.
+
 Use `./runb.sh` for an optimized release build, which suppresses `DEBUG` log
 lines and creates `build/iso_output/eonos.iso`. Use
 `EONOS_PROFILE=dev ./runb.sh` to run an unoptimized development build. Use
@@ -121,7 +126,10 @@ The initramfs is mounted as `/`. The build creates a persistent, sparse 4 GiB
 FAT32 image at `build/eonos_disk.img` and attaches it to QEMU as an NVMe disk.
 The image is preserved across builds; files written to it survive guest
 reboots. The disk starts unmounted so writes require an explicit mount, for
-example `mount /device/nvme0n1 /disk`. `/device/...` is the device namespace
+example `mount /device/nvme0n1 /disk`. USB flash drives appear as
+`/device/usb0`, `/device/usb1`, and so on; mount one with
+`mount /device/usb0 /disk`. The mount command recognizes FAT32 on whole-disk
+images and MBR/GPT FAT32 partitions. `/device/...` is the device namespace
 used by EonOS for devices such as `/device/console`. `lsblk` lists detected
 disks and filesystems, including their mountpoints. FAT32 supports short and
 long names, file writes, directory creation, and removal. Shell commands include

@@ -1,5 +1,6 @@
 pub mod mouse;
 pub mod pci;
+pub mod storage;
 pub mod xhci;
 
 use crate::log_ok;

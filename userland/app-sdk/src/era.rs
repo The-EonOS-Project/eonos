@@ -1156,6 +1156,30 @@ fn decode_event(raw: &[u8; EVENT_SIZE]) -> Option<Event> {
 }
 
 fn input_character(usage: u8, shift: bool) -> Option<char> {
+    let layout = eonos_rt::keyboard_layout().unwrap_or(0);
+    if layout == 1 {
+        if usage == 0x1c { return Some(if shift { 'Y' } else { 'y' }); }
+        if usage == 0x1d { return Some(if shift { 'Z' } else { 'z' }); }
+        return Some(match (usage, shift) {
+            (0x2d, false) => 'ß', (0x2d, true) => '?',
+            (0x2f, false) => 'ü', (0x2f, true) => 'Ü',
+            (0x33, false) => 'ö', (0x33, true) => 'Ö',
+            (0x34, false) => 'ä', (0x34, true) => 'Ä',
+            (0x35, false) => '^', (0x35, true) => '°',
+            _ => return input_character_us(usage, shift),
+        });
+    }
+    if layout == 2 {
+        if (0x1e..=0x27).contains(&usage) && shift {
+            return Some("!\"#$%&/()=".chars().nth((usage - 0x1e) as usize)?);
+        }
+        if usage == 0x34 { return Some(if shift { '\'' } else { ';' }); }
+        if usage == 0x35 { return Some(if shift { '~' } else { '`' }); }
+    }
+    input_character_us(usage, shift)
+}
+
+fn input_character_us(usage: u8, shift: bool) -> Option<char> {
     let character = match usage {
         0x04..=0x1d => {
             let letter = (b'a' + usage - 0x04) as char;

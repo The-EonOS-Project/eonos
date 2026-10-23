@@ -6,6 +6,7 @@ const FILL_RECT: usize = 1;
 const TEXT: usize = 2;
 const PRESENT: usize = 3;
 const EXIT: usize = 4;
+const BLIT_SCALED: usize = 6;
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 #[repr(C)]
@@ -55,6 +56,18 @@ pub fn text(x: i32, y: i32, color: u32, text: &str) -> Result<(), Error> {
         )
     })
     .map(|_| ())
+}
+
+pub fn blit_scaled(width: u32, height: u32, pixels: &[u32]) -> Result<(), Error> {
+    let count = (width as usize).checked_mul(height as usize).ok_or(Error(22))?;
+    if width == 0 || height == 0 || pixels.len() != count || count > 2_097_152 {
+        return Err(Error(22));
+    }
+    let bytes = unsafe { core::slice::from_raw_parts(pixels.as_ptr().cast::<u8>(), core::mem::size_of_val(pixels)) };
+    checked(unsafe {
+        syscall6(SYS_ERA_GRAPHICS, BLIT_SCALED, width as usize, height as usize,
+            bytes.as_ptr() as usize, bytes.len(), 0)
+    }).map(|_| ())
 }
 
 pub fn present() -> Result<(), Error> {

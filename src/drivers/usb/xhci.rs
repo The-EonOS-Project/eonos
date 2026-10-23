@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use core::sync::atomic::{AtomicBool, Ordering};
+use core::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 
 use crate::sync::IrqMutex;
 use crate::{log_debug, log_fail, log_ok};
@@ -117,6 +117,7 @@ const TRB_TYPE_COMMAND_COMPLETION: u32 = 33;
 
 const COMPLETION_SUCCESS: u32 = 1;
 const COMPLETION_SHORT_PACKET: u32 = 13;
+const TRB_ISP: u32 = 1 << 2;
 
 const RING_SIZE: usize = 16;
 
@@ -200,12 +201,18 @@ const REQ_GET_DESCRIPTOR: u8 = 6;
 const REQ_SET_CONFIGURATION: u8 = 9;
 const HID_REQ_SET_PROTOCOL: u8 = 0x0B;
 const HID_REQ_SET_IDLE: u8 = 0x0A;
+const MSC_BULK_ONLY_RESET: u8 = 0xFF;
 
 const DESC_TYPE_DEVICE: u16 = 1 << 8;
 const DESC_TYPE_CONFIGURATION: u16 = 2 << 8;
 const HID_PROTOCOL_BOOT: u16 = 0;
 const HID_PROTOCOL_KEYBOARD: u8 = 1;
 const HID_PROTOCOL_MOUSE: u8 = 2;
+const MSC_CLASS: u8 = 8;
+const MSC_SUBCLASS_SCSI: u8 = 6;
+const MSC_PROTOCOL_BULK_ONLY: u8 = 0x50;
+const MSC_CBW_SIGNATURE: u32 = 0x4342_5355;
+const MSC_CSW_SIGNATURE: u32 = 0x5342_5355;
 
 #[derive(Clone, Copy)]
 struct BootHidEndpoint {
@@ -217,6 +224,38 @@ struct BootHidEndpoint {
     protocol: u8,
     report_len: u8,
 }
+
+#[derive(Clone, Copy)]
+struct MassStorageEndpoints {
+    configuration: u8,
+    interface: u8,
+    bulk_in_dci: u8,
+    bulk_out_dci: u8,
+    bulk_in_packet: u16,
+    bulk_out_packet: u16,
+}
+
+struct UsbMassStorage {
+    id: u64,
+    port: u8,
+    slot_id: u8,
+    interface: u8,
+    bulk_in_dci: u8,
+    bulk_out_dci: u8,
+    bulk_in_packet: u16,
+    bulk_out_packet: u16,
+    bulk_in_ring: Ring,
+    bulk_out_ring: Ring,
+    output_ctx_phys: u64,
+    ep0_ring_phys: u64,
+    buffer_phys: u64,
+    csw_phys: u64,
+    capacity: u64,
+    next_tag: u32,
+    registered: bool,
+}
+
+static NEXT_STORAGE_ID: AtomicU64 = AtomicU64::new(1);
 
 fn find_boot_hid(config: &[u8], speed: u32) -> alloc::vec::Vec<BootHidEndpoint> {
     let mut endpoints = alloc::vec::Vec::new();
@@ -314,6 +353,63 @@ fn find_boot_hid(config: &[u8], speed: u32) -> alloc::vec::Vec<BootHidEndpoint> 
     endpoints
 }
 
+fn find_mass_storage(config: &[u8]) -> Option<MassStorageEndpoints> {
+    if config.len() < 9 || config[1] != 2 { return None; }
+    let total = u16::from_le_bytes([config[2], config[3]]) as usize;
+    if total < 9 || total > config.len() { return None; }
+    let configuration = config[5];
+    let mut interface = None;
+    let mut bulk_in = None;
+    let mut bulk_out = None;
+    let mut offset = 9usize;
+    while offset + 2 <= total {
+        let len = config[offset] as usize;
+        let kind = config[offset + 1];
+        if len < 2 || offset + len > total { return None; }
+        match kind {
+            4 if len >= 9 => {
+                interface = if config[offset + 3] == 0
+                    && config[offset + 5] == MSC_CLASS
+                    && config[offset + 6] == MSC_SUBCLASS_SCSI
+                    && config[offset + 7] == MSC_PROTOCOL_BULK_ONLY
+                {
+                    bulk_in = None;
+                    bulk_out = None;
+                    Some(config[offset + 2])
+                } else {
+                    None
+                };
+            }
+            5 if len >= 7 && interface.is_some() => {
+                let address = config[offset + 2];
+                let attributes = config[offset + 3] & 0x03;
+                let packet = u16::from_le_bytes([config[offset + 4], config[offset + 5]]) & 0x07ff;
+                let endpoint = address & 0x0f;
+                if attributes == 2 && endpoint != 0 && packet != 0 {
+                    if address & 0x80 != 0 {
+                        bulk_in = Some((endpoint * 2 + 1, packet));
+                    } else {
+                        bulk_out = Some((endpoint * 2, packet));
+                    }
+                }
+                if let (Some((bulk_in_dci, bulk_in_packet)), Some((bulk_out_dci, bulk_out_packet))) = (bulk_in, bulk_out) {
+                    return Some(MassStorageEndpoints {
+                        configuration,
+                        interface: interface.unwrap(),
+                        bulk_in_dci,
+                        bulk_out_dci,
+                        bulk_in_packet,
+                        bulk_out_packet,
+                    });
+                }
+            }
+            _ => {}
+        }
+        offset += len;
+    }
+    None
+}
+
 fn xhci_interval(speed: u32, descriptor_interval: u8) -> Option<u32> {
     let interval = descriptor_interval.max(1) as u32;
     match speed {
@@ -351,6 +447,7 @@ struct Controller {
 
     slot_id: u8,
     devices: alloc::vec::Vec<UsbHidDevice>,
+    storage_devices: alloc::vec::Vec<UsbMassStorage>,
     scanned_ports: alloc::vec::Vec<u8>,
     last_port_scan_ms: u64,
 }
@@ -639,6 +736,7 @@ pub fn probe(controller: &UsbController) {
         ep0_ring_phys: 0,
         slot_id: 0,
         devices: alloc::vec::Vec::new(),
+        storage_devices: alloc::vec::Vec::new(),
         scanned_ports: alloc::vec::Vec::new(),
         last_port_scan_ms: 0,
     };
@@ -683,13 +781,11 @@ pub fn probe(controller: &UsbController) {
                 .iter()
                 .filter(|device| device.port == port)
                 .count();
-            log_ok!(
-                "USB",
-                "xHCI",
-                "Configured {} boot HID interface(s) on port {}",
-                count,
-                port
-            );
+            if count != 0 {
+                log_ok!("USB", "xHCI", "Configured {} boot HID interface(s) on port {}", count, port);
+            } else if controller.storage_devices.iter().any(|device| device.port == port) {
+                log_ok!("USB", "xHCI", "Configured mass storage on port {}", port);
+            }
 
             controller.slot_id = 0;
             *EP0_RING_STATE.lock() = (0, 1);
@@ -713,11 +809,11 @@ pub fn probe(controller: &UsbController) {
         max_ports
     );
 
-    if controller.devices.is_empty() {
+    if controller.devices.is_empty() && controller.storage_devices.is_empty() {
         log_ok!(
             "USB",
             "xHCI",
-            "No supported USB HID device found on any port"
+            "No supported USB HID or mass storage device found on any port"
         );
     } else {
         log_ok!(
@@ -728,6 +824,21 @@ pub fn probe(controller: &UsbController) {
         );
     }
     CONTROLLERS.lock().push(controller);
+    publish_storage_devices();
+}
+
+fn publish_storage_devices() {
+    let mut controllers = CONTROLLERS.lock();
+    for (controller_index, controller) in controllers.iter_mut().enumerate() {
+        for disk in &mut controller.storage_devices {
+            if disk.registered { continue; }
+            let (name, device) = super::storage::UsbDisk::leak(controller_index, disk.id, disk.capacity);
+            crate::block::register_device(name, device);
+            disk.registered = true;
+            log_ok!("USB", "Storage", "Registered /device/{} ({} MiB)",
+                name, disk.capacity.saturating_mul(512) / (1024 * 1024));
+        }
+    }
 }
 
 fn reset_controller(op: *mut OpRegs) -> bool {
@@ -1155,6 +1266,10 @@ fn try_setup_hid(c: &mut Controller, port: u8) -> bool {
         fail_setup!("reading full configuration descriptor");
     }
     let config = unsafe { core::slice::from_raw_parts(desc, total_length) };
+    if let Some(endpoints) = find_mass_storage(config) {
+        if try_setup_mass_storage(c, port, endpoints) { return true; }
+        fail_setup!("initializing USB mass storage interface");
+    }
     let hid_endpoints = find_boot_hid(config, speed);
     if hid_endpoints.is_empty() {
         fail_setup!("finding HID boot interface");
@@ -1409,6 +1524,301 @@ fn control_transfer(
     responded && saw_completion
 }
 
+fn try_setup_mass_storage(c: &mut Controller, port: u8, endpoints: MassStorageEndpoints) -> bool {
+    if endpoints.bulk_in_packet > 1024 || endpoints.bulk_out_packet > 1024 {
+        log_fail!("USB", "Storage", "Port {} reports unsupported bulk packet size", port);
+        return false;
+    }
+    if !control_transfer_out(c, setup_packet(
+        REQ_TYPE_STD_DEVICE_OUT,
+        REQ_SET_CONFIGURATION,
+        endpoints.configuration as u16,
+        0,
+        0,
+    )) {
+        log_fail!("USB", "Storage", "Port {} SET_CONFIGURATION failed", port);
+        return false;
+    }
+
+    let Some(bulk_in_ring) = Ring::new() else { return false; };
+    let Some(bulk_out_ring) = Ring::new() else {
+        pmm::free_frame(bulk_in_ring.phys);
+        return false;
+    };
+    let Some(buffer_phys) = pmm::alloc_frame_zeroed() else {
+        pmm::free_frame(bulk_in_ring.phys);
+        pmm::free_frame(bulk_out_ring.phys);
+        return false;
+    };
+    let Some(csw_phys) = pmm::alloc_frame_zeroed() else {
+        pmm::free_frame(bulk_in_ring.phys);
+        pmm::free_frame(bulk_out_ring.phys);
+        pmm::free_frame(buffer_phys);
+        return false;
+    };
+
+    let max_dci = endpoints.bulk_in_dci.max(endpoints.bulk_out_dci) as usize;
+    unsafe {
+        let control_ctx = input_context_entry(c.input_ctx_phys, c.context_size, 0);
+        core::ptr::write_bytes(control_ctx, 0, c.context_size / 4);
+        *control_ctx.add(1) = (1 << 0) | (1 << endpoints.bulk_in_dci) | (1 << endpoints.bulk_out_dci);
+
+        let slot_ctx = input_context_entry(c.input_ctx_phys, c.context_size, 1);
+        let output_slot_ctx = pmm::phys_to_virt(c.output_ctx_phys) as *const u32;
+        for dword in 0..(c.context_size / 4) {
+            *slot_ctx.add(dword) = core::ptr::read_volatile(output_slot_ctx.add(dword));
+        }
+        let context_entries_mask = 0x1f << 27;
+        *slot_ctx = (*slot_ctx & !context_entries_mask) | ((max_dci as u32) << 27);
+
+        configure_bulk_endpoint(c, endpoints.bulk_in_dci, endpoints.bulk_in_packet, bulk_in_ring.phys, true);
+        configure_bulk_endpoint(c, endpoints.bulk_out_dci, endpoints.bulk_out_packet, bulk_out_ring.phys, false);
+    }
+
+    let Some((code, _)) = do_command(c, Trb {
+        parameter: c.input_ctx_phys,
+        status: 0,
+        control: make_type(TRB_TYPE_CONFIGURE_ENDPOINT) | ((c.slot_id as u32) << 24),
+    }) else {
+        pmm::free_frame(bulk_in_ring.phys);
+        pmm::free_frame(bulk_out_ring.phys);
+        pmm::free_frame(buffer_phys);
+        pmm::free_frame(csw_phys);
+        return false;
+    };
+    if code != COMPLETION_SUCCESS {
+        log_fail!("USB", "Storage", "Port {} Configure Endpoint failed (completion {})", port, code);
+        pmm::free_frame(bulk_in_ring.phys);
+        pmm::free_frame(bulk_out_ring.phys);
+        pmm::free_frame(buffer_phys);
+        pmm::free_frame(csw_phys);
+        return false;
+    }
+
+    let mut disk = UsbMassStorage {
+        id: NEXT_STORAGE_ID.fetch_add(1, Ordering::Relaxed),
+        port,
+        slot_id: c.slot_id,
+        interface: endpoints.interface,
+        bulk_in_dci: endpoints.bulk_in_dci,
+        bulk_out_dci: endpoints.bulk_out_dci,
+        bulk_in_packet: endpoints.bulk_in_packet,
+        bulk_out_packet: endpoints.bulk_out_packet,
+        bulk_in_ring,
+        bulk_out_ring,
+        output_ctx_phys: c.output_ctx_phys,
+        ep0_ring_phys: c.ep0_ring_phys,
+        buffer_phys,
+        csw_phys,
+        capacity: 0,
+        next_tag: 1,
+        registered: false,
+    };
+    c.output_ctx_phys = 0;
+    c.ep0_ring_phys = 0;
+
+    let inquiry = [0x12, 0, 0, 0, 36, 0];
+    if mass_storage_command(c, &mut disk, &inquiry, 36, true) != Ok(36) {
+        log_fail!("USB", "Storage", "Port {} SCSI INQUIRY failed", port);
+        free_mass_storage(disk);
+        return false;
+    }
+    let capacity_cdb = [0x25, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    let mut capacity = None;
+    for attempt in 0..10 {
+        if mass_storage_command(c, &mut disk, &capacity_cdb, 8, true) == Ok(8) {
+            let data = unsafe { core::slice::from_raw_parts(pmm::phys_to_virt(disk.buffer_phys), 8) };
+            let last_lba = u32::from_be_bytes([data[0], data[1], data[2], data[3]]) as u64;
+            let block_size = u32::from_be_bytes([data[4], data[5], data[6], data[7]]);
+            if block_size == crate::fat32::SECTOR_SIZE as u32 && last_lba != u32::MAX as u64 {
+                capacity = Some(last_lba + 1);
+                break;
+            }
+            if last_lba == u32::MAX as u64 {
+                let capacity16 = [0x9e, 0x10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0];
+                if mass_storage_command(c, &mut disk, &capacity16, 32, true) == Ok(32) {
+                    let data = unsafe { core::slice::from_raw_parts(pmm::phys_to_virt(disk.buffer_phys), 32) };
+                    let last_lba = u64::from_be_bytes([data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]]);
+                    let block_size = u32::from_be_bytes([data[8], data[9], data[10], data[11]]);
+                    if block_size == crate::fat32::SECTOR_SIZE as u32 && last_lba != u64::MAX {
+                        capacity = Some(last_lba + 1);
+                        break;
+                    }
+                }
+            }
+        }
+        if attempt != 9 { crate::scheduler::sleep_ms(100); }
+    }
+    let Some(capacity) = capacity else {
+        log_fail!("USB", "Storage", "Port {} could not read 512-byte SCSI capacity", port);
+        free_mass_storage(disk);
+        return false;
+    };
+    disk.capacity = capacity;
+    c.storage_devices.push(disk);
+    log_ok!("USB", "Storage", "Flash drive ready on port {}: {} sectors ({} MiB)",
+        port, capacity, capacity.saturating_mul(512) / (1024 * 1024));
+    true
+}
+
+unsafe fn configure_bulk_endpoint(c: &Controller, dci: u8, max_packet: u16, ring_phys: u64, input: bool) {
+    let ep_ctx = input_context_entry(c.input_ctx_phys, c.context_size, dci as usize + 1);
+    let endpoint_type = if input { 6u32 } else { 2u32 };
+    *ep_ctx = 0;
+    *ep_ctx.add(1) = (endpoint_type << 3) | (3 << 1) | ((max_packet as u32) << 16);
+    *ep_ctx.add(2) = (ring_phys | 1) as u32;
+    *ep_ctx.add(3) = (ring_phys >> 32) as u32;
+    *ep_ctx.add(4) = max_packet as u32;
+}
+
+fn free_mass_storage(disk: UsbMassStorage) {
+    pmm::free_frame(disk.bulk_in_ring.phys);
+    pmm::free_frame(disk.bulk_out_ring.phys);
+    pmm::free_frame(disk.buffer_phys);
+    pmm::free_frame(disk.csw_phys);
+    if disk.output_ctx_phys != 0 { pmm::free_frame(disk.output_ctx_phys); }
+    if disk.ep0_ring_phys != 0 { pmm::free_frame(disk.ep0_ring_phys); }
+}
+
+fn bulk_transfer(c: &mut Controller, disk: &mut UsbMassStorage, input: bool, buffer_phys: u64, length: u32) -> Result<usize, ()> {
+    if length == 0 || length > pmm::PAGE_SIZE as u32 { return Err(()); }
+    let (dci, slot_id, trb_phys) = if input {
+        let slot = unsafe { disk.bulk_in_ring.push(Trb {
+            parameter: buffer_phys,
+            status: length,
+            control: make_type(TRB_TYPE_NORMAL) | TRB_IOC | TRB_ISP,
+        }) };
+        (disk.bulk_in_dci, disk.slot_id, slot)
+    } else {
+        let slot = unsafe { disk.bulk_out_ring.push(Trb {
+            parameter: buffer_phys,
+            status: length,
+            control: make_type(TRB_TYPE_NORMAL) | TRB_IOC | TRB_ISP,
+        }) };
+        (disk.bulk_out_dci, disk.slot_id, slot)
+    };
+    reg_write32(unsafe { c.db.add(slot_id as usize) }, dci as u32);
+    let mut completion = None;
+    let finished = spin_until(3_000, || {
+        while let Some(event) = poll_event_ring(c) {
+            if trb_type(event.control) == TRB_TYPE_TRANSFER_EVENT
+                && event.parameter == trb_phys
+                && ((event.control >> 24) as u8) == slot_id
+            {
+                completion = Some(((event.status >> 24) & 0xff, (event.status & 0x00ff_ffff) as usize));
+                return true;
+            }
+            dispatch_hid_event(c, event);
+        }
+        false
+    });
+    if !finished { return Err(()); }
+    let (code, residual) = completion.ok_or(())?;
+    if code != COMPLETION_SUCCESS && code != COMPLETION_SHORT_PACKET { return Err(()); }
+    Ok((length as usize).saturating_sub(residual).min(length as usize))
+}
+
+fn mass_storage_command(c: &mut Controller, disk: &mut UsbMassStorage, cdb: &[u8], data_len: u32, input: bool) -> Result<usize, ()> {
+    if cdb.is_empty() || cdb.len() > 16 || data_len > pmm::PAGE_SIZE as u32 { return Err(()); }
+    let tag = disk.next_tag;
+    disk.next_tag = disk.next_tag.wrapping_add(1).max(1);
+    let cbw = unsafe { core::slice::from_raw_parts_mut(pmm::phys_to_virt(disk.buffer_phys), 31) };
+    cbw.fill(0);
+    cbw[0..4].copy_from_slice(&MSC_CBW_SIGNATURE.to_le_bytes());
+    cbw[4..8].copy_from_slice(&tag.to_le_bytes());
+    cbw[8..12].copy_from_slice(&data_len.to_le_bytes());
+    cbw[12] = if input { 0x80 } else { 0 };
+    cbw[14] = cdb.len() as u8;
+    cbw[15..15 + cdb.len()].copy_from_slice(cdb);
+    if bulk_transfer(c, disk, false, disk.buffer_phys, 31)? != 31 { return Err(()); }
+
+    let transferred = if data_len == 0 {
+        0
+    } else {
+        bulk_transfer(c, disk, input, disk.buffer_phys, data_len)?
+    };
+    let csw = unsafe { core::slice::from_raw_parts_mut(pmm::phys_to_virt(disk.csw_phys), 13) };
+    csw.fill(0);
+    if bulk_transfer(c, disk, true, disk.csw_phys, 13)? != 13 { return Err(()); }
+    let csw = unsafe { core::slice::from_raw_parts(pmm::phys_to_virt(disk.csw_phys), 13) };
+    let signature = u32::from_le_bytes([csw[0], csw[1], csw[2], csw[3]]);
+    let returned_tag = u32::from_le_bytes([csw[4], csw[5], csw[6], csw[7]]);
+    let status = csw[12];
+    if signature != MSC_CSW_SIGNATURE || returned_tag != tag || status != 0 { return Err(()); }
+    Ok(transferred)
+}
+
+fn with_storage_device<T>(controller_index: usize, id: u64, operation: impl FnOnce(&mut Controller, &mut UsbMassStorage) -> Result<T, crate::block::BlockError>) -> Result<T, crate::block::BlockError> {
+    while POLLING.compare_exchange(false, true, Ordering::Acquire, Ordering::Relaxed).is_err() {
+        crate::scheduler::yield_now();
+    }
+    let mut controllers = {
+        let mut registry = CONTROLLERS.lock();
+        core::mem::take(&mut *registry)
+    };
+    let result = if let Some(controller) = controllers.get_mut(controller_index) {
+        if let Some(index) = controller.storage_devices.iter().position(|device| device.id == id) {
+            let mut device = controller.storage_devices.remove(index);
+            let result = operation(controller, &mut device);
+            controller.storage_devices.insert(index.min(controller.storage_devices.len()), device);
+            result
+        } else {
+            Err(crate::block::BlockError::BadBuffer)
+        }
+    } else {
+        Err(crate::block::BlockError::BadBuffer)
+    };
+    *CONTROLLERS.lock() = controllers;
+    POLLING.store(false, Ordering::Release);
+    result
+}
+
+pub fn read_storage_sector(controller_index: usize, id: u64, lba: u64, out: &mut [u8; crate::fat32::SECTOR_SIZE]) -> Result<(), crate::block::BlockError> {
+    with_storage_device(controller_index, id, |controller, disk| {
+        let cdb = read_write_cdb(lba, false);
+        let count = mass_storage_command(controller, disk, &cdb[..cdb_length(lba)], crate::fat32::SECTOR_SIZE as u32, true)
+            .map_err(|_| crate::block::BlockError::BadBuffer)?;
+        if count != crate::fat32::SECTOR_SIZE { return Err(crate::block::BlockError::BadBuffer); }
+        let data = unsafe { core::slice::from_raw_parts(pmm::phys_to_virt(disk.buffer_phys), crate::fat32::SECTOR_SIZE) };
+        out.copy_from_slice(data);
+        Ok(())
+    })
+}
+
+pub fn write_storage_sector(controller_index: usize, id: u64, lba: u64, input: &[u8; crate::fat32::SECTOR_SIZE]) -> Result<(), crate::block::BlockError> {
+    with_storage_device(controller_index, id, |controller, disk| {
+        let data = unsafe { core::slice::from_raw_parts_mut(pmm::phys_to_virt(disk.buffer_phys), crate::fat32::SECTOR_SIZE) };
+        data.copy_from_slice(input);
+        let cdb = read_write_cdb(lba, true);
+        let count = mass_storage_command(controller, disk, &cdb[..cdb_length(lba)], crate::fat32::SECTOR_SIZE as u32, false)
+            .map_err(|_| crate::block::BlockError::BadBuffer)?;
+        if count != crate::fat32::SECTOR_SIZE { return Err(crate::block::BlockError::BadBuffer); }
+        Ok(())
+    })
+}
+
+pub fn flush_storage(controller_index: usize, id: u64) -> Result<(), crate::block::BlockError> {
+    // BOT writes complete synchronously. A number of flash devices stall the
+    // optional SYNCHRONIZE CACHE command, so keep flush compatible with them.
+    with_storage_device(controller_index, id, |_controller, _disk| Ok(()))
+}
+
+fn cdb_length(lba: u64) -> usize { if lba <= u32::MAX as u64 { 10 } else { 16 } }
+
+fn read_write_cdb(lba: u64, write: bool) -> [u8; 16] {
+    let mut cdb = [0u8; 16];
+    if lba <= u32::MAX as u64 {
+        cdb[0] = if write { 0x2a } else { 0x28 };
+        cdb[2..6].copy_from_slice(&(lba as u32).to_be_bytes());
+        cdb[8] = 1;
+    } else {
+        cdb[0] = if write { 0x8a } else { 0x88 };
+        cdb[2..10].copy_from_slice(&lba.to_be_bytes());
+        cdb[13] = 1;
+    }
+    cdb
+}
+
 fn queue_report_read(keyboard: &mut UsbHidDevice) {
     let buffer = keyboard.report_enqueue;
     let trb = Trb {
@@ -1451,6 +1861,7 @@ pub fn poll() {
         poll_root_ports(c);
     }
     *CONTROLLERS.lock() = controllers;
+    publish_storage_devices();
     POLLING.store(false, Ordering::Release);
 }
 
@@ -1475,8 +1886,9 @@ fn poll_root_ports(c: &mut Controller) {
     for port in 1..=c.max_ports {
         let portsc = reg_read32(unsafe { core::ptr::addr_of!((*port_regs(c, port)).portsc) });
         if portsc & PORTSC_CCS == 0 {
-            if let Some(index) = c.devices.iter().position(|device| device.port == port) {
-                let slot_id = c.devices[index].slot_id;
+            let slot_id = c.devices.iter().find(|device| device.port == port).map(|device| device.slot_id)
+                .or_else(|| c.storage_devices.iter().find(|device| device.port == port).map(|device| device.slot_id));
+            if let Some(slot_id) = slot_id {
                 let mut disconnected = alloc::vec::Vec::new();
                 let mut index = 0;
                 while index < c.devices.len() {
@@ -1486,9 +1898,19 @@ fn poll_root_ports(c: &mut Controller) {
                         index += 1;
                     }
                 }
+                let mut disconnected_storage = alloc::vec::Vec::new();
+                let mut index = 0;
+                while index < c.storage_devices.len() {
+                    if c.storage_devices[index].port == port && c.storage_devices[index].slot_id == slot_id {
+                        disconnected_storage.push(c.storage_devices.remove(index));
+                    } else {
+                        index += 1;
+                    }
+                }
                 if !disable_hid_slot(c, slot_id, port) {
 
                     c.devices.extend(disconnected);
+                    c.storage_devices.extend(disconnected_storage);
                     continue;
                 }
                 for device in disconnected {
@@ -1497,12 +1919,8 @@ fn poll_root_ports(c: &mut Controller) {
                     }
                     free_hid_device(device);
                 }
-                log_ok!(
-                    "USB",
-                    "xHCI",
-                    "USB HID device disconnected from port {}",
-                    port
-                );
+                for disk in disconnected_storage { free_mass_storage(disk); }
+                log_ok!("USB", "xHCI", "USB device disconnected from port {}", port);
             }
             c.scanned_ports.retain(|scanned| *scanned != port);
             continue;
@@ -1771,11 +2189,38 @@ fn translate_boot_report(
         if (code as usize) >= HID_UNSHIFTED.len() {
             continue;
         }
+        let layout = crate::input::keyboard_layout();
         let mut ascii = if shift {
             HID_SHIFTED[code as usize]
         } else {
             HID_UNSHIFTED[code as usize]
         };
+        if layout == 1 {
+            // German QWERTZ: letter swap and common punctuation positions.
+            if code == 0x1c || code == 0x1d {
+                let other = if code == 0x1c { 0x1d } else { 0x1c };
+                ascii = if shift { HID_SHIFTED[other] } else { HID_UNSHIFTED[other] };
+            } else {
+                ascii = match (code, shift) {
+                    (0x2d, false) => 0xdf, (0x2d, true) => b'?',
+                    (0x2e, false) => b'\'', (0x2e, true) => b'`',
+                    (0x2f, false) => b'[', (0x2f, true) => b'{',
+                    (0x30, false) => b']', (0x30, true) => b'}',
+                    (0x31, false) => b'#', (0x31, true) => b'\'',
+                    (0x33, false) => b';', (0x33, true) => b':',
+                    (0x34, false) => b'\'', (0x34, true) => b'"',
+                    (0x35, false) => b'^', (0x35, true) => b'~',
+                    _ => ascii,
+                };
+            }
+        } else if layout == 2 {
+            // Dutch QWERTY keeps the letters and uses the Dutch number row.
+            if (0x1e..=0x27).contains(&code) && shift {
+                ascii = *b"!\"#$%&/()=".get((code - 0x1e) as usize).unwrap_or(&ascii);
+            } else if code == 0x34 {
+                ascii = if shift { b'\'' } else { b';' };
+            }
+        }
         if ascii == 0 {
             continue;
         }

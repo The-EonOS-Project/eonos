@@ -1,4 +1,14 @@
 use crate::sync::IrqMutex;
+use core::sync::atomic::{AtomicU8, Ordering};
+
+// 0 = US, 1 = German, 2 = Dutch.
+static KEYBOARD_LAYOUT: AtomicU8 = AtomicU8::new(0);
+pub fn keyboard_layout() -> u8 { KEYBOARD_LAYOUT.load(Ordering::Relaxed) }
+pub fn set_keyboard_layout(layout: u8) -> bool {
+    if layout > 2 { return false; }
+    KEYBOARD_LAYOUT.store(layout, Ordering::Relaxed);
+    true
+}
 
 const QUEUE_CAPACITY: usize = 512;
 

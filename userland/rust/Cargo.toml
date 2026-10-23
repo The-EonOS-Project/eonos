@@ -3,6 +3,7 @@ name = "eonos-rust-hello"
 version = "0.1.0"
 edition = "2021"
 build = "../doom/build.rs"
+autobins = false
 
 [[bin]]
 name = "rust-hello"
@@ -107,6 +108,12 @@ test = false
 bench = false
 
 [[bin]]
+name = "era-wallpaper"
+path = "src/bin/era_wallpaper.rs"
+test = false
+bench = false
+
+[[bin]]
 name = "fb-test"
 path = "src/bin/fb_test.rs"
 test = false
@@ -121,6 +128,7 @@ bench = false
 [dependencies]
 eonos-rt = { path = "../runtime" }
 eonos-user = { path = "../lib" }
+miniz_oxide = { version = "=0.9.1", default-features = false, features = ["with-alloc"] }
 rustls = { version = "=0.23.34", default-features = false, features = ["ring", "tls12"] }
 ring = { version = "=0.17.14", default-features = false, features = ["alloc", "less-safe-getrandom-custom-or-rdrand"] }
 webpki-roots = "=1.0.3"

@@ -180,6 +180,21 @@ pub fn mount_fat32_partition(
     mount_fat32(prefix, partition)
 }
 
+pub fn mount_fat32_partition_device(
+    prefix: &str,
+    device_name: &str,
+    parent: &'static dyn BlockDevice,
+    start_lba: u64,
+    sectors: u64,
+) -> Result<(), FsError> {
+    let partition = PartitionDevice::new(parent, start_lba, sectors).ok_or(FsError::InvalidPath)?;
+    if crate::fs_probe::detect(&partition) != crate::fs_probe::FsType::Fat32 {
+        return Err(FsError::Io);
+    }
+    let partition: &'static dyn BlockDevice = alloc::boxed::Box::leak(alloc::boxed::Box::new(partition));
+    mount_fat32_device(prefix, device_name, partition)
+}
+
 pub fn read_all(path: &str) -> Result<Vec<u8>, FsError> {
     let size = file_size(path)?;
     if size > MAX_READ_ALL {

@@ -226,6 +226,7 @@ pub const SYS_SECURE_RANDOM: u64 = 9046;
 pub const SYS_KEYBOARD_EVENT: u64 = 9035;
 
 pub const SYS_KEYBOARD_FOCUS: u64 = 9036;
+pub const SYS_KEYBOARD_LAYOUT: u64 = 9047;
 
 pub const SYS_SEEK: u64 = 9037;
 
@@ -242,7 +243,7 @@ const ERA_GRAPHICS_EXIT: u64 = 4;
 const ERA_GRAPHICS_IMAGE: u64 = 5;
 const ERA_GRAPHICS_BLIT_SCALED: u64 = 6;
 const ERA_MAX_TEXT_BYTES: usize = 512;
-const ERA_MAX_IMAGE_PIXELS: usize = 262_144;
+const ERA_MAX_IMAGE_PIXELS: usize = 2_097_152;
 
 const USER_HEAP_BASE: u64 = 0x0000_7000_0000_0000;
 const USER_HEAP_END: u64 = 0x0000_7000_1000_0000;
@@ -1465,6 +1466,14 @@ fn sys_keyboard_focus(operation: u64) -> u64 {
     }
 }
 
+fn sys_keyboard_layout(operation: u64) -> u64 {
+    match operation {
+        0 => crate::input::keyboard_layout() as u64,
+        1..=3 => { crate::input::set_keyboard_layout((operation - 1) as u8); 0 }
+        _ => errno(EINVAL),
+    }
+}
+
 fn sys_seek(fd: u64, offset: i64, whence: u64) -> u64 {
     let pid = scheduler::current_id();
     let mut files = OPEN_FILES.lock();
@@ -2090,7 +2099,29 @@ fn sys_mount(device_ptr: u64, mountpoint_ptr: u64) -> u64 {
     };
     match crate::vfs::mount_fat32_device(&mountpoint, device_name, device) {
         Ok(()) => 0,
-        Err(error) => fs_errno(error),
+        Err(error) => {
+            let direct_error = error;
+            let Ok(partitions) = crate::partition::scan(device) else {
+                return fs_errno(direct_error);
+            };
+            for partition in partitions {
+                let likely_fat = match partition.table {
+                    crate::partition::TableKind::Mbr => matches!(partition.type_tag, 0x0b | 0x0c),
+                    crate::partition::TableKind::Gpt => matches!(partition.type_tag, 0xebd0_a0a2 | 0xc12a_7328),
+                };
+                if !likely_fat { continue; }
+                if crate::vfs::mount_fat32_partition_device(
+                    &mountpoint,
+                    device_name,
+                    device,
+                    partition.start_lba,
+                    partition.sectors,
+                ).is_ok() {
+                    return 0;
+                }
+            }
+            fs_errno(direct_error)
+        }
     }
 }
 
@@ -2507,6 +2538,7 @@ extern "C" fn syscall_dispatch(frame: &mut SyscallFrame) {
         SYS_SECURE_RANDOM => frame.rax = sys_secure_random(frame.rdi, frame.rsi),
         SYS_KEYBOARD_EVENT => frame.rax = sys_keyboard_event(frame.rdi),
         SYS_KEYBOARD_FOCUS => frame.rax = sys_keyboard_focus(frame.rdi),
+        SYS_KEYBOARD_LAYOUT => frame.rax = sys_keyboard_layout(frame.rdi),
         SYS_SEEK => frame.rax = sys_seek(frame.rdi, frame.rsi as i64, frame.rdx),
         SYS_PIPE_READ_AVAILABLE => frame.rax = sys_pipe_read_available(frame.rdi, frame.rsi, frame.rdx as usize),
         SYS_PIPE_WRITE_AVAILABLE => frame.rax = sys_pipe_write_available(frame.rdi, frame.rsi, frame.rdx as usize),

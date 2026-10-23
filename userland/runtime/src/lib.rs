@@ -139,6 +139,7 @@ const SYS_KILL: usize = 62;
 const SYS_SCHED_YIELD: usize = 24;
 const SYS_KEYBOARD_EVENT: usize = 9035;
 const SYS_KEYBOARD_FOCUS: usize = 9036;
+const SYS_KEYBOARD_LAYOUT: usize = 9047;
 const SYS_SEEK: usize = 9037;
 const SYS_PIPE_READ_AVAILABLE: usize = 9038;
 const SYS_PIPE_WRITE_AVAILABLE: usize = 9039;
@@ -420,6 +421,17 @@ pub fn keyboard_event() -> Result<Option<KeyEvent>> {
         syscall3(SYS_KEYBOARD_EVENT, (&mut event as *mut KeyEvent) as usize, 0, 0)
     })?;
     Ok((count != 0).then_some(event))
+}
+
+/// Current text layout: 0 = US, 1 = German, 2 = Dutch.
+pub fn keyboard_layout() -> Result<u8> {
+    checked(unsafe { syscall3(SYS_KEYBOARD_LAYOUT, 0, 0, 0) }).map(|value| value as u8)
+}
+
+/// Select a system-wide text layout: 0 = US, 1 = German, 2 = Dutch.
+pub fn set_keyboard_layout(layout: u8) -> Result<()> {
+    if layout > 2 { return Err(Error(22)); }
+    checked(unsafe { syscall3(SYS_KEYBOARD_LAYOUT, layout as usize + 1, 0, 0) }).map(|_| ())
 }
 
 pub fn getpid() -> usize {

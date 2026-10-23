@@ -4,10 +4,14 @@
 
 extern crate alloc;
 
+mod era_png;
+
+use alloc::boxed::Box;
 use alloc::format;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::ffi::CStr;
+use core::ptr;
 use core::sync::atomic::{AtomicBool, AtomicI8, AtomicU8, AtomicUsize, Ordering};
 
 const PANEL: u32 = 0xC0C0C0;
@@ -20,6 +24,8 @@ const ACCENT: u32 = 0x12377B;
 const AQUA: u32 = 0x12377B;
 const GOLD: u32 = 0x805000;
 const SETTINGS_PATH: &str = "/disk/era-settings";
+const WALLPAPER_PATH_FILE: &str = "/disk/era-wallpaper";
+static CUSTOM_WALLPAPER: core::sync::atomic::AtomicPtr<era_png::Image> = core::sync::atomic::AtomicPtr::new(ptr::null_mut());
 static WALLPAPER_THEME: AtomicU8 = AtomicU8::new(0);
 static RESTORE_SESSION: AtomicBool = AtomicBool::new(true);
 static DISK_MOUNTED: AtomicBool = AtomicBool::new(false);
@@ -28,6 +34,7 @@ static APP_LAUNCH_STATUS: AtomicU8 = AtomicU8::new(0);
 static SYSTEM_TAB: AtomicU8 = AtomicU8::new(0);
 static SETTINGS_TAB: AtomicU8 = AtomicU8::new(0);
 static TIMEZONE_OFFSET: AtomicI8 = AtomicI8::new(0);
+static KEYBOARD_LAYOUT: AtomicU8 = AtomicU8::new(0);
 static APP_PAGE: AtomicUsize = AtomicUsize::new(0);
 
 struct RegisteredApp { name: &'static str, description: &'static str, executable: &'static str }
@@ -81,24 +88,63 @@ fn refresh_disk_status() -> bool {
     mounted
 }
 
+fn load_custom_wallpaper() {
+    let Ok(mut setting) = eonos_user::File::open(WALLPAPER_PATH_FILE, eonos_user::flags::READ_ONLY) else { return; };
+    let Ok(path) = setting.read_to_string() else { return; };
+    let path = path.trim();
+    if !path.starts_with("/disk/") || !path.to_ascii_lowercase().ends_with(".png") {
+        eonos_rt::eprintln!("Era: custom wallpaper path must be a PNG file under /disk");
+        return;
+    }
+    let result = (|| {
+        let mut file = eonos_user::File::open(path, eonos_user::flags::READ_ONLY)
+            .map_err(|_| "could not open PNG wallpaper")?;
+        let mut bytes = Vec::new();
+        let mut chunk = [0u8; 4096];
+        loop {
+            let count = file.read(&mut chunk).map_err(|_| "could not read PNG wallpaper")?;
+            if count == 0 { break; }
+            if bytes.len().checked_add(count).filter(|size| *size <= 17 * 1024 * 1024).is_none() {
+                return Err("PNG file exceeds the wallpaper size limit");
+            }
+            if bytes.try_reserve(count).is_err() { return Err("not enough memory to load PNG wallpaper"); }
+            bytes.extend_from_slice(&chunk[..count]);
+        }
+        era_png::decode(&bytes)
+    })();
+    match result {
+        Ok(image) => {
+            let image = Box::into_raw(Box::new(image));
+            CUSTOM_WALLPAPER.store(image, Ordering::Release);
+        }
+        Err(error) => eonos_rt::eprintln!("Era: could not load PNG wallpaper: {}", error),
+    }
+}
+
 fn load_settings() {
     if !refresh_disk_status() { return; }
     let Ok(mut file) = eonos_user::File::open(SETTINGS_PATH, eonos_user::flags::READ_ONLY) else { return; };
     let Ok(contents) = file.read_to_string() else { return; };
     let mut lines = contents.lines();
     let version = lines.next();
-    if version != Some("ERA-SETTINGS-1") && version != Some("ERA-SETTINGS-2") { return; }
+    if version != Some("ERA-SETTINGS-1") && version != Some("ERA-SETTINGS-2") && version != Some("ERA-SETTINGS-3") { return; }
     if let Some(theme) = lines.next().and_then(|value| value.parse::<u8>().ok()).filter(|value| *value < 3) {
         WALLPAPER_THEME.store(theme, Ordering::Relaxed);
     }
     if let Some(restore) = lines.next() {
         RESTORE_SESSION.store(restore == "1", Ordering::Relaxed);
     }
-    if version == Some("ERA-SETTINGS-2") {
+    if version == Some("ERA-SETTINGS-2") || version == Some("ERA-SETTINGS-3") {
         if let Some(offset) = lines.next().and_then(|value| value.parse::<i8>().ok()).filter(|value| (-12..=14).contains(value)) {
             TIMEZONE_OFFSET.store(offset, Ordering::Relaxed);
         }
     }
+    if version == Some("ERA-SETTINGS-3") {
+        if let Some(layout) = lines.next().and_then(|value| value.parse::<u8>().ok()).filter(|value| *value <= 2) {
+            KEYBOARD_LAYOUT.store(layout, Ordering::Relaxed);
+        }
+    }
+    let _ = eonos_rt::set_keyboard_layout(KEYBOARD_LAYOUT.load(Ordering::Relaxed));
 }
 
 fn save_settings() {
@@ -111,7 +157,7 @@ fn save_settings() {
             SETTINGS_PATH,
             eonos_user::flags::WRITE_ONLY | eonos_user::flags::CREATE | eonos_user::flags::TRUNCATE,
         )?;
-        let data = format!("ERA-SETTINGS-2\n{}\n{}\n{}\n", WALLPAPER_THEME.load(Ordering::Relaxed), RESTORE_SESSION.load(Ordering::Relaxed) as u8, TIMEZONE_OFFSET.load(Ordering::Relaxed));
+        let data = format!("ERA-SETTINGS-3\n{}\n{}\n{}\n{}\n", WALLPAPER_THEME.load(Ordering::Relaxed), RESTORE_SESSION.load(Ordering::Relaxed) as u8, TIMEZONE_OFFSET.load(Ordering::Relaxed), KEYBOARD_LAYOUT.load(Ordering::Relaxed));
         file.write_all(data.as_bytes())?;
         file.close()?;
         eonos_rt::sync()?;
@@ -121,6 +167,7 @@ fn save_settings() {
 }
 
 fn wallpaper_name() -> &'static str {
+    if !CUSTOM_WALLPAPER.load(Ordering::Acquire).is_null() { return "Custom PNG"; }
     match WALLPAPER_THEME.load(Ordering::Relaxed) {
         1 => "Violet",
         2 => "Forest",
@@ -825,6 +872,7 @@ fn main(args: eonos_rt::Args<'_>) -> i32 {
     let mut processes = eonos_user::list_processes().unwrap_or_else(|_| String::from("Process data unavailable"));
     let mut devices = eonos_user::list_block_devices().unwrap_or_else(|_| String::from("No block devices"));
     load_settings();
+    load_custom_wallpaper();
     let mut view = if RESTORE_SESSION.load(Ordering::Relaxed) {
         restore_session(&mut files).unwrap_or(Some(View::Welcome))
     } else {
@@ -1243,6 +1291,13 @@ fn main(args: eonos_rt::Args<'_>) -> i32 {
                     save_settings();
                     draw_era(&layout, view, minimized, &konsul, &files, &processes, &devices, &installed_apps, &app_sessions);
                 }
+                Action::KeyboardLayoutNext => {
+                    let next = (KEYBOARD_LAYOUT.load(Ordering::Relaxed) + 1) % 3;
+                    KEYBOARD_LAYOUT.store(next, Ordering::Relaxed);
+                    let _ = eonos_rt::set_keyboard_layout(next);
+                    save_settings();
+                    draw_era(&layout, view, minimized, &konsul, &files, &processes, &devices, &installed_apps, &app_sessions);
+                }
                 Action::SettingsTab(tab) => {
                     SETTINGS_TAB.store(tab, Ordering::Relaxed);
                     draw_era(&layout, view, minimized, &konsul, &files, &processes, &devices, &installed_apps, &app_sessions);
@@ -1350,6 +1405,7 @@ enum Action {
     SystemTab(u8),
     SettingsTab(u8),
     TimezoneStep(i8),
+    KeyboardLayoutNext,
 }
 
 #[derive(Clone, Copy)]
@@ -1629,6 +1685,10 @@ fn hit_test(layout: &Layout, view: Option<View>, minimized: bool, x: i32, y: i32
             {
                 return Action::ToggleRestore;
             }
+            if tab == 0 && y >= layout.window_y + 248 && y < layout.window_y + 296
+                && x >= layout.window_x + layout.window_w - 190
+                && x < layout.window_x + layout.window_w - 34
+            { return Action::KeyboardLayoutNext; }
             if tab == 1 && y >= layout.window_y + 142 && y < layout.window_y + 190 {
                 if x >= layout.window_x + layout.window_w - 190 && x < layout.window_x + layout.window_w - 114 { return Action::TimezoneStep(-1); }
                 if x >= layout.window_x + layout.window_w - 108 && x < layout.window_x + layout.window_w - 34 { return Action::TimezoneStep(1); }
@@ -1658,7 +1718,9 @@ fn draw_era(layout: &Layout, view: Option<View>, minimized: bool, konsul: &Konsu
 
 fn draw_desktop(layout: &Layout, view: Option<View>, minimized: bool, konsul: &KonsulState, files: &FileState, processes: &str, devices: &str, apps: &[InstalledApp], sessions: &[AppSession]) {
     draw_wallpaper_region(layout, 0, 0, layout.width, layout.height);
-    draw_wallpaper_accents(layout, (0, 0, layout.width, layout.height));
+    if CUSTOM_WALLPAPER.load(Ordering::Acquire).is_null() {
+        draw_wallpaper_accents(layout, (0, 0, layout.width, layout.height));
+    }
 
     if !minimized {
         for (index, window_view) in layout.windows.iter().enumerate() {
@@ -1776,6 +1838,11 @@ fn draw_wallpaper_region(layout: &Layout, x: i32, y: i32, width: i32, height: i3
         if top < end {
             rect(x, top, width, end - top, wallpaper_color(band));
         }
+    }
+    let wallpaper = CUSTOM_WALLPAPER.load(Ordering::Acquire);
+    if !wallpaper.is_null() && x == 0 && y == 0 && width == layout.width && height == layout.height {
+        let image = unsafe { &*wallpaper };
+        let _ = eonos_rt::era::blit_scaled(image.width as u32, image.height as u32, &image.pixels);
     }
 }
 
@@ -2051,6 +2118,9 @@ fn draw_window(layout: &Layout, view: View, files: &FileState, processes: &str, 
                 text(x + 42, y + 202, TEXT, "Restore last session");
                 let restore_label = if RESTORE_SESSION.load(Ordering::Relaxed) { "On" } else { "Off" };
                 button(x + w - 190, y + 194, 156, 40, ACCENT, restore_label);
+                text(x + 42, y + 258, TEXT, "Keyboard layout");
+                let layout = match KEYBOARD_LAYOUT.load(Ordering::Relaxed) { 1 => "German", 2 => "Dutch", _ => "US" };
+                button(x + w - 190, y + 250, 156, 40, PANEL_RAISED, layout);
             }
             if !DISK_MOUNTED.load(Ordering::Relaxed) {
                 text(x + 34, y + h - 70, GOLD, "Warning: no writable disk is mounted at /disk.");
